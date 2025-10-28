@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <style>
-            #btn-cancel,#btn-simpan,#btn-print {
+            #btn-cancel,#btn-simpan,#btn-print,#btn-print-pdf {
                 display: none;
             }
             .select2-container--focus{
@@ -29,7 +29,7 @@
                 #btn-edit{
                     display: none;
                 }
-                #btn-print {
+                #btn-print,#btn-print-pdf {
                     display:inline;
                 }
             </style>
@@ -71,9 +71,23 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("accounting/fakturpenjualan/update/{$id}") ?>">
+                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/fakturpenjualan/update/{$id}") ?>">
+                            <input type="hidden" name="ids" value="<?= $datas->id ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title"><?= ($datas->no_faktur === "") ? "" : "No Faktur {$datas->no_faktur}" ?></h3>
+                                <h3 class="box-title"><?= ($datas->no_faktur_internal === "") ? "" : "No Faktur <strong>{$datas->no_faktur_internal}</strong>" ?></h3>
+                                <div class="pull-right text-right" id="btn-header">
+                                    <?php
+                                    if ($datas->status == 'cancel') {
+                                        ?>
+                                        <button class="btn btn-primary btn-sm" type="button" id="btn-draft" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                            Simpan Sebagai Draft
+                                        </button>
+                                    <?php }
+                                    ?>
+                                    <button class="btn btn-primary btn-sm" type="button" id="btn-print-pdf" data-ids="<?= $id ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-print"></i>&nbsp;Print PDF
+                                        </button>
+                                </div>
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -100,6 +114,7 @@
                                                 <div class="col-xs-8 col-md-8">
                                                     <div class="input-group">
                                                         <input type="text" name="no_sj" id="no_sj" class="form-control input-sm no_sj clear-tipe" value="<?= $datas->no_sj ?>" required readonly/>
+                                                        <input type="hidden" name="no_sj_old" id="no_sj_old" class="form-control input-sm no_sj_old" value="<?= $datas->no_sj ?>"/>
                                                         <span class="input-group-addon get-no-sj" title="Cari No SJ"><i class="fa fa-search"><span></i>
                                                     </div>
                                                 </div>
@@ -142,13 +157,13 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="hidden" class="form-control input-sm customer clear-tipe" id="customer" name="customer" value="<?= $datas->partner_id ?>">
-                                                    <input type="text" class="form-control input-sm customer_nama clear-tipe" id="customer_nama" name="customer_nama" value="<?= $datas->partner_nama ?>" readonly>
+                                                    <input type="text" class="form-control input-sm customer_nama clear-tipe edited-read" id="customer_nama" name="customer_nama" value="<?= $datas->partner_nama ?>" readonly>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Faktur</label></div>
+                                                <div class="col-xs-4"><label class="form-label">No Faktur Internal</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_faktur" class="form-control input-sm no_faktur edited-read" value="<?= $datas->no_faktur ?>" readonly/>
+                                                    <input type="text" name="no_faktur_internal" class="form-control input-sm no_faktur_internal edited-read" value="<?= $datas->no_faktur_internal ?>" readonly/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -186,8 +201,13 @@
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="table-responsive over">
                                                 <table class="table table-condesed table-hover rlstable" id="fpenjualan" style="min-width: 105%; padding: 0 0 0 0 !important;">
-                                                    <caption>
-                                                        <button type="button" class="btn btn-default btn-sm btn-rmv-item btn-split"style="display: none;" >Join Item</button>
+                                                    <caption><?php if ($datas->status === 'draft') { ?>
+                                                            <button type="button" class="btn btn-success btn-sm btn-rmv-item btn-add-item" style="display: none;" title="Tambah Data"><i class="fa fa-plus-circle"></i></button>
+                                                        <?php } ?>
+
+                                                        <button type="button" class="btn btn-primary btn-sm btn-rmv-item btn-split" style="display: none;" >Join Item</button>
+                                                        <button type="button" class="btn btn-danger btn-sm btn-rmv-item btn-delete-item" style="display: none;" >Delete Item</button>
+
                                                     </caption>
                                                     <thead>
                                                     <th class="style" style="width: 15px">No.</th>
@@ -283,60 +303,81 @@
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="7"></td>
-                                                                <td colspan="2">
-                                                                    <div class="col-xs-4">
-                                                                        <select class="form-control input-sm select2 pull-right edited" name="tipediskon" disabled>
-                                                                            <option value=""></option>
-                                                                            <option value="%" <?= ($datas->tipe_diskon === "%") ? "selected" : "" ?>>%</option>
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-xs-4">
-                                                                        <input class="form-control input-sm text-right edited-read" name="nominaldiskon" value="<?= $datas->nominal_diskon ?>" type="text" readonly>
-                                                                    </div>
-                                                                    <div class="col-xs-4 text-right">
-                                                                        <span class=""><strong>Diskon</strong></span>
-                                                                    </div>
+                                                                <td>
 
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-addon">
+                                                                            %
+                                                                        </span>
+                                                                        <input class="form-control input-sm text-right edited-read"  name="nominaldiskon" value="<?= $datas->nominal_diskon ?>" type="text" readonly>
+                                                                    </div>
+                                                                    <select class="form-control input-sm hide" name="tipediskon">
+                                                                        <option value="%" <?= ($datas->tipe_diskon === "%") ? "selected" : "" ?>>%</option>
+                                                                    </select>
                                                                 </td>
+                                                                <td class="text-right"><strong>Diskon</strong></td>
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->diskon, 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="8"></td>
-                                                                <td class="text-right"><strong>DPP Nilai Lain</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->dpp_lain, 2, ".", ",") ?>"></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="7"></td>
-                                                                <td colspan="2" class="text-right">
-
-                                                                    <div class="col-xs-6">
-                                                                        <select class="form-control input-sm select2 pull-right edited" name="tax" id="tax" disabled>
-                                                                            <option value=""></option>
-                                                                            <?php
-                                                                            foreach ($taxs as $k => $tax) {
-                                                                                ?>
-                                                                                <option data-val="<?= $tax->amount ?>" value="<?= $tax->id ?>" <?= ($tax->id === $datas->tax_id) ? "selected" : "" ?> ><?= $tax->nama ?></option>
-                                                                                <?php
-                                                                            }
-                                                                            ?>
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col-xs-6">
-                                                                        <input type="hidden" value="<?= $datas->tax_value ?>" name="tax_value" id="tax_value">
-                                                                        <span class=""><strong>Ppn</strong></span>
-                                                                    </div>
-
-                                                                </td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn, 2, ".", ",") ?>"></td>
+                                                                <td class="text-right"><strong>Subtotal 2</strong></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subTotal - $datas->diskon, 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="8"></td>
+                                                                <td class="text-right"><strong>DPP Nilai Lain</strong></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(($datas->grand_total - $datas->diskon) * 11 / 12, 2, ".", ",") ?>"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="7"></td>
+                                                                <td class="pull-right">
+
+                                                                    <select class="form-control input-sm select2 edited" style="width: 100%" name="tax" id="tax" disabled>
+                                                                        <option value=""></option>
+                                                                        <?php
+                                                                        foreach ($taxs as $k => $tax) {
+                                                                            ?>
+                                                                            <option data-val="<?= $tax->amount ?>" value="<?= $tax->id ?>" <?= ($tax->id === $datas->tax_id) ? "selected" : "" ?> ><?= $tax->nama ?></option>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </select>
+                                                                    <input type="hidden" value="<?= $datas->tax_value ?>" name="tax_value" id="tax_value">
+
+
+                                                                </td>
+                                                                <td class="text-right"><strong>Ppn</strong></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn - $datas->diskon_ppn, 2, ".", ",") ?>"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Note</td>
+                                                                <td><input class="form-control input-sm  footnote edited-read" value="<?= $datas->foot_note ?? "" ?>" name="footnote" readonly> </td>
+                                                                <td colspan="4"></td>
+                                                                <td class="text-right">
+                                                                    *Payment Term
+                                                                </td>
+                                                                <td class="pull-right">
+                                                                    <select class="form-control input-sm edited" style="width: 100%" title="Payment Term" name="payment_term" id="payment_term" disabled>
+                                                                        <option value=""></option>
+                                                                        <?php
+                                                                        foreach ($payment_term as $k => $term) {
+                                                                            $term = (object) $term;
+                                                                            ?>
+                                                                            <option value="<?= $term->kode ?>" <?= ($term->kode == $datas->payment_term) ? "selected" : "" ?> ><?= $term->nama ?></option>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </select
+                                                                </td>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(($datas->grand_total - $datas->diskon), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(($datas->final_total), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <?php
                                                         }
                                                         ?>
+                                                        <tr>
+
+                                                        </tr>
                                                     </tfoot>
                                                 </table>
                                             </div>
@@ -370,7 +411,7 @@
                                                                 <label class="form-label">Tanggal</label>
                                                             </div>
                                                             <div class="col-xs-8 col-md-8">
-                                                                <!--<strong>:&nbsp;<?= $jurnal ? date("Y-m-d", strtotime($jurnal->tanggal_dibuat)) : "" ?></strong>-->
+                                                                <strong>:&nbsp;<?= $jurnal ? date("Y-m-d", strtotime($jurnal->tanggal_dibuat)) : "" ?></strong>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -397,7 +438,57 @@
         ?>
     </footer>
 </div>
+<template>
+    <tr>
+        <td style="width: 50px">
+            <a class="btn-simpan-item" data-toggle="tooltip" style="color: #FFC107;" data-original-title="Simpan"><i class="fa fa-save"></i>&nbsp;&nbsp;</a>
+            <a class="btn-cancel-item" data-toggle="tooltip" style="color: red;" data-original-title="Batal"><i class="fa fa-close"></i></a>
+        </td>
+        <td>
+            <input class="form-control input-sm  uraian uraian_:no"  id="uraian">
+        </td>
+        <td>
+            <input class="form-control input-sm  warna warna_:no" id="warna">
+        </td>
+        <td>
+            <input class="form-control input-sm  no_po no_po_:no" id="nopo"> 
+        </td>
+        <td class="text-right">
+            <input type="text" id="qtylot" class="form-control input-sm text-right qty-lot qty-lot_:no" />
+        </td>
+        <td>
+            <select class="form-control input-sm temp-select2 uomlot uomlot_:no" style="width:100%" id="uomlot">
+                <?php
+                foreach ($uomLot as $keys => $uoml) {
+                    ?>
+                    <option value="<?= $keys ?>"><?= $uoml ?></option>
+                    <?php
+                }
+                ?>
+            </select>
+        </td>
+        <td class="">
+            <input type="text" id="qty"  class="form-control input-sm text-right qty-lot qty-lot_:no">
+            <select class="form-control input-sm temp-select2 uom uom_:no" style="width:100%" id="uom">
+
+            </select>
+        </td>
+        <td>
+            <select class="form-control input-sm edited noacc noacc_:no" style="width:100%" id="noacc">
+
+            </select>
+        </td>
+        <td>
+            <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' id="harga"
+                   class="form-control input-sm text-right edited-read harga harga_:no"/>
+        </td>
+        <td>
+
+        </td>
+    </tr>
+</template>
 <script>
+    var editing = false;
 <?php
 if ($datas->status == 'confirm') {
     ?>
@@ -405,6 +496,17 @@ if ($datas->status == 'confirm') {
     <?php
 }
 ?>
+    var no = <?= count($detail) ?>;
+
+    $(document).ready(function () {
+        $(window).keydown(function (event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+    });
+
     const setCoaItem = ((klas = "select2-coa") => {
         $("." + klas).select2({
             placeholder: "Pilih Coa",
@@ -437,6 +539,35 @@ if ($datas->status == 'confirm') {
             }
         });
     });
+    const setUomItem = ((klas = "select2-uom") => {
+        $("." + klas).select2({
+            placeholder: "Pilih UOM",
+            allowClear: true,
+            ajax: {
+                dataType: 'JSON',
+                type: "GET",
+                url: "<?php echo base_url(); ?>sales/fakturpenjualan/get_satuan",
+                delay: 250,
+                data: function (params) {
+                    return{
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    var results = [];
+                    $.each(data.data, function (index, item) {
+                        results.push({
+                            id: item.short,
+                            text: item.nama
+                        });
+                    });
+                    return {
+                        results: results
+                    };
+                }
+            }
+        });
+    });
     const setNominalCurrency = (() => {
         $("input[data-type='currency']").on({
             keyup: function () {
@@ -448,6 +579,12 @@ if ($datas->status == 'confirm') {
             blur: function () {
                 formatCurrency($(this), "blur");
             }
+        });
+    });
+    const setPterm = (() => {
+        $("#payment_term").select2({
+            placeholder: "Payment Term",
+            allowClear: true
         });
     });
     $(function () {
@@ -465,6 +602,8 @@ if ($datas->status == 'confirm') {
             $(".select2").select2({placeholder: "Pilih",
                 allowClear: true});
             setCoaItem();
+            setPterm();
+            editing = true;
         });
         $("#btn-cancel").on("click", function (e) {
             e.preventDefault();
@@ -475,11 +614,51 @@ if ($datas->status == 'confirm') {
             $(".btn-rmv-item").hide();
             $("#btn-confirm").show();
             $("#btn-simpan").hide();
+            editing = false;
         });
         $("#btn-simpan").on("click", function (e) {
             e.preventDefault();
             $(".btn-save").trigger("click");
         });
+
+        $("#btn-confirm").on("click", function (e) {
+            e.preventDefault();
+            var text = $(this).html();
+            var statuss = text.replace(/(<([^>]+)>)/ig, "");
+            confirmRequest("Faktur Penjualan", "Confirm Data ? ", function () {
+                updateStatus(statuss);
+            });
+        });
+
+        $("#btn-draft").unbind("click").off("click").on("click", function (e) {
+            e.preventDefault();
+            confirmRequest("Faktur Penjualan", "Simpan Kembali Sebagai Draft ? ", (() => {
+                updateStatus("draft");
+            }));
+        });
+
+        const updateStatus = ((status) => {
+            $.ajax({
+                url: "<?= base_url('sales/fakturpenjualan/update_status/' . $id) ?>",
+                type: "POST",
+                data: {status: status.trim()},
+                beforeSend: function (xhr) {
+                    please_wait(function () {});
+                },
+                error: function (req, error) {
+                    unblockUI(function () {
+                        setTimeout(function () {
+                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                        }, 500);
+                    });
+                }, success: function (data) {
+                    location.reload();
+                },
+                complete: function (jqXHR, textStatus) {
+                    unblockUI(function () {}, 200);
+                }
+            });
+        })
 
         const formdo = document.forms.namedItem("form-faktur-penjualan");
         formdo.addEventListener(
@@ -517,7 +696,7 @@ if ($datas->status == 'confirm') {
             const tt = $(this);
             var ids = $(this).data("ids");
             $.ajax({
-                url: "<?= base_url('accounting/fakturpenjualan/split/' . $id) ?>",
+                url: "<?= base_url('sales/fakturpenjualan/split/' . $id) ?>",
                 type: "POST",
                 data: {ids: ids},
                 beforeSend: function (xhr) {
@@ -545,7 +724,7 @@ if ($datas->status == 'confirm') {
 
         });
 
-        $(".btn-split").unbind("click").off("click").on("click", function () {
+        $(".btn-delete-item").unbind("click").off("click").on("click", function () {
             var val = [];
             $(".join-item:checked").each(function (i) {
                 val[i] = $(this).val();
@@ -553,10 +732,41 @@ if ($datas->status == 'confirm') {
             if (val.length < 1)
                 return;
 
-            confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
-
+            confirmRequest("Faktur Penjualan", "Delete Item Dipilih ? ", function () {
                 $.ajax({
-                    url: "<?= base_url('accounting/fakturpenjualan/join/' . $id) ?>",
+                    url: "<?= base_url('sales/fakturpenjualan/delete_item/' . $id) ?>",
+                    type: "POST",
+                    data: {ids: val.join()},
+                    beforeSend: function (xhr) {
+                        please_wait(function () {});
+                    },
+                    error: function (req, error) {
+                        unblockUI(function () {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                            }, 500);
+                        });
+                    }, success: function (data) {
+                        location.reload();
+                    },
+                    complete: function (jqXHR, textStatus) {
+                        unblockUI(function () {}, 200);
+                    }
+                });
+            });
+        });
+
+        $(".btn-split").unbind("click").off("click").on("click", function () {
+            var val = [];
+            $(".join-item:checked").each(function (i) {
+                val[i] = $(this).val();
+            });
+            if (val.length < 2)
+                return;
+
+            confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
+                $.ajax({
+                    url: "<?= base_url('sales/fakturpenjualan/join/' . $id) ?>",
                     type: "POST",
                     data: {ids: val.join()},
                     beforeSend: function (xhr) {
@@ -579,6 +789,133 @@ if ($datas->status == 'confirm') {
             });
         });
 
+        $(".get-no-sj").on("click", function (e) {
+            e.preventDefault();
+            if (!editing)
+                return;
+            $("#tambah_data").modal({
+                show: true,
+                backdrop: 'static'
+            });
+            $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+            $('.modal-title').text("List SJ");
+            $("#btn-tambah").html("Pilih");
+            var tipee = $("#tipe").val();
+            $.post("<?= base_url('sales/fakturpenjualan/get_view_sj') ?>", {tipe: tipee}, function (data) {
+                setTimeout(function () {
+                    $(".tambah_data").html(data.data);
+                    $("#btn-tambah").hide();
+
+                }, 1000);
+            });
+        });
+
+        $(".btn-add-item").on("click", function (e) {
+            e.preventDefault();
+            $(this).hide();
+            no += 1;
+            var tmplt = $("template");
+            var isi_tmplt = tmplt.html().replace(/:no/g, no);
+            $("#fpenjualan tbody").append(isi_tmplt);
+            $(".temp-select2").select2({
+                placeholder: "Pilih",
+                allowClear: true
+            });
+            setCoaItem("noacc_" + no);
+            setNominalCurrency();
+            setUomItem("uom_" + no);
+
+            $(".btn-cancel-item").on("click", function (e) {
+                $(this).closest("tr").remove();
+                $(".btn-add-item").show();
+            });
+
+            $(".btn-simpan-item").off("click").unbind("click").on("click", function (e) {
+                confirmRequest("Faktur Penjualan", "Simpan Item Baru ? ", function () {
+                    $.ajax({
+                        url: "<?= base_url('sales/fakturpenjualan/save_item/' . $id) ?>",
+                        type: "POST",
+                        data: {
+                            uraian: $("#uraian").val(),
+                            warna: $("#warna").val(),
+                            no_po: $("#nopo").val(),
+                            qty_lot: $("#qtylot").val(),
+                            uom_lot: $("#uomlot :selected").val(),
+                            uom: $("#uom").val(),
+                            qty: $("#qty").val(),
+                            no_acc: $("#noacc :selected").val(),
+                            harga: $("#harga").val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }, success: function (data) {
+                            location.reload();
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {});
+                        }
+                    });
+                });
+            });
+
+        });
+
+        $("#btn-print").on("click", function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: "<?= base_url('sales/fakturpenjualan/print') ?>",
+                type: "POST",
+                data: {
+                    no: "<?= $id ?>"
+                },
+                beforeSend: function (xhr) {
+                    please_wait(function () {});
+                },
+                success: function (data) {
+                    alert_notify(data.icon, data.message, data.type, function () {}, 500);
+                },
+                complete: function (jqXHR, textStatus) {
+                    unblockUI(function () {});
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert_notify("fa fa-warning", jqXHR?.responseJSON?.message, "danger", function () {}, 500);
+                }
+            });
+        });
+        
+        $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url('sales/fakturpenjualan/print_pdf/') ?>",
+                        type: "POST",
+                        data: {
+                            id: "<?= $id ?>"
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        success: function (data) {
+                            unblockUI(function () {});
+                            window.open(data.url, "_blank").focus();
+
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+
     });
     var counterSplit = 0;
     const cancelSplit = ((e) => {
@@ -592,7 +929,7 @@ if ($datas->status == 'confirm') {
     const saveSplit = (() => {
         confirmRequest("Faktur Penjualan", "Simpan Split Item? ", function () {
             $.ajax({
-                url: "<?= base_url('accounting/fakturpenjualan/save_split/' . $id) ?>",
+                url: "<?= base_url('sales/fakturpenjualan/save_split/' . $id) ?>",
                 type: "POST",
                 data: {
                     ids: $("#ids").val(),
@@ -617,8 +954,42 @@ if ($datas->status == 'confirm') {
                     unblockUI(function () {});
                 }
             });
-        })
+        });
     });
+
+    const addTotable = ((nosj) => {
+        $.ajax({
+            url: "<?= base_url('sales/fakturpenjualan/addsj') ?>",
+            type: "POST",
+            data: {
+                no: nosj
+            },
+            beforeSend: function (xhr) {
+                please_wait(function () {});
+            },
+            success: function (data) {
+                $("#po_cust").val(data.data.keterangan);
+                $("#no_sj").val(nosj);
+                $("#marketing_kode").val(data.data.sales_kode);
+                $("#marketing_nama").val(data.data.sales_nama);
+                $("#customer").val(data.data.customer_id);
+                $("#customer_nama").val(data.data.customer);
+            },
+            complete: function (jqXHR, textStatus) {
+                unblockUI(function () {
+                    $("#fpenjualan tbody").remove();
+                    $("#fpenjualan tfoot").remove();
+                }, 100);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                unblockUI(function () {
+                    alert_notify("fa fa-warning", jqXHR?.responseJSON?.message, "danger", function () {}, 500);
+                }, 100);
+
+            }
+        });
+    });
+
 </script>
 </body>
 </html>

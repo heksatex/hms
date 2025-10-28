@@ -135,7 +135,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('accounting/fakturpenjualan/list_data') ?>",
+                        "url": "<?php echo site_url('sales/fakturpenjualan/list_data') ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.tanggal = tanggal;

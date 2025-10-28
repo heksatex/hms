@@ -778,6 +778,11 @@ class Girokeluar extends MY_Controller {
 
                 default:
                     $this->validasiPin($pin, "Batal / Cancel Data Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
+                    
+                    $lunas =  $model->setTables("acc_giro_keluar_detail")->setWheres(["giro_keluar_id" => $head->id, "lunas" => 1])->getDetail();
+                    if($lunas) {
+                         throw new \exception("Giro Sudah ada pada pelunasan", 500);
+                    }
 
                     $checkCair = $model->setTables("acc_giro_keluar_detail")->setWheres(["giro_keluar_id" => $head->id, "cair" => 1])->getDetail();
                     if ($checkCair) {

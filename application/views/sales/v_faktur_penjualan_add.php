@@ -3,7 +3,7 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
         <style>
-            #btn-cancel {
+            #btn-cancel,#btn-confirm,#btn-edit,#btn-print {
                 display: none;
             }
         </style>
@@ -26,7 +26,7 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("accounting/fakturpenjualan/simpan") ?>">
+                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/fakturpenjualan/simpan") ?>">
                             <button class="btn btn-default btn-sm btn-save" type="submit"> Simpan </button>
                             <div class="box-header with-border">
                                 <h3 class="box-title">Faktur Penjualan</h3>
@@ -55,7 +55,7 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <div class="input-group">
-                                                        <input type="text" name="no_sj" id="no_sj" class="form-control input-sm no_sj clear-tipe" required readonly/>
+                                                        <input type="text" name="no_sj" id="no_sj" class="form-control input-sm no_sj clear-tipe" required/>
                                                         <span class="input-group-addon get-no-sj" title="Cari No SJ"><i class="fa fa-search"><span></i>
                                                     </div>
                                                 </div>
@@ -102,9 +102,9 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">No Faktur Internal</label></div>
+                                                <div class="col-xs-4"><label class="form-label">No Faktur Internal</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_faktur" id="no_faktur" class="form-control input-sm no_faktur"/>
+                                                    <input type="text" name="no_faktur_internal" id="no_faktur_internal" class="form-control input-sm no_faktur_internal"/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -180,7 +180,7 @@
                     $('.modal-title').text("List SJ");
                     $("#btn-tambah").html("Pilih");
                     var tipee = $("#tipe").val();
-                    $.post("<?= base_url('accounting/fakturpenjualan/get_view_sj') ?>", {tipe: tipee}, function (data) {
+                    $.post("<?= base_url('sales/fakturpenjualan/get_view_sj') ?>", {tipe: tipee}, function (data) {
                         setTimeout(function () {
                             $(".tambah_data").html(data.data);
                             $("#btn-tambah").hide();
@@ -213,7 +213,7 @@
 
             const addTotable = ((nosj) => {
                 $.ajax({
-                    url: "<?= base_url('accounting/fakturpenjualan/addsj') ?>",
+                    url: "<?= base_url('sales/fakturpenjualan/addsj') ?>",
                     type: "POST",
                     data: {
                         no: nosj
