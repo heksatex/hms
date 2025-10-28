@@ -134,14 +134,16 @@
                                                         <th class='style bb' style="min-width: 105px; width:105px;">PO</th>
                                                         <th class='style bb' style="min-width: 105px; width:105px;">Receiving</th>
                                                         <th class='style bb' style="min-width: 105px; width:105px;">Tanggal</th>
-                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Hutang</th>
-                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Hutang</th>
-                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Umur (Hari)</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Hutang (Rp)</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Hutang (Rp)</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Hutang (Valas)</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Hutang (Valas)</th>
+                                                        <th class='style bb text-right' style="min-width: 100px; width:100px;">Umur (Hari)</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="9">Tidak ada Data</td>
+                                                        <td colspan="11">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -270,6 +272,8 @@
                             credit = 0;
                             total_hutang_rp = 0;
                             total_sisa_hutang = 0;
+                            total_hutang_valas = 0;
+                            total_sisa_hutang_valas = 0;
                             $.each(value.tmp_data_items, function(key, value2) {
                                 var tr3 = $("<tr>").append(
                                     $("<td>").html(no++),
@@ -280,11 +284,15 @@
                                     $("<td align=''>").text(value2.tanggal),
                                     $("<td align='right'>").text(formatNumber(value2.hutang_rp.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value2.sisa_hutang_rp.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value2.hutang_valas.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value2.sisa_hutang_valas.toFixed(2))),
                                     $("<td align='right'>").text(value2.hari),
                                 );
                                 tbody.append(tr3);
                                 total_hutang_rp = total_hutang_rp + value2.hutang_rp;
                                 total_sisa_hutang = total_sisa_hutang + value2.sisa_hutang_rp;
+                                total_hutang_valas = total_hutang_valas + value2.hutang_valas;
+                                total_sisa_hutang_valas = total_sisa_hutang_valas + value2.sisa_hutang_valas;
                             });
 
                             no = 1;
@@ -294,13 +302,15 @@
                                 $("<td class='style_space text-right'>").html('<b>Total : </b>'),
                                 $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_rp.toFixed(2)) + '</b>'),
                                 $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_sisa_hutang.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_valas.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_sisa_hutang_valas.toFixed(2)) + '</b>'),
                                 $("<td class='style_space'>").text(''),
                             );
                             tbody.append(tr4);
                         });
 
                         if (empty == true) {
-                            var tr = $("<tr>").append($("<td colspan='9'>").text('Tidak ada Data'));
+                            var tr = $("<tr>").append($("<td colspan='11'>").text('Tidak ada Data'));
                             tbody.append(tr);
                         }
 

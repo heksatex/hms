@@ -5,7 +5,7 @@
         @page {
             /* margin: 20px; */
             /* rapat, bisa diubah ke 0 jika benar-benar ingin full page */
-            margin: 30px 30px 30px 30px;
+            margin: 30px 20px 30px 20px;
             header: page-header;
             footer: page-footer;
         }
@@ -87,14 +87,16 @@
         <thead>
             <tr>
                 <th class="style" style="width: 5px;">No. </th>
-                <th class='style' style="width: 60px">Supplier</th>
+                <!-- <th class='style' style="width: 60px">Supplier</th> -->
                 <th class='style' style="width: 100px">Invoice</th>
-                <th class='style' style="width: 90px">PO</th>
-                <th class='style' style="width: 100px">Receiving</th>
-                <th class='style' style="width: 60px">Tanggal</th>
-                <th class='style text-right' style="width: 110px">Total Hutang</th>
-                <th class='style text-right' style="width: 110px">Sisa Hutang</th>
-                <th class='style text-right' style="width: 60px">Umur (Hari)</th>
+                <th class='style' style="width: 80px">PO</th>
+                <th class='style' style="width: 90px">Receiving</th>
+                <th class='style' style="width: 55px">Tanggal</th>
+                <th class='style text-right' style="width: 85px">Total Hutang (Rp)</th>
+                <th class='style text-right' style="width: 85px">Sisa Hutang (Rp)</th>
+                <th class='style text-right' style="width: 85px">Total Hutang (Valas)</th>
+                <th class='style text-right' style="width: 85px">Sisa Hutang (Valas)</th>
+                <th class='style text-right' style="width: 50px">Umur (Hari)</th>
             </tr>
         </thead>
         <tbody>
@@ -112,29 +114,37 @@
                 $no = 1;
                 $total_hutang = 0;
                 $total_sisa_hutang = 0;
+                $total_hutang_valas = 0;
+                $total_sisa_hutang_valas = 0;
                 foreach($rows['tmp_data_items'] as $items) {
             ?>
                 <tr>
                     <td><?php echo $no++; ?></td>
-                    <td ></td>
+                    <!-- <td ></td>  -->
                     <td ><?php echo $items['no_invoice'] ?></td>
                     <td ><?php echo $items['no_po'] ?></td>
                     <td ><?php echo $items['origin'] ?></td>
                     <td ><?php echo $items['tanggal'] ?></td>
                     <td class='text-right'><?php echo number_format($items['hutang_rp'],2) ?></td>
                     <td class='text-right'><?php echo number_format($items['sisa_hutang_rp'],2) ?></td>
+                    <td class='text-right'><?php echo number_format($items['hutang_valas'],2) ?></td>
+                    <td class='text-right'><?php echo number_format($items['sisa_hutang_valas'],2) ?></td>
                     <td class='text-right'><?php echo $items['hari'] ?></td>
                 </tr>
 
             <?php
                     $total_hutang = $total_hutang + $items['hutang_rp'];
                     $total_sisa_hutang = $total_sisa_hutang + $items['sisa_hutang_rp'];
+                    $total_hutang_valas = $total_hutang_valas + $items['hutang_valas'];
+                    $total_sisa_hutang_valas = $total_sisa_hutang_valas + $items['sisa_hutang_valas'];
                }
             ?>
                 <tr>
-                    <td class="bold text-right"colspan="6">Total : </td>
+                    <td class="bold text-right"colspan="5">Total : </td>
                     <td class="text-right"><?php echo number_format($total_hutang, 2); ?></td>
                     <td class="text-right"> <?php echo number_format($total_sisa_hutang, 2); ?></td>
+                    <td class="text-right"><?php echo number_format($total_hutang_valas, 2); ?></td>
+                    <td class="text-right"> <?php echo number_format($total_sisa_hutang_valas, 2); ?></td>
                 </tr>
             <?php
             }
