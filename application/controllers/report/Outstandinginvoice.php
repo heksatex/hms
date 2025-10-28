@@ -113,23 +113,23 @@ class Outstandinginvoice extends MY_Controller
             $periode = tgl_indo(date('d-m-Y', strtotime($tgl_now)));
             // set Judul
             $sheet->SetCellValue('A' . $rowCount, 'PT. HEKSATEX INDAH');
-            $sheet->mergeCells('A' . $rowCount . ':I' . $rowCount);
+            $sheet->mergeCells('A' . $rowCount . ':K' . $rowCount);
             $sheet->getStyle('A' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             // set Judul
             $rowCount++;
             $sheet->SetCellValue('A' . $rowCount, 'OUTSTANDING INVOICE');
-            $sheet->mergeCells('A' . $rowCount . ':I' . $rowCount);
+            $sheet->mergeCells('A' . $rowCount . ':K' . $rowCount);
             $sheet->getStyle('A' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             // set periode
             $rowCount = 3;
             $sheet->SetCellValue('A' . $rowCount, 'Per Tgl. ' . $periode);
-            $sheet->mergeCells('A' . $rowCount . ':I' . $rowCount);
+            $sheet->mergeCells('A' . $rowCount . ':K' . $rowCount);
             $sheet->getStyle('A' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             //bold huruf
-            $activeSheet->getStyle("A1:I5")->getFont()->setBold(true);
+            $activeSheet->getStyle("A1:K5")->getFont()->setBold(true);
 
             // Border 
             $styleArray = array(
@@ -148,13 +148,15 @@ class Outstandinginvoice extends MY_Controller
             $this->create_thead($rowCount, $activeSheet, $activeSheet);
             $total_hutang_rp        = 0;
             $total_sisa_hutang_rp   = 0;
+            $total_hutang_valas       = 0;
+            $total_sisa_hutang_valas  = 0;
             $rowCount++;
             foreach ($data as $datas) {
 
                 // nama partner
                 $activeSheet->SetCellValue('A' . $rowCount, $datas['nama_partner']);
-                $activeSheet->mergeCells('A' . $rowCount . ':i' . $rowCount);
-                $activeSheet->getStyle("A" . $rowCount . ":I" . $rowCount)->getFont()->setBold(true);
+                $activeSheet->mergeCells('A' . $rowCount . ':k' . $rowCount);
+                $activeSheet->getStyle("A" . $rowCount . ":K" . $rowCount)->getFont()->setBold(true);
                 $rowCount++;
 
                 foreach ($datas['tmp_data_items'] as $datas2) {
@@ -166,35 +168,46 @@ class Outstandinginvoice extends MY_Controller
                     $activeSheet->SetCellValue('F' . $rowCount, date("Y-m-d", strtotime($datas2['tanggal'])));
                     $activeSheet->SetCellValue('G' . $rowCount, $datas2['hutang_rp']);
                     $activeSheet->SetCellValue('H' . $rowCount, $datas2['sisa_hutang_rp']);
-                    $activeSheet->SetCellValue('I' . $rowCount, $datas2['hari']);
+                    $activeSheet->SetCellValue('i' . $rowCount, $datas2['hutang_valas']);
+                    $activeSheet->SetCellValue('J' . $rowCount, $datas2['sisa_hutang_valas']);
+                    $activeSheet->SetCellValue('K' . $rowCount, $datas2['hari']);
 
                     $activeSheet->getStyle('g' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
-                    $activeSheet->getStyle('h' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
-                    // $activeSheet->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0');
+                    $activeSheet->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
+                    $activeSheet->getStyle('I' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
+                    $activeSheet->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
 
                     $num++;
                     $rowCount++;
                     $total_hutang_rp = $total_hutang_rp + $datas2['hutang_rp'];
                     $total_sisa_hutang_rp = $total_sisa_hutang_rp + $datas2['sisa_hutang_rp'];
+                    $total_hutang_valas = $total_hutang_valas + $datas2['hutang_valas'];
+                    $total_sisa_hutang_valas = $total_sisa_hutang_valas + $datas2['sisa_hutang_valas'];
                 }
                 $num = 1;
 
                 // summary
                 $activeSheet->SetCellValue('A' . $rowCount, 'Total : ');
                 $activeSheet->mergeCells('A' . $rowCount . ':F' . $rowCount);
-                $activeSheet->getStyle("A" . $rowCount . ":I" . $rowCount)->getFont()->setBold(true);
+                $activeSheet->getStyle("A" . $rowCount . ":K" . $rowCount)->getFont()->setBold(true);
                 $activeSheet->getStyle("A" . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
                 $activeSheet->SetCellValue('G' . $rowCount, $total_hutang_rp);
                 $activeSheet->SetCellValue('H' . $rowCount, $total_sisa_hutang_rp);
+                $activeSheet->SetCellValue('I' . $rowCount, $total_hutang_valas);
+                $activeSheet->SetCellValue('J' . $rowCount, $total_sisa_hutang_valas);
 
                 $activeSheet->getStyle('G' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $activeSheet->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $activeSheet->getStyle('I' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $activeSheet->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 // $object->getActiveSheet()->getStyle("A" . $rowCount . ":I" . $rowCount)->applyFromArray($styleArrayColor);
                 $rowCount++;
 
                 $total_hutang_rp  = 0;
                 $total_sisa_hutang_rp   = 0;
+                $total_hutang_valas       = 0;
+                $total_sisa_hutang_valas  = 0;
                 $rowCount = $rowCount;;
             }
 
@@ -239,7 +252,7 @@ class Outstandinginvoice extends MY_Controller
             )
         );
 
-        $table_head_columns  = array('No', 'Supplier', 'Invoice', 'PO', 'Receiving', 'Tanggal', 'Total Hutang', 'Sisa Hutang', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Supplier', 'Invoice', 'PO', 'Receiving', 'Tanggal', 'Total Hutang (Rp)', 'Sisa Hutang (Rp)', 'Total Hutang (Valas)' , 'Sisa Hutang (Valas)', 'Umur (Hari)');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $activeSheet->setCellValueByColumnAndRow($column, $rowCount, $field);
@@ -247,7 +260,7 @@ class Outstandinginvoice extends MY_Controller
         }
 
         // set width and border
-        $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I');
+        $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K');
         $loop = 0;
         foreach ($index_header as $val) {
 
@@ -262,17 +275,17 @@ class Outstandinginvoice extends MY_Controller
             } else if ( $loop == 5) {
                 $getSheet->getColumnDimension($val)->setWidth(14); // index F
             } else if ($loop > 5) {
-                $getSheet->getColumnDimension($val)->setWidth(18); // index -> G
+                $getSheet->getColumnDimension($val)->setWidth(18); // index -> G-J
                 $getSheet->getStyle($val . '' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-            } else if ( $loop == 8) {
-                $getSheet->getColumnDimension($val)->setWidth(14); // index I
+            } else if ( $loop == 10) {
+                $getSheet->getColumnDimension($val)->setWidth(14); // index K
                 $getSheet->getStyle($val . '' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
             }
 
             $loop++;
         }
         $getSheet->getRowDimension($rowCount)->setRowHeight(24); // height acc
-        $getSheet->getStyle("A" . $rowCount . ":I" . $rowCount)->applyFromArray($styleArrayColor);
+        $getSheet->getStyle("A" . $rowCount . ":K" . $rowCount)->applyFromArray($styleArrayColor);
 
 
         return;
