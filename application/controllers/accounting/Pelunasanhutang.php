@@ -14,7 +14,8 @@ class Pelunasanhutang extends MY_Controller
         parent::__construct();
         $this->is_loggedin(); //cek apakah user sudah login
         $this->load->model("_module"); //load modul global
-        $this->load->model("m_pelunasanhutang"); //load modul global
+        $this->load->model("m_pelunasanhutang");
+        $this->load->model("m_penerimaanBarang");
         $this->load->library("token");
     }
 
@@ -2160,7 +2161,7 @@ class Pelunasanhutang extends MY_Controller
                             if (!empty($gs->koreksi)) {
                                 throw new \Exception('Koreksi Untuk Uang Muka tidak harus dipilih !', 422);
                             }
-                            if($gs->tipe_currency == 'Rp') {
+                            if ($gs->tipe_currency == 'Rp') {
                                 $create_jurnal = true;
                             }
                         } else { // selisih == 0 atau selisih > 0
@@ -2209,7 +2210,7 @@ class Pelunasanhutang extends MY_Controller
                 //     throw new \Exception('Data Summary / Info  tidak Valid !', 200);
                 // }
 
-                if($create_jurnal == true){
+                if ($create_jurnal == true) {
                     if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl)) . '/' . date('m', strtotime($tgl)), true)
                         ->generate("{$kodeJurnal}/", '/%05d')->get()) {
                         throw new \Exception("No jurnal tidak terbuat", 500);
@@ -2593,5 +2594,50 @@ class Pelunasanhutang extends MY_Controller
             // unlock table
             $this->_module->unlock_tabel();
         }
+    }
+
+
+    public function get_view_origin()
+    {
+        $no_pelunasan = $this->input->post("no_pelunasan", true); // XSS filtering aktif
+        $origin       = $this->input->post("origin", true);
+
+        // validasi awal
+        if (empty($origin)) {
+            return $this->output
+                ->set_status_header(400)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['error' => 'Parameter origin tidak boleh kosong.']));
+        }
+
+        // ambil data dari model
+        $header = $this->m_penerimaanBarang->get_data_by_code($origin);
+        $items  = $this->m_penerimaanBarang->get_list_penerimaan_barang($origin);
+
+        // handle jika data kosong
+        if (!$header && !$items) {
+            return $this->output
+                ->set_status_header(404)
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['error' => 'Data origin tidak ditemukan.']));
+        }
+
+        // render view menjadi HTML string
+        $view = $this->load->view(
+            'modal/v_pelunasan_hutang_view_origin_modal',
+            [
+                "origin" => $origin,
+                "no_pelunasan" => $no_pelunasan,
+                "header" => $header,
+                "items" => $items
+            ],
+            true
+        );
+
+        // output JSON
+        return $this->output
+            ->set_status_header(200)
+            ->set_content_type('application/json', 'utf-8')
+            ->set_output(json_encode(['data' => $view]));
     }
 }
