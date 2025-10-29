@@ -2090,7 +2090,7 @@ class Pelunasanhutang extends MY_Controller
             }
 
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("acc_pelunasan_hutang WRITE, main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_summary_koreksi WRITE, invoice as a WRITE, currency_kurs as c WRITE, invoice WRITE, acc_bank_keluar_detail WRITE, acc_giro_keluar_detail WRITE, acc_kas_keluar_detail WRITE, mst_jurnal WRITE, acc_jurnal_entries WRITE, acc_jurnal_entries_items WRITE, acc_pelunasan_koreksi WRITE, acc_pelunasan_hutang_summary_koreksi as aphsk WRITE, acc_pelunasan_hutang_summary as aphs WRITE, acc_bank_keluar WRITE, acc_giro_keluar WRITE,  acc_kas_keluar WRITE");
+            $this->_module->lock_tabel("acc_pelunasan_hutang WRITE, main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_summary_koreksi WRITE, invoice as a WRITE, currency_kurs as c WRITE, invoice WRITE, acc_bank_keluar_detail WRITE, acc_giro_keluar_detail WRITE, acc_kas_keluar_detail WRITE, mst_jurnal WRITE, acc_jurnal_entries WRITE, acc_jurnal_entries_items WRITE, acc_pelunasan_koreksi WRITE, acc_pelunasan_hutang_summary_koreksi as aphsk WRITE, acc_pelunasan_hutang_summary as aphs WRITE, acc_bank_keluar WRITE, acc_giro_keluar WRITE,  acc_kas_keluar WRITE, invoice_retur WRITE");
 
             $no_pelunasan = $this->input->post('no_pelunasan');
             $tgl = date('Y-m-d H:i:s');
