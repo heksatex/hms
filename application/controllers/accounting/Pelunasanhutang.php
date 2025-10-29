@@ -457,10 +457,10 @@ class Pelunasanhutang extends MY_Controller
                     $row[] = date('Y-m-d', strtotime($field->created_at));
                     $row[] = $field->currency;
                     $row[] = $field->nilai_matauang;
-                    $row[] = number_format($field->total_hutang_rp, 4);
-                    $row[] = number_format($field->total_hutang_valas, 4);
-                    $row[] = number_format($field->sisa_hutang_rp, 4);
-                    $row[] = number_format($field->sisa_hutang_valas, 4);
+                    $row[] = number_format($field->total_hutang_rp, 2);
+                    $row[] = number_format($field->total_hutang_valas, 2);
+                    $row[] = number_format($field->sisa_hutang_rp, 2);
+                    $row[] = number_format($field->sisa_hutang_valas, 2);
                     $data[] = $row;
                 }
 
@@ -647,8 +647,8 @@ class Pelunasanhutang extends MY_Controller
                     $row[] = date('Y-m-d', strtotime($field->tanggal));
                     $row[] = $field->currency;
                     $row[] = $field->kurs;
-                    $row[] = number_format($field->total_rp, 4);
-                    $row[] = number_format($field->total_valas, 4);
+                    $row[] = number_format($field->total_rp, 2);
+                    $row[] = number_format($field->total_valas, 2);
                     $data[] = $row;
                 }
 
@@ -2209,9 +2209,9 @@ class Pelunasanhutang extends MY_Controller
                 // if ($data_summary == 'invalid') {
                 //     throw new \Exception('Data Summary / Info  tidak Valid !', 200);
                 // }
-
+                $tgl_transaksi = $cek->tanggal_transaksi;
                 if ($create_jurnal == true) {
-                    if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl)) . '/' . date('m', strtotime($tgl)), true)
+                    if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl_transaksi)) . '/' . date('m', strtotime($tgl_transaksi)), true)
                         ->generate("{$kodeJurnal}/", '/%05d')->get()) {
                         throw new \Exception("No jurnal tidak terbuat", 500);
                     }
@@ -2220,9 +2220,9 @@ class Pelunasanhutang extends MY_Controller
                     $row_items     = 1;
                     $head_entries = array(
                         'kode' => $jurnal,
-                        'tanggal_dibuat' => $tgl,
+                        'tanggal_dibuat' => $tgl_transaksi,
                         'tanggal_posting' => $tgl,
-                        'periode'       => date("y/m", strtotime($tgl)),
+                        'periode'       => date("y/m", strtotime($tgl_transaksi)),
                         'origin'        => $no_pelunasan,
                         'status'        => 'posted',
                         'tipe'          => $kodeJurnal,
@@ -2235,7 +2235,7 @@ class Pelunasanhutang extends MY_Controller
                             $items_entries[] = array(
                                 'kode'          => $jurnal,
                                 'nama'          => $mp->no_bukti,
-                                'reff_note'     => '',
+                                'reff_note'     => 'Uang Muka',
                                 'partner'       => $cek->partner_id, // partner_id
                                 'kode_coa'      => $com['kode_coa'],
                                 'posisi'        => $com['posisi'],
@@ -2254,6 +2254,7 @@ class Pelunasanhutang extends MY_Controller
                 // cek selisih rupiah
                 $list_coa_koreksi = "";
                 $get_selisih = $this->m_pelunasanhutang->get_data_summary_by_code($no_pelunasan);
+                $tgl_transaksi = $cek->tanggal_transaksi;
                 foreach ($get_selisih as $gs) {
 
                     if ($gs->selisih > 0 || $gs->selisih < 0) { // rugi / laba
@@ -2289,7 +2290,7 @@ class Pelunasanhutang extends MY_Controller
 
                                     if (empty($jurnal)) {
 
-                                        if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl)) . '/' . date('m', strtotime($tgl)), true)
+                                        if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl_transaksi)) . '/' . date('m', strtotime($tgl_transaksi)), true)
                                             ->generate("{$kodeJurnal}/", '/%05d')->get()) {
                                             throw new \Exception("No jurnal tidak terbuat", 500);
                                         }
@@ -2297,9 +2298,9 @@ class Pelunasanhutang extends MY_Controller
                                         $row_items     = 1;
                                         $head_entries = array(
                                             'kode' => $jurnal,
-                                            'tanggal_dibuat' => $tgl,
+                                            'tanggal_dibuat' => $tgl_transaksi,
                                             'tanggal_posting' => $tgl,
-                                            'periode'       => date("y/m", strtotime($tgl)),
+                                            'periode'       => date("y/m", strtotime($tgl_transaksi)),
                                             'origin'        => $no_pelunasan,
                                             'status'        => 'posted',
                                             'tipe'          => $kodeJurnal,
