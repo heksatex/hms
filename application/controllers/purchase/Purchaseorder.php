@@ -907,7 +907,7 @@ class Purchaseorder extends MY_Controller {
                     "total" => 0,
                     "dpp_lain" => 0,
                     "created_at" => $now,
-                    "periode" => date("Y/m", strtotime(now)),
+                    "periode" => date("Y/m", strtotime($now)),
                     "tanggal_sj" => $checkInv->tanggal_sj,
                     "status" => "draft"
                 ];
