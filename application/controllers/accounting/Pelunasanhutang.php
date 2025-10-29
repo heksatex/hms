@@ -2445,7 +2445,7 @@ class Pelunasanhutang extends MY_Controller
                         }
                     } else if ($mt->tipe2 == 'kas') { // kas keluar detail'
                         $cek_mt = $this->m_pelunasanhutang->cek_data_metode_valid_by_code('kas', ['acc_kas_keluar.status' => 'confirm', 'acc_kas_keluar.no_kk' => $mt->no_bukti, 'acc_kas_keluar_detail.id' => $mt->id_bukti, 'acc_kas_keluar_detail.lunas' => 0]);
-                        if (isset($cek_mk)) {
+                        if (isset($cek_mt)) {
                             if ((float) $cek_mt->nominal == (float) $total) {
                                 $data_update3 = array(
                                     'id'  => $mt->id_bukti,
@@ -2461,7 +2461,7 @@ class Pelunasanhutang extends MY_Controller
                         }
                     } else if ($mt->tipe2 == 'retur') { //invoice retur
                         $cek_mt = $this->m_pelunasanhutang->cek_data_metode_valid_by_code('retur', ['status' => 'done', 'no_inv_retur' => $mt->no_bukti, 'id' => $mt->id_bukti, 'lunas' => 0]);
-                        if (isset($cek_mk)) {
+                        if (isset($cek_mt)) {
                             if ((float) $cek_mt->total == (float) $total) {
                                 $data_update4 = array(
                                     'id'  => $mt->id_bukti,
@@ -2476,7 +2476,7 @@ class Pelunasanhutang extends MY_Controller
                             throw new \Exception('Metode Pelunasan Retur Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                         }
                     } else {
-                        throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas  !', 200);
+                        throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas/Retur  !', 200);
                     }
                 }
             } else {
