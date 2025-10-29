@@ -11,7 +11,7 @@
             .totalan {
                 font-size: 14px;
             }
-            #btn-approve {
+            #btn-approve,#btn-simpan {
                 display: none;
             }
             .prio-urgent {

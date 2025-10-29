@@ -274,7 +274,32 @@ class Purchaseorder extends MY_Controller {
                                 if ($cekUpdateIn !== "") {
                                     throw new \Exception("Update pada data invoice gagal.", 500);
                                 }
-                                $modelInv->update(["total" => $data->total, "dpp_lain" => $data->dpp_lain]);
+
+                                if ($data->nilai_currency > 1) {
+                                    $hutangrp = $data->total * $data->nilai_currency;
+                                    $hutangvalas = $data->total;
+                                    $totalrp = $data->total * $data->nilai_currency;
+                                    $dpprp = $data->dpp_lain * $data->nilai_currency;
+                                    $dppvalas = $data->dpp_lain;
+                                    $totalValas = $data->total;
+                                } else {
+                                    $hutangrp = $data->total;
+                                    $hutangvalas = 0;
+                                    $totalrp = $data->total;
+                                    $dpprp = $data->dpp_lain;
+                                    $dppvalas = 0;
+                                    $totalValas = 0;
+                                }
+                                $modelInv->update([
+                                    "total" => $data->total,
+                                    "dpp_lain" => $data->dpp_lain,
+                                    "hutang_rp" => round($hutangrp),
+                                    "hutang_valas" => round($hutangvalas),
+                                    "total_valas" => round($totalValas),
+                                    "total_rp" => round($totalrp),
+                                    "dpp_rp" => round($dpprp),
+                                    "dpp_valas" => round($dppvalas)
+                                ]);
                                 $this->_module->gen_history("invoice", $cekInv->id, 'edit',
                                         "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
                                         $username);
@@ -544,7 +569,7 @@ class Purchaseorder extends MY_Controller {
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 $taxe = 0;
-                if ($dpplain === "1" && $dppTax[$key] === "1") {
+                if ($dpplain === "1") {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                     $nilaiDppLain += (($total - $diskon) * 11) / 12;
                 } else {
@@ -611,6 +636,11 @@ class Purchaseorder extends MY_Controller {
             $this->_module->startTransaction();
             $model = new $this->m_global;
             $model2 = clone $model;
+            $checkInvoice = $model2->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "invoice.status <>" => "cancel"])->getDetail();
+            if ($checkInvoice) {
+                if ($checkInvoice->lunas == "1")
+                    throw new \Exception('Data PO sudah ada pelunasan.', 500);
+            }
             $whereStatus = "'done','cancel'";
             $cek = $model->setTables("purchase_order_edited")
                     ->setJoins("mst_status", "mst_status.kode = status", "LEFT")
@@ -618,6 +648,7 @@ class Purchaseorder extends MY_Controller {
                     ->setWheres(["po_id" => $kode_decrypt])->setWhereRaw("status not in ({$whereStatus})")
                     ->getDetail();
             if ($cek !== null) {
+
                 $update = false;
                 switch ($status) {
                     case "cancel":
@@ -861,7 +892,6 @@ class Purchaseorder extends MY_Controller {
                         . "stock_move WRITE, stock_move_produk WRITE, departemen d WRITE,"
                         . "pengiriman_barang WRITE, pengiriman_barang_items WRITE, departemen WRITE, mst_produk WRITE";
                 $this->_module->lock_tabel($locktabel);
-                $now = date("Y-m-d H:i:s");
                 $invRetur = [
                     "no_inv_retur" => $noDeb,
                     "id_supplier" => $checkInv->id_supplier,
@@ -877,7 +907,7 @@ class Purchaseorder extends MY_Controller {
                     "total" => 0,
                     "dpp_lain" => 0,
                     "created_at" => $now,
-                    "periode"=>date("Y/m", strtotime(now)),
+                    "periode" => date("Y/m", strtotime(now)),
                     "tanggal_sj" => $checkInv->tanggal_sj,
                     "status" => "draft"
                 ];
@@ -920,7 +950,7 @@ class Purchaseorder extends MY_Controller {
                     $totals += $total;
                     $diskon = ($value->diskon ?? 0);
                     $diskons += $diskon;
-                    if ($checkInv->dpp_lain > 0 && $value->dpp_tax === "1") {
+                    if ($checkInv->dpp_lain > 0) {
                         $taxe = ((($total - $diskon) * 11) / 12) * $value->tax_amount;
                         $dpp += ((($total - $diskon) * 11) / 12);
                     } else {

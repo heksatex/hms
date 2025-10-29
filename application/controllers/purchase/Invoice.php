@@ -215,7 +215,7 @@ class Invoice extends MY_Controller {
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 $taxe = 0;
-                if ($dpplain === "1" && $tax_lain[$key] === "1") {
+                if ($dpplain === "1") {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                 } else {
                     $taxe += ($total - $diskon) * $amount_tax[$key];
@@ -226,12 +226,15 @@ class Invoice extends MY_Controller {
                     foreach ($dataTax as $kkk => $datas) {
                         if ($dpplain === "1" && $datas->dpp === "1") {
                             $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
-                            continue;
                         }
-                        $taxe += ($total - $diskon) * $datas->amount;
+                        else {
+                             $taxe += ($total - $diskon) * $datas->amount;
+                        }
+                       
                     }
                 }
                 $taxes += $taxe;
+                
             }
             if ($dpplain === "1") {
                 $nilaiDppLain = (($totals - $diskons) * 11) / 12;
@@ -320,7 +323,7 @@ class Invoice extends MY_Controller {
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
                                 ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,tax.ket, coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id", "invoice.created_at as invoice_create", "invoice.total as total_invoice"])
+                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id", "invoice.created_at as invoice_create", "invoice.total as total_invoice","dpp_lain_rp,dpp_lain_valas,total_rp"])
                                 ->setOrder(["invoice_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
@@ -346,11 +349,13 @@ class Invoice extends MY_Controller {
                 $pajakLain = [];
                 $checkDpp = $dataItems[0]->dpp_lain > 0;
                 if (count($dataItems) > 0) {
-                    $updateInv["hutang_rp"] = $dataItems[0]->total_invoice;
+                    $updateInv["hutang_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang);
+                        $updateInv["total_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang);
+                        $updateInv["dpp_lain_rp"] = round($dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang);
                     if ($dataItems[0]->nilai_matauang > 1) {
-                        $updateInv["total_valas"] = $dataItems[0]->total_invoice;// 
-                         $updateInv["hutang_rp"] = $dataItems[0]->nilai_matauang * $dataItems[0]->total_invoice;
-                        $updateInv["hutang_valas"] = $updateInv["total_valas"];
+                        $updateInv["total_valas"] = round($dataItems[0]->total_invoice);//
+                        $updateInv["hutang_valas"] = round($updateInv["total_valas"]);
+                        $updateInv["dpp_lain_valas"] = round($dataItems[0]->dpp_lain);
                     }
                 }
                 foreach ($dataItems as $key => $value) {

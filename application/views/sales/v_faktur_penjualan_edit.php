@@ -264,7 +264,7 @@
                                                                 </td>
                                                                 <td class="text-right">
                                                                     <input value="<?= $value->qty ?>" type="hidden" name="qty[]">
-                                                                    <?= "{$value->qty} {$value->uom}" ?>
+                                                                    <input class="form-control input-sm" disabled value="<?= "{$value->qty} {$value->uom}" ?>">
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm select2-coa edited noacc noacc_<?= $key ?>" style="width:100%" name="noacc[]" disabled>
@@ -321,12 +321,12 @@
                                                             <tr>
                                                                 <td colspan="8"></td>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subTotal - $datas->diskon, 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($subTotal - $datas->diskon), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="8"></td>
                                                                 <td class="text-right"><strong>DPP Nilai Lain</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(($datas->grand_total - $datas->diskon) * 11 / 12, 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($datas->grand_total - $datas->diskon) * 11 / 12), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="7"></td>
@@ -587,6 +587,18 @@ if ($datas->status == 'confirm') {
             allowClear: true
         });
     });
+    $(document).on('focus', '.select2', function (e) {
+                if (e.originalEvent) {
+                    var s2element = $(this).siblings('select');
+                    s2element.select2('open');
+
+                    // Set focus back to select2 element on closing.
+                    s2element.on('select2:closing', function (e) {
+                        s2element.select2('focus');
+                    });
+                }
+            });
+            
     $(function () {
         setNominalCurrency();
         $(".select2").select2();

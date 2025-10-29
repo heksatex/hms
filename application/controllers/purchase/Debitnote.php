@@ -175,7 +175,7 @@ class Debitnote extends MY_Controller {
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 $taxe = 0;
-                if ($dpplain === "1" && $tax_lain[$key] === "1") {
+                if ($dpplain === "1") {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                 } else {
                     $taxe += ($total - $diskon) * $amount_tax[$key];
@@ -275,7 +275,7 @@ class Debitnote extends MY_Controller {
                                 ->setSelects(["invoice_retur_detail.*", "invoice_retur.id_supplier,invoice_retur.journal as jurnal,dpp_lain,nilai_matauang",
                                     "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,tax.ket", "invoice_retur.created_at as invoice_retur_create"])
+                                    "partner.nama as nama_supp,tax.ket", "invoice_retur.created_at as invoice_retur_create,invoice_retur.total as total_invoice"])
                                 ->setOrder(["invoice_retur_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
@@ -288,6 +288,16 @@ class Debitnote extends MY_Controller {
                 $jurnalItems = [];
                 $tax = 0;
                 $totalNominal = 0;
+                if (count($dataItems) > 0) {
+                    $updateInv["hutang_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauan;
+                        $updateInv["total_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
+                        $updateInv["dpp_lain_rp"] = $dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang;
+                    if ($dataItems[0]->nilai_matauang > 1) {
+                        $updateInv["total_valas"] = $dataItems[0]->total_invoice;//
+                        $updateInv["hutang_valas"] = $updateInv["total_valas"];
+                        $updateInv["dpp_lain_valas"] = $dataItems[0]->dpp_lain;
+                    }
+                }
                 foreach ($dataItems as $key => $value) {
                     if ($value->account === null) {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
