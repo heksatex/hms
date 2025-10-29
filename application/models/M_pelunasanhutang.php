@@ -1147,6 +1147,10 @@ class M_pelunasanhutang extends CI_Model
             $this->db->FROM('acc_giro_keluar');
             $this->db->join('acc_giro_keluar_detail', 'acc_giro_keluar_detail.giro_keluar_id = acc_giro_keluar.id', 'inner');
             $result = $this->db->get();
+        } else if($metode =='retur') {
+            $this->db->select('id, no_inv_retur, total, lunas');
+            $this->db->FROM('invoice_retur');
+            $result = $this->db->get();
         } else {
             $this->db->select('acc_kas_keluar.no_kk, acc_kas_keluar_detail.id, acc_kas_keluar_detail.nominal');
             $this->db->FROM('acc_kas_keluar');
