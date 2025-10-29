@@ -289,7 +289,7 @@ class Debitnote extends MY_Controller {
                 $tax = 0;
                 $totalNominal = 0;
                 if (count($dataItems) > 0) {
-                    $updateInv["hutang_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
+                        $updateInv["hutang_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
                         $updateInv["total_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
                         $updateInv["dpp_lain_rp"] = $dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang;
                     if ($dataItems[0]->nilai_matauang > 1) {
