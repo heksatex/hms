@@ -2143,6 +2143,7 @@ class Pelunasanhutang extends MY_Controller
             $tmp_update =  array();
             $tmp_update2 =  array();
             $tmp_update3 =  array();
+            $tmp_update4 =  array();
             $head_entries =  array();
             $items_entries =  array();
             // $data_update3 =  array();
@@ -2458,6 +2459,22 @@ class Pelunasanhutang extends MY_Controller
                         } else {
                             throw new \Exception('Metode Pelunasan Kas Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                         }
+                    } else if ($mt->tipe2 == 'retur') { //invoice retur
+                        $cek_mt = $this->m_pelunasanhutang->cek_data_metode_valid_by_code('retur', ['status' => 'done', 'no_inv_retur' => $mt->no_bukti, 'id' => $mt->id_bukti, 'lunas' => 0]);
+                        if (isset($cek_mk)) {
+                            if ((float) $cek_mt->total == (float) $total) {
+                                $data_update4 = array(
+                                    'id'  => $mt->id_bukti,
+                                    'lunas'   => 1
+                                );
+                                $tmp_update4 =  array();
+                                array_push($tmp_update4, $data_update4);
+                            } else {
+                                throw new \Exception('Nominal Metode Pelunasan Retur  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                            }
+                        } else {
+                            throw new \Exception('Metode Pelunasan Retur Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                        }
                     } else {
                         throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas  !', 200);
                     }
@@ -2482,6 +2499,10 @@ class Pelunasanhutang extends MY_Controller
             }
             if ($tmp_update3) { // update kas
                 $this->m_pelunasanhutang->update_kas_bank_kode($tmp_update3, 'acc_kas_keluar_detail');
+            }
+
+            if ($tmp_update3) { // update invoice retur
+                $this->m_pelunasanhutang->update_kas_bank_kode($tmp_update4, 'invoice_retur');
             }
 
             if ($head_entries && $items_entries) {
