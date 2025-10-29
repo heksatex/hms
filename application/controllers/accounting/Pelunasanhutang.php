@@ -1051,6 +1051,9 @@ class Pelunasanhutang extends MY_Controller
                 $keterangan_valas = '';
             }
 
+            if ($cek_mt) {
+                $keterangan_valas = 'Uang Muka';
+            }
 
             $insert_summary[] = array(
                 'tipe_currency' => 'Valas',
