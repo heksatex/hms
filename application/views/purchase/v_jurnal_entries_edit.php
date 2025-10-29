@@ -168,7 +168,9 @@
                                                                 <td>
                                                                     <div class="input-group">
                                                                         <span class="input-group-addon" style="border:none;"><?= ($keys + 1) ?></span>
+                                                                        <?php if ($jurnal->status === "unposted") { ?>
                                                                         <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
+                                                                        <?php } ?>
                                                                     </div>
                                                                 </td>
                                                                 <td><input type="text" class="form-control input-sm nama" value="<?= $value->nama ?>" name="nama[]" <?= ($jurnal->status === 'unposted') ? '' : 'readonly' ?>></td>

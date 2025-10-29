@@ -100,7 +100,7 @@ function logArrayToString(string $seperator, array $data, string $indikatorVal =
     foreach ($data as $key => $value) {
         if (is_array($value)) {
 
-            $hasil .= " " .($key + 1) . " " . logArrayToString($seperator, $value, $indikatorVal);
+            $hasil .= " " . ($key + 1) . " " . logArrayToString($seperator, $value, $indikatorVal);
         } else {
             $hasil = implode($seperator, array_map(
                             function ($v, $k) use ($indikatorVal) {
@@ -230,6 +230,27 @@ function searchOnArray(array $data, string $keySearch, string $valueSearch) {
         }
     }
     return $hasil;
+}
+
+function Kwitansi($x) {
+    $bilangan = array("", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas");
+    if ($x < 12) {
+        return " " . $bilangan[$x];
+    } elseif ($x < 20) {
+        return Kwitansi($x - 10) . " belas";
+    } elseif ($x < 100) {
+        return Kwitansi($x / 10) . " puluh" . Kwitansi($x % 10);
+    } elseif ($x < 200) {
+        return " seratus" . Kwitansi($x - 100);
+    } elseif ($x < 1000) {
+        return Kwitansi($x / 100) . " ratus" . Kwitansi($x % 100);
+    } elseif ($x < 2000) {
+        return " seribu" . Kwitansi($x - 1000);
+    } elseif ($x < 1000000) {
+        return Kwitansi($x / 1000) . " ribu" . Kwitansi($x % 1000);
+    } elseif ($x < 1000000000) {
+        return Kwitansi($x / 1000000) . " juta" . Kwitansi($x % 1000000);
+    }
 }
 
 ?>

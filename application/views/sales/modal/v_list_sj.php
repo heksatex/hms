@@ -33,7 +33,7 @@
                 style: 'single'
             },
             "ajax": {
-                "url": "<?php echo site_url('accounting/fakturpenjualan/list_sj') ?>",
+                "url": "<?php echo site_url('sales/fakturpenjualan/list_sj') ?>",
                 "type": "POST",
                 "data": function (d) {
                     d.tipe = '<?= $tipe ?>';

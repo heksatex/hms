@@ -42,7 +42,6 @@
                 $data['deptid'] = $id_dept;
                 $this->load->view("admin/_partials/topbar.php", $data)
                 ?>
-
             </header>
             <aside class="main-sidebar">
                 <?php $this->load->view("admin/_partials/sidebar-new.php") ?>
