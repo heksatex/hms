@@ -39,8 +39,8 @@ class Outstandingkasbank extends MY_Controller
                     $row[] = date('Y-m-d', strtotime($field->tanggal));
                     $row[] = $field->currency;
                     $row[] = $field->kurs;
-                    $row[] = number_format($field->total_rp, 4);
-                    $row[] = number_format($field->total_valas, 4);
+                    $row[] = number_format($field->total_rp, 2);
+                    $row[] = number_format($field->total_valas, 2);
                     $data[] = $row;
                 }
 

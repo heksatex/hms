@@ -118,7 +118,7 @@
                                             <div class="col-md-12 table-responsive over">
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
-                                                        <div class="col-md-4 col-lg-2">
+                                                        <div class="col-md-4 col-lg-3">
                                                             <label>Invoice Akan dilunasi</label>
                                                         </div>
                                                         <div class="col-md-4">
@@ -158,10 +158,10 @@
                                             <div class="col-md-12 table-responsive over">
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
-                                                        <div class="col-md-4 col-lg-2">
+                                                        <div class="col-md-4 col-lg-3">
                                                             <label>Pelunasan</label>
                                                         </div>
-                                                        <div class="col-md-6 col-lg-4">
+                                                        <div class="col-md-6 col-lg-5">
                                                             <button class="btn btn-default btn-sm" id="btn-kas-bank" name="btn-kas-bank"><i class='fa fa-bank' style='color: green'></i> Kas Bank (<span id='tbk'>0</span>)</button>
                                                             <button class="btn btn-default btn-sm" id="btn-uang-muka" name="btn-uang-muka"><i class='fa fa-money' style='color: blue'></i> Uang Muka (<span id='tum'>0</span>)</button>
                                                             <button class="btn btn-default btn-sm" id="btn-retur" name="btn-retur"><i class='fa fa-exchange' style='color: red'></i> Retur (<span id='tret'>0</span>)</button>

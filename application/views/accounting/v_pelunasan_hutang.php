@@ -26,13 +26,13 @@
                         <div class="col-xs-12 table-responsive">
                             <table id="tbl-pelunasan-hutang" class="table table-striped">
                                 <thead>
-                                   <tr>
-                                    <th class="no">No</th>
-                                    <th>No Pelunasan</th>
-                                    <th>Tanggal dibuat</th>
-                                    <th>Supplier</th>
-                                    <th>Status</th>
-                                   </tr>
+                                    <tr>
+                                        <th class="no">No</th>
+                                        <th>No Pelunasan</th>
+                                        <th>Tanggal dibuat</th>
+                                        <th>Supplier</th>
+                                        <th>Status</th>
+                                    </tr>
                                 </thead>
                             </table>
                         </div>
@@ -46,10 +46,12 @@
         $(function() {
             // const table = $("#tbl-pelunasan-hutang").DataTable({});
             const table = $('#tbl-pelunasan-hutang').DataTable({
-                "iDisplayLength": 10,
+                "iDisplayLength": 50,
                 "processing": true,
                 "serverSide": true,
                 "order": [],
+                "scrollX": true,
+                "scrollY": "calc(101vh - 250px)",
                 "paging": true,
                 "lengthChange": true,
                 "searching": true,

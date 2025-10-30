@@ -1014,6 +1014,12 @@ class M_pelunasanhutang extends CI_Model
             if ($db_error['code'] > 0) {
                 throw new Exception($db_error['message']);
             }
+
+            // Cek apakah ada data yang berhasil dimasukkan
+            if ($this->db->affected_rows() === 0) {
+                throw new Exception("Gagal insert: tidak ada data yang dimasukkan.");
+            }
+
             return "";
         } catch (Exception $ex) {
             return $ex->getMessage();
@@ -1024,11 +1030,19 @@ class M_pelunasanhutang extends CI_Model
     {
         try {
             $this->db->insert_batch('acc_jurnal_entries_items', $data_insert);
+
+            // Cek error MySQL
             $db_error = $this->db->error();
             if ($db_error['code'] > 0) {
                 throw new Exception($db_error['message']);
             }
-            return "";
+
+            // Cek apakah ada data yang berhasil dimasukkan
+            if ($this->db->affected_rows() === 0) {
+                throw new Exception("Gagal insert: tidak ada data yang dimasukkan.");
+            }
+
+            return ""; // sukses
         } catch (Exception $ex) {
             return $ex->getMessage();
         }
@@ -1102,23 +1116,36 @@ class M_pelunasanhutang extends CI_Model
             if ($db_error['code'] > 0) {
                 throw new Exception($db_error['message']);
             }
+            
+            // Cek apakah ada data yang berubah
+            if ($this->db->affected_rows() === 0) {
+                throw new Exception("Gagal update: tidak ada data yang diperbarui.");
+            }
             return "";
         } catch (Exception $ex) {
             return $ex->getMessage();
         }
     }
 
-    function update_kas_bank_kode($data_update, $kas_bank = null )
+    function update_kas_bank_kode($data_update, $kas_bank = null)
     {
         try {
             $this->db->update_batch($kas_bank, $data_update, 'id');
+
+            // Cek error database
             $db_error = $this->db->error();
             if ($db_error['code'] > 0) {
                 throw new Exception($db_error['message']);
             }
-            return "";
+
+            // Cek apakah ada data yang berubah
+            if ($this->db->affected_rows() === 0) {
+                throw new Exception("Gagal update: tidak ada data yang diperbarui.");
+            }
+
+            return ""; // sukses tanpa pesan
         } catch (Exception $ex) {
-            return $ex->getMessage();
+            return $ex->getMessage(); // kembalikan pesan error
         }
     }
 
@@ -1170,6 +1197,12 @@ class M_pelunasanhutang extends CI_Model
             if ($db_error['code'] > 0) {
                 throw new Exception($db_error['message']);
             }
+
+            // Cek apakah ada data yang berubah
+            if ($this->db->affected_rows() === 0) {
+                throw new Exception("Gagal update: tidak ada data yang diperbarui.");
+            }
+            
             return "";
         } catch (Exception $ex) {
             return $ex->getMessage();

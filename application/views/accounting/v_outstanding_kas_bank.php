@@ -54,7 +54,7 @@
                 "serverSide": true,
                 "order": [],
                 "scrollX": true,
-                "scrollY": "calc(85vh - 250px)",
+                "scrollY": "calc(100vh - 250px)",
                 "paging": true,
                 "lengthChange": true,
                 "searching": true,

@@ -511,7 +511,7 @@
             } else {
                 $.ajax({
                     "type": 'POST',
-                    "url": "<?php echo site_url('accounting/bukubesar/export_excel_detail') ?>",
+                    "url": "<?php echo site_url('report/bukubesar/export_excel_detail') ?>",
                     "data": {
                         arr_filter: arr_filter
                     },

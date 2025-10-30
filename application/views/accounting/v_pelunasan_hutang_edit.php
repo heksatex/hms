@@ -194,7 +194,7 @@
                                             <div class="col-md-12 table-responsive over">
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
-                                                        <div class="col-md-4 col-lg-2">
+                                                        <div class="col-md-4 col-lg-3">
                                                             <label>Invoice Akan dilunasi</label>
                                                         </div>
                                                         <div class="col-md-4">
@@ -242,10 +242,10 @@
                                             <div class="col-md-12 table-responsive over">
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
-                                                        <div class="col-md-4 col-lg-2">
+                                                        <div class="col-md-4 col-lg-3">
                                                             <label>Pelunasan</label>
                                                         </div>
-                                                        <div class="col-md-7 col-lg-4">
+                                                        <div class="col-md-7 col-lg-5">
                                                             <button class="btn btn-sm btn-default <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-kas-bank" name="btn-kas-bank" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-bank' style='color: green'></i> Kas Bank (<span id='tbk'>0</span>)</button>
                                                             <button class="btn btn-sm btn-default  <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-uang-muka" name="btn-uang-muka" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-money' style='color: blue'></i> Uang Muka (<span id='tum'>0</span>)</button>
                                                             <button class="btn btn-sm btn-default <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-retur" name="btn-retur" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-exchange' style='color: red'></i> Retur (<span id='tret'>0</span>)</button>
@@ -671,6 +671,7 @@
                                             }, 1000);
                                         });
                                         refresh();
+
                                     }
 
                                 },
@@ -1344,6 +1345,7 @@
                 loadPelunasan();
                 loadInvoice();
                 loadLog();
+                $("#tab_2").load(location.href + " #tab_2");
             }
 
             var koreksiOptions = [{
