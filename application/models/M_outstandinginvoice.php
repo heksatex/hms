@@ -44,35 +44,35 @@ class M_outstandinginvoice extends CI_Model
         if(count($where) > 0 ) {
             $this->db->where($where);
         }
-        $this->db->select("p.nama AS nama_partner,SUM(inv.total) AS total_hutang,
+        $this->db->select("p.nama AS nama_partner,SUM(inv.hutang_rp) AS total_hutang,
                         SUM(
                             CASE 
                                 WHEN DATE_FORMAT(inv.order_date, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
-                                THEN inv.total ELSE 0 
+                                THEN inv.hutang_rp ELSE 0 
                             END
                         ) AS hutang_bulan_ini,
                         SUM(
                             CASE 
                                 WHEN DATE_FORMAT(inv.order_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m')
-                                THEN inv.total ELSE 0 
+                                THEN inv.hutang_rp ELSE 0 
                             END
                         ) AS hutang_bulan_1,
                         SUM(
                             CASE 
                                 WHEN DATE_FORMAT(inv.order_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m')
-                                THEN inv.total ELSE 0 
+                                THEN inv.hutang_rp ELSE 0 
                             END
                         ) AS hutang_bulan_2,
                         SUM(
                             CASE 
                                 WHEN DATE_FORMAT(inv.order_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 3 MONTH), '%Y-%m')
-                                THEN inv.total ELSE 0 
+                                THEN inv.hutang_rp ELSE 0 
                             END
                         ) AS hutang_bulan_3,
                         SUM(
                             CASE 
                                 WHEN inv.order_date < DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 3 MONTH), '%Y-%m-01')
-                                THEN inv.total ELSE 0 
+                                THEN inv.hutang_rp ELSE 0 
                             END
                         ) AS hutang_lebih_dari_3_bulan
                         ");

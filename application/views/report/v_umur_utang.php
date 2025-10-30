@@ -12,7 +12,7 @@
 
         .divListviewHead table {
             display: block;
-            height: calc(96vh - 250px);
+            height: calc(101vh - 250px);
             overflow-x: auto;
         }
 
@@ -133,7 +133,7 @@
                                                         <th class='style bb text-right' style="min-width: 150px; width:100px;">Total utang</th>
                                                         <th class='style bb text-right' style="min-width: 150px; width:100px;">Bulan Ini</th>
                                                         <th class='style bb text-right' style="min-width: 150px; width:100px;">Bulan 1</th>
-                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">BUlan 2</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Bulan 2</th>
                                                         <th class='style bb text-right' style="min-width: 150px; width:100px;">BUlan 3</th>
                                                         <th class='style bb text-right' style="min-width: 150px; width:100px;">Bulan >3 </th>
                                                     </tr>
@@ -209,12 +209,9 @@
 
 
 
-        var arr_filter = [];
-
         // btn generate
         $("#btn-generate").on('click', function() {
             var this_btn = $(this);
-            arr_filter = [];
             proses_aging(this_btn);
         });
 
@@ -256,16 +253,12 @@
                         const headerRow = data.header.map((h, i) => `<th class="style bb ${i > 1 ? 'text-right' : 'text-left'}" style="min-width:${headerWidths[i]}; width:100px;">${h}</th>`).join('');
                         $("#tableHeader").html(headerRow);
 
-                        if (data.record.length === 0) {
-                            tbody.append("<tr><td colspan='" + data.header.length + "' class='text-center'>Tidak ada data</td></tr>");
-                            return;
-                        }
-
                         let tbody = $("<tbody />");
 
-                        arr_filter.push({
-                            partner: partner
-                        });
+                        if (data.record.length === 0) {
+                            tbody.append("<tr><td colspan='" + data.header.length + "' class='text-right'>Tidak ada data</td></tr>");
+                        }
+
                         let total_hutang = 0;
                         let total_hutang_bulan_ini = 0;
                         let total_hutang_bulan_1 = 0;
@@ -294,17 +287,18 @@
 
                         });
 
-
-                        var tr4 = $("<tr>").append(
-                            $("<td colspan='2' class='style_space text-right'>").html('<b>Total : </b>'),
-                            $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang.toFixed(2)) + '</b>'),
-                            $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_ini.toFixed(2)) + '</b>'),
-                            $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_1.toFixed(2)) + '</b>'),
-                            $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_2.toFixed(2)) + '</b>'),
-                            $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_3.toFixed(2)) + '</b>'),
-                            $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_lebih_dari_3_bulan.toFixed(2)) + '</b>'),
-                        );
-                        tbody.append(tr4);
+                        if(data.record.length > 0 ){
+                            var tr4 = $("<tr>").append(
+                                $("<td colspan='2' class='style_space text-right'>").html('<b>Total : </b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_ini.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_1.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_2.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_bulan_3.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(total_hutang_lebih_dari_3_bulan.toFixed(2)) + '</b>'),
+                            );
+                            tbody.append(tr4);
+                        }
 
                         $("#example1").append(tbody); // append parents
 

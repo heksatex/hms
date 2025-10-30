@@ -73,13 +73,9 @@
                                     <th class="style no">No.</th>
                                     <th class="style" style="width: 120px;">Kode Product</th>
                                     <th class="style">Product</th>
-                                    <th class="style" style="text-align: right;">Qty</th>
-                                    <th class="style">uom</th>
-                                    <th class="style" style="text-align: right;">Tersedia</th>
                                     <th class="style">Kode PP</th>
-                                    <th class="style" style="text-align: right;">Qty Beli</th>
+                                    <th class="style" style="text-align: right;">Qty Beli Tersedia</th>
                                     <th class="style">uom Beli</th>
-                                    <th class="style" style="text-align: right;">Tersedia Qty Beli</th>
                                     <th class="style">Reff Note</th>
                                     <th class="style">Status</th>
                                 </tr>
@@ -107,13 +103,9 @@
                                             <td></td>
                                             <td><?php echo $row->kode_produk; ?></td>
                                             <td><?php echo $row->nama_produk; ?></td>
-                                            <td align="right"><?php echo number_format($row->qty, 2) ?></td>
-                                            <td><?php echo $row->uom ?></td>
-                                            <td align="right" style="color:<?php echo $color; ?>"><?php echo (!empty($row->sum_qty)) ? number_format($row->sum_qty, 2) : ''; ?></td>
                                             <td><?= $row->kode_pp ?></td>
-                                            <td align="right"><?= number_format($row->qty_beli, 2) ?></td>
-                                            <td><?= $row->uom_beli ?></td>
                                             <td align="right"><?= number_format($qty_beli_tersedia, 2) ?></td>
+                                            <td><?= $row->uom_beli ?></td>
                                             <td>
                                                 <?= nl2br($row->reff_note ?? "") ?>
                                             </td>
