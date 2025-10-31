@@ -73,17 +73,35 @@ class Purchaseorder extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $nextPage = $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
-                            ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
-                            ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
-            if ($nextPage) {
-                $data["next_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($nextPage->no_po));
+            $prd = ($_GET["produk"] ?? "");
+            $stt = ($_GET["stt"] ?? '');
+            $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)//, "po.supplier" => $data["po"]->supplier
+                    ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
+                    ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
+            
+            if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
             }
-            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
-                            ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
-                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
+            $nextPage = $model1->getDetail();
+            if ($nextPage) {
+                $data["next_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($nextPage->no_po) . "?produk={$prd}&stt={$stt}");
+            }
+            $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true) //, "po.supplier" => $data["po"]->supplier
+                    ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
+                    ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
+            if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
+            }
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
+            
+            $prevPage = $model1->getDetail();
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po));
+                $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}");
             }
 
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
@@ -129,12 +147,14 @@ class Purchaseorder extends MY_Controller {
             $list->setWhereRaw("jenis <>'FPT'");
 
             $no = $_POST['start'];
-
+            $statuss = "";
             if (gettype($status) === 'string')
                 $list->setWhereRaw("po.status in ('done','cancel','purchase_confirmed','exception')");
             else
-            if (count($status) > 0)
+            if (count($status) > 0) {
                 $list->setWhereIn("po.status", $status);
+                $statuss = implode(",", $status);
+            }
 
             if ($nama_produk !== "")
                 $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
@@ -148,7 +168,7 @@ class Purchaseorder extends MY_Controller {
                 }
                 $data [] = [
                     $no,
-                    '<a href="' . base_url('purchase/purchaseorder/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
+                    '<a href="' . base_url('purchase/purchaseorder/edit/' . encrypt_url($field->no_po)) . '?produk=' . $nama_produk . '&stt=' . $statuss . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->order_date,
                     $field->create_date,

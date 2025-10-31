@@ -86,7 +86,7 @@
                                     ?>
                                     <button class="btn btn-primary btn-sm" type="button" id="btn-print-pdf" data-ids="<?= $id ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         <i class="fa fa-print"></i>&nbsp;Print PDF
-                                        </button>
+                                    </button>
                                 </div>
                             </div>
                             <div class="box-body">
@@ -347,7 +347,7 @@
 
                                                                 </td>
                                                                 <td class="text-right"><strong>Ppn</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn - $datas->diskon_ppn, 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn - $datas->diskon_ppn), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Note</td>
@@ -588,20 +588,20 @@ if ($datas->status == 'confirm') {
         });
     });
     $(document).on('focus', '.select2', function (e) {
-                if (e.originalEvent) {
-                    var s2element = $(this).siblings('select');
-                    s2element.select2('open');
+        if (e.originalEvent) {
+            var s2element = $(this).siblings('select');
+            s2element.select2('open');
 
-                    // Set focus back to select2 element on closing.
-                    s2element.on('select2:closing', function (e) {
-                        s2element.select2('focus');
-                    });
-                }
+            // Set focus back to select2 element on closing.
+            s2element.on('select2:closing', function (e) {
+                s2element.select2('focus');
             });
-            
+        }
+    });
+
     $(function () {
         setNominalCurrency();
-        $(".select2").select2();
+
         $("#btn-edit").on("click", function (e) {
             e.preventDefault();
             $("#btn-cancel").show();
@@ -611,6 +611,7 @@ if ($datas->status == 'confirm') {
             $(".btn-rmv-item").show();
             $("#btn-confirm").hide();
             $("#btn-simpan").show();
+            $(".select2").select2();
             $(".select2").select2({placeholder: "Pilih",
                 allowClear: true});
             setCoaItem();
@@ -637,7 +638,7 @@ if ($datas->status == 'confirm') {
             e.preventDefault();
             var text = $(this).html();
             var statuss = text.replace(/(<([^>]+)>)/ig, "");
-            confirmRequest("Faktur Penjualan", "Confirm Data ? ", function () {
+            confirmRequest("Faktur Penjualan", statuss + " Data ? ", function () {
                 updateStatus(statuss);
             });
         });
@@ -902,31 +903,31 @@ if ($datas->status == 'confirm') {
                 }
             });
         });
-        
-        $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
-                    $.ajax({
-                        url: "<?= base_url('sales/fakturpenjualan/print_pdf/') ?>",
-                        type: "POST",
-                        data: {
-                            id: "<?= $id ?>"
-                        },
-                        beforeSend: function (xhr) {
-                            please_wait(function () {});
-                        },
-                        success: function (data) {
-                            unblockUI(function () {});
-                            window.open(data.url, "_blank").focus();
 
-                        },
-                        error: function (req, error) {
-                            unblockUI(function () {
-                                setTimeout(function () {
-                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                                }, 500);
-                            });
-                        }
+        $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
+            $.ajax({
+                url: "<?= base_url('sales/fakturpenjualan/print_pdf/') ?>",
+                type: "POST",
+                data: {
+                    id: "<?= $id ?>"
+                },
+                beforeSend: function (xhr) {
+                    please_wait(function () {});
+                },
+                success: function (data) {
+                    unblockUI(function () {});
+                    window.open(data.url, "_blank").focus();
+
+                },
+                error: function (req, error) {
+                    unblockUI(function () {
+                        setTimeout(function () {
+                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                        }, 500);
                     });
-                });
+                }
+            });
+        });
 
     });
     var counterSplit = 0;

@@ -482,8 +482,6 @@ class Fakturpenjualan extends MY_Controller {
                     throw new \Exception("No Faktur Internal sudah terpakai", 500);
                 }
             }
-
-
             $header = [
                 "tipe" => $this->input->post("tipe"),
                 "no_sj" => $nosj,
@@ -492,8 +490,8 @@ class Fakturpenjualan extends MY_Controller {
                 "marketing_nama" => $this->input->post("marketing_nama"),
                 "partner_id" => $this->input->post("customer"),
                 "partner_nama" => $this->input->post("customer_nama"),
-                "no_faktur_pajak" => $noFakturInternal,
-                "no_faktur_internal" => $this->input->post("no_faktur_internal"),
+                "no_faktur_pajak" => $this->input->post("no_faktur_pajak"),
+                "no_faktur_internal" => $noFakturInternal,
                 "kurs" => $this->input->post("kurs"),
                 "kurs_nominal" => $this->input->post("kurs_nominal"),
                 "tipe_diskon" => $tipediskon,
@@ -549,7 +547,7 @@ class Fakturpenjualan extends MY_Controller {
                         ];
                     }
                     $header["diskon"] = round($grandDiskon);
-                    $header["diskon_ppn"] = round($grandDiskonPpn);
+                    $header["diskon_ppn"] = $grandDiskonPpn;
                     $header["grand_total"] = round($grandTotal);
 
                     $model->setTables("acc_faktur_penjualan_detail")->updateBatch($detail, "id");
@@ -732,7 +730,7 @@ class Fakturpenjualan extends MY_Controller {
                         "nama" => "PPN",
                         "reff_note" => "",
                         "partner" => $data->partner_nama,
-                        "kode_coa" => $getCoaDefaultDppDisc->value,
+                        "kode_coa" => $getCoaDefaultPpnDisc->value,
                         "posisi" => "C",
                         "nominal_curr" => $data->ppn,
                         "kurs" => $data->kurs_nominal,
@@ -748,10 +746,10 @@ class Fakturpenjualan extends MY_Controller {
                             "partner" => $data->partner_nama,
                             "kode_coa" => $value->no_acc,
                             "posisi" => "C",
-                            "nominal_curr" => $value->jumlah,
+                            "nominal_curr" => round($value->jumlah),
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => ($value->jumlah * $data->kurs_nominal),
+                            "nominal" => (round($value->jumlah) * $data->kurs_nominal),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -995,7 +993,7 @@ class Fakturpenjualan extends MY_Controller {
             }
 
             $check->final_total -= round($finalTotal);
-            $check->diskon_ppn -= round($ppnDiskon);
+            $check->diskon_ppn -= $ppnDiskon;
             $check->diskon -= round($diskon);
             $check->grand_total -= round($total);
             $check->ppn -= round($pajak);
@@ -1229,7 +1227,7 @@ class Fakturpenjualan extends MY_Controller {
             ];
             $model->setTables("acc_faktur_penjualan_detail")->save($item);
             $check->dpp_lain += round($dpp);
-            $check->diskon_ppn += round($ppn_diskon);
+            $check->diskon_ppn += $ppn_diskon;
             $check->ppn += round($pajak);
             $check->grand_total += round($jumlah);
             $check->final_total += round($totalHarga);
@@ -1396,8 +1394,7 @@ class Fakturpenjualan extends MY_Controller {
                 $line = str_pad("", 92);
                 $line .= str_pad(trim($value), 25);
                 $printer->text($line . "\n");
-            }
-//            
+            }            
 
             $detail = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->setOrder(["uraian" => "asc"])->getData();
             $printer->selectPrintMode();
@@ -1412,21 +1409,21 @@ class Fakturpenjualan extends MY_Controller {
                                 ->setSelects(["currency.*,ket"])->getDetail();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->text(str_pad("No", 3));
-                $printer->text(str_pad("Jenis Barang / Uraian", 31, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("No.PO", 24, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Jenis Barang / Uraian", 30, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("No.PO", 20, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Quantity", 26, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("Harga Satuan", 26, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("Jumlah", 26, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Harga Satuan", 24, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Jumlah", 33, " ", STR_PAD_BOTH));
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-                $printer->text(str_pad(" ", 58));
+                $printer->text(str_pad(" ", 53));
                 $printer->text(str_pad("Gul/PCS", 13, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Satuan", 13, " ", STR_PAD_BOTH));
+                $printer->text(str_pad($curr->nama, 10, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("IDR", 14, ".", STR_PAD_BOTH));
                 $printer->text(str_pad($curr->nama, 12, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("IDR", 14, " ", STR_PAD_BOTH));
-                $printer->text(str_pad($curr->nama, 12, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("IDR", 14, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("IDR", 21, " ", STR_PAD_BOTH));
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
@@ -1444,23 +1441,23 @@ class Fakturpenjualan extends MY_Controller {
                     $uomLot = $value->lot;
                     $uom = $value->uom;
                     $line = str_pad($key + 1, 3);
-                    $line .= str_pad($value->uraian, 31, " ", STR_PAD_RIGHT);
-                    $line .= str_pad($value->no_po, 24, " ", STR_PAD_RIGHT);
-                    $line .= str_pad("{$value->qty_lot} {$value->lot}", 16, " ", STR_PAD_BOTH);
-                    $line .= str_pad("{$value->qty} {$value->uom}", 16, " ", STR_PAD_BOTH);
-
+                    $line .= str_pad($value->uraian, 30, " ", STR_PAD_RIGHT);
+                    $line .= str_pad($value->no_po, 20, " ", STR_PAD_RIGHT);
+                    $line .= str_pad("{$value->qty_lot} {$value->lot}", 13, " ", STR_PAD_BOTH);
+                    $line .= str_pad("{$value->qty} {$value->uom}", 13, " ", STR_PAD_BOTH);
+//
                     $line .= str_pad(" {$curr->symbol}", 4);
-                    $line .= str_pad(number_format($value->harga, 2), 8, " ", STR_PAD_LEFT);
+                    $line .= str_pad(number_format($value->harga, 2), 6, " ", STR_PAD_LEFT);
                     $line .= str_pad(" Rp.", 4);
-                    $line .= str_pad(number_format(($value->harga * $head->kurs_nominal), 2), 10, " ", STR_PAD_LEFT);
-
+                    $line .= str_pad(number_format(($value->harga * $head->kurs_nominal), 2), 8, " ", STR_PAD_LEFT);
+//
                     $line .= str_pad(" {$curr->symbol}", 4);
                     $line .= str_pad(number_format($value->jumlah, 2), 8, " ", STR_PAD_LEFT);
                     $line .= str_pad(" Rp.", 4);
-                    $line .= str_pad(number_format(($value->jumlah * $head->kurs_nominal), 2), 10, " ", STR_PAD_LEFT);
+                    $line .= str_pad(number_format(($value->jumlah * $head->kurs_nominal), 2), 17, " ", STR_PAD_LEFT);
                     $printer->text($line . "\n");
                 }
-                $printer->text(str_pad("", 58));
+                $printer->text(str_pad("", 53));
                 $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 16));
                 $printer->text(str_pad("{$totalQty} {$uom}", 16));
                 $printer->feed();
@@ -1475,35 +1472,34 @@ class Fakturpenjualan extends MY_Controller {
                 $terbilang = Kwitansi($head->final_total);
                 $spltTbl = str_split($terbilang . " {$curr->ket}", 73);
 
-                $printer->text(str_pad("(*)Kurs : Rp. {$head->kurs_nominal}", 96, " "));
-                $printer->text(str_pad("Subtotal", 14, " ", STR_PAD_RIGHT));
+                $printer->text(str_pad("(*)Kurs : Rp. {$head->kurs_nominal}", 91, " "));
+                $printer->text(str_pad("Subtotal", 12, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad(number_format($subtotalValas, 2), 8, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(($subtotal), 2), 10, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format(($subtotal), 2), 15, " ", STR_PAD_LEFT));
                 $printer->feed();
-                $printer->text(str_pad("", 98));
-                $printer->text(str_pad("Discount", 14, " ", STR_PAD_RIGHT));
+                $printer->text(str_pad("", 91));
+                $printer->text(str_pad("Discount", 12, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad(number_format($diskonValas, 2), 8, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(($diskon * $head->kurs_nominal), 2), 10, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format(($diskon * $head->kurs_nominal), 2), 15, " ", STR_PAD_LEFT));
                 $printer->feed();
-                $printer->text(str_pad(" Terbilang : ", 13));
-                $printer->text(str_pad(($spltTbl[0] ?? " "), 83, " "));
-                $printer->text(str_pad("Ppn", 14, " ", STR_PAD_RIGHT));
+                $printer->text(str_pad(" Terbilang : ".($spltTbl[0] ?? " "), 91, " "));
+                $printer->text(str_pad("Ppn", 12, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad(number_format($ppnValas, 2), 8, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($ppn, 10, " ", STR_PAD_LEFT));
+                $printer->text(str_pad($ppn, 15, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
-                $printer->text(str_pad(($spltTbl[1] ?? " "), 83, " "));
-                $printer->text(str_pad("Total", 14, " ", STR_PAD_RIGHT));
+                $printer->text(str_pad(($spltTbl[1] ?? " "), 78, " "));
+                $printer->text(str_pad("Total", 12, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad($finalTotalValas, 8, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($finalTotal, 10, " ", STR_PAD_LEFT));
+                $printer->text(str_pad($finalTotal, 15, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->text(str_pad(" ", 137));
@@ -1590,24 +1586,24 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->feed();
             }
 
-            $buff->write("\x1bg" . chr(1));
-            $printer->text(str_pad(" ", 6));
-            $printer->text(str_pad("Penerima :", 20, " ", STR_PAD_BOTH));
-            $printer->text(str_pad(" ", 72));
-            $printer->text(str_pad("Hormat Kami :", 20, " ", STR_PAD_BOTH));
-            $printer->feed();
-            $printer->feed();
-            $printer->text(str_pad(" ", 26));
-            $printer->text(str_pad("Pengaduan/Klaim melebihi 7 hari dari tanggal pengiriman barang,", 72, " ", STR_PAD_BOTH));
-            $printer->feed();
-            $printer->text(str_pad(" ", 26));
-            $printer->text(str_pad("tidak akan kami layani", 82, " ", STR_PAD_BOTH));
-            $printer->feed();
-            $printer->feed();
-            $printer->text(str_pad(" ", 6));
-            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
-            $printer->text(str_pad(" ", 72));
-            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
+//            $buff->write("\x1bg" . chr(1));
+//            $printer->text(str_pad(" ", 6));
+//            $printer->text(str_pad("Penerima :", 20, " ", STR_PAD_BOTH));
+//            $printer->text(str_pad(" ", 72));
+//            $printer->text(str_pad("Hormat Kami :", 20, " ", STR_PAD_BOTH));
+//            $printer->feed();
+//            $printer->feed();
+//            $printer->text(str_pad(" ", 26));
+//            $printer->text(str_pad("Pengaduan/Klaim melebihi 7 hari dari tanggal pengiriman barang,", 72, " ", STR_PAD_BOTH));
+//            $printer->feed();
+//            $printer->text(str_pad(" ", 26));
+//            $printer->text(str_pad("tidak akan kami layani", 82, " ", STR_PAD_BOTH));
+//            $printer->feed();
+//            $printer->feed();
+//            $printer->text(str_pad(" ", 6));
+//            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
+//            $printer->text(str_pad(" ", 72));
+//            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
 
             $printer->feed();
             $datas = $connector->getData();
@@ -1616,7 +1612,7 @@ class Fakturpenjualan extends MY_Controller {
             $resp = $client->request("POST", $this->config->item('url_web_print_w_logo'), [
                 "form_params" => [
                     "data" => $datas,
-                    "logo" => "",
+                    "logo" => "",//logo300x50px.prn
                     "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
                 ]
             ]);
