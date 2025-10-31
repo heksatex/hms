@@ -169,7 +169,7 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label">No Faktur Pajak</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_faktur_pajak" id="no_faktur_pajak" class="form-control input-sm no_faktur_pajak edited-read" <?= $datas->no_faktur_pajak ?> readonly/>
+                                                    <input type="text" name="no_faktur_pajak" id="no_faktur_pajak" class="form-control input-sm no_faktur_pajak edited-read" value="<?= $datas->no_faktur_pajak ?>" readonly/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
