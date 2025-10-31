@@ -99,6 +99,7 @@
         <b>PT. HEKSATEX INDAH</b><br>
         <strong>UMUR UTANG (AGING)</strong>
         <div class="kop2">
+            <strong style="padding-top:20px;"><?php echo "Per Tgl. ".$periode; ?></strong><br>
         </div>
     </div>
     <table>

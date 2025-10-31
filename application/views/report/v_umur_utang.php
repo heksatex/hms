@@ -256,7 +256,7 @@
                         let tbody = $("<tbody />");
 
                         if (data.record.length === 0) {
-                            tbody.append("<tr><td colspan='" + data.header.length + "' class='text-right'>Tidak ada data</td></tr>");
+                            tbody.append("<tr><td colspan='" + data.header.length + "' class='text-left'>Tidak ada data</td></tr>");
                         }
 
                         let total_hutang = 0;
