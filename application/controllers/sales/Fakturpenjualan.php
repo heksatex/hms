@@ -878,12 +878,12 @@ class Fakturpenjualan extends MY_Controller {
                 throw new Exception('Data Tidak ditemukan', 500);
             }
             $hasilKurang = $getDetail->qty - $qty;
-            if ($hasilKurang < 1) {
-                throw new Exception('Hasil Split QTY Kurang dari 1', 500);
+            if ($hasilKurang <= 0) {
+                throw new Exception('Hasil Split QTY Kurang dari 0', 500);
             }
             $hasilKurangLot = $getDetail->qty_lot - $qtyLot;
-            if ($hasilKurangLot < 1) {
-                throw new Exception('Hasil Split QTY LOT Kurang dari 1', 500);
+            if ($hasilKurangLot <= 0) {
+                throw new Exception('Hasil Split QTY LOT Kurang dari 0', 500);
             }
 
             $jumlah = $hasilKurang * $getDetail->harga;
@@ -1586,24 +1586,24 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->feed();
             }
 
-//            $buff->write("\x1bg" . chr(1));
-//            $printer->text(str_pad(" ", 6));
-//            $printer->text(str_pad("Penerima :", 20, " ", STR_PAD_BOTH));
-//            $printer->text(str_pad(" ", 72));
-//            $printer->text(str_pad("Hormat Kami :", 20, " ", STR_PAD_BOTH));
-//            $printer->feed();
-//            $printer->feed();
-//            $printer->text(str_pad(" ", 26));
-//            $printer->text(str_pad("Pengaduan/Klaim melebihi 7 hari dari tanggal pengiriman barang,", 72, " ", STR_PAD_BOTH));
-//            $printer->feed();
-//            $printer->text(str_pad(" ", 26));
-//            $printer->text(str_pad("tidak akan kami layani", 82, " ", STR_PAD_BOTH));
-//            $printer->feed();
-//            $printer->feed();
-//            $printer->text(str_pad(" ", 6));
-//            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
-//            $printer->text(str_pad(" ", 72));
-//            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
+            $buff->write("\x1bg" . chr(1));
+            $printer->text(str_pad(" ", 6));
+            $printer->text(str_pad("Penerima :", 20, " ", STR_PAD_BOTH));
+            $printer->text(str_pad(" ", 72));
+            $printer->text(str_pad("Hormat Kami :", 20, " ", STR_PAD_BOTH));
+            $printer->feed();
+            $printer->feed();
+            $printer->text(str_pad(" ", 26));
+            $printer->text(str_pad("Pengaduan/Klaim melebihi 7 hari dari tanggal pengiriman barang,", 72, " ", STR_PAD_BOTH));
+            $printer->feed();
+            $printer->text(str_pad(" ", 26));
+            $printer->text(str_pad("tidak akan kami layani", 82, " ", STR_PAD_BOTH));
+            $printer->feed();
+            $printer->feed();
+            $printer->text(str_pad(" ", 6));
+            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
+            $printer->text(str_pad(" ", 72));
+            $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
 
             $printer->feed();
             $datas = $connector->getData();
@@ -1612,7 +1612,7 @@ class Fakturpenjualan extends MY_Controller {
             $resp = $client->request("POST", $this->config->item('url_web_print_w_logo'), [
                 "form_params" => [
                     "data" => $datas,
-                    "logo" => "",//logo300x50px.prn
+                    "logo" => "logo300x50px.prn",//logo300x50px.prn
                     "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
                 ]
             ]);
