@@ -377,7 +377,7 @@ class Fakturpenjualan extends MY_Controller {
                 ];
             }
             $model->setTables("acc_faktur_penjualan_detail")->saveBatch($detail);
-            $model->setTables("delivery_order do")->setWheres(["no_sj" => $nosj])->update(["faktur" => 1]);
+//            $model->setTables("delivery_order do")->setWheres(["no_sj" => $nosj])->update(["faktur" => 1]);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
@@ -1410,7 +1410,7 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->text(str_pad("No", 3));
                 $printer->text(str_pad("Jenis Barang / Uraian", 30, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("No.PO", 20, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("", 20, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Quantity", 26, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Harga Satuan", 24, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Jumlah", 33, " ", STR_PAD_BOTH));
