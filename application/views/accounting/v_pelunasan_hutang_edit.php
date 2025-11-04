@@ -288,7 +288,7 @@
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
                                                         <div class="col-md-2">
-                                                            <label>Info</label>
+                                                            <label>Summary</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1387,8 +1387,11 @@
                         type: "POST",
                         url: "<?php echo base_url(); ?>accounting/pelunasanhutang/get_list_koreksi_select2",
                         data: function(params) {
+                            // ambil currency dari atribut data-currency di elemen select
+                            let currency = $(this).data('currency') || '';
                             return {
-                                name: params.term // keyword pencarian
+                                name: params.term, // keyword pencarian
+                                tipe_currency: currency // filter tambahan
                             };
                         },
                         processResults: function(data) {
@@ -1493,7 +1496,8 @@
                     name: 'koreksi',
                     style: 'width:100% !important;',
                     'data-id': value.id,
-                    'data-default': koreksiId
+                    'data-default': koreksiId,
+                    'data-currency': value.tipe_currency
                 });
 
                 if (koreksiId && koreksiNama) {

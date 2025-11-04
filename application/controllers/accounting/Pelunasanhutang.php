@@ -236,6 +236,13 @@ class Pelunasanhutang extends MY_Controller
         echo json_encode($callback);
     }
 
+    public function get_supplier_by_id()
+    {
+        $id = $this->input->post('id');
+        $data = $this->m_pelunasanhutang->get_partner_by_id($id);
+        echo json_encode($data);
+    }
+
     public function simpan()
     {
         try {
@@ -1738,8 +1745,9 @@ class Pelunasanhutang extends MY_Controller
     function get_list_koreksi_select2()
     {
         $nama  = addslashes($this->input->post('name'));
+        $tipe_currency  = addslashes($this->input->post('tipe_currency'));
         // $callback = $this->get_list_koreksi($nama);
-        $callback = $this->m_pelunasanhutang->get_list_koreksi($nama);
+        $callback = $this->m_pelunasanhutang->get_list_koreksi($tipe_currency,$nama);
         echo json_encode($callback);
     }
 

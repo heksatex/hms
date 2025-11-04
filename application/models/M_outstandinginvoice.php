@@ -44,7 +44,7 @@ class M_outstandinginvoice extends CI_Model
         if(count($where) > 0 ) {
             $this->db->where($where);
         }
-        $this->db->select("p.nama AS nama_partner,SUM(inv.hutang_rp) AS total_hutang,
+        $this->db->select("inv.id_supplier, p.nama AS nama_partner,SUM(inv.hutang_rp) AS total_hutang,
                         SUM(
                             CASE 
                                 WHEN DATE_FORMAT(inv.order_date, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')

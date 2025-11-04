@@ -1048,11 +1048,17 @@ class M_pelunasanhutang extends CI_Model
         }
     }
 
-    function get_list_koreksi($where = null)
+    function get_list_koreksi($tipe_currency = null, $where = null)
     {
         $this->db->order_by('nama_koreksi', 'asc');
         if(($where)){
             $this->db->like('nama_koreksi', $where);
+        }
+        if($tipe_currency == 'Rp') { // Rp, VALAS
+            $this->db->WHERE('show_idr', 'true'); // I
+        }
+        if($tipe_currency == 'Valas') { // Rp, VALAS
+            $this->db->WHERE('show_valas', 'true'); // I
         }
         $query = $this->db->get('acc_pelunasan_koreksi');
         return $query->result();
