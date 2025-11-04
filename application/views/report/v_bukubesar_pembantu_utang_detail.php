@@ -32,7 +32,8 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 300px; /* Sesuaikan dengan kebutuhan */
+            max-width: 300px;
+            /* Sesuaikan dengan kebutuhan */
         }
 
         .resizable .resizer:hover {
@@ -52,6 +53,7 @@
             user-select: none;
             height: 100%;
         }
+
         table th,
         table td {
             white-space: nowrap;
@@ -59,7 +61,20 @@
             text-overflow: ellipsis;
         }
 
-        
+        .currency-radio-wrapper {
+            display: table;
+            height: 100%;
+        }
+
+        .currency-radio-wrapper .form-inline {
+            display: table-cell;
+            vertical-align: middle;
+            padding-top: 0;
+        }
+
+        .currency-radio-wrapper .form-inline .radio-inline {
+            padding-top: 0px;
+        }
     </style>
 </head>
 
@@ -88,7 +103,7 @@
                 <!--  box content -->
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title"><b>Buku Besar Detail</b></h3>
+                        <h3 class="box-title"><b>Buku Besar Pembantu Utang Detail</b></h3>
                     </div>
                     <div class="box-body">
 
@@ -97,10 +112,26 @@
                                 <div class="form-group">
                                     <div class="col-md-12">
                                         <div class="col-md-2">
-                                            <label>COA</label>
+                                            <label>Supplier</label>
                                         </div>
                                         <div class="col-md-4">
-                                            <select class="form-control input-sm" name="coa" id="coa"></select>
+                                            <select class="form-control input-sm" name="partner" id="partner"></select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>Currency</label>
+                                        </div>
+                                        <div class="col-md-4 currency-radio-wrapper">
+                                            <div class="form-inline">
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="currency" value="all" checked> All
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="currency" value="valas"> Valas
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="currency" value="rp"> Rp
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -164,9 +195,9 @@
                                                     <tr>
                                                         <th class="style bb no">No. </th>
                                                         <th class='style bb' style="min-width: 80px; width:80px;">Tanggal</th>
-                                                        <th class='style bb' style="min-width: 105px; width:105px;">Kode Entries</th>
-                                                        <th class='style bb' style="min-width: 100px; max-width: 220px; width:100px;">Origin</th>
-                                                        <th class='style bb' style="min-width: 200px">Keterangan</th>
+                                                        <th class='style bb' style="min-width: 105px; width:105px;">No Bukti</th>
+                                                        <!-- <th class='style bb' style="min-width: 100px; max-width: 220px; width:100px;">Uraian</th> -->
+                                                        <th class='style bb' style="min-width: 200px">Uraian</th>
                                                         <th class='style bb' style="min-width: 150px; width:100px;">Debit</th>
                                                         <th class='style bb' style="min-width: 150px; width:100px;">Credit</th>
                                                         <th class='style bb' style="min-width: 150px; width:100px;">Saldo</th>
@@ -174,7 +205,7 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="8">Tidak ada Data</td>
+                                                        <td colspan="7">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -203,10 +234,6 @@
 
     <?php $this->load->view("admin/_partials/js.php"); ?>
 
-    <div id="load_modal">
-        <!-- Load Partial Modal -->
-        <?php $this->load->view("admin/_partials/modal.php") ?>
-    </div>
 
     <script type="text/javascript">
         // set date tgldari
@@ -233,27 +260,25 @@
             //startDate: StartDate,
         });
 
-        //select 2 COA
-        $('#coa').select2({
+        //select 2 supplier
+        $('#partner').select2({
             allowClear: true,
-            placeholder: "Select COA",
-            width: '100%',
+            placeholder: "Select Supplier",
             ajax: {
                 dataType: 'JSON',
                 type: "POST",
-                url: "<?php echo base_url(); ?>report/bukubesardetail/get_list_coa",
-                //delay : 250,
+                url: "<?php echo base_url(); ?>accounting/pelunasanhutang/get_list_supplier",
                 data: function(params) {
                     return {
-                        nama: params.term,
+                        name: params.term,
                     };
                 },
                 processResults: function(data) {
                     var results = [];
                     $.each(data, function(index, item) {
                         results.push({
-                            id: item.kode_coa,
-                            text: item.kode_coa +' - '+ item.nama
+                            id: item.id,
+                            text: item.nama
                         });
                     });
                     return {
@@ -280,10 +305,13 @@
 
             var tgldari_2 = $('#tgldari').data("DateTimePicker").date();
             var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+            var selectedCurrency = $('input[name="currency"]:checked').val();
+
 
             if (tgldari == '' || tglsampai == '') {
                 alert_modal_warning('Periode Tanggal Harus diisi !');
-
+            } else if (selectedCurrency == '' || selectedCurrency === 'undefined') {
+                alert_modal_warning('Currency Harus dipilih !');
             } else if (tglsampai_2 < tgldari_2) {
                 alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
             } else {
@@ -306,22 +334,29 @@
             var tgldari = $('#tgldari').val();
             var tglsampai = $('#tglsampai').val();
             var check_hidden = $("#hidden_check").is(':checked');
-            var coa    = $('#coa').val();
+            var partner = $('#partner').val();
+            var selectedCurrency = $('input[name="currency"]:checked').val();
+
+            let slowProcessWarning = setTimeout(function() {
+                please_wait(function(){});
+            }, 5000); // 5 detik
 
             $("#example1_processing").css('display', ''); // show loading
             this_btn.button('loading');
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('report/bukubesardetail/loadData') ?>",
+                url: "<?php echo site_url('report/bukubesarpembantuutangdetail/loadData') ?>",
                 data: {
                     tgldari: tgldari,
                     tglsampai: tglsampai,
                     checkhidden: check_hidden,
-                    coa:coa
+                    partner: partner,
+                    currency: selectedCurrency
                 },
                 success: function(data) {
-
+                    clearTimeout(slowProcessWarning);
+                    unblockUI(function () { });
                     if (data.status == 'failed') {
                         unblockUI(function() {
                             setTimeout(function() {
@@ -343,7 +378,8 @@
                             tgldari: tgldari,
                             tglsampai: tglsampai,
                             checkhidden: check_hidden,
-                            coa:coa
+                            partner: partner,
+                            currency: selectedCurrency
                         });
 
                         $.each(data.record, function(key, value) {
@@ -351,16 +387,13 @@
                             empty = false;
                             var tr = $("<tr>").append(
                                 // $("<td>").text(''),
-                                $("<td colspan=2 class='text-center'>").html('<b>No. ACC: </b> ' + value.kode_acc),
-                                $("<td class='text-left' colspan=2>").html('<b>Nama ACC : </b>' + value.nama_acc),
-                                // $("<td class='text-left'>").text(value.nama_acc),
-                                $("<td align=''>").html('<b>Saldo Normal : </b> '+ value.saldo_normal),
-                                $("<td colspan='2'>").text(''),
+                                $("<td class='text-left' colspan='4'>").html('<b>Supplier : </b>' + value.nama_partner),
+                                $("<td colspan='3'>").text(''),
                             );
                             tbody.append(tr);
 
                             var tr2 = $("<tr>").append(
-                                $("<td colspan=4>").text(no),
+                                $("<td colspan=3>").text(no),
                                 $("<td>").html('SALDO AWAL'),
                                 $("<td align='right'>").text(0.00),
                                 $("<td align='right'>").text(0.00),
@@ -369,7 +402,7 @@
 
                             tbody.append(tr2);
                             no = 2
-                            acc  = '';
+                            acc = '';
                             debit = 0;
                             credit = 0;
                             s_akhir = value.saldo_awal;
@@ -377,9 +410,8 @@
                                 var tr3 = $("<tr>").append(
                                     $("<td>").html(no++),
                                     $("<td align=''>").text(value2.tanggal),
-                                    $("<td align=''>").text(value2.kode_entries),
-                                    $("<td align=''>").text(value2.origin),
-                                    $("<td class='ket-acc'>").text(value2.keterangan),
+                                    $("<td align=''>").text(value2.no_bukti),
+                                    $("<td class='ket-acc'>").text(value2.uraian),
                                     $("<td align='right'>").text(formatNumber(value2.debit.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value2.credit.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value2.saldo_akhir.toFixed(2))),
@@ -393,30 +425,19 @@
                             no = 1;
 
                             var tr4 = $("<tr>").append(
-                                        $("<td colspan='4' class='style_space'>").text(''),
-                                        $("<td class='style_space text-right'>").html('<b>Total : ' +value.kode_acc+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(debit.toFixed(2))+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(credit.toFixed(2))+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(s_akhir.toFixed(2))+ '</b>'),
-                                        );
+                                $("<td colspan='3' class='style_space'>").text(''),
+                                $("<td class='style_space text-right'>").html('<b>Total : ' + value.nama_partner + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(s_akhir.toFixed(2)) + '</b>'),
+                            );
                             tbody.append(tr4);
                         });
 
                         if (empty == true) {
                             var tr = $("<tr>").append($("<td colspan='8'>").text('Tidak ada Data'));
                             tbody.append(tr);
-                        } else {
-                            // tbody.append("<tr><td colspan='8'>&nbsp</td></tr>");
-                            // tr2 = $("<tr>").append(
-                            //     $("<td colspan='5'>").text(''),
-                            //     // $("<td align='right'>").text(formatNumber(s_awal.toFixed(2))),
-                            //     $("<td align='right'>").text(''),
-                            //     $("<td align='right'>").text(formatNumber(debit.toFixed(2))),
-                            //     $("<td align='right'>").text(formatNumber(credit.toFixed(2))),
-                            // );
-                            // tbody.append(tr2);
                         }
-
                         $("#example1").append(tbody); // append parents
 
                         this_btn.button('reset');
@@ -426,6 +447,8 @@
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
+                    clearTimeout(slowProcessWarning);
+                    unblockUI(function () { });
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }
@@ -433,6 +456,61 @@
 
         }
 
+
+        // ambil parameter dari URL
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        $(document).ready(function() {
+            const partner = getUrlParameter('partner'); // <— ganti dari id_partner ke partner
+            const params = getUrlParameter('params');
+
+            if (partner && params) {
+                // decode JSON filter yang dikirim
+                const filter = JSON.parse(params);
+
+                // ambil parameter filter
+                const tgldari = filter[0].tgldari;
+                const tglsampai = filter[0].tglsampai;
+                const checkhidden = filter[0].checkhidden;
+                const currency = filter[0].currency;
+
+                // 🔹 Set nilai ke form
+                $('#tgldari').val(tgldari);
+                $('#tglsampai').val(tglsampai);
+
+                // set radio currency
+                if (currency) {
+                    $('input[name="currency"][value="' + currency + '"]').prop('checked', true);
+                }
+
+                // set checkbox
+                $('#hidden_check').prop('checked', checkhidden === true || checkhidden === 'true');
+
+                // ambil data supplier
+                $.ajax({
+                    url: "<?php echo base_url(); ?>accounting/pelunasanhutang/get_supplier_by_id",
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        id: partner
+                    },
+                    success: function(partnerData) {
+                        if (partnerData) {
+                            var option = new Option(partnerData.nama, partnerData.id, true, true);
+                            $('#partner').append(option).trigger('change');
+
+                            // setelah supplier terisi, panggil proses detail
+                            process_bukubesar($('#btn-generate'));
+                        }
+                    }
+                });
+            }
+        });
 
         // klik btn excel
         $('#btn-excel').click(function() {
@@ -443,7 +521,7 @@
 
                 $.ajax({
                     "type": 'POST',
-                    "url": "<?php echo site_url('report/bukubesardetail/export_excel') ?>",
+                    "url": "<?php echo site_url('report/bukubesarpembantuutangdetail/export_excel') ?>",
                     "data": {
                         arr_filter: arr_filter
                     },
@@ -478,7 +556,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/bukubesardetail/export_pdf';
+                var url = '<?php echo base_url() ?>report/bukubesarpembantuutangdetail/export_pdf';
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 

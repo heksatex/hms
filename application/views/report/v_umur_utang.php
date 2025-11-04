@@ -256,7 +256,7 @@
                         let tbody = $("<tbody />");
 
                         if (data.record.length === 0) {
-                            tbody.append("<tr><td colspan='" + data.header.length + "' class='text-right'>Tidak ada data</td></tr>");
+                            tbody.append("<tr><td colspan='" + data.header.length + "' class='text-left'>Tidak ada data</td></tr>");
                         }
 
                         let total_hutang = 0;
@@ -269,7 +269,7 @@
 
                             var tr = $("<tr>").append(
                                 $("<td>").text(key + 1),
-                                $("<td align=''>").text(value.nama_partner),
+                                $("<td align=''>").html(`<a href="<?php echo site_url('report/outstandinginvoice?id_partner=') ?>${value.id_partner}" target="_blank">${value.nama_partner}</a>`),
                                 $("<td align='right'>").text(formatNumber(value.total_hutang.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.hutang_bulan_ini.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.hutang_bulan_1.toFixed(2))),

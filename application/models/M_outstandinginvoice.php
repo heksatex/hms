@@ -28,7 +28,7 @@ class M_outstandinginvoice extends CI_Model
             $this->db->where($where);
         }
 
-        $this->db->select("inv.no_invoice, p.nama as nama_partner, inv.no_po,  c.currency, inv.nilai_matauang , inv.order_date, DATEDIFF(CURDATE(), inv.order_date) AS hari, inv.origin, inv.status, IFNULL(inv.total,0) as hutang_rp, IFNULL(inv.hutang_rp,0) as sisa_hutang_rp, IFNULL(inv.total_valas,0) as hutang_valas, IFNULL(inv.hutang_valas,0) as sisa_hutang_valas");
+        $this->db->select("inv.no_invoice, p.nama as nama_partner, inv.no_po,  c.currency, inv.nilai_matauang , inv.order_date, DATEDIFF(CURDATE(), inv.order_date) AS hari, inv.origin, inv.status, IFNULL(inv.total_rp,0) as hutang_rp, IFNULL(inv.hutang_rp,0) as sisa_hutang_rp, IFNULL(inv.total_valas,0) as hutang_valas, IFNULL(inv.hutang_valas,0) as sisa_hutang_valas");
         $this->db->from('invoice inv');
         $this->db->join('partner p', "inv.id_supplier = p.id", "inner");
         $this->db->join("currency_kurs c","inv.matauang = c.id","left");
@@ -44,7 +44,7 @@ class M_outstandinginvoice extends CI_Model
         if(count($where) > 0 ) {
             $this->db->where($where);
         }
-        $this->db->select("p.nama AS nama_partner,SUM(inv.hutang_rp) AS total_hutang,
+        $this->db->select("inv.id_supplier, p.nama AS nama_partner,SUM(inv.hutang_rp) AS total_hutang,
                         SUM(
                             CASE 
                                 WHEN DATE_FORMAT(inv.order_date, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')

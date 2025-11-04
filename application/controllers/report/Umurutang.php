@@ -75,6 +75,7 @@ class Umurutang extends MY_Controller
         foreach ($data as $datas) {
 
             $tmp_data_items[] = array(
+                'id_partner'        => $datas->id_supplier,
                 'nama_partner'      => $datas->nama_partner,
                 'total_hutang'      => (float) $datas->total_hutang,
                 'hutang_bulan_ini'  => (float) $datas->hutang_bulan_ini,

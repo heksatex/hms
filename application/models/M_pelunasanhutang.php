@@ -358,14 +358,14 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    var $column_order2 = array(null, null, 'no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total', 'total_valas', 'hutang_rp', 'hutang_valas');
-    var $column_search2 = array('no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total', 'total_valas', 'hutang_rp', 'hutang_valas');
+    var $column_order2 = array(null, null, 'no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
+    var $column_search2 = array('no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
     var $order2         = array('no_invoice' => 'desc');
 
     function query2()
     {
         $this->db->where('status', 'done');
-        $this->db->select("a.id,a.no_invoice, a.created_at, a.order_date, a.tanggal_invoice_supp, a.no_invoice_supp, a.origin, a.status, a.matauang, c.currency, a.nilai_matauang, IFNULL(total, 0) as total_hutang_rp, IFNULL(total_valas,0) as total_hutang_valas, IFNULL(hutang_rp,0) as sisa_hutang_rp, IFNULL(hutang_valas,0) as sisa_hutang_valas");
+        $this->db->select("a.id,a.no_invoice, a.created_at, a.order_date, a.tanggal_invoice_supp, a.no_invoice_supp, a.origin, a.status, a.matauang, c.currency, a.nilai_matauang, IFNULL(total_rp, 0) as total_hutang_rp, IFNULL(total_valas,0) as total_hutang_valas, IFNULL(hutang_rp,0) as sisa_hutang_rp, IFNULL(hutang_valas,0) as sisa_hutang_valas");
         $this->db->from("invoice a");
         $this->db->join("currency_kurs c ", "a.matauang = c.id", "left");
     }
@@ -824,7 +824,7 @@ class M_pelunasanhutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("invr.id, invr.no_inv_retur as no_bukti, invr.created_at as tanggal, curr.currency, invr.matauang as currency_id, invr.nilai_matauang as kurs, IF(curr.currency='IDR', invr.total, IFNULL(invr.nilai_matauang*invr.total,0)) as total_rp, IF(curr.currency!='IDR', invr.total, 0) as total_valas, 'retur' as tipe2");
+        $this->db->select("invr.id, invr.no_inv_retur as no_bukti, invr.created_at as tanggal, curr.currency, invr.matauang as currency_id, invr.nilai_matauang as kurs, invr.total_rp, invr.total_valas, 'retur' as tipe2");
         $this->db->from("invoice_retur invr ");
         $this->db->join("currency_kurs curr ", "invr.matauang = curr.id", "left");
         return $query4_sql = $this->db->get_compiled_select();
@@ -1048,11 +1048,17 @@ class M_pelunasanhutang extends CI_Model
         }
     }
 
-    function get_list_koreksi($where = null)
+    function get_list_koreksi($tipe_currency = null, $where = null)
     {
         $this->db->order_by('nama_koreksi', 'asc');
         if(($where)){
             $this->db->like('nama_koreksi', $where);
+        }
+        if($tipe_currency == 'Rp') { // Rp, VALAS
+            $this->db->WHERE('show_idr', 'true'); // I
+        }
+        if($tipe_currency == 'Valas') { // Rp, VALAS
+            $this->db->WHERE('show_valas', 'true'); // I
         }
         $query = $this->db->get('acc_pelunasan_koreksi');
         return $query->result();
@@ -1202,7 +1208,7 @@ class M_pelunasanhutang extends CI_Model
             if ($this->db->affected_rows() === 0) {
                 throw new Exception("Gagal update: tidak ada data yang diperbarui.");
             }
-            
+
             return "";
         } catch (Exception $ex) {
             return $ex->getMessage();

@@ -210,6 +210,34 @@
             }
         });
 
+        // ambil parameter dari URL
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        $(document).ready(function() {
+            const id_partner = getUrlParameter('id_partner');
+            if (id_partner) {
+                // set select2 value otomatis
+                $.ajax({
+                    url: "<?php echo base_url(); ?>accounting/pelunasanhutang/get_supplier_by_id",
+                    type: "POST",
+                    dataType: "JSON",
+                    data: { id: id_partner },
+                    success: function(partner) {
+                        if (partner) {
+                            var option = new Option(partner.nama, partner.id, true, true);
+                            $('#partner').append(option).trigger('change');
+                            proses_outstanding($('#btn-generate'));
+                        }
+                    }
+                });
+            }
+        });
+
 
         // btn generate
         $("#btn-generate").on('click', function() {
@@ -336,7 +364,9 @@
             $.ajax({
                 "type": 'POST',
                 "url": "<?php echo site_url('report/outstandinginvoice/export_excel') ?>",
-                "data": {partner: partner},
+                "data": {
+                    partner: partner
+                },
                 "dataType": 'json',
                 beforeSend: function() {
                     $('#btn-excel').button('loading');
@@ -359,13 +389,15 @@
                 $('#btn-excel').button('reset');
             });
         });
-        
+
         var arr_filter = [];
         // klik btn print  pdf
         $(document).on('click', "#btn-pdf", function(e) {
 
             var partner = $('#partner').val();
-            arr_filter.push({partner: partner});
+            arr_filter.push({
+                partner: partner
+            });
             var arrStr = encodeURIComponent(JSON.stringify(arr_filter));
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');

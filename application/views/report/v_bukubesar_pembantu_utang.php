@@ -20,46 +20,12 @@
             padding: 0px 5px 0px 5px !important;
         }
 
-        .style_space {
-            white-space: nowrap !important;
-            /* font-weight: 700; */
-            background: #F0F0F0;
-            border-top: 2px solid #ddd !important;
-            border-bottom: 2px solid #ddd !important;
-        }
-
-        .ket-acc {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 300px; /* Sesuaikan dengan kebutuhan */
-        }
-
-        .resizable .resizer:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .resizable {
-            position: relative;
-        }
-
-        .resizable .resizer {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 5px;
-            cursor: col-resize;
-            user-select: none;
-            height: 100%;
-        }
-        table th,
-        table td {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        
+        /*
+    .btn-setTgl {
+      height: 22px;
+      min-width: 40px;
+    }
+    */
     </style>
 </head>
 
@@ -88,22 +54,12 @@
                 <!--  box content -->
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title"><b>Buku Besar Detail</b></h3>
+                        <h3 class="box-title"><b>Buku Besar Pembantu Utang</b></h3>
                     </div>
                     <div class="box-body">
 
                         <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode">
                             <div class="col-md-8">
-                                <div class="form-group">
-                                    <div class="col-md-12">
-                                        <div class="col-md-2">
-                                            <label>COA</label>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <select class="form-control input-sm" name="coa" id="coa"></select>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="form-group">
                                     <div class="col-md-12">
                                         <div class="col-md-2">
@@ -146,14 +102,13 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
-                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
-                                    <!-- <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button> -->
+                                    <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                                    <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button>
                                 </div>
                             </div>
 
                         </form>
 
-                        <!-- table -->
                         <div class="box-body">
                             <div class="col-sm-12 table-responsive">
                                 <div class="table_scroll">
@@ -163,18 +118,19 @@
                                                 <thead>
                                                     <tr>
                                                         <th class="style bb no">No. </th>
-                                                        <th class='style bb' style="min-width: 80px; width:80px;">Tanggal</th>
-                                                        <th class='style bb' style="min-width: 105px; width:105px;">Kode Entries</th>
-                                                        <th class='style bb' style="min-width: 100px; max-width: 220px; width:100px;">Origin</th>
-                                                        <th class='style bb' style="min-width: 200px">Keterangan</th>
-                                                        <th class='style bb' style="min-width: 150px; width:100px;">Debit</th>
-                                                        <th class='style bb' style="min-width: 150px; width:100px;">Credit</th>
-                                                        <th class='style bb' style="min-width: 150px; width:100px;">Saldo</th>
+                                                        <th class='style bb' style="min-width: 200px">Supplier</th>
+                                                        <th class='style bb' style="min-width: 150px">Saldo Awal</th>
+                                                        <th class='style bb' style="min-width: 150px">Utang</th>
+                                                        <th class='style bb' style="min-width: 150px">Pelunasan</th>
+                                                        <th class='style bb' style="min-width: 150px">Retur</th>
+                                                        <th class='style bb' style="min-width: 150px">Uang Muka</th>
+                                                        <th class='style bb' style="min-width: 100px">Koreksi</th>
+                                                        <th class='style bb' style="min-width: 150px">Saldo Akhir</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="8">Tidak ada Data</td>
+                                                        <td colspan="9">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -189,7 +145,6 @@
                             </div>
                         </div>
 
-
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -203,11 +158,6 @@
 
     <?php $this->load->view("admin/_partials/js.php"); ?>
 
-    <div id="load_modal">
-        <!-- Load Partial Modal -->
-        <?php $this->load->view("admin/_partials/modal.php") ?>
-    </div>
-
     <script type="text/javascript">
         // set date tgldari
         $('#tgldari').datetimepicker({
@@ -217,7 +167,7 @@
             defaultDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // ⬅️ tanggal 1 bulan ini
             format: 'D-MMMM-YYYY',
             ignoreReadonly: true,
-            // maxDate: new Date()
+            maxDate: new Date()
         });
 
         // set date tglsampai
@@ -227,44 +177,10 @@
             }),
             format: 'D-MMMM-YYYY',
             ignoreReadonly: true,
-            // maxDate: new Date(),
+            maxDate: new Date(),
             //minDate : 
             //maxDate: new Date(),
             //startDate: StartDate,
-        });
-
-        //select 2 COA
-        $('#coa').select2({
-            allowClear: true,
-            placeholder: "Select COA",
-            width: '100%',
-            ajax: {
-                dataType: 'JSON',
-                type: "POST",
-                url: "<?php echo base_url(); ?>report/bukubesardetail/get_list_coa",
-                //delay : 250,
-                data: function(params) {
-                    return {
-                        nama: params.term,
-                    };
-                },
-                processResults: function(data) {
-                    var results = [];
-                    $.each(data, function(index, item) {
-                        results.push({
-                            id: item.kode_coa,
-                            text: item.kode_coa +' - '+ item.nama
-                        });
-                    });
-                    return {
-                        results: results
-                    };
-                },
-                error: function(xhr, ajaxOptions, thrownError) {
-                    //alert('Error data');
-                    //alert(xhr.responseText);
-                }
-            }
         });
 
 
@@ -294,7 +210,6 @@
         });
 
 
-
         function formatNumber(n) {
             return new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
@@ -306,19 +221,17 @@
             var tgldari = $('#tgldari').val();
             var tglsampai = $('#tglsampai').val();
             var check_hidden = $("#hidden_check").is(':checked');
-            var coa    = $('#coa').val();
 
             $("#example1_processing").css('display', ''); // show loading
             this_btn.button('loading');
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('report/bukubesardetail/loadData') ?>",
+                url: "<?php echo site_url('report/bukubesarpembantuutang/loadData') ?>",
                 data: {
                     tgldari: tgldari,
                     tglsampai: tglsampai,
-                    checkhidden: check_hidden,
-                    coa:coa
+                    checkhidden: check_hidden
                 },
                 success: function(data) {
 
@@ -333,9 +246,12 @@
                         $("#example1 tbody").remove();
                         let no = 1;
                         let empty = true;
-                        let debit = 0;
-                        let credit = 0;
                         let s_awal = 0;
+                        let utang = 0;
+                        let pelunasan = 0;
+                        let retur = 0;
+                        let uang_muka = 0;
+                        let koreksi = 0;
                         let s_akhir = 0;
                         let tbody = $("<tbody />");
 
@@ -343,78 +259,53 @@
                             tgldari: tgldari,
                             tglsampai: tglsampai,
                             checkhidden: check_hidden,
-                            coa:coa
+                            currency:'all'
                         });
 
                         $.each(data.record, function(key, value) {
 
                             empty = false;
+
+                            func2 = "view_detail2('" + value.id_partner + "')";
                             var tr = $("<tr>").append(
-                                // $("<td>").text(''),
-                                $("<td colspan=2 class='text-center'>").html('<b>No. ACC: </b> ' + value.kode_acc),
-                                $("<td class='text-left' colspan=2>").html('<b>Nama ACC : </b>' + value.nama_acc),
-                                // $("<td class='text-left'>").text(value.nama_acc),
-                                $("<td align=''>").html('<b>Saldo Normal : </b> '+ value.saldo_normal),
-                                $("<td colspan='2'>").text(''),
-                            );
-                            tbody.append(tr);
-
-                            var tr2 = $("<tr>").append(
-                                $("<td colspan=4>").text(no),
-                                $("<td>").html('SALDO AWAL'),
-                                $("<td align='right'>").text(0.00),
-                                $("<td align='right'>").text(0.00),
+                                $("<td class='no'>").html(no),
+                                $("<td>").html("<a href='javascript:void(0)' onclick=\"" + func2 + "\">" + value.nama_partner + "</a>"),
                                 $("<td align='right'>").text(formatNumber(value.saldo_awal.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.utang.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.pelunasan.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.retur.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.uang_muka.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.koreksi.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.saldo_akhir.toFixed(2))),
                             );
 
-                            tbody.append(tr2);
-                            no = 2
-                            acc  = '';
-                            debit = 0;
-                            credit = 0;
-                            s_akhir = value.saldo_awal;
-                            $.each(value.tmp_data_isi, function(key, value2) {
-                                var tr3 = $("<tr>").append(
-                                    $("<td>").html(no++),
-                                    $("<td align=''>").text(value2.tanggal),
-                                    $("<td align=''>").text(value2.kode_entries),
-                                    $("<td align=''>").text(value2.origin),
-                                    $("<td class='ket-acc'>").text(value2.keterangan),
-                                    $("<td align='right'>").text(formatNumber(value2.debit.toFixed(2))),
-                                    $("<td align='right'>").text(formatNumber(value2.credit.toFixed(2))),
-                                    $("<td align='right'>").text(formatNumber(value2.saldo_akhir.toFixed(2))),
-                                );
-                                tbody.append(tr3);
-                                debit = debit + value2.debit;
-                                credit = credit + value2.credit;
-                                s_akhir = value2.saldo_akhir;
-                            });
-
-                            no = 1;
-
-                            var tr4 = $("<tr>").append(
-                                        $("<td colspan='4' class='style_space'>").text(''),
-                                        $("<td class='style_space text-right'>").html('<b>Total : ' +value.kode_acc+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(debit.toFixed(2))+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(credit.toFixed(2))+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(s_akhir.toFixed(2))+ '</b>'),
-                                        );
-                            tbody.append(tr4);
+                            tbody.append(tr);
+                            no++;
+                            s_awal = s_awal + value.saldo_awal;
+                            utang  = utang + value.utang;
+                            pelunasan   = pelunasan + value.pelunasan;
+                            retur       = retur + value.retur;
+                            uang_muka   = uang_muka + value.uang_muka;
+                            koreksi   = koreksi + value.koreksi;
+                            s_akhir = s_akhir + value.saldo_akhir;
                         });
 
                         if (empty == true) {
-                            var tr = $("<tr>").append($("<td colspan='8'>").text('Tidak ada Data'));
+                            var tr = $("<tr>").append($("<td colspan='9'>").text('Tidak ada Data'));
                             tbody.append(tr);
                         } else {
-                            // tbody.append("<tr><td colspan='8'>&nbsp</td></tr>");
-                            // tr2 = $("<tr>").append(
-                            //     $("<td colspan='5'>").text(''),
-                            //     // $("<td align='right'>").text(formatNumber(s_awal.toFixed(2))),
-                            //     $("<td align='right'>").text(''),
-                            //     $("<td align='right'>").text(formatNumber(debit.toFixed(2))),
-                            //     $("<td align='right'>").text(formatNumber(credit.toFixed(2))),
-                            // );
-                            // tbody.append(tr2);
+                            tbody.append("<tr><td colspan='9'>&nbsp</td></tr>");
+                            tr2 = $("<tr>").append(
+                                $("<td align='right' colspan='2'>").html('<b>Total :<b>'),
+                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(s_awal.toFixed(2))),
+                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(utang.toFixed(2))),
+                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(pelunasan.toFixed(2))),
+                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(retur.toFixed(2))),
+                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(uang_muka.toFixed(2))),
+                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(koreksi.toFixed(2))),
+                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(s_akhir.toFixed(2))),
+                            );
+                            tbody.append(tr2);
                         }
 
                         $("#example1").append(tbody); // append parents
@@ -434,6 +325,18 @@
         }
 
 
+        function view_detail2(partner) {
+            var arrStr = encodeURIComponent(JSON.stringify(arr_filter));
+
+            if (arr_filter.length == 0) {
+                alert_modal_warning('Generate Data terlebih dahulu !');
+            } else {
+                var url = '<?php echo base_url() ?>report/bukubesarpembantuutangdetail';
+                window.open(url + '?partner='+ partner +'&&params=' + arrStr, '_blank');
+            }
+        }
+
+
         // klik btn excel
         $('#btn-excel').click(function() {
 
@@ -443,7 +346,7 @@
 
                 $.ajax({
                     "type": 'POST',
-                    "url": "<?php echo site_url('report/bukubesardetail/export_excel') ?>",
+                    "url": "<?php echo site_url('report/bukubesarpembantuutang/export_excel') ?>",
                     "data": {
                         arr_filter: arr_filter
                     },
@@ -478,7 +381,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/bukubesardetail/export_pdf';
+                var url = '<?php echo base_url() ?>report/bukubesarpembantuutang/export_pdf';
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 

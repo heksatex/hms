@@ -195,7 +195,7 @@
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
                                                         <div class="col-md-2">
-                                                            <label>Info</label>
+                                                            <label>Summary</label>
                                                         </div>
                                                     </div>
                                                 </div>
