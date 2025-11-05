@@ -1208,9 +1208,9 @@ class Pelunasanhutang extends MY_Controller
 
                         array_push($tmp_update, $data_update);
 
-                        $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan, 'id <>' => $id]);
+                        $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan]);
 
-                        if ((float) $pelunasan_rp > (float) $get_hutang_inv->total_hutang_rp) {
+                        if ((float) round($pelunasan_rp,2) >= (float) round($get_hutang_inv->total_hutang_rp,2)) {
                             throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Sisa Hutang (Rp) ', 200);
                         }
 
@@ -1218,6 +1218,7 @@ class Pelunasanhutang extends MY_Controller
                             throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Sisa Hutang (Valas) ', 200);
                         }
 
+                        $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan, 'id <>' => $id]);
 
                         $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no($no_pelunasan);
 

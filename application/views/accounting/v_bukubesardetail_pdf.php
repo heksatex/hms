@@ -159,7 +159,7 @@
                         <td><?php echo $num; ?></td>
                         <td style=""><?php echo $datas2['tanggal']; ?></td>
                         <td style=""><?php echo $datas2['kode_entries']; ?></td>
-                        <td style=""> 
+                        <td> 
                             <?php
                             $origin = $datas2['origin'];
                             echo strlen($origin) > 24 ? substr($origin, 0, 24) . '...' : $origin;

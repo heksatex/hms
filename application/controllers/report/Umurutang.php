@@ -39,8 +39,7 @@ class Umurutang extends MY_Controller
 
     function proses_data($partner)
     {
-
-        // Ambil bulan berjalan
+        // Nama-nama bulan
         $bulanNames = [
             "Januari",
             "Februari",
@@ -55,16 +54,35 @@ class Umurutang extends MY_Controller
             "November",
             "Desember"
         ];
-        $bulanSekarang = date('n') - 1; // 0-based index
 
-        // Buat array nama bulan mundur 4 bulan ke belakang
+        $bulanSekarang = date('n'); // 1-12
+        $tahunSekarang = date('Y');
+
+        // Buat array nama bulan + tahun mundur 4 bulan ke belakang
         $bulanLabels = [];
         for ($i = 0; $i < 4; $i++) {
-            $bulanIndex = ($bulanSekarang - $i + 12) % 12;
-            $bulanLabels[] = $bulanNames[$bulanIndex];
-        }
-        $bulanLabels[] = "Lebih dari " . $bulanNames[($bulanSekarang - 3 + 12) % 12];
+            $bulanIndex = $bulanSekarang - $i;
+            $tahun = $tahunSekarang;
 
+            // Kalau mundur ke tahun sebelumnya
+            if ($bulanIndex <= 0) {
+                $bulanIndex += 12;
+                $tahun -= 1;
+            }
+
+            $bulanLabels[] = $bulanNames[$bulanIndex - 1] . " " . $tahun;
+        }
+
+        // Label terakhir untuk “lebih dari 3 bulan”
+        $bulanIndexLebih3 = $bulanSekarang - 3;
+        $tahunLebih3 = $tahunSekarang;
+        if ($bulanIndexLebih3 <= 0) {
+            $bulanIndexLebih3 += 12;
+            $tahunLebih3 -= 1;
+        }
+        $bulanLabels[] = "> " . $bulanNames[$bulanIndexLebih3 - 1] . " " . $tahunLebih3;
+
+        // Ambil data supplier
         $where_partner = ['inv.id_supplier' => $partner];
         $where_params = ["inv.status" => "done", "inv.lunas " => 0];
         $result = (!empty($partner)) ? array_merge($where_partner, $where_params) : $where_params;
@@ -73,7 +91,6 @@ class Umurutang extends MY_Controller
         $data = $this->m_outstandinginvoice->get_list_aging_utang_supplier($result);
 
         foreach ($data as $datas) {
-
             $tmp_data_items[] = array(
                 'id_partner'        => $datas->id_supplier,
                 'nama_partner'      => $datas->nama_partner,
@@ -88,7 +105,6 @@ class Umurutang extends MY_Controller
 
         return array($bulanLabels, $tmp_data_items);
     }
-
 
     function export_excel()
     {
@@ -280,13 +296,14 @@ class Umurutang extends MY_Controller
     }
 
 
-    public function export_pdf() {
-     
+    public function export_pdf()
+    {
+
         $this->load->library('dompdflib');
-        $data_arr  = json_decode($this->input->get('params'),true);  
+        $data_arr  = json_decode($this->input->get('params'), true);
         $tgl_now   = date("Y-m-d");
         $partner   = '';
-        foreach($data_arr as $rows){
+        foreach ($data_arr as $rows) {
             $partner = $rows['partner'];
         }
 

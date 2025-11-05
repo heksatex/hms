@@ -167,7 +167,7 @@
             defaultDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // ⬅️ tanggal 1 bulan ini
             format: 'D-MMMM-YYYY',
             ignoreReadonly: true,
-            maxDate: new Date()
+            // maxDate: new Date()
         });
 
         // set date tglsampai
@@ -177,7 +177,7 @@
             }),
             format: 'D-MMMM-YYYY',
             ignoreReadonly: true,
-            maxDate: new Date(),
+            // maxDate: new Date(),
             //minDate : 
             //maxDate: new Date(),
             //startDate: StartDate,
@@ -222,6 +222,10 @@
             var tglsampai = $('#tglsampai').val();
             var check_hidden = $("#hidden_check").is(':checked');
 
+            let slowProcessWarning = setTimeout(function() {
+                please_wait(function(){});
+            }, 5000); // 5 detik
+
             $("#example1_processing").css('display', ''); // show loading
             this_btn.button('loading');
             $.ajax({
@@ -234,6 +238,8 @@
                     checkhidden: check_hidden
                 },
                 success: function(data) {
+                    clearTimeout(slowProcessWarning);
+                    unblockUI(function () { });
 
                     if (data.status == 'failed') {
                         unblockUI(function() {
@@ -259,7 +265,7 @@
                             tgldari: tgldari,
                             tglsampai: tglsampai,
                             checkhidden: check_hidden,
-                            currency:'all'
+                            currency:'rp'
                         });
 
                         $.each(data.record, function(key, value) {
@@ -317,6 +323,8 @@
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
+                    clearTimeout(slowProcessWarning);
+                    unblockUI(function () { });
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }

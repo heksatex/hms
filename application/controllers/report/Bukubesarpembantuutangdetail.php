@@ -77,11 +77,15 @@ class Bukubesarpembantuutangdetail extends MY_Controller
 
                 $tmp_data_akun_isi[] = array(
                     'tanggal'   => date("Y-m-d",strtotime($datas2->tgl)),
+                    'id_bukti'  => $datas2->id_bukti,
                     'no_bukti'  => $datas2->no_bukti,
                     'uraian' => $datas2->uraian,
                     'debit' => $debit,
                     'credit' => $credit,
-                    'saldo_akhir' => ($saldo_akhir)
+                    'saldo_akhir' => ($saldo_akhir),
+                    'id_bukti_ecr' =>encrypt_url($datas2->id_bukti),
+                    'no_bukti_ecr' =>encrypt_url($datas2->no_bukti),
+                    'link'  => $datas2->link
                 );
                 $saldo_awal = $saldo_akhir;
             }
@@ -190,8 +194,9 @@ class Bukubesarpembantuutangdetail extends MY_Controller
             $num      = 1;
             $total_credit  = 0;
             $total_debit   = 0;
+            $nama_partner  = '';
             foreach($data as $datas){
-
+                $nama_partner = $datas['nama_partner'];
                 // nama acc
                 $activeSheet->SetCellValue('A'.$rowCount, ' Supplier :  ' . $datas['nama_partner']);
                 $activeSheet->mergeCells('A'.$rowCount.':G'.$rowCount);
@@ -264,8 +269,8 @@ class Bukubesarpembantuutangdetail extends MY_Controller
     
             $xlsData = ob_get_contents();
             ob_end_clean();
-
-            $name_file ='Buku Besar Pembantu Utang Detail Periode '.$periode.'.xlsx';
+            $nama_partner = ($partner != '' || $partner != null)? $nama_partner : '';
+            $name_file ='Buku Besar Pembantu Utang Detail  '.$nama_partner.' Periode '.$periode.'.xlsx';
     
             $response =  array(
                 'op'        => 'ok',

@@ -360,7 +360,7 @@ class M_pelunasanhutang extends CI_Model
 
     var $column_order2 = array(null, null, 'no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
     var $column_search2 = array('no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
-    var $order2         = array('no_invoice' => 'desc');
+    var $order2         = array('created_at' => 'asc');
 
     function query2()
     {

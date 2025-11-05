@@ -172,7 +172,7 @@
             defaultDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // ⬅️ tanggal 1 bulan ini
             format: 'D-MMMM-YYYY',
             ignoreReadonly: true,
-            maxDate: new Date()
+            // maxDate: new Date()
         });
 
         // set date tglsampai
@@ -182,7 +182,7 @@
             }),
             format: 'D-MMMM-YYYY',
             ignoreReadonly: true,
-            maxDate: new Date(),
+            // maxDate: new Date(),
             //minDate : 
             //maxDate: new Date(),
             //startDate: StartDate,
