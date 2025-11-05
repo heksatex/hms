@@ -30,6 +30,7 @@
                                         <th class="no">No</th>
                                         <th>No Bukti</th>
                                         <th>Supplier</th>
+                                        <th>CoA</th>
                                         <th>Tanggal</th>
                                         <th>Curr</th>
                                         <th>Kurs</th>
@@ -71,7 +72,7 @@
                         "orderable": false
                     },
                     {
-                        'targets': [5, 6, 7],
+                        'targets': [6, 7, 8],
                         "className": "text-right"
                     }
                 ]

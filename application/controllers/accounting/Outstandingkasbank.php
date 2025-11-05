@@ -36,6 +36,7 @@ class Outstandingkasbank extends MY_Controller
                     $row[] = $no;
                     $row[] = $field->no_bukti;
                     $row[] = $field->partner_nama;
+                    $row[] = $field->coa;
                     $row[] = date('Y-m-d', strtotime($field->tanggal));
                     $row[] = $field->currency;
                     $row[] = $field->kurs;
