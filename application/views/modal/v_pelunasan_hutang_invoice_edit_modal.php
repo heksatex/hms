@@ -29,19 +29,19 @@
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Kurs</label></div>
                     <div class="col-12 col-md-12 col-lg-8">
-                        <input type="text" class="form-control input-sm text-right" name="kurs" id="kurs" value="<?php echo number_format($get_data->kurs, 4); ?>" readonly />
+                        <input type="text" class="form-control input-sm text-right" name="kurs" id="kurs" value="<?php echo number_format($get_data->kurs, 2); ?>" readonly />
                     </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Sisa Hutang (Rp)</label></div>
                     <div class="col-12 col-md-12 col-lg-8">
-                        <input type="text" class="form-control input-sm text-right" name="sisa_hutang_rp" id="sisa_hutang_rp" value="<?php echo number_format($get_data->sisa_hutang_rp, 4); ?>" readonly />
+                        <input type="text" class="form-control input-sm text-right" name="sisa_hutang_rp" id="sisa_hutang_rp" value="<?php echo number_format($get_data->sisa_hutang_rp, 2); ?>" readonly />
                     </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Sisa Hutang (Valas)</label></div>
                     <div class="col-12 col-md-12 col-lg-8">
-                        <input type="text" class="form-control input-sm text-right" name="sisa_hutang_valas" id="sisa_hutang_valas" value="<?php echo number_format($get_data->sisa_hutang_valas, 4); ?>" readonly />
+                        <input type="text" class="form-control input-sm text-right" name="sisa_hutang_valas" id="sisa_hutang_valas" value="<?php echo number_format($get_data->sisa_hutang_valas, 2); ?>" readonly />
                     </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -53,13 +53,13 @@
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Pelunasan (Rp) </label></div>
                     <div class="col-12 col-md-12 col-lg-8">
-                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_rp" id="pelunasan_rp" data-decimal="2" value="<?php echo $get_data->pelunasan_rp; ?>" />
+                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_rp" id="pelunasan_rp" data-decimal="2" value="<?php echo $get_data->pelunasan_rp; ?>" readonly />
                     </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Pelunasan (Valas) </label></div>
                     <div class="col-12 col-md-12 col-lg-8">
-                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_valas" id="pelunasan_valas" data-decimal="2" value="<?php echo $get_data->pelunasan_valas; ?>" />
+                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_valas" id="pelunasan_valas" data-decimal="2" value="<?php echo $get_data->pelunasan_valas; ?>" readonly/>
                     </div>
                 </div>
                 <div class="col-md-12 col-xs-12">

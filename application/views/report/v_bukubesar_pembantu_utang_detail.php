@@ -122,14 +122,14 @@
                                         </div>
                                         <div class="col-md-4 currency-radio-wrapper">
                                             <div class="form-inline">
-                                                <label class="radio-inline">
+                                                <!-- <label class="radio-inline">
                                                     <input type="radio" name="currency" value="all" checked> All
-                                                </label>
+                                                </label> -->
                                                 <label class="radio-inline">
                                                     <input type="radio" name="currency" value="valas"> Valas
                                                 </label>
                                                 <label class="radio-inline">
-                                                    <input type="radio" name="currency" value="rp"> Rp
+                                                    <input type="radio" name="currency" value="rp" checked> Rp
                                                 </label>
                                             </div>
                                         </div>
@@ -407,10 +407,27 @@
                             credit = 0;
                             s_akhir = value.saldo_awal;
                             $.each(value.tmp_data_isi, function(key, value2) {
+
+
+                                let linkUrl = '#';
+                                if (value2.link === 'plh') {
+                                    linkUrl = "<?php echo site_url('accounting/pelunasanhutang/edit/') ?>" + value2.no_bukti_ecr;
+                                } else if (value2.link === 'inv') {
+                                    linkUrl = "<?php echo site_url('purchase/invoice/edit/') ?>" + value2.id_bukti_ecr;
+                                } else {
+                                    linkUrl = "<?php echo site_url('purchase/debitnote/edit/') ?>" + value2.no_bukti_ecr;
+                                }
+
+                                // Buat kolom No Bukti dengan link (buka tab baru)
+                                let noBuktiHtml = value2.no_bukti;
+                                if (value2.link === 'plh' || value2.link === 'invr' || value2.link === 'inv') {
+                                    noBuktiHtml = `<a href="${linkUrl}" target="_blank">${value2.no_bukti}</a>`;
+                                }
+
                                 var tr3 = $("<tr>").append(
                                     $("<td>").html(no++),
                                     $("<td align=''>").text(value2.tanggal),
-                                    $("<td align=''>").text(value2.no_bukti),
+                                    $("<td align=''>").html(noBuktiHtml),
                                     $("<td class='ket-acc'>").text(value2.uraian),
                                     $("<td align='right'>").text(formatNumber(value2.debit.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value2.credit.toFixed(2))),

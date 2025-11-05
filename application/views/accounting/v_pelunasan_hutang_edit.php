@@ -327,7 +327,9 @@
                                                     <div class="col-md-12 col-xs-12">
                                                         <div class="col-xs-4"><label>No Jurnal</label></div>
                                                         <div class="col-xs-8">
-                                                            <?php echo ": " . $list_jurnal->kode; ?>
+                                                            <?php  $link = site_url('accounting/jurnalentries/edit/'.encrypt_url($list_jurnal->kode)) ?>
+
+                                                            <?php echo ($list_jurnal->kode)? ': <a href="'.$link.'" target="_blank">'.$list_jurnal->kode.'</a>' : ''; ?>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-xs-12">
@@ -1472,6 +1474,7 @@
                     if (selectedVal === defaultVal) {
                         $coaInfo.show();
                         let summaryId = $(this).data('id');
+
                         loadCoaInfo(selectedVal, summaryId, $coaInfo.find('small'));
                     } else {
                         $coaInfo.hide();
@@ -1540,7 +1543,9 @@
                             </button>
                         `);
                         $coaInfo.show();
-                        loadCoaInfo(selectedId, value.id, $coaInfo.find('small'));
+                        if(value.tipe_currency == 'Rp'){
+                            loadCoaInfo(selectedId, value.id, $coaInfo.find('small'));
+                        }
                     } else if (hasCoa == 'false') {
                         $tdButton.html(`                           
                             <button type="button" class="btn btn-xs btn-danger btn-hapus-koreksi"
@@ -1562,7 +1567,9 @@
 
                 if (status == 'done') {
                     $coaInfo.show();
-                    loadCoaInfo(koreksiId, value.id, $coaInfo.find('small'));
+                    if(value.tipe_currency == 'Rp'){
+                        loadCoaInfo(koreksiId, value.id, $coaInfo.find('small'));
+                    }
                 }
 
                 // event onchange
