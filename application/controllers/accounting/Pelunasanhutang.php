@@ -2589,7 +2589,7 @@ class Pelunasanhutang extends MY_Controller
             }
 
             if ($tmp_update) { // update bank
-                $this->m_pelunasanhutang->update_kas_bank_kode($tmp_update, 'acc_bank_keluar_detail');
+                $result = $this->m_pelunasanhutang->update_kas_bank_kode($tmp_update, 'acc_bank_keluar_detail');
                 if ($result !== "") {
                     throw new \Exception('Gagal Update Bank Keluar, Tidak ada data yang diperbaharui  !', 200);
                 }
