@@ -145,7 +145,8 @@ class M_bukubesarpembantuutang extends CI_Model
 
         $this->db->SELECT("id as id_bukti, no_invoice as no_bukti,created_at as tgl, id_supplier as id_partner,
         CONCAT(
-            'Pembelian ',
+            'Pembelian: ',
+            IF(origin = '', '', CONCAT('RCV: ',origin, ' - ')),
             IF(no_invoice_supp = '', '', CONCAT('No: ', no_invoice_supp, ' - ')),
             IF(no_sj_supp = '', '', CONCAT('SJ: ', no_sj_supp)),
             IF('$currency' = 'valas', 
@@ -180,7 +181,7 @@ class M_bukubesarpembantuutang extends CI_Model
             
             IF('$currency' = 'valas', 
                 GROUP_CONCAT(' - ',aphm.no_bukti,' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), '  Kurs: ', aphm.kurs,' '), 
-                ''
+                GROUP_CONCAT(' - ',,aphm.no_bukti)
             )) as uraian, IFNULL(SUM($total),0) as total_pelunasan,   IFNULL(SUM($total),0) as debit , 0 as credit, aph.status, 'plh' as link ");
         $this->db->FROM('acc_pelunasan_hutang aph');
         $this->db->jOIN("acc_pelunasan_hutang_metode aphm","aph.id = aphm.pelunasan_hutang_id", "INNER");
@@ -199,8 +200,8 @@ class M_bukubesarpembantuutang extends CI_Model
         }
         $total  = ($currency === 'valas')? 'total_valas' : 'total_rp';
 
-        $this->db->SELECT("id as id_bukti, no_inv_retur as no_bukti, created_at as tgl,  id_supplier as id_partner, CONCAT('Retur ',IF(no_invoice_supp ='', '', CONCAT('No: ',no_invoice_supp,' - ')),'',IF(no_sj_supp = '', '', CONCAT('SJ: ', no_sj_supp) ) )  as uraian, IFNULL(sum($total),0) as total_retur, IFNULL(sum($total),0) as debit , 0 as credit, status, 'invr' as link");
-        $this->db->FROM('invoice_retur');
+        $this->db->SELECT("id as id_bukti, no_inv_retur as no_bukti, created_at as tgl,  id_supplier as id_partner, CONCAT('Retur: ',IF(no_invoice_supp ='', '', CONCAT('No: ',no_invoice_supp,' - ')),'',IF(no_sj_supp = '', '', CONCAT('SJ: ', no_sj_supp) ), ' - ',' Pelunasan : ', (SELECT no_pelunasan FROM acc_pelunasan_hutang_metode WHERE id_bukti = invr.id AND no_bukti = invr.no_inv_retur))  as uraian, IFNULL(sum($total),0) as total_retur, IFNULL(sum($total),0) as debit , 0 as credit, status, 'invr' as link");
+        $this->db->FROM('invoice_retur invr');
         return $this->db->get_compiled_select();
 
     }
@@ -219,7 +220,14 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->where('aphs.keterangan', 'Uang Muka');
         $this->db->where('aph.status', 'done');
         // $this->db->where('aphs.tipe_currency', 'Rp');
-        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner,  CONCAT('Uang Muka : ', (SELECT GROUP_CONCAT(no_invoice) as group_invoice FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id)) as uraian,  IFNULL(SUM($total),0) as total_uang_muka, IFNULL(SUM($total),0)  as debit, 0  as credit,  aph.status, 'plh' as link");
+        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner,  
+                        CONCAT('Uang Muka : ', (SELECT GROUP_CONCAT(no_invoice) as group_invoice FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id), ' ',  
+                        IF('$currency' = 'valas', 
+                                GROUP_CONCAT(' - ',(SELECT GROUP_CONCAT(no_bukti) as group_no FROM acc_pelunasan_hutang_metode WHERE pelunasan_hutang_id = aph.id),' Curr: ', (SELECT currency FROM currency_kurs WHERE id = aphs.currency_id), '  Kurs: ', aphs.kurs,' '), 
+                                GROUP_CONCAT(' - ',(SELECT GROUP_CONCAT(no_bukti) as group_no FROM acc_pelunasan_hutang_metode WHERE pelunasan_hutang_id = aph.id))
+                        )) as uraian, 
+
+                        IFNULL(SUM($total),0) as total_uang_muka, IFNULL(SUM($total),0)  as debit, 0  as credit,  aph.status, 'plh' as link");
         $this->db->FROM('acc_pelunasan_hutang aph');
         $this->db->jOIN("acc_pelunasan_hutang_summary aphs","aph.id = aphs.pelunasan_hutang_id", "INNER");
         return $this->db->get_compiled_select();
@@ -234,7 +242,7 @@ class M_bukubesarpembantuutang extends CI_Model
             $this->db->group_by($group);
         }
 
-        $total  = ($currency === 'valas')? 'aphs.selisih' : 'aphs.total_pelunasan * aphs.kurs';
+        $total  = ($currency === 'valas')? 'aphs.selisih' : 'aphs.selisih';
 
         $this->db->where('aphs.keterangan <>', 'Uang Muka');
         $this->db->where('aph.status', 'done');
