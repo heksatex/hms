@@ -196,12 +196,11 @@
         callback();
     }
 
-    //untuk  loading saat proses klik button
     function please_wait(callback) {
-        //$('#block-page').block({ 
+        var notifTimeout;
+
         $.blockUI({
-            message: '<h4><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br> Please wait...</h4>',
-            //theme: false,
+            message: '<h4><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?>"/><br> Please wait...</h4>',
             baseZ: 2000,
             css: {
                 border: 'none',
@@ -214,7 +213,21 @@
                 clear: "both",
             },
         });
-        callback();
+
+        // kalau proses lebih dari 5 detik, ubah pesan loading
+        notifTimeout = setTimeout(function() {
+            $(".blockUI h4").html('<img src="<?php echo base_url('dist/img/ajax-loader.gif') ?>"/><br> Proses masih berjalan,<br> mohon tunggu sebentar lagi...');
+        }, 5000);
+
+        notifTimeout = setTimeout(function() {
+            $(".blockUI h4").html('<img src="<?php echo base_url('dist/img/ajax-loader.gif') ?>"/><br> Proses masih berjalan,<br> luangkan waktu sebentar untuk mengambil kopi...');
+        }, 40000);
+
+        // jalankan proses utama
+        callback(function done() {
+            clearTimeout(notifTimeout);
+            $.unblockUI();
+        });
     }
 
     //unblock UI 
