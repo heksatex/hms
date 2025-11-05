@@ -237,19 +237,19 @@ function Kwitansi($x) {
     if ($x < 12) {
         return " " . $bilangan[$x];
     } elseif ($x < 20) {
-        return Kwitansi($x - 10) . " belas";
+        return Kwitansi($x - 10) . " Belas";
     } elseif ($x < 100) {
-        return Kwitansi($x / 10) . " puluh" . Kwitansi($x % 10);
+        return Kwitansi($x / 10) . " Puluh" . Kwitansi($x % 10);
     } elseif ($x < 200) {
-        return " seratus" . Kwitansi($x - 100);
+        return " Seratus" . Kwitansi($x - 100);
     } elseif ($x < 1000) {
-        return Kwitansi($x / 100) . " ratus" . Kwitansi($x % 100);
+        return Kwitansi($x / 100) . " Ratus" . Kwitansi($x % 100);
     } elseif ($x < 2000) {
-        return " seribu" . Kwitansi($x - 1000);
+        return " Seribu" . Kwitansi($x - 1000);
     } elseif ($x < 1000000) {
-        return Kwitansi($x / 1000) . " ribu" . Kwitansi($x % 1000);
+        return Kwitansi($x / 1000) . " Ribu" . Kwitansi($x % 1000);
     } elseif ($x < 1000000000) {
-        return Kwitansi($x / 1000000) . " juta" . Kwitansi($x % 1000000);
+        return Kwitansi($x / 1000000) . " Juta" . Kwitansi($x % 1000000);
     }
 }
 

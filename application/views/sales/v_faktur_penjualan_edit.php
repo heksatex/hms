@@ -210,7 +210,7 @@
 
                                                     </caption>
                                                     <thead>
-                                                    <th class="style" style="width: 15px">No.</th>
+                                                    <th class="style" style="width: 15px">No. <input type="checkbox" class="btn-rmv-item join-item-check" style="display: none;" data-toggle="tooltip" data-original-title="Check All"></th>
                                                     <th class="style" style="width: 150px">Uraian</th>
                                                     <th class="style" style="width: 100px">Warna</th>
                                                     <th class="style" style="width: 100px">No PO</th>
@@ -299,7 +299,7 @@
                                                             <tr>
                                                                 <td colspan="8"></td>
                                                                 <td class="text-right"><strong>Subtotal</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subTotal, 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($subTotal*$datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="7"></td>
@@ -316,17 +316,17 @@
                                                                     </select>
                                                                 </td>
                                                                 <td class="text-right"><strong>Diskon</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->diskon, 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->diskon * $datas->kurs_nominal ), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="8"></td>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($subTotal - $datas->diskon), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($subTotal - $datas->diskon) * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="8"></td>
                                                                 <td class="text-right"><strong>DPP Nilai Lain</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($datas->grand_total - $datas->diskon) * 11 / 12), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round((($datas->grand_total - $datas->diskon) * 11 / 12) * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="7"></td>
@@ -347,7 +347,7 @@
 
                                                                 </td>
                                                                 <td class="text-right"><strong>Ppn</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn - $datas->diskon_ppn), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($datas->ppn - $datas->diskon_ppn)* $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Note</td>
@@ -370,7 +370,7 @@
                                                                     </select
                                                                 </td>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(($datas->final_total), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->final_total* $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <?php
                                                         }
@@ -928,6 +928,10 @@ if ($datas->status == 'confirm') {
                 }
             });
         });
+        
+         $(".join-item-check").click(function () {
+            $('.join-item').not(this).prop('checked', this.checked);
+ });
 
     });
     var counterSplit = 0;
