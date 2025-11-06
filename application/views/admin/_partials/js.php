@@ -196,8 +196,13 @@
         callback();
     }
 
+    // simpan timeout global biar bisa dibersihkan
+    var pleaseWaitTimeouts = [];
+
     function please_wait(callback) {
-        var notifTimeout;
+        // Hapus semua timeout lama
+        pleaseWaitTimeouts.forEach(clearTimeout);
+        pleaseWaitTimeouts = [];
 
         $.blockUI({
             message: '<h4><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?>"/><br> Please wait...</h4>',
@@ -214,21 +219,24 @@
             },
         });
 
-        // kalau proses lebih dari 5 detik, ubah pesan loading
-        notifTimeout = setTimeout(function() {
+        // ubah pesan setelah 5 detik
+        pleaseWaitTimeouts.push(setTimeout(function() {
             $(".blockUI h4").html('<img src="<?php echo base_url('dist/img/ajax-loader.gif') ?>"/><br> Proses masih berjalan,<br> mohon tunggu sebentar lagi...');
-        }, 5000);
+        }, 5000));
 
-        notifTimeout = setTimeout(function() {
-            $(".blockUI h4").html('<img src="<?php echo base_url('dist/img/ajax-loader.gif') ?>"/><br> Proses masih berjalan,<br> luangkan waktu sebentar untuk mengambil kopi...');
-        }, 40000);
+        // ubah pesan lagi setelah 40 detik
+        pleaseWaitTimeouts.push(setTimeout(function() {
+            $(".blockUI h4").html('<img src="<?php echo base_url('dist/img/ajax-loader.gif') ?>"/><br> Proses masih berjalan,<br> mungkin waktu yang pas untuk membuat kopi ☕');
+        }, 40000));
 
-        // jalankan proses utama
+        // jalankan callback, dan sediakan fungsi done()
         callback(function done() {
-            clearTimeout(notifTimeout);
+            pleaseWaitTimeouts.forEach(clearTimeout);
+            pleaseWaitTimeouts = [];
             $.unblockUI();
         });
     }
+
 
     //unblock UI 
     function unblockUI(callback, timeout = 1000) {
