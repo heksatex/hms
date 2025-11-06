@@ -28,7 +28,7 @@ class M_bukubesarpembantuutang extends CI_Model
         // saldo berdasakran periode berjalan
         $subquery_invoice      = $this->get_saldo_utang(['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done'], 'id_supplier','');
         $subquery_pelunasan    = $this->get_saldo_pelunasan(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai], 'aph.partner_id','');
-        $subquery_retur        = $this->get_saldo_retur(['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done'],'id_supplier', 'id_supplier','');
+        $subquery_retur        = $this->get_saldo_retur(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai], 'aph.partner_id','');
         $subquery_um           = $this->get_saldo_um(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'], 'aph.partner_id','');
         $subquery_korksi       = $this->get_saldo_koreksi(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'], 'aph.partner_id','');
 
@@ -106,12 +106,12 @@ class M_bukubesarpembantuutang extends CI_Model
             }
             $subquery  = $this->get_saldo_pelunasan($tmp_where, 'aph.partner_id',$currency);
         } else if($tipe == 'retur'){
-            $tmp_where = ['created_at >= '=> $tgl_dari, 'created_at <= '=> $tgl_sampai, 'status'=>'done'];
+            $tmp_where = ['aph.tanggal_transaksi >= '=> $tgl_dari, 'aph.tanggal_transaksi  <= '=> $tgl_sampai];
             if($currency === 'valas'){
                 $cr_condition = ($currency === 'valas')? '<>' : '';
-                $tmp_where = array_merge($tmp_where, [ 'matauang ' . $cr_condition => 1]);
+                $tmp_where = array_merge($tmp_where, [ 'aphm.currency_id ' .$cr_condition => 1]);
             }
-            $subquery  = $this->get_saldo_retur($tmp_where, 'id_supplier',$currency);
+            $subquery  = $this->get_saldo_retur($tmp_where, 'aph.partner_id',$currency);
         } else if($tipe == 'um'){
             $tmp_where = ['aph.tanggal_transaksi >= '=> $tgl_dari, 'aph.tanggal_transaksi <= '=> $tgl_sampai, 'status'=>'done','aphs.tipe_currency' => 'Rp'];
             if($currency === 'valas'){
@@ -198,10 +198,18 @@ class M_bukubesarpembantuutang extends CI_Model
         if($group){
             $this->db->group_by($group);
         }
-        $total  = ($currency === 'valas')? 'total_valas' : 'total_rp';
+        $total  = ($currency === 'valas')? 'aphm.total_valas' : 'aphm.total_rp';
 
-        $this->db->SELECT("id as id_bukti, no_inv_retur as no_bukti, created_at as tgl,  id_supplier as id_partner, CONCAT('Retur: ',IF(no_invoice_supp ='', '', CONCAT('No: ',no_invoice_supp,' - ')),'',IF(no_sj_supp = '', '', CONCAT('SJ: ', no_sj_supp) ), ' - ',' Pelunasan : ', (SELECT no_pelunasan FROM acc_pelunasan_hutang_metode WHERE id_bukti = invr.id AND no_bukti = invr.no_inv_retur))  as uraian, IFNULL(sum($total),0) as total_retur, IFNULL(sum($total),0) as debit , 0 as credit, status, 'invr' as link");
-        $this->db->FROM('invoice_retur invr');
+        $this->db->where('aph.status', 'done');
+        $this->db->where('aphm.tipe','retur');
+        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner, CONCAT('Retur: ', (SELECT GROUP_CONCAT(no_invoice) as group_invoice FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id), 
+            
+            IF('$currency' = 'valas', 
+                GROUP_CONCAT(' - ',aphm.no_bukti,' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), '  Kurs: ', aphm.kurs,' '), 
+                GROUP_CONCAT(' - ',,aphm.no_bukti)
+            )) as uraian, IFNULL(SUM($total),0) as total_retur,   IFNULL(SUM($total),0) as debit , 0 as credit, aph.status, 'plh' as link ");
+        $this->db->FROM('acc_pelunasan_hutang aph');
+        $this->db->jOIN("acc_pelunasan_hutang_metode aphm","aph.id = aphm.pelunasan_hutang_id", "INNER");
         return $this->db->get_compiled_select();
 
     }
@@ -283,7 +291,7 @@ class M_bukubesarpembantuutang extends CI_Model
         if($currency === 'all' || $currency == 'rp'){
             $where_utang = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done'];
             $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
-            $where_retur = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done'];
+            $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
             $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency' => 'Rp'];
             $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'];
         } else {
@@ -291,7 +299,7 @@ class M_bukubesarpembantuutang extends CI_Model
             
            $where_utang = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done', 'matauang ' . $cr_condition => 1 ];
            $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
-           $where_retur = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done', 'matauang ' . $cr_condition => 1 ];
+           $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
            $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency ' .$cr_condition => 'Rp'];
            $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency ' .$cr_condition => 'Rp'];
         }
@@ -299,7 +307,7 @@ class M_bukubesarpembantuutang extends CI_Model
         // saldo berdasakran periode berjalan
         $subquery_invoice      = $this->get_saldo_utang($where_utang, 'id_supplier',$currency);
         $subquery_pelunasan    = $this->get_saldo_pelunasan($where_pelunasan, 'aph.partner_id',$currency);
-        $subquery_retur        = $this->get_saldo_retur($where_retur, 'id_supplier',$currency);
+        $subquery_retur        = $this->get_saldo_retur($where_retur, 'aph.partner_id',$currency);
         $subquery_um           = $this->get_saldo_um($where_um, 'aph.partner_id',$currency);
         $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'aph.partner_id',$currency);
 
@@ -362,7 +370,7 @@ class M_bukubesarpembantuutang extends CI_Model
         if($currency === 'all' || $currency === 'rp'){
             $where_utang = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done'];
             $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
-            $where_retur = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done'];
+            $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
             $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency' => 'Rp'];
             $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'];
         } else {
@@ -370,14 +378,14 @@ class M_bukubesarpembantuutang extends CI_Model
             
            $where_utang = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done', 'matauang ' . $cr_condition => 1 ];
            $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
-           $where_retur = ['created_at >= '=> $tgldari, 'created_at <= '=> $tglsampai, 'status'=>'done', 'matauang ' . $cr_condition => 1 ];
+           $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
            $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency ' .$cr_condition => 'Rp'];
            $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency ' .$cr_condition => 'Rp'];
         }
 
         $subquery_invoice      = $this->get_saldo_utang($where_utang, 'no_invoice',$currency);
         $subquery_pelunasan    = $this->get_saldo_pelunasan($where_pelunasan, 'aph.no_pelunasan',$currency);
-        $subquery_retur        = $this->get_saldo_retur($where_retur, 'no_inv_retur',$currency);
+        $subquery_retur        = $this->get_saldo_retur($where_retur, 'aph.no_pelunasan',$currency);
         $subquery_um           = $this->get_saldo_um($where_um,'aph.no_pelunasan',$currency);
         $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'aph.no_pelunasan',$currency);
 
