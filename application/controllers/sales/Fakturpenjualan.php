@@ -1415,7 +1415,7 @@ class Fakturpenjualan extends MY_Controller {
             $npwp = $model->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
             $buff = $printer->getPrintConnector();
             $buff->write("\x1bC" . chr(34));
-            $buff->write("\x1bM");
+            $buff->write("\x1bg" . chr(1));
             $alamat = str_split(trim(preg_replace('/\s+/', ' ', $alamat->value)), 40);
             foreach ($alamat as $key => $value) {
                 $printer->text(trim($value));
@@ -1431,32 +1431,29 @@ class Fakturpenjualan extends MY_Controller {
             $buff->write("\x1bE" . chr(1));
             $printer->text("FAKTUR PENJUALAN");
             $buff->write("\x1bF" . chr(0));
-            $buff->write("\x1bM");
+            $buff->write("\x1bg" . chr(1));
             $printer->feed();
             $printer->text(str_pad("No. Faktur", 15));
             $printer->text(str_pad(": {$head->no_faktur_internal}", 30));
-            $buff->write("\x1bg" . chr(1));
             //
 //            $printer->text(str_pad("", 5));
             $printer->text(str_pad("", 5));
-            $printer->text(str_pad("", 9));
+            $printer->text(str_pad("", 19));
             //
 //            $printer->text(str_pad("", 5));
 
             $printer->text("Kepada Yth.,");
             $printer->feed();
-            $buff->write("\x1bM");
             $printer->text(str_pad("No. Surat Jalan", 15));
             $printer->text(str_pad(": {$head->no_sj}", 30));
-            $buff->write("\x1bg" . chr(1));
-            $printer->text(str_pad("", 14));
-            $kpd = str_split($head->partner_nama, 50);
+            $printer->text(str_pad("", 24));
+            $kpd = str_split($head->partner_nama, 40);
             $buff->write("\x1bE" . chr(1));
             foreach ($kpd as $key => $value) {
                 if ($key > 0) {
-                    $printer->text(str_pad("", 80));
+                    $printer->text(str_pad("", 90));
                 }
-                $printer->text(str_pad(trim($value), 50));
+                $printer->text(str_pad(trim($value), 40));
             }
             $buff->write("\x1bF" . chr(0));
             $buff->write("\x1bg" . chr(1));
@@ -1465,7 +1462,7 @@ class Fakturpenjualan extends MY_Controller {
             $alm = preg_replace('/\s\s+/', '*#*', "Alamat 1 :{$head->alamat}");
             $alm = explode("*#*", str_replace(array("\n","\r"),"*#*",$alm));
             foreach ($alm as $key => $value) {
-                $line = str_pad("", 70);
+                $line = str_pad("", 69);
                 $line .= str_pad(trim($value), 50);
                 $printer->text($line . "\n");
             }
@@ -1525,10 +1522,10 @@ class Fakturpenjualan extends MY_Controller {
                         $uraian[$k] = $vls;
                     }
                     if ($value->no_po != "") {
-                        $nopo = str_split("No.PO :{$value->no_po}", 49);
-                        $np = preg_replace('/\s\s+/', '*#*', $nopo);
-                        $np = explode("*#*", str_replace(array("\n","\r"),"*#*",$np));
-                        foreach ($np as $k => $vls) {
+                        $np = preg_replace('/\s\s+/', '*#*', "No.PO :{$value->no_po}");
+//                        $nopo = str_split($np, 49);
+                        $nopo = explode("*#*", str_replace(array("\n","\r"),"*#*",$np));
+                        foreach ($nopo as $k => $vls) {
                             $vls = trim($vls);
                             $uraian[] = $vls;
                         }
@@ -1703,10 +1700,10 @@ class Fakturpenjualan extends MY_Controller {
                         $uraian[$k] = $vls;
                     }
                     if ($value->no_po != "") {
-                        $nopo = str_split("No.PO :{$value->no_po}", 49);
-                        $np = preg_replace('/\s\s+/', '*#*', $nopo);
-                        $np = explode("*#*", str_replace(array("\n","\r"),"*#*",$np));
-                        foreach ($np as $k => $vls) {
+                        $np = preg_replace('/\s\s+/', '*#*', "No.PO :{$value->no_po}");
+//                        $nopo = str_split($np, 49);
+                        $nopo = explode("*#*", str_replace(array("\n","\r"),"*#*",$np));
+                        foreach ($nopo as $k => $vls) {
                             $vls = trim($vls);
                             $uraian[] = $vls;
                         }
@@ -1748,8 +1745,8 @@ class Fakturpenjualan extends MY_Controller {
                         }
                         $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
                         $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 57, " ", STR_PAD_RIGHT) : str_pad("", 57, " ", STR_PAD_RIGHT);
-                        $line .= (isset($qtylot[$i])) ? str_pad($qtylot[$i], 16, " ", STR_PAD_BOTH) : str_pad("", 16, " ", STR_PAD_BOTH);
-                        $line .= (isset($qtyuom[$i])) ? str_pad($qtyuom[$i], 16, " ", STR_PAD_BOTH) : str_pad("", 16, " ", STR_PAD_BOTH);
+                        $line .= (isset($qtylot[$i])) ? str_pad($qtylot[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtyuom[$i])) ? str_pad($qtyuom[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
                         $line .= (isset($harga[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
                         $line .= (isset($harga[$i])) ? str_pad($harga[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
                         $line .= (isset($jumlah[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
@@ -1837,7 +1834,6 @@ class Fakturpenjualan extends MY_Controller {
             $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
             $printer->text(str_pad(" ", 72));
             $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
-
             $printer->feed();
             $datas = $connector->getData();
             $printer->close();
