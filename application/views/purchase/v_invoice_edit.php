@@ -210,7 +210,11 @@
                                                     <label class="form-label">Tgl Invoice Supplier</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="datetime-local" class="form-control pull-right input-sm" name="tanggal_invoice_supp" value="<?= $inv->tanggal_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                    <div class="input-group tgl-def-format">
+                                                         <input type="text" class="form-control pull-right input-sm" name="tanggal_invoice_supp" value="<?= $inv->tanggal_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
+                                                    </div>
+                                                    
                                                 </div>
                                                 <button type="submit" id="form-inv-submit" style="display: none"></button>
                                             </div>
@@ -227,15 +231,11 @@
                                                     <label class="form-label">Tgl SJ</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="datetime-local" class="form-control pull-right input-sm" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">Tgl Faktur</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="date" class="form-control pull-right input-sm" id="tanggal_fk" name="tanggal_fk" value="<?= $inv->tanggal_fk ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
+                                                    <div class="input-group tgl-def-format">
+                                                         <input type="text" class="form-control pull-right input-sm" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
+                                                    </div>
+                                                   
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -244,6 +244,18 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <input type="text" class="form-control pull-right input-sm" id="no_faktur_pajak" name="no_faktur_pajak" value="<?= $inv->no_faktur_pajak ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Tgl Faktur</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <div class="input-group tgl-def-format">
+                                                        <input type="text" class="form-control pull-right input-sm" id="tanggal_fk" name="tanggal_fk" value="<?= $inv->tanggal_fk ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
+                                                    </div>
+                                                    
                                                 </div>
                                             </div>
                                         </div>  

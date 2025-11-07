@@ -1420,8 +1420,8 @@ class Fakturpenjualan extends MY_Controller {
             foreach ($alamat as $key => $value) {
                 $printer->text(trim($value));
                 if ($key === 0) {
-                    $printer->text(str_pad("", 25));
-                    $printer->text(str_pad("Bandung, " . date("d-m-Y"), 30));
+                    $printer->text(str_pad("", 35));
+                    $printer->text(str_pad("Bandung, " . date("d-m-Y"), 30," ",STR_PAD_LEFT));
                 }
                 $printer->text("\n");
             }
@@ -1458,8 +1458,10 @@ class Fakturpenjualan extends MY_Controller {
             $buff->write("\x1bF" . chr(0));
             $buff->write("\x1bg" . chr(1));
             $printer->feed();
+            $printer->text(str_pad(" ", 69));
+            $printer->text("Alamat 1 :\n");
 //            $alm = str_split(trim(preg_replace('/\s+/', '*#*', "Alamat 1 : {$head->alamat}")), 40);
-            $alm = preg_replace('/\s\s+/', '*#*', "Alamat 1 :{$head->alamat}");
+            $alm = preg_replace('/\s\s+/', '*#*', "{$head->alamat}");
             $alm = explode("*#*", str_replace(array("\n","\r"),"*#*",$alm));
             foreach ($alm as $key => $value) {
                 $line = str_pad("", 69);
@@ -1663,16 +1665,16 @@ class Fakturpenjualan extends MY_Controller {
 
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->text(str_pad("No", 3));
-                $printer->text(str_pad("Jenis Barang / Uraian", 57, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("Quantity", 32, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Jenis Barang / Uraian", 50, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Quantity", 39, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Harga Satuan", 20, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Jumlah", 25, " ", STR_PAD_BOTH));
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-                $printer->text(str_pad(" ", 60));
-                $printer->text(str_pad("Gul/PCS", 16, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("Satuan", 16, " ", STR_PAD_BOTH));
+                $printer->text(str_pad(" ", 53));
+                $printer->text(str_pad("Gul/PCS", 19, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Satuan", 20, " ", STR_PAD_BOTH));
                 $printer->text(str_pad(" ", 45));
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
                 $printer->feed();
@@ -1694,7 +1696,7 @@ class Fakturpenjualan extends MY_Controller {
                         $vls = trim($vls);
                         $no[$k] = $vls;
                     }
-                    $uraian = str_split($value->uraian, 56);
+                    $uraian = str_split($value->uraian, 50);
                     foreach ($uraian as $k => $vls) {
                         $vls = trim($vls);
                         $uraian[$k] = $vls;
@@ -1709,12 +1711,12 @@ class Fakturpenjualan extends MY_Controller {
                         }
                     }
 
-                    $qtylot = str_split("{$value->qty_lot} {$value->lot}", 15);
+                    $qtylot = str_split("{$value->qty_lot} {$value->lot} ", 18);
                     foreach ($qtylot as $k => $vls) {
                         $vls = trim($vls);
                         $qtylot[$k] = $vls;
                     }
-                    $qtyuom = str_split("{$value->qty} {$value->uom}", 15);
+                    $qtyuom = str_split("{$value->qty} {$value->uom} ", 19);
                     foreach ($qtyuom as $k => $vls) {
                         $vls = trim($vls);
                         $qtyuom[$k] = $vls;
@@ -1744,9 +1746,9 @@ class Fakturpenjualan extends MY_Controller {
                             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                         }
                         $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
-                        $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 57, " ", STR_PAD_RIGHT) : str_pad("", 57, " ", STR_PAD_RIGHT);
-                        $line .= (isset($qtylot[$i])) ? str_pad($qtylot[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
-                        $line .= (isset($qtyuom[$i])) ? str_pad($qtyuom[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
+                        $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 50, " ", STR_PAD_RIGHT) : str_pad("", 50, " ", STR_PAD_RIGHT);
+                        $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]} ", 19, " ", STR_PAD_LEFT) : str_pad("", 19, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i] }", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
                         $line .= (isset($harga[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
                         $line .= (isset($harga[$i])) ? str_pad($harga[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
                         $line .= (isset($jumlah[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
@@ -1761,9 +1763,9 @@ class Fakturpenjualan extends MY_Controller {
                 $totalQtyLot = number_format($totalQtyLot, 2);
                 $totalQty = number_format($totalQty, 2);
                 $printer->feed();
-                $printer->text(str_pad("", 60));
-                $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 16, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("{$totalQty} {$uom}", 16, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("", 50));
+                $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 19, " ", STR_PAD_LEFT));
+                $printer->text(str_pad("{$totalQty} {$uom}", 20, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("", 45));
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_NONE);

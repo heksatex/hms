@@ -317,8 +317,8 @@ class Purchaseorder extends MY_Controller {
                                     "hutang_valas" => round($hutangvalas),
                                     "total_valas" => round($totalValas),
                                     "total_rp" => round($totalrp),
-                                    "dpp_rp" => round($dpprp),
-                                    "dpp_valas" => round($dppvalas)
+                                    "dpp_lain_rp" => round($dpprp),
+                                    "dpp_lain_valas" => round($dppvalas)
                                 ]);
                                 $this->_module->gen_history("invoice", $cekInv->id, 'edit',
                                         "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
