@@ -374,11 +374,17 @@
                                 debit = 0;
                                 credit = 0;
                                 s_akhir = value.saldo_awal;
+                                let linkUrl = '#';
                                 $.each(value.tmp_data_isi, function(key, value2) {
+                                    
+                                    linkUrl = "<?php echo site_url('accounting/jurnalentries/edit/') ?>" + value2.kode_entries_encr;
+                                    noBuktiHtml = `<a href="${linkUrl}" target="_blank">${value2.kode_entries}</a>`;
+                                    
                                     var tr3 = $("<tr>").append(
                                         $("<td>").html(no++),
                                         $("<td style='max-width:10px'>").text(value2.tanggal),
-                                        $("<td style='max-width:20px'>").text(value2.kode_entries),
+                                        // $("<td style='max-width:20px'>").text(value2.kode_entries),
+                                        $("<td style='max-width:20px'>").html(noBuktiHtml),
                                         $("<td style=''>").text(value2.origin),
                                         $("<td class='ket-acc'>").text(value2.keterangan),
                                         $("<td align='right'>").text(formatNumber(value2.debit.toFixed(2))),
@@ -436,7 +442,7 @@
             let s_awal = 0;
             let tbody = $("<tbody />");
             let tmp_kode_entries = '';
-
+            let linkUrl = '#';
             $.each(dataRecord, function(key, value) {
 
                 empty = false;
@@ -462,10 +468,14 @@
                     tmp_kode_entries = kode_entries;
                 }
 
+                linkUrl = "<?php echo site_url('accounting/jurnalentries/edit/') ?>" + value.kode_entries_encr;
+                noBuktiHtml = `<a href="${linkUrl}" target="_blank">${value.kode_entries}</a>`;
+
                 var tr = $("<tr>").append(
                     $("<td>").html(no++),
                     $("<td style='max-width:10px'>").text(tanggal),
-                    $("<td style='max-width:20px'>").text(kode_entries),
+                    // $("<td style='max-width:20px'>").text(kode_entries),
+                    $("<td style='max-width:20px'>").html(noBuktiHtml),
                     $("<td align=''>").text(origin),
                     $("<td class='ket-acc'>").text(keterangan),
                     $("<td align='right'>").text((debit_or_credit)),

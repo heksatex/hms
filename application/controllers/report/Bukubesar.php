@@ -246,6 +246,7 @@ class Bukubesar extends MY_Controller
 
                 $tmp_data_akun_isi[] = array(
                     'tanggal' => date("Y-m-d",strtotime($datas2->tanggal)),
+                    'kode_entries_encr' => encrypt_url($datas2->kode_entries),
                     'kode_entries' => $datas2->kode_entries,
                     'origin' => $datas2->origin,
                     'keterangan' => $datas2->keterangan,
@@ -303,6 +304,7 @@ class Bukubesar extends MY_Controller
                 if($loop2 == 1){
                     $tmp_data_akun_isi[] = array(
                         'tanggal' => date("Y-m-d", strtotime($datas->tanggal)),
+                        'kode_entries_encr' => encrypt_url($datas->kode_entries),
                         'kode_entries' => $datas->kode_entries,
                         'origin' => $datas->origin,
                         'keterangan' => $datas->keterangan,
