@@ -255,7 +255,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <!--<input class="form-control input-sm  no_po edited-read no_po_<?= $key ?>" value="<?= $value->no_po ?>" name="nopo[]" readonly>--> 
-                                                                    <textarea class="form-control no_po edited-read no_po_<?= $key ?>"  name="nopo[]" readonly><?= $datas->po_cust ?></textarea>
+                                                                    <textarea class="form-control no_po edited-read no_po_<?= $key ?>"  name="nopo[]" readonly><?= $value->no_po ?></textarea>
                                                                     
                                                                 </td>
                                                                 <td class="text-right">
