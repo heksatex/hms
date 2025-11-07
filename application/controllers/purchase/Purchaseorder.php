@@ -481,7 +481,7 @@ class Purchaseorder extends MY_Controller {
                                         "nominal" => $nttmax,
                                         "kode" => $cekJurnal->kode,
                                         "nama" => "",
-                                        "reff_note" => "",
+                                        "reff_note" => "Retur Pembelian",
                                         "partner" => $dataItems[0]->id_supplier,
                                         "kode_coa" => ($defaultPpn->value ?? 0),
                                         "posisi" => "C",

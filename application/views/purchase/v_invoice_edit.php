@@ -62,6 +62,9 @@
             .td-diskon {
                 width: 2% !important;
             }
+            .td-pph23 {
+                width: 2% !important;
+            }
             /*            .td-deskripsi{
                             width: 7% !important;
                         }*/
@@ -98,7 +101,15 @@
                         <div class="box-header with-border">
                             <h3 class="box-title"><strong> <?= $inv->no_invoice ?? "" ?> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
-
+                                <?php
+                                if ($inv->status === "done") {
+                                    ?>
+                                    <button class="btn btn-default btn-sm" type="button" id="btn-update-fp" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        </i>&nbsp;Update Faktur
+                                    </button>
+                                    <?php
+                                }
+                                ?> 
                             </div>
                         </div>
                         <form  class="form-horizontal" method="POST" name="form-inv" id="form-inv" action="<?= base_url('purchase/invoice/update/' . $id) ?>">
@@ -119,7 +130,7 @@
                                                     <label class="form-label">Origin</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                  <input class="form-control" value="<?= $inv->origin ?>" disabled>
+                                                    <input class="form-control" value="<?= $inv->origin ?>" disabled>
                                                     <input type="hidden" class="form-control pull-right input-sm" name="origin" value="<?= $inv->origin ?>" readonly> 
                                                 </div>
                                             </div>
@@ -141,13 +152,25 @@
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
+                                                    <label class="form-label required">Kurs</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon get-no-sj"><?= $inv->mata_uang ?></span>
+                                                        <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
                                                     <label class="form-label required">Periode ACC</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <?php
                                                     if ($inv->status !== "draft") {
                                                         ?>
-                                                        <span><?= $inv->periode ?></span>
+                                                        <input class="form-control input-sm" type="text" disabled value="<?= $inv->periode ?>">
                                                         <?php
                                                     } else {
                                                         ?>
@@ -170,7 +193,6 @@
 
                                                 </div>
                                             </div>
-                                            
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -210,21 +232,21 @@
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label required">Kurs</label>
+                                                    <label class="form-label">Tgl Faktur</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
+                                                    <input type="date" class="form-control pull-right input-sm" id="tanggal_fk" name="tanggal_fk" value="<?= $inv->tanggal_fk ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Mata Uang</label>
+                                                    <label class="form-label">No Faktur Pajak</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $inv->mata_uang ?></span>
+                                                    <input type="text" class="form-control pull-right input-sm" id="no_faktur_pajak" name="no_faktur_pajak" value="<?= $inv->no_faktur_pajak ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div>  
                                     </div>
                                 </div>
                             </div>
@@ -238,11 +260,11 @@
                                         <!--<div class="tab-pane" id="tab_2"></div>-->
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="table-responsive over">
-                                                <table id="tbl-inv" class="table table-condesed table-hover rlstable  over" style="min-width: 150%">
+                                                <table id="tbl-inv" class="table table-condesed table-hover rlstable  over" style="min-width: 115%">
                                                     <thead>
                                                     <th class="no">#</th>
                                                     <th class="no">No</th>
-                                                    <th>Produk</th>
+                                                    <th >Produk</th>
                                                     <!--<th>Deskripsi</th>-->
                                                     <th>Reff Note</th>
                                                     <th>Account</th>
@@ -251,7 +273,7 @@
                                                     <th>Harga Satuan</th>
                                                     <th>Tax</th>
                                                     <th>Diskon</th>
-                                                    <!--<th>#</th>-->
+                                                    <th>Pph23</th>
                                                     </thead>
                                                     <tbody>
                                                         <?php
@@ -386,6 +408,10 @@
                                                                         <input type="hidden" class="form-control" name="diskon[<?= $value->id ?>]" value="<?= $value->diskon ?>">
                                                                         <input type="text" class="form-control" value="<?= $value->diskon ?>" disabled>
                                                                     </td>
+                                                                    <td class="td-pph23">
+                                                                        <input type="checkbox" class="check-pph23" data-toggle="tooltip" data-original-title="Pph23"
+                                                                               value="<?= $value->id ?>" <?= ((int)$value->pph23) ? "checked":"" ?>   <?= ($inv->status === 'cancel') ? 'disabled' : "" ?>>
+                                                                    </td>
                                                                 </tr>
                                                                 <?php
                                                             }
@@ -438,10 +464,10 @@
 
                                                                                 </td>
                                                                                 <td>
-                                                                                    <?= $inv->symbol ?> <?= number_format(($v->base), 4) ?>
+                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $v->base : round($v->base), 4) ?>
                                                                                 </td>
                                                                                 <td>
-                                                                                    <?= $inv->symbol ?> <?= number_format(($v->nominal), 4) ?>
+                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $v->nominal : round($v->nominal), 4) ?>
                                                                                 </td>
                                                                             </tr>
                                                                             <?php
@@ -458,15 +484,15 @@
                                                         <table class="table table-condesed table-hover rlstable  over">
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 1</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($subtotal1), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $subtotal1 : round($subtotal1), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right">Diskon</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($totalDiskon), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $totalDiskon : round($totalDiskon), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($subtotal2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $subtotal2 : round($subtotal2), 4) ?></td>
                                                             </tr>
                                                             <?php if ($setting !== null) {
                                                                 ?>
@@ -474,7 +500,7 @@
                                                                     <td class="style text-right">DPP Nilai Lain</td>
                                                                     <td class="style totalan"> 
                                                                         <input name="dpplain" type="hidden" value="1">
-                                                                        <strong><?= $inv->symbol ?> <?= number_format(((($subtotal1 - $totalDiskon) * 11) / 12), 4) ?>
+                                                                        <strong><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? (($subtotal1 - $totalDiskon) * 11) / 12 : round((($subtotal1 - $totalDiskon) * 11) / 12), 4) ?>
                                                                         </strong>
                                                                     </td>
                                                                 </tr>
@@ -482,11 +508,11 @@
                                                             ?>
                                                             <tr>
                                                                 <td class="text-right">Tax</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($totalTax), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $totalTax : round($totalTax), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($subtotal2 + $totalTax), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? ($subtotal2 + $totalTax) : round($subtotal2 + $totalTax), 4) ?></td>
                                                             </tr>
                                                         </table>
                                                     </div>
@@ -730,6 +756,64 @@
                         }
                     });
 
+                });
+
+
+                $("#btn-update-fp").unbind("click").off("click").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url('purchase/invoice/update_faktur/' . $id) ?>",
+                        type: "POST",
+                        data: {
+                            pajak: $("#no_faktur_pajak").val(),
+                            tanggal_fk: $("#tanggal_fk").val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 200);
+                        }, success: function (data) {
+                            location.reload();
+                        }
+                    });
+                });
+
+                $(".check-pph23").unbind("click").off("click").on("click", function () {
+//                  $(this).prop('checked', !this.checked);
+                    var th = this;
+                    $.ajax({
+                        url: "<?= base_url('purchase/invoice/update_pph23/' . $id) ?>",
+                        type: "POST",
+                        data: {
+                            pph23: this.checked ? 1:0,
+                            ids: $(this).val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        error: function (req, error) {
+                            $(this).prop('checked', !this.checked);
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {
+                                        $(th).prop('checked', !th.checked);
+                                    });
+                                }, 500);
+                            });
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 200);
+                        }, success: function (data) {
+                            alert_notify('fa fa-close', data?.message, 'success', function () {});
+                        }
+                    });
                 });
 
 

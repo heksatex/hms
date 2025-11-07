@@ -47,36 +47,7 @@ class Jurnalmemorial extends MY_Controller {
         $this->load->library('excelexp/Memorialpembelian', null, 'pemb');
 //        $this->data = new $this->m_global;
     }
-
-    protected function getData() {
-        try {
-            $periode = $this->input->post("periode");
-            $jurnal = $this->input->post("jurnal");
-            $filter = $this->input->post("filter");
-            switch ($jurnal) {
-                case 1:
-
-
-                    break;
-
-                default:
-                    break;
-            }
-
-            $this->data->setTables("acc_jurnal_entries je")
-                    ->setJoins("acc_jurnal_entries_items jei", "je.kode = jei.kode")
-                    ->setJoins("mst_jurnal mj", "mj.kode = je.tipe", "left")
-                    ->setJoins("acc_coa", "jei.kode_coa = acc_coa.kode_coa", "left")
-                    ->setJoins("partner", "partner.id = jei.partner", "left")
-                    ->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
-                    ->setWheres(array_merge(["je.status" => "posted", "je.tipe" => $jurnal], $where))
-                    ->setSelects(["mj.nama as nama_jurnal", "acc_coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
-                        "origin,date(tanggal_dibuat) as tanggal_dibuat"]);
-        } catch (Exception $ex) {
-            throw $ex;
-        }
-    }
-
+    
     public function check_berdasarkan($str, $periode): bool {
         if (empty($str) && empty($this->input->post($periode))) {
             $this->form_validation->set_message('check_berdasarkan', 'Pilih Salah satu Tanggal dibuat / Periode');
