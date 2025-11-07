@@ -134,6 +134,7 @@
             "ordering": true,
             "info": true,
             "autoWidth": false,
+            "stateSave":true,
             "ajax": {
                 "url": "<?php echo site_url('purchase/purchaseorder/list_data') ?>",
                 "type": "POST",
@@ -157,7 +158,6 @@
         });
         $("#search").on("click", function () {
             table.ajax.reload();
-            console.log(table.settings()[0].sDom);
         });
 
     });

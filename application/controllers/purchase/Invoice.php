@@ -116,41 +116,54 @@ class Invoice extends MY_Controller {
         }
     }
 
-//    public function data_detail() {
-//        try {
-//            $id = $this->input->post("id");
-//            $data = array();
-//            $list = new $this->m_global;
-//            $kode_decrypt = decrypt_url($id);
-//            $list->setTables("invoice_detail")->setWheres(["invoice_id" => $kode_decrypt])->setOrder(["id"])
-//                    ->setOrders([null, "kode_produk", null, null, "account", "qty_beli", "harga_satuan"]);
-//            $no = $_POST['start'];
-//            foreach ($list->getData() as $field) {
-//                $no++;
-//                $data [] = array(
-//                    $no,
-//                    $field->kode_produk . " - " . $field->nama_produk,
-//                    $field->deskripsi,
-//                    $field->reff_note,
-//                    $field->account,
-//                    $field->qty_beli . "  " . $field->uom_beli,
-//                    $field->harga_satuan,
-//                );
-//            }
-//            echo json_encode(array("draw" => $_POST['draw'],
-//                "recordsTotal" => $list->getDataCountAll(),
-//                "recordsFiltered" => $list->getDataCountFiltered(),
-//                "data" => $data,
-//            ));
-//            exit();
-//        } catch (Exception $ex) {
-//            echo json_encode(array("draw" => $_POST['draw'],
-//                "recordsTotal" => 0,
-//                "recordsFiltered" => 0,
-//                "data" => [],
-//            ));
-//        }
-//    }
+    public function update_faktur($id) {
+        try {
+            $kode_decrypt = decrypt_url($id);
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username'));
+            $model = new $this->m_global;
+            $dt = $this->input->post("tanggal_fk");
+            $update = [
+                "tanggal_fk" =>$dt,
+                "no_faktur_pajak" => $this->input->post("pajak")
+            ];
+            $model->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update($update);
+            $log = "Update " . logArrayToString("; ", $update);
+
+            $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+    
+    public function update_pph23($id) {
+        try {
+            $kode_decrypt = decrypt_url($id);
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username'));
+            $model = new $this->m_global;
+            $pph23 = $this->input->post("pph23");
+            $ids = $this->input->post("ids");
+            $model->setTables("invoice_detail")->setWheres(["id" => $ids])->update(["pph23"=>$pph23]);
+            $log = "Update PPh 23 {$pph23}";
+
+            $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Update PPH23', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
 
     public function update($id) {
         $val = [
@@ -199,7 +212,9 @@ class Invoice extends MY_Controller {
             $tanggal_sj = $this->input->post("tanggal_sj");
             $tax_lain = $this->input->post("tax_lain_id");
             $periode = $this->input->post("periode");
-
+            $tanggal_fk = $this->input->post("tanggal_fk");
+            $noFP = $this->input->post("no_faktur_pajak");
+            
             $item = [];
             $totals = 0.00;
             $diskons = 0.00;
@@ -226,24 +241,53 @@ class Invoice extends MY_Controller {
                     foreach ($dataTax as $kkk => $datas) {
                         if ($dpplain === "1" && $datas->dpp === "1") {
                             $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
+                        } else {
+                            $taxe += ($total - $diskon) * $datas->amount;
                         }
-                        else {
-                             $taxe += ($total - $diskon) * $datas->amount;
-                        }
-                       
                     }
                 }
                 $taxes += $taxe;
-                
             }
             if ($dpplain === "1") {
                 $nilaiDppLain = (($totals - $diskons) * 11) / 12;
             }
             $grandTotal = ($totals - $diskons) + $taxes;
+            if ($matauang > 1) {
+                $hutangrp = $grandTotal * $matauang;
+                $hutangvalas = $grandTotal;
+                $totalrp = $grandTotal * $matauang;
+                $dpprp = $nilaiDppLain * $matauang;
+                $dppvalas = $nilaiDppLain;
+                $totalValas = $grandTotal;
+            } else {
+                $hutangrp = $grandTotal;
+                $hutangvalas = 0;
+                $totalrp = $grandTotal;
+                $dpprp = $nilaiDppLain;
+                $dppvalas = 0;
+                $totalValas = 0;
+            }
+
             $head = new $this->m_global;
             $bd = clone $head;
-            $dataUpdate = ["no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain,
-                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode];
+            $dataUpdate = [
+                "no_sj_supp" => $noSjSupp,
+                "no_invoice_supp" => $noInvSupp,
+                "tanggal_invoice_supp" => $tglInvSupp,
+                'dpp_lain' => $nilaiDppLain,
+                'total' => $grandTotal,
+                'nilai_matauang' => $matauang,
+                "tanggal_sj" => $tanggal_sj,
+                "periode" => $periode,
+                "dpp_lain_valas" => $dppvalas,
+                "dpp_lain_rp" => round($nilaiDppLain),
+                "total_rp" => round($hutangrp),
+                "hutang_valas" => $hutangvalas,
+                "hutang_rp" => round($hutangrp),
+                "total_valas" => $grandTotal,
+                "no_faktur_pajak"=>$noFP,
+                "tanggal_fk"=>$tanggal_fk
+            ];
             $head->setTables('invoice')->setWheres(["id" => $kode_decrypt])
                     ->update($dataUpdate);
             $bd->setTables("invoice_detail")->updateBatch($item, 'id');
@@ -323,7 +367,7 @@ class Invoice extends MY_Controller {
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
                                 ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,tax.ket, coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id", "invoice.created_at as invoice_create", "invoice.total as total_invoice","dpp_lain_rp,dpp_lain_valas,total_rp"])
+                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id", "invoice.created_at as invoice_create", "invoice.total as total_invoice", "dpp_lain_rp,dpp_lain_valas,total_rp"])
                                 ->setOrder(["invoice_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
@@ -350,10 +394,10 @@ class Invoice extends MY_Controller {
                 $checkDpp = $dataItems[0]->dpp_lain > 0;
                 if (count($dataItems) > 0) {
                     $updateInv["hutang_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang);
-                        $updateInv["total_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang);
-                        $updateInv["dpp_lain_rp"] = round($dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang);
+                    $updateInv["total_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang);
+                    $updateInv["dpp_lain_rp"] = round($dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang);
                     if ($dataItems[0]->nilai_matauang > 1) {
-                        $updateInv["total_valas"] = round($dataItems[0]->total_invoice);//
+                        $updateInv["total_valas"] = round($dataItems[0]->total_invoice); //
                         $updateInv["hutang_valas"] = round($updateInv["total_valas"]);
                         $updateInv["dpp_lain_valas"] = round($dataItems[0]->dpp_lain);
                     }

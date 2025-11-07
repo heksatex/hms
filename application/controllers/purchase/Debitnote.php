@@ -196,12 +196,35 @@ class Debitnote extends MY_Controller {
                 $nilaiDppLain = (($totals - $diskons) * 11) / 12;
             }
             $grandTotal = ($totals - $diskons) + $taxes;
+            if ($matauang > 1) {
+                $hutangrp = $grandTotal * $matauang;
+                $hutangvalas = $grandTotal;
+                $totalrp = $grandTotal * $matauang;
+                $dpprp = $nilaiDppLain * $matauang;
+                $dppvalas = $nilaiDppLain;
+                $totalValas = $grandTotal;
+            } else {
+                $hutangrp = $grandTotal;
+                $hutangvalas = 0;
+                $totalrp = $grandTotal;
+                $dpprp = $nilaiDppLain;
+                $dppvalas = 0;
+                $totalValas = 0;
+            }
+
             $head = new $this->m_global;
             $bd = clone $head;
-            $dataUpdate = ["no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain,
-                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode];
-            $head->setTables('invoice_retur')->setWheres(["no_inv_retur" => $kode_decrypt])
-                    ->update($dataUpdate);
+            $dataUpdate = [
+                "no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain,
+                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode,
+                "dpp_lain_valas" => $dppvalas,
+                "dpp_lain_rp" => round($nilaiDppLain),
+                "total_rp" => round($hutangrp),
+                "hutang_valas" => $hutangvalas,
+                "hutang_rp" => round($hutangrp),
+                "total_valas" => $grandTotal
+            ];
+            $head->setTables('invoice_retur')->setWheres(["no_inv_retur" => $kode_decrypt])->update($dataUpdate);
             $bd->setTables("invoice_retur_detail")->updateBatch($item, 'id');
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $dataUpdate), $username);
             $this->output->set_status_header(200)
@@ -289,11 +312,11 @@ class Debitnote extends MY_Controller {
                 $tax = 0;
                 $totalNominal = 0;
                 if (count($dataItems) > 0) {
-                        $updateInv["hutang_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
-                        $updateInv["total_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
-                        $updateInv["dpp_lain_rp"] = $dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang;
+                    $updateInv["hutang_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
+                    $updateInv["total_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
+                    $updateInv["dpp_lain_rp"] = $dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang;
                     if ($dataItems[0]->nilai_matauang > 1) {
-                        $updateInv["total_valas"] = $dataItems[0]->total_invoice;//
+                        $updateInv["total_valas"] = $dataItems[0]->total_invoice; //
                         $updateInv["hutang_valas"] = $updateInv["total_valas"];
                         $updateInv["dpp_lain_valas"] = $dataItems[0]->dpp_lain;
                     }
@@ -433,11 +456,11 @@ class Debitnote extends MY_Controller {
                 );
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
-                
+
                 $log = "Header -> " . logArrayToString("; ", $jurnalData);
                 $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                 $this->_module->gen_history("debitnote", $jurnal, 'create', $log, $username);
-                $updateInv = array_merge($updateInv,["jurnal_retur" => $jurnal]);
+                $updateInv = array_merge($updateInv, ["jurnal_retur" => $jurnal]);
             }
             $head->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update($updateInv);
             if (!$this->_module->finishTransaction()) {

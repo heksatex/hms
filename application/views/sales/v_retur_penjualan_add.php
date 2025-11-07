@@ -29,7 +29,7 @@
                         <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/fakturpenjualan/simpan") ?>">
                             <button class="btn btn-default btn-sm btn-save hide" type="submit"> Simpan </button>
                             <div class="box-header with-border">
-                                <h3 class="box-title">Faktur Penjualan</h3>
+                                <h3 class="box-title">Retur Penjualan</h3>
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -180,7 +180,7 @@
                     $('.modal-title').text("List SJ");
                     $("#btn-tambah").html("Pilih");
                     var tipee = $("#tipe").val();
-                    $.post("<?= base_url('sales/fakturpenjualan/get_view_sj') ?>", {tipe: tipee}, function (data) {
+                    $.post("<?= base_url('sales/returpenjualan/get_view_sj') ?>", {tipe: tipee}, function (data) {
                         setTimeout(function () {
                             $(".tambah_data").html(data.data);
                             $("#btn-tambah").hide();

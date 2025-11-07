@@ -69,9 +69,16 @@ class Requestforquotation extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data tidak ditemukan', 500);
             }
-            $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
+            $prd = ($_GET["produk"] ?? "");
+            $stt = ($_GET["stt"] ?? '');
+            $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)
                     ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
-
+             if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
+            }
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
             if (strtolower($level) === "direksi") {
                 $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
             } else {
@@ -80,12 +87,18 @@ class Requestforquotation extends MY_Controller {
 
             $nextPage = $model1->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po));
+                $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po). "?produk={$prd}&stt={$stt}");
             }
 
-            $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
+            $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true)
                     ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
-
+            if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
+            }
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
+            
             if (strtolower($level) === "direksi") {
                 $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
             } else {
@@ -95,7 +108,7 @@ class Requestforquotation extends MY_Controller {
             $prevPage = $model1->getDetail();
 
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po));
+                $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po). "?produk={$prd}&stt={$stt}");
             }
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
@@ -119,7 +132,7 @@ class Requestforquotation extends MY_Controller {
             $jenis = $this->input->post("jenis");
             $status = $this->input->post("status");
             $nama_produk = $this->input->post("nama_produk");
-
+            $statuss = "";
             $data = array();
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "create_date", "order_date", "po.status"])
                     ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode", "coalesce(poe.status,'') as poe_status"])->setOrder(['create_date' => 'desc'])
@@ -136,8 +149,13 @@ class Requestforquotation extends MY_Controller {
                     $list->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
             }
 
-            if ($status !== "")
-                $list->setWheres(["po.status" => $status]);
+            if (gettype($status) === 'string')
+                $list->setWhereRaw("po.status in ('draft','waiting_approve')");
+            else
+            if (count($status) > 0) {
+                $list->setWhereIn("po.status", $status);
+                $statuss = implode(",", $status);
+            }
 
             if ($nama_produk !== "")
                 $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
@@ -158,7 +176,7 @@ class Requestforquotation extends MY_Controller {
 
                 $data [] = [
                     $no,
-                    '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
+                    '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '?produk=' . $nama_produk . '&stt=' . $statuss . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->create_date,
                     number_format($field->total, 4) . " " . ( ($field->total === null) ? "" : $field->curr_kode),
