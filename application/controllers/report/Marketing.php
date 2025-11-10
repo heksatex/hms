@@ -2589,4 +2589,394 @@ class Marketing extends MY_Controller
 
     }
 
+
+
+    function readygoodsgroupnmb()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['title']  = 'View Product Ready Goods NMB (GJD)';
+        $data['proofing'] = 'no';
+        $this->load->view('report/v_marketing_view_ready_goods_group_nmb', $data);
+    }
+
+
+    function get_data_ready_goods_group_nmb()
+    {
+
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables17();
+            $proofing = $this->input->post('proofing');
+            if($proofing == 'yes'){
+                $link = "groupcolourproofing";
+            }else{
+                $link = "readygoodsgroupcolournmb";
+            }
+            // $get_data_current = '&product='.urlencode($product).'&color='.urlencode($color).'&cmbMarketing='.urlencode($mkt);
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = '<a href="'.base_url('report/marketing/'.$link.'?id='.urlencode($field->corak_remark)).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'">'.$field->corak_remark.'</a>';
+                $row[] = $field->total_warna;
+                $row[] = $field->lebar_jadi_merge;
+                $row[] = $field->total_qty_jual.' '.$field->uom_jual;
+                // $row[] = $field->total_qty2_jual.' '.$field->uom2_jual;
+                $row[] = $field->gl;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all17(),
+                "recordsFiltered" => $this->m_marketing->count_filtered17(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group17()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+        
+    }
+
+     function export_excel_ready_goods_group_nmb()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables17_excel();
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+        $proofing = $this->input->post('proofing');
+        if($proofing == 'yes') {
+            $title = 'Report Proofing NMB (GJD)';
+        }else{
+            $title = 'Report Ready Goods NMB (GJD)';
+        }
+        
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1',$title);
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:Q3")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Corak' , 'Jml Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Gl/Lot');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+            $object->getActiveSheet()->getStyle($val.'3')->applyFromArray($styleArray);
+        }
+        $rowCount  = 4;
+        $num       = 1;
+        foreach ($get_data as $val) {
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->total_warna);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->total_qty_jual);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->gl);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+        
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = $title.".xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+    }
+
+    function readygoodsgroupcolournmb()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['product']= $this->input->get('id');
+        $data['lebar_jadi']= $this->input->get('lebar_jadi');
+        $data['uom_lebar_jadi']= $this->input->get('uom_lebar_jadi');
+        $data['uom_jual']= $this->input->get('uom_jual');
+        // $data['uom2_jual']= $this->input->get('uom2_jual');
+        $data['title']    = 'View Product Ready Goods NMB (GJD)';
+        $data['proofing'] = 'no';
+        $this->load->view('report/v_marketing_view_ready_goods_group_colour_nmb', $data);
+    }
+
+    
+    function get_data_ready_goods_group_colour_nmb()
+    {
+
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $proofing = $this->input->post('proofing');
+            if($proofing == 'yes'){
+                $link = "itemsproofing";
+            }else{
+                $link = "readygoodsitemsnmb";
+            }
+            $list = $this->m_marketing->get_datatables18();
+            // $get_data_current = '&product='.urlencode($product).'&color='.urlencode($color).'&cmbMarketing='.urlencode($mkt);
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = '<a href="'.base_url('report/marketing/'.$link.'?id='.urlencode($field->corak_remark)).'&warna_remark='.urlencode($field->warna_remark).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
+                $row[] = $field->warna_remark;
+                $row[] = $field->lebar_jadi_merge;
+                $row[] = $field->total_qty_jual.' '.$field->uom_jual;
+                $row[] = $field->total_qty2_jual.' '.$field->uom2_jual;
+                $row[] = $field->gl;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all18(),
+                "recordsFiltered" => $this->m_marketing->count_filtered18(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group18()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+    }
+
+     function readygoodsitemsnmb()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['product']= $this->input->get('id');
+        $data['color']  = $this->input->get('warna_remark');
+        $data['lebar_jadi']   = $this->input->get('lebar_jadi');
+        $data['uom_lebar_jadi']   = $this->input->get('uom_lebar_jadi');
+        $data['uom_jual']    = $this->input->get('uom_jual');
+        $data['uom2_jual']   = $this->input->get('uom2_jual');
+        $data['title']    = 'View Product Ready Goods NMB (GJD)';
+        $data['proofing'] = 'no';
+        $this->load->view('report/v_marketing_view_ready_goods_items_nmb', $data);
+    }
+
+    function get_data_ready_goods_items_nmb()
+    {
+
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables19();
+            $data = array();
+            $no = $_POST['start'];
+            $link  = '';
+            $gmbr  = '';
+            foreach ($list as $field) {
+                $image = "/upload/product/" . $field->kode_produk . ".jpg";
+                $imageThumb = "/upload/product/thumb-" . $field->kode_produk . ".jpg";
+                if (is_file(FCPATH . $image)) {
+                    // $link  = is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image);
+                    $link  = base_url($image);
+                }else{
+                    $link  = base_url("/upload/product/default.jpg");
+                }
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $link;
+                $row[] = $field->kode_produk;
+                $row[] = $field->create_date;
+                $row[] = $field->lot;
+                $row[] = $field->corak_remark;
+                $row[] = $field->warna_remark;
+                $row[] = $field->lebar_jadi." ".$field->uom_lebar_jadi;
+                $row[] = $field->qty_jual." ".$field->uom_jual;
+                $row[] = $field->qty2_jual." ".$field->uom2_jual;
+                $row[] = $field->lokasi;
+                $row[] = $field->lokasi_fisik;
+                $row[] = $field->umur;
+                $data[] = $row;
+
+            }
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all19(),
+                "recordsFiltered" => $this->m_marketing->count_filtered19(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group19()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+    }
+
+     function export_excel_ready_goods_nmb()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables19_excel();
+
+        $product    = $this->input->post('product');
+        $color      = $this->input->post('color');
+        $lebar_jadi = $this->input->post('lebar_jadi');
+        $uom_lebar_jadi      = $this->input->post('uom_lebar_jadi');
+        $uom_jual      = $this->input->post('uom_jual');
+        $uom2_jual      = $this->input->post('uom2_jual');
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+        $proofing = $this->input->post('proofing');
+        if($proofing == 'yes') {
+            $title = 'Report Proofing NMB (GJD)';
+        }else{
+            $title = 'Report Ready Goods NMB (GJD)';
+        }
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', $title);
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET Filter
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Product / Corak');
+ 		$object->getActiveSheet()->SetCellValue('B3', ': '.$product);
+		$object->getActiveSheet()->mergeCells('B3:D3');
+
+        $object->getActiveSheet()->SetCellValue('A4', 'Warna');
+ 		$object->getActiveSheet()->SetCellValue('B4', ': '.$color);
+		$object->getActiveSheet()->mergeCells('B4:D4');
+
+        // $object->getActiveSheet()->SetCellValue('A5', 'Lebar Jadi');
+ 		// $object->getActiveSheet()->SetCellValue('B5', ': '.$uom);
+		// $object->getActiveSheet()->mergeCells('B5:D5');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:Q7")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi', 'Lokasi Fisik / Rak ', 'Umur (Hari)');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+            $object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
+        }
+        $rowCount  = 8;
+        $num       = 1;
+        foreach ($get_data as $val) {
+
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->create_date);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->warna_remark);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lokasi);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->lokasi_fisik);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->umur);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = $title.".xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
+    }
+
+
 }
