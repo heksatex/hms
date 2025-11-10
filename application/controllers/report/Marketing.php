@@ -3261,7 +3261,7 @@ class Marketing extends MY_Controller
         if($changed == 'true'){
             foreach ($data_print as $dp){
                 $id = $dp['rowId'];
-                $get = $this->m_marketing->get_data_changed_all($id);
+                $get = $this->m_marketing->get_data_changed_all_nmb($id);
                 $lebar_jadi  = $get->lebar_Jadi;
                 $uom_lebar_jadi  = $get->uom_lebar_jadi;
                 $data_print_array[] = array(
@@ -3391,5 +3391,140 @@ class Marketing extends MY_Controller
 
     }
 
+
+    
+    function readygoodscategorychangednmb()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $this->load->view('report/v_marketing_view_ready_goods_category_changed_nmb', $data);
+    }
+    
+    function get_data_ready_goods_category_changed_nmb()
+    {
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+
+            // delete table
+            $this->m_marketing->delete_table_nmb();
+            // get_past 2 tanggal
+            $limit = '1,2';
+            $past_date = $this->m_marketing->get_last_date_history_2_nmb();
+            $tmp_insert = [];
+            $get_data_ = $this->m_marketing->get_data_all_20($past_date);
+            foreach($get_data_ as $val2){
+                $tmp_insert[] = array(
+                            'tanggal'       => $val2->tanggal,
+                            'cat_id'        => $val2->cat_id,
+                            'corak'         => $val2->corak,
+                            'warna'         => $val2->warna,
+                            'lebar_Jadi'    => $val2->lebar_Jadi,
+                            'uom_lebar_jadi'=> $val2->uom_lebar_jadi,
+                );
+            }
+
+            if($tmp_insert){
+                $this->m_marketing->insert_data_last_date_nmb($tmp_insert);
+            }
+
+            $tmp_update = array();
+            $tmp_insert2 = array();
+            $where_update = array();
+            // get date last
+            $last_date = $this->m_marketing->get_last_date_history_nmb();
+            $get_data2_ = $this->m_marketing->get_data_all_20($last_date);
+            foreach($get_data2_ as $pd){
+
+                // cek data in table
+                $cek_dt = $this->m_marketing->cek_data_in_table_nmb($pd->cat_id,$pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+                if($cek_dt){// update
+                    $tmp_update = array(
+                                'cat_id_last'     =>$pd->cat_id,
+                                'corak_last'      =>$pd->corak,
+                                'warna_last'      =>$pd->warna,
+                                'lebar_jadi_last' =>$pd->lebar_Jadi,
+                                'uom_lebar_jadi_last' =>$pd->uom_lebar_jadi
+                    );
+                    $where_update[] = array(
+                                'corak'      =>$pd->corak,
+                                'warna'      =>$pd->warna,
+                                'lebar_jadi' =>$pd->lebar_Jadi,
+                                'uom_lebar_jadi' =>$pd->uom_lebar_jadi
+                    );
+                    $this->m_marketing->update_table_changed_nmb($tmp_update,$pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+                }else{
+                    //insert
+                    $tmp_insert2[] = array(
+                                'cat_id_last'     =>$pd->cat_id,
+                                'corak_last'      =>$pd->corak,
+                                'warna_last'      =>$pd->warna,
+                                'lebar_jadi_last' =>$pd->lebar_Jadi,
+                                'uom_lebar_jadi_last' =>$pd->uom_lebar_jadi,
+                                'action'          => 'ADD'
+                    );
+                    // $this->m_marketing->insert_table_changed($tmp_insert2);
+                    // $tmp_update = array(
+                    //                 'action' => 'REMOVE'
+                    // );
+                    // $this->m_marketing->update_table_changed($tmp_update,$pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+
+                }
+            }
+
+            if(!empty($tmp_update)) {
+                // $this->m_marketing->update_table_changed($tmp_update,$where_update);
+            }
+
+            if(!empty($tmp_insert2)) {
+                $this->m_marketing->insert_data_last_date_nmb($tmp_insert2);
+
+            }
+
+            // get data remove 
+            $where_  = array('cat_id_last'=>'');
+            $tmp_id  = array();
+            $get_dt_remove = $this->m_marketing->get_data_table_changed_all_nmb($where_);
+            foreach($get_dt_remove as $gtr){
+                $tmp_id = array('action'=>"REMOVE");
+                $this->m_marketing->update_table_changed2_nmb($gtr->id, $tmp_id);
+            }
+
+
+            $total_remove = $this->m_marketing->get_total_action_nmb('REMOVE');
+            $total_add    = $this->m_marketing->get_total_action_nmb('ADD');
+
+            $list = $this->m_marketing->get_datatables21();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->cat_id;
+                $row[] = $field->corak;
+                $row[] = $field->warna;
+                $row[] = $field->lebar_Jadi." ".$field->uom_lebar_jadi;
+                $row[] = $field->action;
+                $row[] = $field->id;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all21(),
+                "recordsFiltered" => $this->m_marketing->count_filtered21(),
+                "data" => $data,
+                "past_date" => $past_date,
+                "last_date" => $last_date,
+                'total_add' => $total_add,
+                'total_remove' => $total_remove,
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+        
+    }
 
 }
