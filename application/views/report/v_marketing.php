@@ -65,6 +65,7 @@
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodsgroupnmb'"><i class='fa fa-file-text-o'></i> Report Ready Goods NMB (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/groupproofing'"><i class='fa fa-file-text-o'></i> Report Proofing (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodscategory'"><i class='fa fa-file-text-o'></i> Report Ready Goods Category (GJD)</button>
+                        <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodscategorynmb'"><i class='fa fa-file-text-o'></i> Report Ready Goods Category NMB (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodscategorychanged'"><i class='fa fa-file-text-o'></i> Report Ready Changed Goods Category (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/goodstopush'"><i class='fa fa-file-text-o'></i> Report Goods To Push (GJD & GRG)</button>
                     </div>

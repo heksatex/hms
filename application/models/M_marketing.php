@@ -2510,6 +2510,125 @@ class m_marketing extends CI_Model
 		return $query->result();
 	}
 
+	var $column_order20 = array(null,null,'cat_id','corak','warna','lebar_Jadi','qty_jual','qty2_jual','jumlah_lot');
+	var $column_search20= array('cat_id','corak','warna','lebar_Jadi','qty_jual','qty2_jual','jumlah_lot');
+	var $order20  	  = array('cat_id' => 'asc','corak' => 'asc','warna' => 'asc');
+	var $table20      = "ready_goods_history_nmb";
+
+	function get_last_date_history_nmb()
+	{
+		// get last tgl
+		$this->db->SELECT('tanggal');
+		$this->db->from('ready_goods_history_nmb');
+		$this->db->group_by('date_format(tanggal, "%Y-%m-%d")');
+		$this->db->order_by('date_format(tanggal, "%Y-%m-%d") desc');
+		$this->db->limit(1);
+		$query = $this->db->get();
+		$resultq = $query->row();
+		return	$resultq->tanggal ?? '';
+
+	}
+
+	private function get_query_20()
+    {	
+		
+		$tanggal_history = $this->get_last_date_history_nmb();
+		
+		$this->db->SELECT('*');
+		$this->db->from($this->table20);
+		$this->db->where('tanggal',$tanggal_history);
+        return;
+    }
+
+    private function _get_datatables_query20()
+	{
+		
+        $this->get_query_20();
+
+        $i = 0;
+		foreach ($this->column_search20 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search20) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order20[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order20))
+		{
+			$order = $this->order20;
+			foreach($order as $key => $value){
+				$this->db->order_by($key, $value);
+			}
+		}
+	}
+
+	function get_datatables20()
+	{
+		$this->_get_datatables_query20();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered20()
+	{
+		$this->_get_datatables_query20();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all20()
+	{
+		$this->get_query_20();
+		return $this->db->count_all_results();
+	} 
+
+	public function count_all_no_group20()
+	{
+		$this->get_query_20();
+		return $this->db->count_all_results();
+	} 
+
+
+	public function get_data_ready_goods_category_nmb()
+	{
+		$this->get_query_20();
+		$order = $this->order20;
+		foreach($order as $key => $value){
+			$this->db->order_by($key, $value);
+		}
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	public function get_query_20_print($category)
+    {	
+		
+		$tanggal_history = $this->get_query_20();
+		$this->db->where('cat_id',$category);
+		$query = $this->db->get();
+		return $query->result();
+    }
+
 
 
 }
