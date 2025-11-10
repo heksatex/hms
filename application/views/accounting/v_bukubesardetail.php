@@ -338,7 +338,7 @@
                         let s_awal = 0;
                         let s_akhir = 0;
                         let tbody = $("<tbody />");
-
+                        let linkUrl = '#';
                         arr_filter.push({
                             tgldari: tgldari,
                             tglsampai: tglsampai,
@@ -374,10 +374,13 @@
                             credit = 0;
                             s_akhir = value.saldo_awal;
                             $.each(value.tmp_data_isi, function(key, value2) {
+                                linkUrl = "<?php echo site_url('accounting/jurnalentries/edit/') ?>" + value2.kode_entries_encr;
+                                noBuktiHtml = `<a href="${linkUrl}" target="_blank">${value2.kode_entries}</a>`;
                                 var tr3 = $("<tr>").append(
                                     $("<td>").html(no++),
                                     $("<td align=''>").text(value2.tanggal),
-                                    $("<td align=''>").text(value2.kode_entries),
+                                    // $("<td align=''>").text(value2.kode_entries),
+                                    $("<td align=''>").html(noBuktiHtml),
                                     $("<td align=''>").text(value2.origin),
                                     $("<td class='ket-acc'>").text(value2.keterangan),
                                     $("<td align='right'>").text(formatNumber(value2.debit.toFixed(2))),

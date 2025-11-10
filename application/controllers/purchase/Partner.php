@@ -127,6 +127,7 @@ class Partner extends MY_Controller {
             $delivery_state = addslashes($this->input->post('delivery_state'));
             $delivery_country = addslashes($this->input->post('delivery_country'));
             $delivery_zip = addslashes($this->input->post('delivery_zip'));
+            $saldo_awal_utang = addslashes($this->input->post('saldo_awal_utang'));
 
             $check_customer = $this->input->post('customer');
             $check_supplier = $this->input->post('supplier');
@@ -154,26 +155,40 @@ class Partner extends MY_Controller {
                 "fax" => $fax,
                 "email" => $email,
                 "customer" => $check_customer,
-                "supplier" => $check_supplier
+                "supplier" => $check_supplier,
+                "saldo_awal_utang" => $saldo_awal_utang
             ];
             $jenis_log = "create";
             $id_encrypt = "";
+
+            $cek = $this->m_partner->cek_partner_by_nama($name)->row_array();
+            if($cek){
+                if($id != '' AND $cek['id'] != decrypt_url($id)){
+                    throw new \Exception('Name allready exist !', 409);
+                }
+                if($id === ''){
+                    throw new \Exception('Name allready exist !', 409);
+                }
+            }
+
             if ($id === "") {
+                $model->setTables("partner")->save($data);
                 $last_id = $this->m_partner->get_last_id_partner();
                 $id_encrypt = encrypt_url($last_id);
-                $model->setTables("partner")->save($data);
             } else {
                 $jenis_log = "edit";
                 $last_id = decrypt_url($id);
                 $model->setTables("partner")->setWheres(["id"=>$last_id])->update($data);
             }
             $note_log = $last_id . " | " . $name . " | " . $invoice_street . " | " . $invoice_city . " | " . $invoice_zip;
-            $this->_module->gen_history($sub_menu, $last_id, $jenis_log, $note_log, $username);
+            $this->_module->gen_history_deptid($sub_menu, $last_id, $jenis_log, $note_log, $username,'PPRT');
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "id" => $id_encrypt)));
         } catch (Exception $ex) {
-            
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('status' => 'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
         }

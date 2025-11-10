@@ -216,7 +216,7 @@ class Partner extends MY_Controller
 
 	                $jenis_log = "create";
 	                $note_log  = $last_id." | ".$name." | ".$invoice_street." | ".$invoice_city." | ".$invoice_zip." | ".$buyer_code;
-	                $this->_module->gen_history($sub_menu, $last_id, $jenis_log, $note_log, $username);
+	                $this->_module->gen_history_deptid($sub_menu, $last_id, $jenis_log, $note_log, $username,'PRT');
 
 	        		$callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success', 'kode_encrypt' => $id_encrypt);
 
@@ -226,7 +226,7 @@ class Partner extends MY_Controller
 
 	                $jenis_log = "edit";
 	                $note_log  = $id." | ".$name." | ".$invoice_street." | ".$invoice_city." | ".$invoice_zip." | ".$buyer_code;
-	                $this->_module->gen_history($sub_menu, $id, $jenis_log, $note_log, $username);
+	                $this->_module->gen_history_deptid($sub_menu, $id, $jenis_log, $note_log, $username,'PRT');
 
 	        		$callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 

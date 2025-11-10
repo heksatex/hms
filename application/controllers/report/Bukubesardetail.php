@@ -95,6 +95,7 @@ class Bukubesardetail extends MY_Controller
 
                 $tmp_data_akun_isi[] = array(
                     'tanggal' => date("Y-m-d",strtotime($datas2->tanggal)),
+                    'kode_entries_encr' => encrypt_url($datas2->kode_entries),
                     'kode_entries' => $datas2->kode_entries,
                     'origin' => $datas2->origin,
                     'keterangan' => $datas2->keterangan,
