@@ -2978,5 +2978,418 @@ class Marketing extends MY_Controller
 
     }
 
+    function readygoodscategorynmb()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $this->load->view('report/v_marketing_view_ready_goods_category_nmb', $data);
+    }
+
+
+    function get_data_ready_goods_category_nmb()
+    {
+  
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables20();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                // $row[] = $link;
+                // $row[] = $field->file_name;
+                $row[] = $field->cat_id;
+                $row[] = $field->corak;
+                $row[] = $field->warna;
+                $row[] = $field->lebar_Jadi." ".$field->uom_lebar_jadi;
+                $row[] = $field->qty_jual.' '.$field->uom_jual;
+                $row[] = $field->qty2_jual.' '.$field->uom2_jual;
+                $row[] = $field->jumlah_lot;
+                $row[] = $field->corak.",".$field->warna.",".$field->lebar_Jadi." ".$field->uom_lebar_jadi;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all20(),
+                "recordsFiltered" => $this->m_marketing->count_filtered20(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group20(),
+                "date_history"=>$this->m_marketing->get_last_date_history()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        } 
+        
+    }
+
+
+    public function print_category_nmb() 
+    {
+
+        $this->load->library('Pdf');//load library pdf
+        
+        $pdf       = new PDF_Pagegroup('P','mm',array(210,297));// A4
+        // $pdf       = new PDF_Code128('P','mm',array(215,330));// F4
+
+        // $category  = ['Q9','Q50','Q250','Q500','Q750','Q1000','QX'];
+        $category  = ['Q1','Q2','Q3'];
+        $date_last = $this->m_marketing->get_last_date_history();
+
+        $cat_id    = "";
+
+        foreach($category as $cat){
+            
+            if(!empty($cat_id) AND $cat_id != $cat){
+                $pdf->StartPageGroup();
+            // $pdf->AddPage();
+            // $pdf->AliasNbPages('{totalPages}');
+
+            }
+            $cat_id = $cat;
+            $pdf->SetMargins(0,0,0);
+            $pdf->SetAutoPageBreak(False);
+            $pdf->StartPageGroup();
+            $pdf->AddPage();
+            $pdf->setTitle('Ready Goods Category NMB');
+
+            $pdf->SetFont('Arial','B',14,'C');
+            $pdf->Cell(0,20,'Ready Goods Category NMB',0,0,'C');
+            
+            $pdf->SetFont('Arial','',7,'C');
+
+            $pdf->setXY(5,7);
+            $pdf->AliasNbPages('{totalPages}');
+            // $pdf->Multicell(30,4, "Page " . $pdf->PageNo(2) . "/{totalPages}", 0,'L');
+            $pdf->Multicell(30,4, "Page " . $pdf->GroupPageNo() . "/".$pdf->PageGroupAlias(), 0,'L');
+
+            $pdf->setXY(160,7);
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+
+            $pdf->SetFont('Arial','B',8,'C');
+        
+            $pdf->setXY(5,15);
+            $pdf->Multicell(17,4,'Category ',0,'L');
+            $pdf->setXY(32, 15);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(33,15);
+            $pdf->Multicell(40,4,$cat,0,'L');
+
+            $pdf->setXY(5,20);
+            $pdf->Multicell(30,4,'Data Per Tanggal ',0,'L');
+            $pdf->setXY(32, 20);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(33,20);
+            $pdf->Multicell(40,4,$date_last,0,'L');
+            
+            $no   = 1;
+            $y    = 20;   
+            $column2 = 0;
+            $loop = 0;
+
+            $pdf->SetFont('Arial','B',8,'C');
+            // get
+            $data_cat = $this->m_marketing->get_query_13_print($cat);
+            $pdf->setXY(5,$y+5);
+            $pdf->Cell(10, 5, 'No.', 1, 0, 'L');
+            $pdf->Cell(80, 5, 'Article', 1, 0, 'L');
+            $pdf->Cell(50, 5, 'Color', 1, 0, 'L');
+            $pdf->Cell(30, 5, 'Size', 1, 0, 'L');
+            $pdf->Cell(25, 5, 'Qty', 1, 1, 'R');
+            $pdf->SetFont('Arial','',7,'C');
+            foreach($data_cat as $row){
+
+                $cellWidth =80; //lebar sel
+                $cellHeight=3; //tinggi sel satu baris normal
+                $corak = $row->corak;
+                if($pdf->GetStringWidth( $corak ) <  $cellWidth  ){
+                    // jika tidak
+                    $line =1;
+                }else{
+                    //jika ya, maka hitung ketinggian yang dibutuhkan untuk sel akan dirapikan
+                    //dengan memisahkan teks agar sesuai dengan lebar sel
+                    //lalu hitung berapa banyak baris yang dibutuhkan agar teks pas dengan sel
+                    // $plus_length  = round($pdf->GetStringWidth( strtoupper($corak) )) - strlen($corak);
+                    $textLength =strlen($corak) ;	//total panjang teks
+                    $errMargin  =7;		//margin kesalahan lebar sel, untuk jaga-jaga
+                    $startChar  =0;		//posisi awal karakter untuk setiap baris
+                    $maxChar    =0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+                    $textArray  =array();	//untuk menampung data untuk setiap baris
+                    $tmpString  ="";		//untuk menampung teks untuk setiap baris (sementara)
+                    $tmpString2  ="";		//untuk menampung teks untuk setiap baris (sementara)
+                        
+                    while($startChar < $textLength){ //perulangan sampai akhir teks
+                        //perulangan sampai karakter maksimum tercapai
+                        while( $pdf->GetStringWidth( $tmpString ) < ($cellWidth-$errMargin) && ($startChar+$maxChar) < $textLength ) {
+                            $maxChar++;
+                            $tmpString=substr($corak,$startChar,$maxChar);
+                        }
+                        //pindahkan ke baris berikutnya
+                        $startChar=$startChar+$maxChar;
+                        //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                        array_push($textArray,$tmpString);
+                        //reset variabel penampung
+                        $maxChar  =0;
+                        $tmpString='';
+                    }
+                    //dapatkan jumlah baris
+                    $line=count($textArray);
+                }
+
+                //tulis cellnya
+                $pdf->SetFillColor(255,255,255);
+                $pdf->Cell(5,($line * $cellHeight),'',0,0,'',true); //sesuaikan ketinggian dengan jumlah garis
+                $pdf->Cell(10,($line * $cellHeight),$no,'L,B',0,'L'); 
+
+                $xPos=$pdf->GetX();
+                $yPos=$pdf->GetY();
+                $pdf->Multicell($cellWidth,$cellHeight,$corak,'B','L');
+
+                $pdf->SetXY($xPos + $cellWidth , $yPos);
+                $pdf->Multicell(50,($line * $cellHeight),$row->warna,'B','L');
+
+                $pdf->SetXY($xPos + 50 + $cellWidth , $yPos);
+                $pdf->Multicell(30,($line * $cellHeight),$row->lebar_Jadi.' '.$row->uom_lebar_jadi,'B','R');
+
+                $pdf->SetXY($xPos + 80 + $cellWidth , $yPos);
+                $pdf->Multicell(25,($line * $cellHeight),number_format($row->qty_jual,2).' '.$row->uom_jual,'B,R','R');
+                
+                $no++;
+                // $gulung++;
+
+                if($pdf->GetY() > 280){
+                        $pdf->SetMargins(0,0,0);
+                        $pdf->SetAutoPageBreak(False);
+                        // $pdf->StartPageGroup();
+                        $pdf->AddPage();
+                        $pdf->setTitle('Ready Goods Category NMB');
+
+                        $pdf->SetFont('Arial','B',14,'C');
+                        $pdf->Cell(0,20,'Ready Goods Category NMB',0,0,'C');
+                        
+                        $pdf->SetFont('Arial','',7,'C');
+
+                        $pdf->setXY(5,7);
+                        // $pdf->AliasNbPages('{totalPages}');
+                        // $pdf->Multicell(30,4, "Page " . $pdf->PageNo() . "/{totalPages}", 0,'L');
+                        $pdf->Multicell(30,4, "Page " . $pdf->GroupPageNo() . "/".$pdf->PageGroupAlias(), 0,'L');
+
+                        $pdf->setXY(160,7);
+                        $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+                        $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+
+                        $pdf->SetFont('Arial','B',8,'C');
+                    
+                        $pdf->setXY(5,15);
+                        $pdf->Multicell(17,4,'Category ',0,'L');
+                        $pdf->setXY(32, 15);
+                        $pdf->Multicell(5, 4, ':', 0, 'L');
+                        $pdf->setXY(33,15);
+                        $pdf->Multicell(40,4,$cat,0,'L');
+
+                        $pdf->setXY(5,20);
+                        $pdf->Multicell(30,4,'Data Per Tanggal ',0,'L');
+                        $pdf->setXY(32, 20);
+                        $pdf->Multicell(5, 4, ':', 0, 'L');
+                        $pdf->setXY(33,20);
+                        $pdf->Multicell(40,4,$date_last,0,'L');
+
+                        $y    = 20;   
+                        $column2 = 0;
+
+                        $pdf->setXY(5,$y+5);
+                        $pdf->Cell(10, 5, 'No.', 1, 0, 'L');
+                        $pdf->Cell(80, 5, 'Article', 1, 0, 'L');
+                        $pdf->Cell(50, 5, 'Color', 1, 0, 'L');
+                        $pdf->Cell(30, 5, 'Size', 1, 0, 'L');
+                        $pdf->Cell(25, 5, 'Qty', 1, 1, 'R');
+                        $pdf->SetFont('Arial','',7,'C');
+                
+                }
+
+                $loop++;
+
+            }
+
+
+        }
+
+        $pdf->Output();
+    }
+
+    function print_category_tag_nmb() {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+
+                $changed     = $this->input->post('changed'); 
+                $data_print  = json_decode($this->input->post('data_print'),true); 
+
+                if(empty($data_print)){
+                    throw new \Exception('Data Print tidak ditemukan !', 500);
+                }else{
+                    
+                    $data_prints = $this->print_hanger_nmb($changed,$data_print);
+                    if(empty($data_prints)){
+                        throw new \Exception('Data Print tidak ditemukan !', 500);
+                    }
+                    $callback = array('status' => 'success', 'message' => 'Print Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success', 'data_print' =>$data_prints);
+                }
+                $this->output->set_status_header(200)
+                        ->set_content_type('application/json', 'utf-8')
+                        ->set_output(json_encode($callback));
+            }
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    function print_hanger_nmb($changed,$data_print)
+    {
+        $data_print_array = array();
+        
+        if($changed == 'true'){
+            foreach ($data_print as $dp){
+                $id = $dp['rowId'];
+                $get = $this->m_marketing->get_data_changed_all($id);
+                $lebar_jadi  = $get->lebar_Jadi;
+                $uom_lebar_jadi  = $get->uom_lebar_jadi;
+                $data_print_array[] = array(
+                                'article'   => $get->corak ?? '',
+                                'color'     => $get->warna ?? '',
+                                'size'      => $lebar_jadi.' '.$uom_lebar_jadi,
+                );
+            }
+
+        }else{
+            foreach ($data_print as $dp){
+                foreach($dp as $val){
+                    $dp_ex = explode(",",$val);
+                    $data_print_array[] = array(
+                                'article'   => $dp_ex[0] ?? '',
+                                'color'     => $dp_ex[1] ?? '',
+                                'size'      => $dp_ex[2] ?? '',
+                    );
+                }
+            }
+        }
+        $this->hanger->addDatas($data_print_array);
+       
+        return $this->hanger->generate();
+    }
+
+
+    function export_excel_ready_goods_category_nmb()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_data_ready_goods_category_nmb();
+        $get_last_date = $this->m_marketing->get_last_date_history_nmb();
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+        $title = 'Report Ready Goods Category NMB';
+        
+        
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1',$title);
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A2','Data Per Tanggal');
+ 		$object->getActiveSheet()->getStyle('A2')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A2:D2');
+
+ 		$object->getActiveSheet()->SetCellValue('E2',": ".$get_last_date);
+ 		$object->getActiveSheet()->getStyle('E2')->getAlignment()->setIndent(1);
+
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:Q4")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Category' , 'Article', 'Color', 'Size', 'Uom Size', 'Qty', 'Uom', 'Qty2', 'Uom2','Gl/Lot');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 4, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+            $object->getActiveSheet()->getStyle($val.'4')->applyFromArray($styleArray);
+        }
+        $rowCount  = 5;
+        $num       = 1;
+        foreach ($get_data as $val) {
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->cat_id);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->corak);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->warna);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lebar_Jadi);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->jumlah_lot);
+			
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+
+		}
+        
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = $title.".xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
+    }
+
 
 }
