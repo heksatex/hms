@@ -102,9 +102,9 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Faktur Internal</label></div>
+                                                <div class="col-xs-4"><label class="form-label">No Retur Internal</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_faktur_internal" id="no_faktur_internal" class="form-control input-sm no_faktur_internal"/>
+                                                    <input type="text" name="no_retur_internal" id="no_retur_internal" class="form-control input-sm no_retur_internal"/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -213,7 +213,7 @@
 
             const addTotable = ((nosj) => {
                 $.ajax({
-                    url: "<?= base_url('sales/fakturpenjualan/addsj') ?>",
+                    url: "<?= base_url('sales/returpenjualan/addsj') ?>",
                     type: "POST",
                     data: {
                         no: nosj

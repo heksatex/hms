@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-
+    <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -562,7 +562,7 @@ if ($datas->status == 'confirm') {
                         false
 
                         );
-                $(".select2").select2();
+                
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
@@ -598,6 +598,7 @@ if ($datas->status == 'confirm') {
                     e.preventDefault();
                     $(".edited-read").removeAttr("readonly");
                     $(".edited").removeAttr("disabled");
+                    $(".select2").select2();
                     setCurr();
                     $(this).hide();
                     $("#btn-cancel").show();
@@ -611,6 +612,7 @@ if ($datas->status == 'confirm') {
                     $(".ftotal_nominal").hide();
                     $(".total_nominal").show();
                     $("#btn-simpan").show();
+                    getPartner();
                     setCoaItem();
                     $("#btn-confirm").hide();
                     edit = true;
@@ -646,7 +648,8 @@ if ($datas->status == 'confirm') {
                 $(".total-nominal").on("click", function () {
                     calculateTotal();
                 });
-                $("#partner").select2({
+                const getPartner = (()=>{
+                    $("#partner").select2({
                     placeholder: "Pilih",
                     allowClear: true,
                     ajax: {
@@ -676,6 +679,7 @@ if ($datas->status == 'confirm') {
                         }
                     }
                 });
+                })
 
                 $(".partner").on("change", function () {
                     var ttt = $(".partner").find(":selected");

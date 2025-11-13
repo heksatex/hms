@@ -178,7 +178,7 @@ class Returpenjualan extends MY_Controller {
                     ->setSearch(["do.no_sj", "do.no_picklist", "pr.nama", "msg.nama_sales_group"])
                     ->setOrders([null, "do.no_sj", "do.no_picklist", "pr.nama", "msg.nama_sales_group"])
                     ->setGroups(["do.no_sj"])
-                    ->setOrder(["do.tanggal_dokumen" => "desc"])->setWheres(["do.status" => "done", "faktur" => 0])
+                    ->setOrder(["do.tanggal_dokumen" => "desc"])->setWheres(["do.status" => "done", "faktur" => 1])
                     ->setSelects(["do.no_sj,do.no_picklist", "pr.nama as buyer", "msg.nama_sales_group as marketing"]);
             $exp = implode("|", ($this->sj_tipe[$tipe] ?? []));
             switch ($tipe) {
@@ -220,6 +220,76 @@ class Returpenjualan extends MY_Controller {
         }
     }
     
+    public function list_data() {
+        try {
+            $data = array();
+            $model = new $this->m_global;
+            $model->setTables("acc_retur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_retur_penjualan.status", "left")
+                    ->setOrder(["acc_retur_penjualan.tanggal" => "desc"])->setSearch(["no_retur", "no_faktur_pajak", "no_sj", "partner_nama","no_retur_internal"])
+                    ->setOrders([null, "no_retur", "no_faktur_pajak", "tanggal", "no_sj", "marketing_nama", "partner_nama"])->setSelects(["acc_retur_penjualan.*", "nama_status"]);
+            $no = $_POST['start'];
+            $tanggal = $this->input->post("tanggal");
+            $marketing = $this->input->post("marketing");
+            if ($tanggal !== "") {
+                $tanggals = explode(" - ", $tanggal);
+                $model->setWheres(["date(tanggal) >=" => $tanggals[0], "date(tanggal) <=" => $tanggals[1]]);
+            }
+            if ($marketing !== "") {
+                $model->setWheres(["marketing_kode" => $marketing]);
+            }
+            foreach ($model->getData() as $key => $value) {
+                $no += 1;
+                $kode_encrypt = encrypt_url($value->no_retur);
+                $fk = ($value->no_retur_internal === '') ? $value->no_retur : $value->no_retur_internal;
+                $data [] = [
+                    $no,
+                    "<a href='" . base_url("sales/returpenjualan/edit/{$kode_encrypt}") . "'>{$fk}</a>",
+                    $value->no_faktur_pajak,
+                    $value->tanggal,
+                    $value->no_sj,
+                    $value->marketing_nama,
+                    $value->partner_nama,
+                    $value->nama_status
+                ];
+            }
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => $model->getDataCountAll("id"),
+                "recordsFiltered" => $model->getDataCountFiltered(),
+                "data" => $data,
+            ));
+            exit();
+        } catch (Exception $ex) {
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => [],
+            ));
+        }
+    }
+    
+    public function addsj() {
+        try {
+            $sj = $this->input->post("no");
+            $model = new $this->m_global;
+            $data = $model->setTables("delivery_order do")->setJoins("picklist p", "p.no = do.no_picklist")
+                            ->setJoins("mst_sales_group msg", "msg.kode_sales_group = p.sales_kode", "left")
+                            ->setJoins("partner pr", "pr.id = p.customer_id", "left")
+                            ->setSelects(["customer_id,pr.nama as customer", "p.sales_kode,msg.nama_sales_group as sales_nama"])
+                            ->setSelects(["p.keterangan"])->setWheres(["do.status" => "done", "do.no_sj" => $sj])->getDetail();
+
+            if (!$data) {
+                throw new \Exception('Data SJ tidak ditemukan', 500);
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+    
     public function simpan() {
         try {
             $sub_menu = $this->uri->segment(2);
@@ -237,7 +307,7 @@ class Returpenjualan extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $customer = $this->input->post("customer");
             $customerNama = $this->input->post("customer_nama");
-            $noFakturInternal = $this->input->post("no_faktur_internal");
+            $noReturInternal = $this->input->post("no_retur_internal");
             $noFakturPajak = $this->input->post("no_faktur_pajak");
             $kurs = $this->input->post("kurs");
             $kursNominal = $this->input->post("kurs_nominal");
@@ -247,17 +317,48 @@ class Returpenjualan extends MY_Controller {
             $lock = "token_increment WRITE,main_menu_sub READ, log_history WRITE,delivery_order do WRITE,delivery_order_detail dod READ,picklist_detail pd READ,"
                     . "acc_retur_penjualan WRITE, acc_retur_penjualan_detail WRITE";
             $this->_module->lock_tabel($lock);
-            $checkSJ = $model->setTables("delivery_order do")->setJoins("delivery_order_detail dod", "(do.id = do_id and dod.status = 'done')", "left")
+            $checkSJ = $model->setTables("delivery_order do")->setJoins("delivery_order_detail dod", "(do.id = do_id and dod.status = 'retur')", "left")
                             ->setJoins("picklist_detail pd", "picklist_detail_id = pd.id")->setWheres(["do.no_sj" => $nosj])
                             ->setGroups(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom"])
                             ->setSelects(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom", "faktur"])
                             ->setSelects(["count(dod.barcode_id) as total_lot", "sum(pd.qty) as total_qty"])->getData();
             if (count($checkSJ) > 0) {
-                if ((string) $checkSJ[0]->faktur === "1") {
-                    throw new \Exception("SJ {$nosj} Sudah masuk Retur penjualan", 500);
+                if ((string) $checkSJ[0]->faktur === "0") {
+                    throw new \Exception("SJ {$nosj} Belum masuk Faktur penjualan", 500);
                 }
                 $dariSJ = "1";
             }
+            if ($noReturInternal !== "") {
+                $fk = $model->setTables("acc_retur_penjualan")->setWheres(["no_retur_internal" => $noReturInternal])->getDetail();
+                if ($fk) {
+                    throw new \Exception("No Retur Internal sudah terpakai", 500);
+                }
+            }
+            
+            if (!$noRetur = $this->token->noUrut('returpenjualan', date('y', strtotime($tanggal)) . '/' . getRomawi(date('m', strtotime($tanggal))), true)
+                            ->generate('RP/', '/%04d')->get()) {
+                throw new \Exception("No Retur tidak terbuat", 500);
+            }
+            
+            $header = [
+                "no_retur" => $noRetur,
+                "no_retur_internal" => $noReturInternal,
+                "tanggal" => $tanggal,
+                "tipe" => $tipe,
+                "no_sj" => $nosj,
+                "po_cust" => $poCust,
+                "marketing_kode" => $marKode,
+                "marketing_nama" => $marNama,
+                "partner_id" => $customer,
+                "partner_nama" => $customerNama,
+                "no_faktur_pajak" => $noFakturPajak,
+                "kurs" => $kurs,
+                "kurs_nominal" => $kursNominal,
+                "create_date" => date("Y-m-d H:i:s"),
+                "dari_sj"=>$dariSJ
+            ];
+            
+            
         } catch (Exception $ex) {
             
         }

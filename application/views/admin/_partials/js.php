@@ -101,15 +101,15 @@
             left_side = formatNumber(left_side);
 
             // validate right side
-            right_side = formatNumber(right_side);
-
+//            right_side = formatNumber(right_side);
+            right_side = right_side.replace(/\D/g, "").replace(/\B(?=(\d{4})+(?!\d))/g, "");
             // On blur make sure 2 numbers after decimal
             if (blur === "blur") {
                 right_side += "00";
             }
 
             // Limit decimal to only 2 digits
-            right_side = right_side.substring(0, 2);
+            right_side = right_side.substring(0, 4);
 
             // join number by .
             input_val = left_side + "." + right_side;

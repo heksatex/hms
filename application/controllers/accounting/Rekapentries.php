@@ -42,7 +42,7 @@ class Rekapentries extends MY_Controller {
     }
 
     protected function getData() {
-//        try {
+        try {
         $periode = $this->input->post("periode");
         $jurnal = $this->input->post("jurnal");
         $filter = $this->input->post("filter");
@@ -68,9 +68,9 @@ class Rekapentries extends MY_Controller {
                 ->setWheres(array_merge(["je.status" => "posted", "je.tipe" => $jurnal], $where))
                 ->setSelects(["mj.nama as nama_jurnal", "acc_coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
                     "origin,date(tanggal_dibuat) as tanggal_dibuat"]);
-//        } catch (Exception $ex) {
-//            
-//        }
+        } catch (Exception $ex) {
+            throw $ex;
+        }
     }
 
     public function index() {

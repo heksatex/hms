@@ -100,7 +100,7 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>No Faktur</th>
+                                            <th>No Retur</th>
                                             <th>No Faktur Pajak</th>
                                             <th>Tanggal</th>
                                             <th>No SJ</th>
@@ -135,7 +135,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('sales/fakturpenjualan/list_data') ?>",
+                        "url": "<?php echo site_url('sales/returpenjualan/list_data') ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.tanggal = tanggal;

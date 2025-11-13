@@ -158,6 +158,9 @@ class Debitnote extends MY_Controller {
             $tanggal_sj = $this->input->post("tanggal_sj");
             $tax_lain = $this->input->post("tax_lain_id");
             $periode = $this->input->post("periode");
+            $no_fp = $this->input->post("no_fp");
+            $nota_retur = $this->input->post("nota_retur");
+            $tanggal_fp = $this->input->post("tanggal_fp");
 
             $item = [];
             $totals = 0.00;
@@ -215,8 +218,8 @@ class Debitnote extends MY_Controller {
             $head = new $this->m_global;
             $bd = clone $head;
             $dataUpdate = [
-                "no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain,
-                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode,
+                "no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain, "tanggal_fp" => $tanggal_fp,
+                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode, "no_fp" => $no_fp, "nota_retur" => $nota_retur,
                 "dpp_lain_valas" => $dppvalas,
                 "dpp_lain_rp" => round($nilaiDppLain),
                 "total_rp" => round($hutangrp),
@@ -477,6 +480,33 @@ class Debitnote extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
+        }
+    }
+
+    public function update_faktur($id) {
+        try {
+            $kode_decrypt = decrypt_url($id);
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username'));
+            $model = new $this->m_global;
+            $dt = $this->input->post("tanggal_fp");
+            $update = [
+                "tanggal_fp" => $dt,
+                "nota_retur" => $this->input->post("nota_retur"),
+                "no_fp" => $this->input->post("no_fp"),
+            ];
+            $model->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update($update);
+            $log = "Update " . logArrayToString("; ", $update);
+
+            $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 }

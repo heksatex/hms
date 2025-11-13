@@ -91,7 +91,10 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setSelects(array $selects) {
+    public function setSelects(array $selects,$clearBefore = false) {
+        if ($clearBefore) {
+            $this->selects = [];
+        }
         $this->selects = array_merge($this->selects, $selects);
         return $this;
     }

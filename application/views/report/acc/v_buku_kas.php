@@ -55,7 +55,7 @@
                                                         <label class="form-label">Kas</label>
                                                     </div>
                                                     <div class="col-xs-9 col-md-9">
-                                                        <select class="form-control input-sm select2 no_acc" name="kode_coa" id="kode_coa" required>
+                                                        <select class="form-control input-sm no_acc" name="kode_coa" id="kode_coa" required>
                                                             <option value=""></option>
                                                             <?php
                                                             foreach ($coa as $key => $value) {
@@ -65,6 +65,7 @@
                                                             }
                                                             ?>
                                                         </select>
+                                                        <input type="hidden" name="coa" id="coa">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6 col-xs-12">
@@ -87,21 +88,23 @@
                                 </div>
                                 <br>
                                 <br>
-                                
+
                             </form>
                             <div class="col-md-12 table-responsive divListviewHead">
                                 <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
                                     <table id="tblgiro" class="table table-condesed table-hover" border="1">
-                                        <tr>
-                                            <th  class="style bb ws no" >No</th>
-                                            <th class="style bb ws">Tanggal</th>
-                                            <th class="style bb ws">No Bukti</th>
-                                            <th class="style bb ws">Uraian</th>
-                                            <th class="style bb ws">No Acc</th>
-                                            <th class="style bb ws text-right">Debet</th>
-                                            <th class="style bb ws text-right">Kredit</th>
-                                            <th class="style bb ws text-right">Saldo</th>
-                                        </tr>
+                                        <thead id="tHead">
+                                            <tr>
+                                                <th  class="style bb ws no" >No</th>
+                                                <th class="style bb ws">Tanggal</th>
+                                                <th class="style bb ws">No Bukti</th>
+                                                <th class="style bb ws">Uraian</th>
+                                                <th class="style bb ws">No Acc</th>
+                                                <th class="style bb ws text-right">Debet</th>
+                                                <th class="style bb ws text-right">Kredit</th>
+                                                <th class="style bb ws text-right">Saldo</th>
+                                            </tr>
+                                        </thead>
                                         <tbody id="tBody" class="ws">
 
                                         </tbody>
@@ -117,7 +120,7 @@
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script>
             $(function () {
-                
+
                 //* Show collapse advanced search
                 $('#advancedSearch').on('shown.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
@@ -140,14 +143,18 @@
                         '1..P': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                     }
                 });
-
+                $("#kode_coa").on("change", function () {
+                    var selectedText = $(this).find('option:selected').text();
+                    $("#coa").val(selectedText);
+                });
                 $("#search").on("click", function () {
                     $.ajax({
                         url: "<?= base_url('report/bukukas/search') ?>",
                         type: "POST",
                         data: {
                             tanggal: $("#tanggal").val(),
-                            kode_coa: $("#kode_coa").val()
+                            kode_coa: $("#kode_coa").val(),
+                            coa: $("#coa").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -155,6 +162,7 @@
                             }));
                         },
                         success: ((data) => {
+                            $("#tHead").html(data.head);
                             $("#tBody").html(data.data);
                             unblockUI(function () {}, 100);
                         }),
