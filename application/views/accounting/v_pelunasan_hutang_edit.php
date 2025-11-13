@@ -295,7 +295,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume" border="1">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume" border="0">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no"></th>
