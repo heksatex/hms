@@ -44,42 +44,35 @@
             color: #000 !important;
         }
 
-        /* Kolom 1 & 7 → 100px */
-        #table-resume td:nth-child(1),
-        #table-resume th:nth-child(5) {
-            width: 100px;
-            min-width: 100px;
-            max-width: 100px;
-        }
-        #table-resume td:nth-child(8) {
-            width: 10px;
-            max-width: 15px;
-            min-width: 15px;
+        #table-resume th:nth-child(1),
+        #table-resume th:nth-child(8) {
+            width: 5%;
         }
 
-
-        #table-resume td:nth-child(2),
-        #table-resume td:nth-child(3),
-        #table-resume td:nth-child(4),
-        #table-resume td:nth-child(6) {
-            /* kolom tombol */
-            width: 120px;
-            min-width: 120px;
-            max-width: 120px;
+        #table-resume th:nth-child(2),
+        #table-resume th:nth-child(3),
+        #table-resume th:nth-child(4),
+        #table-resume th:nth-child(5),
+        #table-resume th:nth-child(6) {
+            width: 8%;
         }
 
-        #table-resume td:nth-child(7) {
-            /* sesuaikan lebar */
-            width: 170px;
-            min-width: 170px;
-            max-width: 170px;
-            /* agar select + small tetap sejajar */
+        #table-resume th:nth-child(7) {
+            width: 10%;
         }
 
-        #table-resume td {
+
+        #table-resume th {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        @media (max-width: 1366px) {
+            #table-resume th {
+                font-size: 11px;
+                padding: 4px;
+            }
         }
 
         .coa-info {
@@ -202,7 +195,7 @@
                                             <div class="col-md-12 table-responsive over">
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
-                                                        <div class="col-md-4 col-lg-3">
+                                                        <div class="col-md-3 col-lg-3">
                                                             <label>Invoice Akan dilunasi</label>
                                                         </div>
                                                         <div class="col-md-4">
@@ -250,10 +243,10 @@
                                             <div class="col-md-12 table-responsive over">
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
-                                                        <div class="col-md-4 col-lg-3">
+                                                        <div class="col-md-3 col-lg-3">
                                                             <label>Pelunasan</label>
                                                         </div>
-                                                        <div class="col-md-7 col-lg-5">
+                                                        <div class="col-md-9 col-lg-7">
                                                             <button class="btn btn-sm btn-default <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-kas-bank" name="btn-kas-bank" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-bank' style='color: green'></i> Kas Bank (<span id='tbk'>0</span>)</button>
                                                             <button class="btn btn-sm btn-default  <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-uang-muka" name="btn-uang-muka" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-money' style='color: blue'></i> Uang Muka (<span id='tum'>0</span>)</button>
                                                             <button class="btn btn-sm btn-default <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-retur" name="btn-retur" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-exchange' style='color: red'></i> Retur (<span id='tret'>0</span>)</button>
@@ -338,9 +331,9 @@
                                                     <div class="col-md-12 col-xs-12">
                                                         <div class="col-xs-4"><label>No Jurnal</label></div>
                                                         <div class="col-xs-8">
-                                                            <?php  $link = site_url('accounting/jurnalentries/edit/'.encrypt_url($list_jurnal->kode)) ?>
+                                                            <?php $link = site_url('accounting/jurnalentries/edit/' . encrypt_url($list_jurnal->kode)) ?>
 
-                                                            <?php echo ($list_jurnal->kode)? ': <a href="'.$link.'" target="_blank">'.$list_jurnal->kode.'</a>' : ''; ?>
+                                                            <?php echo ($list_jurnal->kode) ? ': <a href="' . $link . '" target="_blank">' . $list_jurnal->kode . '</a>' : ''; ?>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-xs-12">
@@ -1238,7 +1231,7 @@
                         let total_valas = 0.00;
                         let status = data.head.status;
                         let $metode = '';
-                        let $color  = 'warna-pelunasan';
+                        let $color = 'warna-pelunasan';
                         $.each(data.record, function(key, value) {
 
                             empty = false;
@@ -1266,7 +1259,7 @@
                             tbody.append(tr);
                             no++;
 
-                            if(value.tipe === 'koreksi') {
+                            if (value.tipe === 'koreksi') {
                                 $color = "warna-koreksi";
                             }
 
@@ -1278,8 +1271,8 @@
                         } else {
                             var trfoot = $("<tr class='style_total'>").append(
                                 $("<td colspan='7' class='text-right'>").text('Total'),
-                                $("<td class='text-right "+$color+" '>").text(formatNumber(total_rp)),
-                                $("<td class='text-right "+$color+" '>").text(formatNumber(total_valas)),
+                                $("<td class='text-right " + $color + " '>").text(formatNumber(total_rp)),
+                                $("<td class='text-right " + $color + " '>").text(formatNumber(total_valas)),
                                 $("<td colspan=''>").html('&nbsp'),
                             );
 
@@ -1604,7 +1597,7 @@
                             </button>
                         `);
                         $coaInfo.show();
-                        if(value.tipe_currency == 'Rp'){
+                        if (value.tipe_currency == 'Rp') {
                             loadCoaInfo(selectedId, value.id, $coaInfo.find('small'));
                         }
                     } else if (hasCoa == 'false') {
@@ -1628,7 +1621,7 @@
 
                 if (status == 'done') {
                     $coaInfo.show();
-                    if(value.tipe_currency == 'Rp'){
+                    if (value.tipe_currency == 'Rp') {
                         loadCoaInfo(koreksiId, value.id, $coaInfo.find('small'));
                     }
                 }
