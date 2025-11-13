@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-
+            <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -177,7 +177,7 @@
                                                     <th class="style" style="width: 120px">No Rek</th>
                                                     <th class="style" style="width: 120px">No.Cek/BG</th>
                                                     <th class="style" style="width: 140px">Tgl Cair</th>
-                                                    <th class="style" style="width: 100px">No.Acc(Kredit)</th>
+                                                    <th class="style" style="width: 110px">No.Acc(Kredit)</th>
                                                     <th class="style" style="width: 100px;text-align: right;" >Kurs</th>
                                                     <th class="style" style="width: 100px">Curr</th>
                                                     <th class="style text-right" style="width: 150px">Nominal</th>
@@ -677,12 +677,12 @@ if ($datas->status == 'confirm') {
                         false
 
                         );
-                $(".select2").select2();
+//                $(".select2").select2();
                 $("#btn-simpan").on("click", function (e) {
                     e.preventDefault();
                     $(".btn-save").trigger("click");
                 });
-                setCoaItem();
+//                setCoaItem();
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
@@ -729,6 +729,7 @@ if ($datas->status == 'confirm') {
                     e.preventDefault();
                     $(".edited-read").removeAttr("readonly");
                     $(".edited").removeAttr("disabled");
+                    $(".select2").select2();
                     setCurr();
                     $(this).hide();
                     $("#btn-cancel").show();
@@ -747,6 +748,7 @@ if ($datas->status == 'confirm') {
                     setCoaItem();
                     $("#btn-confirm").hide();
                     edit = true;
+                    getPartner();
                 });
 
                 $("#btn-cancel").on("click", function (e) {
@@ -781,7 +783,8 @@ if ($datas->status == 'confirm') {
                 $(".total-nominal").on("click", function () {
                     calculateTotal();
                 });
-                $("#partner").select2({
+                const getPartner = (()=>{
+                    $("#partner").select2({
                     placeholder: "Pilih",
                     allowClear: true,
                     ajax: {
@@ -810,6 +813,7 @@ if ($datas->status == 'confirm') {
                         error: function (xhr, ajaxOptions, thrownError) {
                         }
                     }
+                })
                 });
 
                 $(".partner").on("change", function () {

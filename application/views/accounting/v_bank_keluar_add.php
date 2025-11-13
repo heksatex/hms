@@ -10,6 +10,7 @@
                 border:  1px solid #66afe9;
             }
         </style>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">

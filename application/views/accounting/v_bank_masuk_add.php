@@ -6,10 +6,8 @@
             #btn-edit,#btn-cancel,#btn-print,.btn-save,#btn-confirm {
                 display: none;
             }
-            .select2-container--focus{
-                border:  1px solid #66afe9;
-            }
         </style>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -118,7 +116,7 @@
                             </div>
                             <div class="box-footer">
                                 <div class="col-md-12 table-responsive over">
-                                    <table class="table table-condesed table-hover rlstable" width="100%" id="bankmasuk-detail" style="min-width: 105%">
+                                    <table class="table table-condesed table-hover rlstable" width="100%" id="bankmasuk-detail" style="min-width: 110%">
                                         <thead>
                                         <th class="style" style="width: 5px">No.</th>
                                         <th class="style" style="width: 150px">Uraian</th>
@@ -126,7 +124,7 @@
                                         <th class="style" style="width: 120px">No Rek</th>
                                         <th class="style" style="width: 120px">No.Cek/BG</th>
                                         <th class="style" style="width: 140px">Tgl Cair</th>
-                                        <th class="style" style="width: 100px">No.Acc(Kredit)</th>
+                                        <th class="style" style="width: 110px">No.Acc(Kredit)</th>
                                         <th class="style" style="width: 100px;text-align: right;" >Kurs</th>
                                         <th class="style" style="width: 100px">Curr</th>
                                         <th class="style text-right" style="width: 150px">Nominal</th>

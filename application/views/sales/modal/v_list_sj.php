@@ -5,6 +5,7 @@
                 <tr>
                     <th class="style no">No</th>
                     <th class="style">Surat Jalan</th>
+                    <th class="style">Tanggal SJ</th>
                     <th class="style">Picklist</th>
                     <th class="style">Buyer</th>
                     <th class="style">Marketing</th>
@@ -42,7 +43,7 @@
 
             "columnDefs": [
                 {
-                    "targets": [0, 5],
+                    "targets": [0, 6],
                     "orderable": false
                 }
             ],

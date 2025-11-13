@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -80,7 +80,7 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label required">No ACC (Kredit)</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <select class="form-control input-sm no_acc edited" name="no_acc" style="width: 100%;" required>
+                                                    <select class="form-control input-sm select2 no_acc edited" name="no_acc" style="width: 100%;" required disabled>
                                                         <option value=""></option>
                                                         <?php
                                                         foreach ($coa as $key => $value) {
@@ -698,7 +698,7 @@ if ($datas->status == 'confirm') {
                         false
 
                         );
-                $(".select2").select2();
+
                 $(".nominal").on("blur", function () {
                     calculateTotal();
                 });
@@ -731,6 +731,7 @@ if ($datas->status == 'confirm') {
 
                 $("#btn-edit").on("click", function (e) {
                     e.preventDefault();
+                    $(".select2").select2();
                     $(".edited-read").removeAttr("readonly");
                     $(".edited").removeAttr("disabled");
                     setCurr();
@@ -750,6 +751,7 @@ if ($datas->status == 'confirm') {
                     setCoaItem();
                     $("#btn-confirm").hide();
                     edit = true;
+                    getPartner();
                 });
 
                 $("#btn-cancel").on("click", function (e) {
@@ -782,35 +784,37 @@ if ($datas->status == 'confirm') {
 //                $(".no_acc").on("change", function () {
 //                    setBank();
 //                });
-                $("#partner").select2({
-                    placeholder: "Pilih",
-                    allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
-                        type: "GET",
-                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term,
-                                jenis: "supplier"
-                            };
-                        },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                results.push({
-                                    id: item.id,
-                                    text: item.nama
+                const getPartner = (() => {
+                    $("#partner").select2({
+                        placeholder: "Pilih",
+                        allowClear: true,
+                        ajax: {
+                            dataType: 'JSON',
+                            type: "GET",
+                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                            delay: 250,
+                            data: function (params) {
+                                return{
+                                    search: params.term,
+                                    jenis: "supplier"
+                                };
+                            },
+                            processResults: function (data) {
+                                var results = [];
+                                $.each(data.data, function (index, item) {
+                                    results.push({
+                                        id: item.id,
+                                        text: item.nama
+                                    });
                                 });
-                            });
-                            return {
-                                results: results
-                            };
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
+                                return {
+                                    results: results
+                                };
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                            }
                         }
-                    }
+                    })
                 });
 
                 $(".partner").on("change", function () {
@@ -819,10 +823,8 @@ if ($datas->status == 'confirm') {
                     $("#lain_lain").val("");
                 });
 
-                $(".no_acc").select2({
-                    disabled: true
-                });
-                $(".no_acc").prop("disabled", true);
+
+//                $(".no_acc").prop("disabled", true);
                 $(".total-nominal").on("click", function () {
                     calculateTotal();
                 });

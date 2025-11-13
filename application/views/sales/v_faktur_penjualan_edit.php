@@ -45,7 +45,7 @@
             <?php
         }
         ?>
-
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
 
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
@@ -160,7 +160,7 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="hidden" class="form-control input-sm customer clear-tipe" id="customer" name="customer" value="<?= $datas->partner_id ?>">
-                                                    <input type="text" class="form-control input-sm customer_nama clear-tipe edited-read" id="customer_nama" name="customer_nama" value="<?= $datas->partner_nama ?>" readonly>
+                                                    <input type="text" class="form-control input-sm customer_nama clear-tipe" id="customer_nama" name="customer_nama" value="<?= $datas->partner_nama ?>" readonly>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -173,7 +173,7 @@
                                                 <div class="col-xs-4"><label class="form-label">No Faktur Pajak</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="no_faktur_pajak" id="no_faktur_pajak" class="form-control input-sm no_faktur_pajak edited-read" value="<?= $datas->no_faktur_pajak ?>"
-                                                           <?= ($datas->status !== 'confirm') ? 'readonly':"" ?>/>
+                                                           <?= ($datas->status !== 'confirm') ? 'readonly' : "" ?>/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -206,16 +206,16 @@
                                             <div class="table-responsive over">
                                                 <table class="table table-condesed table-hover rlstable" id="fpenjualan" style="min-width: 105%; padding: 0 0 0 0 !important;">
                                                     <caption><?php if ($datas->status === 'draft' && $datas->dari_sj === "0") { ?>
-                                                        
+
                                                             <button type="button" class="btn btn-success btn-sm btn-rmv-item btn-add-item" style="display: none;" title="Tambah Data"><i class="fa fa-plus-circle"></i></button>
                                                         <?php } ?>
 
                                                         <button type="button" class="btn btn-primary btn-sm btn-rmv-item btn-split" style="display: none;" >Join Item</button>
                                                         <?php if ($datas->dari_sj === "0") { ?>
-                                                        
+
                                                             <button type="button" class="btn btn-danger btn-sm btn-rmv-item btn-delete-item" style="display: none;" >Delete Item</button>
                                                         <?php } ?>
-                                                        
+
 
                                                     </caption>
                                                     <thead>
@@ -227,7 +227,7 @@
                                                     <th class="style" style="width: 60px;">UOM LOT</th>
                                                     <th class="style text-right" style="width: 75px">QTY</th>
                                                     <th class="style" style="width: 100px">No ACC</th>
-                                                    <th class="style text-right" style="width: 120px">Harga</th>
+                                                    <th class="style text-right" style="width: 100px">Harga</th>
                                                     <th class="style text-right" style="width: 120px">Jumlah</th>
                                                     </thead>
                                                     <tbody>
@@ -256,7 +256,7 @@
                                                                 <td>
                                                                     <!--<input class="form-control input-sm  no_po edited-read no_po_<?= $key ?>" value="<?= $value->no_po ?>" name="nopo[]" readonly>--> 
                                                                     <textarea class="form-control no_po edited-read no_po_<?= $key ?>"  name="nopo[]" readonly><?= $value->no_po ?></textarea>
-                                                                    
+
                                                                 </td>
                                                                 <td class="text-right">
                                                                     <input type="text" name="qtylot[]" value="<?= "{$value->qty_lot}" ?>" 
@@ -283,7 +283,7 @@
                                                                         <?php
                                                                         if ($value->no_acc !== "") {
                                                                             ?>
-                                                                            <option value="<?= $value->no_acc ?>" selected><?= $value->coa_nama ?></option>
+                                                                            <option value="<?= $value->no_acc ?>" selected><?= $value->no_acc ?></option>
                                                                             <?php
                                                                         }
                                                                         ?>

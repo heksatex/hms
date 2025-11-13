@@ -32,6 +32,7 @@
             <?php
         }
         ?>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -483,8 +484,6 @@ if ($datas->status == 'confirm') {
                             false
                             );
 
-
-                    $(".select2").select2();
                     $(".btn-add-item").on("click", function (e) {
                         e.preventDefault();
                         no += 1;
@@ -511,6 +510,7 @@ if ($datas->status == 'confirm') {
                         e.preventDefault();
                         $(".edited-read").removeAttr("readonly");
                         $(".edited").removeAttr("disabled");
+                        $(".select2").select2();
                         setCurr();
                         setCoaItem();
                         $(this).hide();

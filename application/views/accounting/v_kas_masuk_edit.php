@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-
+            <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -574,8 +574,6 @@ if ($datas->status == 'confirm') {
                             false
                             );
 
-
-                    $(".select2").select2();
                     $(".btn-add-item").on("click", function (e) {
                         e.preventDefault();
                         no += 1;
@@ -607,6 +605,7 @@ if ($datas->status == 'confirm') {
                         e.preventDefault();
                         $(".edited-read").removeAttr("readonly");
                         $(".edited").removeAttr("disabled");
+                        $(".select2").select2();
                         setCurr();
                         setCoaItem();
                         $(this).hide();
@@ -628,6 +627,7 @@ if ($datas->status == 'confirm') {
                         if (trx !== "") {
                             transaksi = trx.split(",");
                         }
+                        getPartner();
                     });
                     $("#btn-cancel").on("click", function (e) {
                         e.preventDefault();
@@ -664,7 +664,8 @@ if ($datas->status == 'confirm') {
                     });
 
 
-                    $("#partner").select2({
+                    const getPartner = (()=>{
+                        $("#partner").select2({
                         placeholder: "Pilih",
                         allowClear: true,
                         ajax: {
@@ -693,6 +694,7 @@ if ($datas->status == 'confirm') {
                             error: function (xhr, ajaxOptions, thrownError) {
                             }
                         }
+                    })
                     });
                     $(".partner").on("change", function () {
                         var ttt = $(".partner").find(":selected");

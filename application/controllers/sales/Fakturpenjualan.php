@@ -174,7 +174,7 @@ class Fakturpenjualan extends MY_Controller {
             $data = array();
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_faktur_penjualan.status", "left")
-                    ->setOrder(["acc_faktur_penjualan.tanggal" => "desc"])->setSearch(["no_faktur", "no_faktur_pajak", "no_sj", "partner_nama"])
+                    ->setOrder(["acc_faktur_penjualan.tanggal" => "desc"])->setSearch(["no_faktur", "no_faktur_pajak", "no_sj", "partner_nama","no_faktur_internal"])
                     ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "marketing_nama", "partner_nama"])->setSelects(["acc_faktur_penjualan.*", "nama_status"]);
             $no = $_POST['start'];
             $tanggal = $this->input->post("tanggal");
@@ -232,9 +232,9 @@ class Fakturpenjualan extends MY_Controller {
                     ->setJoins("mst_sales_group msg", "msg.kode_sales_group = p.sales_kode", "left")
                     ->setSearch(["do.no_sj", "do.no_picklist", "pr.nama", "msg.nama_sales_group"])
                     ->setJoins("partner pr", "pr.id = p.customer_id", "left")
-                    ->setOrders([null, "do.no_sj", "do.no_picklist", "pr.nama", "msg.nama_sales_group"])
+                    ->setOrders([null, "do.no_sj", "do.no_picklist", "do.tanggal_dokumen", "pr.nama", "msg.nama_sales_group"])
                     ->setOrder(["do.tanggal_dokumen" => "desc"])->setWheres(["do.status" => "done", "faktur" => 0])
-                    ->setSelects(["do.no_sj,do.no_picklist", "pr.nama as buyer", "msg.nama_sales_group as marketing"]);
+                    ->setSelects(["do.no_sj,do.no_picklist,tanggal_dokumen", "pr.nama as buyer", "msg.nama_sales_group as marketing"]);
             $exp = implode("|", ($this->sj_tipe[$tipe] ?? []));
             switch ($tipe) {
                 case "makloon":
@@ -254,6 +254,7 @@ class Fakturpenjualan extends MY_Controller {
                 $data[] = [
                     $no,
                     $field->no_sj,
+                    date("Y-m-d",strtotime($field->tanggal_dokumen)),
                     $field->no_picklist,
                     $field->buyer,
                     $field->marketing,
@@ -431,14 +432,14 @@ class Fakturpenjualan extends MY_Controller {
                             'required' => '{field} Pada Item harus diisi'
                         ]
                     ],
-                    [
-                        'field' => 'warna[]',
-                        'label' => 'Warna',
-                        'rules' => ['trim', 'required'],
-                        'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
-                        ]
-                    ],
+//                    [
+//                        'field' => 'warna[]',
+//                        'label' => 'Warna',
+//                        'rules' => ['trim', 'required'],
+//                        'errors' => [
+//                            'required' => '{field} Pada Item harus diisi'
+//                        ]
+//                    ],
                     [
                         'field' => 'uomlot[]',
                         'label' => 'Uom Lot',
@@ -764,7 +765,7 @@ class Fakturpenjualan extends MY_Controller {
                     foreach ($detail as $key => $value) {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "{$value->uraian} {$value->warna}",
+                            "nama" => "{$value->uraian} {$value->warna} {$value->qty} {$value->uom}",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $value->no_acc,
@@ -1204,14 +1205,6 @@ class Fakturpenjualan extends MY_Controller {
                 ]
             ],
             [
-                'field' => 'warna',
-                'label' => 'Warna',
-                'rules' => ['required'],
-                'errors' => [
-                    'required' => '{field} Harus diisi',
-                ]
-            ],
-            [
                 'field' => 'uom',
                 'label' => 'Uom',
                 'rules' => ['required'],
@@ -1482,18 +1475,18 @@ class Fakturpenjualan extends MY_Controller {
                                 ->setSelects(["currency.*,ket"])->getDetail();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->text(str_pad("No", 3));
-                $printer->text(str_pad("Jenis Barang / Uraian", 50, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("Quantity", 24, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("Harga Satuan", 26, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Jenis Barang / Uraian", 42, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Quantity", 30, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Harga Satuan", 28, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("Jumlah", 34, " ", STR_PAD_BOTH));
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-                $printer->text(str_pad(" ", 53));
-                $printer->text(str_pad("Gul/PCS", 12, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("Satuan", 12, " ", STR_PAD_BOTH));
-                $printer->text(str_pad($curr->nama, 10, " ", STR_PAD_BOTH));
-                $printer->text(str_pad("IDR", 16, " ", STR_PAD_BOTH));
+                $printer->text(str_pad(" ", 45));
+                $printer->text(str_pad("Gul/PCS", 15, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("Satuan", 15, " ", STR_PAD_BOTH));
+                $printer->text(str_pad($curr->nama, 11, " ", STR_PAD_BOTH));
+                $printer->text(str_pad("IDR", 17, " ", STR_PAD_BOTH));
                 $printer->text(str_pad($curr->nama, 12, " ", STR_PAD_BOTH));
                 $printer->text(str_pad("IDR", 22, " ", STR_PAD_BOTH));
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
@@ -1518,7 +1511,7 @@ class Fakturpenjualan extends MY_Controller {
                         $vls = trim($vls);
                         $no[$k] = $vls;
                     }
-                    $uraian = str_split($value->uraian, 49);
+                    $uraian = str_split($value->uraian, 41);
                     foreach ($uraian as $k => $vls) {
                         $vls = trim($vls);
                         $uraian[$k] = $vls;
@@ -1533,12 +1526,12 @@ class Fakturpenjualan extends MY_Controller {
                         }
                     }
 
-                    $qtylot = str_split("{$value->qty_lot} {$value->lot}", 12);
+                    $qtylot = str_split("{$value->qty_lot} {$value->lot}", 15);
                     foreach ($qtylot as $k => $vls) {
                         $vls = trim($vls);
                         $qtylot[$k] = $vls;
                     }
-                    $qtyuom = str_split("{$value->qty} {$value->uom}", 12);
+                    $qtyuom = str_split("{$value->qty} {$value->uom}", 15);
                     foreach ($qtyuom as $k => $vls) {
                         $vls = trim($vls);
                         $qtyuom[$k] = $vls;
@@ -1547,7 +1540,7 @@ class Fakturpenjualan extends MY_Controller {
                     foreach ($symbol as $k => $vls) {
                         $symbol[$k] = $vls;
                     }
-                    $valHarga = str_split(number_format($value->harga, 2), 6);
+                    $valHarga = str_split(number_format($value->harga, 2), 7);
                     foreach ($valHarga as $k => $vls) {
                         $vls = trim($vls);
                         $valHarga[$k] = $vls;
@@ -1556,7 +1549,7 @@ class Fakturpenjualan extends MY_Controller {
                     foreach ($symbolRp as $k => $vls) {
                         $symbolRp[$k] = $vls;
                     }
-                    $harga = str_split(number_format(($value->harga * $head->kurs_nominal), 2), 12);
+                    $harga = str_split(number_format(($value->harga * $head->kurs_nominal), 2), 13);
                     foreach ($harga as $k => $vls) {
                         $vls = trim($vls);
                         $harga[$k] = $vls;
@@ -1590,13 +1583,13 @@ class Fakturpenjualan extends MY_Controller {
                             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                         }
                         $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
-                        $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 50, " ", STR_PAD_RIGHT) : str_pad("", 50, " ", STR_PAD_RIGHT);
-                        $line .= (isset($qtylot[$i])) ? str_pad($qtylot[$i], 12, " ", STR_PAD_LEFT) : str_pad("", 12, " ", STR_PAD_LEFT);
-                        $line .= (isset($qtyuom[$i])) ? str_pad($qtyuom[$i], 12, " ", STR_PAD_LEFT) : str_pad("", 12, " ", STR_PAD_LEFT);
+                        $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 42, " ", STR_PAD_RIGHT) : str_pad("", 42, " ", STR_PAD_RIGHT);
+                        $line .= (isset($qtylot[$i])) ? str_pad($qtylot[$i], 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtyuom[$i])) ? str_pad($qtyuom[$i], 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
                         $line .= (isset($symbol[$i])) ? str_pad($symbol[$i], 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($valHarga[$i])) ? str_pad($valHarga[$i], 6, " ", STR_PAD_LEFT) : str_pad("", 6, " ", STR_PAD_LEFT);
+                        $line .= (isset($valHarga[$i])) ? str_pad($valHarga[$i], 7, " ", STR_PAD_LEFT) : str_pad("", 7, " ", STR_PAD_LEFT);
                         $line .= (isset($symbolRp[$i])) ? str_pad($symbolRp[$i], 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($harga[$i])) ? str_pad($harga[$i], 12, " ", STR_PAD_LEFT) : str_pad("", 12, " ", STR_PAD_LEFT);
+                        $line .= (isset($harga[$i])) ? str_pad($harga[$i], 13, " ", STR_PAD_LEFT) : str_pad("", 13, " ", STR_PAD_LEFT);
                         $line .= (isset($symbol[$i])) ? str_pad($symbol[$i], 4, " ") : str_pad("", 4, " ");
                         $line .= (isset($valJumlah[$i])) ? str_pad($valJumlah[$i], 8, " ", STR_PAD_LEFT) : str_pad("", 8, " ", STR_PAD_LEFT);
                         $line .= (isset($symbolRp[$i])) ? str_pad($symbolRp[$i], 4, " ") : str_pad("", 4, " ");
@@ -1611,10 +1604,10 @@ class Fakturpenjualan extends MY_Controller {
                 $totalQty = number_format($totalQty, 2);
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->feed();
-                $printer->text(str_pad("", 53));
-                $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 12));
-                $printer->text(str_pad("{$totalQty} {$uom}", 12));
-                $printer->text(str_pad("", 60));
+                $printer->text(str_pad("", 45));
+                $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 15," ",STR_PAD_LEFT));
+                $printer->text(str_pad("{$totalQty} {$uom}", 15," ",STR_PAD_LEFT));
+                $printer->text(str_pad("", 62));
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
                 $printer->feed();
@@ -1625,9 +1618,9 @@ class Fakturpenjualan extends MY_Controller {
                 $finalTotalValas = number_format(($head->final_total), 2, ".", ",");
                 $finalTotal = number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",");
                 $terbilang = Kwitansi($head->final_total);
-                $spltTbl = str_split($terbilang . " {$curr->ket}", 73);
+                $spltTbl = str_split(trim($terbilang) . " {$curr->ket}", 73);
 
-                $printer->text(str_pad("(*)Kurs : Rp. {$head->kurs_nominal}", 91, " "));
+                $printer->text(str_pad("(*)Kurs : Rp. ".number_format($head->kurs_nominal,2), 91, " "));
                 $printer->text(str_pad("Subtotal", 10, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad(number_format($subtotalValas, 2), 10, " ", STR_PAD_LEFT));
@@ -1711,12 +1704,12 @@ class Fakturpenjualan extends MY_Controller {
                         }
                     }
 
-                    $qtylot = str_split("{$value->qty_lot} {$value->lot} ", 18);
+                    $qtylot = str_split(number_format($value->qty_lot,2)." {$value->lot}", 18);
                     foreach ($qtylot as $k => $vls) {
                         $vls = trim($vls);
                         $qtylot[$k] = $vls;
                     }
-                    $qtyuom = str_split("{$value->qty} {$value->uom} ", 19);
+                    $qtyuom = str_split(number_format($value->qty,2)." {$value->uom}", 19);
                     foreach ($qtyuom as $k => $vls) {
                         $vls = trim($vls);
                         $qtyuom[$k] = $vls;
@@ -1747,8 +1740,8 @@ class Fakturpenjualan extends MY_Controller {
                         }
                         $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
                         $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 50, " ", STR_PAD_RIGHT) : str_pad("", 50, " ", STR_PAD_RIGHT);
-                        $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]} ", 19, " ", STR_PAD_LEFT) : str_pad("", 19, " ", STR_PAD_LEFT);
-                        $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i] }", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]}", 19, " ", STR_PAD_LEFT) : str_pad("", 19, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i]}", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
                         $line .= (isset($harga[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
                         $line .= (isset($harga[$i])) ? str_pad($harga[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
                         $line .= (isset($jumlah[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
@@ -1763,7 +1756,7 @@ class Fakturpenjualan extends MY_Controller {
                 $totalQtyLot = number_format($totalQtyLot, 2);
                 $totalQty = number_format($totalQty, 2);
                 $printer->feed();
-                $printer->text(str_pad("", 50));
+                $printer->text(str_pad("", 53));
                 $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 19, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("{$totalQty} {$uom}", 20, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("", 45));
@@ -1777,7 +1770,7 @@ class Fakturpenjualan extends MY_Controller {
                 $ppn = number_format(round($head->ppn - $head->diskon_ppn), 2, ".", ",");
                 $finalTotal = number_format($head->final_total, 2, ".", ",");
                 $terbilang = Kwitansi($head->final_total);
-                $spltTbl = str_split($terbilang . "Rupiah", 73);
+                $spltTbl = str_split(trim($terbilang) . " Rupiah", 73);
                 //isi terbilang
                 $printer->text(str_pad(" Terbilang : ", 13));
                 $printer->text(str_pad($spltTbl[0] ?? " ", 79));
