@@ -78,6 +78,10 @@ class Pelunasanhutang extends MY_Controller
         array(
             "id" => 'retur',
             "text" => "Retur"
+        ),
+        array(
+            "id" => 'koreksi',
+            "text" => 'Koreksi Kurs Bulan'
         )
     );
 
@@ -87,25 +91,47 @@ class Pelunasanhutang extends MY_Controller
             "text" => '(Giro)',
             'table_detail' => 'acc_giro_keluar_detail',
             'status' => 'acc_giro_keluar.status',
+            'status_value' => 'confirm',
             'no_bukti' => 'acc_giro_keluar_detail.no_gk',
-            'id_detail' => 'acc_giro_keluar_detail.id'
+            'id_detail' => 'acc_giro_keluar_detail.id',
+            "check" => 'true',
         ),
         array(
             "id" => 'kas',
             "text" => '(Kas)',
             'table_detail' => 'acc_kas_keluar_detail',
             'status' => 'acc_kas_keluar.status',
+            'status_value' => 'confirm',
             'no_bukti' => 'acc_kas_keluar_detail.no_kk',
-            'id_detail' => 'acc_kas_keluar_detail.id'
+            'id_detail' => 'acc_kas_keluar_detail.id',
+            "check" => 'true',
         ),
         array(
             "id" => 'bank',
             "text" => '(Bank)',
             "table_detail" => 'acc_bank_keluar_detail',
             'status' => 'acc_bank_keluar.status',
+            'status_value' => 'confirm',
             'no_bukti' => 'acc_bank_keluar_detail.no_bk',
-            'id_detail' => 'acc_bank_keluar_detail.id'
+            'id_detail' => 'acc_bank_keluar_detail.id',
+            "check" => 'true',
         ),
+        array(
+            "id" => "retur",
+            "text" => '',
+            'status' => 'status',
+            'status_value' => 'done',
+            "no_bukti" => "no_inv_retur",
+            'id_detail' => "id",
+            "table_detail" => 'invoice_retur',
+            "check" => 'true',
+        ),
+        array(
+            "id" => "koreksi",
+            "text" => '',
+            "check" => 'false'
+        )
+
     );
 
 
@@ -273,7 +299,7 @@ class Pelunasanhutang extends MY_Controller
             }
 
             if (empty($kode)) {
-                $kode = $this->token->noUrut('pelunasan_hutang', date('ym'), true)
+                $kode = $this->token->noUrut('pelunasan_hutang', date('ym', strtotime($tgl_transaksi)), true)
                     ->generate('PLH', '%04d')
                     ->get();
 
@@ -311,7 +337,7 @@ class Pelunasanhutang extends MY_Controller
 
                 $data_update = [
                     'no_pelunasan'      => $kode,
-                    'tanggal_transaksi' => $tgl_transaksi_new,
+                    // 'tanggal_transaksi' => $tgl_transaksi_new,
                     'partner_id'        => $get_p->id,
                     'partner_nama'      => $get_p->nama ?? '',
                 ];
@@ -513,7 +539,7 @@ class Pelunasanhutang extends MY_Controller
                 $this->_module->startTransaction();
 
                 //lock tabel
-                $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_invoice WRITE, departemen as d READ, user READ, invoice as a WRITE, currency_kurs as c READ, main_menu_sub READ,log_history WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary_koreksi WRITE');
+                $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_invoice WRITE, departemen as d READ, user READ, invoice WRITE, currency_kurs READ, main_menu_sub READ,log_history WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary_koreksi WRITE');
 
                 if (empty($no_pelunasan)) {
                     throw new \Exception('No Pelunasan Kosong !', 200);
@@ -542,7 +568,7 @@ class Pelunasanhutang extends MY_Controller
                     foreach ($arr_data as $ad) {
 
                         // get data invoice 
-                        $dt = $this->m_pelunasanhutang->get_data_invoice_by_id(['a.id' => $ad]);
+                        $dt = $this->m_pelunasanhutang->get_data_invoice_by_id(['invoice.id' => $ad]);
                         $cek_inv = $this->m_pelunasanhutang->cek_invoice_input_by_kode($no_pelunasan, $dt->no_invoice);
 
                         if (($cek_inv) > 0) {
@@ -647,10 +673,11 @@ class Pelunasanhutang extends MY_Controller
                 foreach ($list as $field) {
                     $no++;
                     $row = array();
-                    $row[] = $field->no_bukti;
+                    $row[] = $field->no_bukti.'|^'.$field->id;
                     $row[] = $no;
                     $row[] = $field->no_bukti;
                     $row[] = date('Y-m-d', strtotime($field->tanggal));
+                    $row[] = $field->uraian;
                     $row[] = $field->currency;
                     $row[] = $field->kurs;
                     $row[] = number_format($field->total_rp, 2);
@@ -700,7 +727,7 @@ class Pelunasanhutang extends MY_Controller
                 $this->_module->startTransaction();
 
                 //lock tabel
-                $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_keluar as a WRITE, acc_bank_keluar_detail as b WRITE, currency_kurs as c READ, acc_kas_keluar as h WRITE, acc_kas_keluar_detail as e WRITE, acc_giro_keluar as f WRITE, acc_giro_keluar_detail as  g WRITE, currency_kurs as i READ, currency_kurs as j READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_summary WRITE, invoice_retur as invr WRITE,  currency_kurs as curr READ, acc_pelunasan_hutang_summary_koreksi WRITE');
+                $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_keluar as a WRITE, acc_bank_keluar_detail as b WRITE, currency_kurs as c READ, acc_kas_keluar as h WRITE, acc_kas_keluar_detail as e WRITE, acc_giro_keluar as f WRITE, acc_giro_keluar_detail as  g WRITE, currency_kurs as i READ, currency_kurs as j READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_summary WRITE, invoice_retur as invr WRITE,  currency_kurs as curr READ, acc_pelunasan_hutang_summary_koreksi WRITE, acc_coa READ');
 
                 if (empty($no_pelunasan)) {
                     throw new \Exception('No Pelunasan Kosong !', 200);
@@ -735,24 +762,28 @@ class Pelunasanhutang extends MY_Controller
                     }
 
                     foreach ($arr_data as $ad) {
+                        
+                        $ex = explode("|^", $ad);
+                        $id_bukti_ex = $ex[1];
+                        $no_bukti_ex = $ex[0];
 
                         // get data metode pelunasan 
                         if ($type == 'retur') {
-                            $dt = $this->m_pelunasanhutang->get_data_metode_pelunasan_retur_by_id($cek->partner_id, $ad);
+                            $dt = $this->m_pelunasanhutang->get_data_metode_pelunasan_retur_by_id($cek->partner_id, ['no_bukti' => $no_bukti_ex]);
                         } else {
-                            $dt = $this->m_pelunasanhutang->get_data_metode_pelunasan_by_id($cek->partner_id, $type, $ad);
+                            $dt = $this->m_pelunasanhutang->get_data_metode_pelunasan_by_id($cek->partner_id, $type, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
                         }
 
                         if (empty($dt)) {
                             throw new \Exception('Data Metode Pelunasan tidak ditemukan !', 200);
                         }
 
-                        $cek_inv = $this->m_pelunasanhutang->cek_metode_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_bukti' => $dt->no_bukti]);
+                        $cek_inv = $this->m_pelunasanhutang->cek_metode_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_bukti' => $dt->no_bukti, 'id_bukti' => $id_bukti_ex]);
 
                         if (($cek_inv) > 0) {
                             throw new \Exception('Data Metode Pelunasan <b>' . $dt->no_bukti . '</b> sudah diinput  !', 200);
                         }
-
+                        $uraian = ($type != 'retur')? $dt->uraian : '';
                         $data_items[] = array(
                             'pelunasan_hutang_id'  => $cek->id,
                             'no_pelunasan'         => $no_pelunasan,
@@ -766,11 +797,12 @@ class Pelunasanhutang extends MY_Controller
                             'id_bukti'             => $dt->id, //id bukti detail
                             'tipe'                 => $type,
                             'tipe2'                 => $dt->tipe2, // kas, bank, giro
-                            'row_order'            => $row
+                            'row_order'            => $row,
+                            'uraian'               => $uraian
                         );
 
                         $row++;
-                        $log_add_items .= "(" . $num . ") " . $dt->no_bukti . " " . $dt->tanggal . " " . $dt->currency . " " . $dt->kurs . " " . $dt->total_rp . " " . $dt->total_valas;
+                        $log_add_items .= "(" . $num . ") " . $dt->no_bukti . " " . $dt->tanggal . " " . $uraian . " " . $dt->currency . " " . $dt->kurs . " " . $dt->total_rp . " " . $dt->total_valas;
                         $num++;
                     }
 
@@ -860,7 +892,7 @@ class Pelunasanhutang extends MY_Controller
                 foreach ($list as $field) {
                     $no++;
                     $row = array();
-                    $row[] = $field->no_bukti;
+                    $row[] = $field->no_bukti.'|^'.$field->id;
                     $row[] = $no;
                     $row[] = $field->no_bukti;
                     $row[] = date('Y-m-d', strtotime($field->tanggal));
@@ -902,7 +934,7 @@ class Pelunasanhutang extends MY_Controller
             //code...
 
             // get total value pelunasan 
-            $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no($no_pelunasan);
+            $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no(['no_pelunasan'=> $no_pelunasan, 'tipe <> '=> 'koreksi']);
             $rupiah = $get_tot->sum_rp;
             $valas  = $get_tot->sum_valas;
 
@@ -955,6 +987,7 @@ class Pelunasanhutang extends MY_Controller
                     $status_bayar = '';
                 }
             }
+
             // var_dump($tmp_update);
             if (!empty($tmp_update)) {
                 $update = $this->m_pelunasanhutang->update_pelunasan_invoice_by_kode($tmp_update, $no_pelunasan);
@@ -971,6 +1004,66 @@ class Pelunasanhutang extends MY_Controller
     }
 
 
+      function distribusi_pelunasan_otomatis_koreksi($no_pelunasan)
+    {
+        try {
+            //code...
+            $list_inv = $this->m_pelunasanhutang->get_data_invoice_by_code($no_pelunasan);
+            $tmp_update = array();
+            $get_tot2 = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no(['no_pelunasan'=> $no_pelunasan, 'tipe'=> 'koreksi']);
+            $rupiah = $get_tot2->sum_rp;
+            $valas  = $get_tot2->sum_valas;
+            foreach ($list_inv as $li) {
+                $sisa_hutang_rp = floatval($li->sisa_hutang_rp);
+                $sisa_hutang_valas = floatval($li->sisa_hutang_valas);
+                $sisa_rupiah = $rupiah;
+                $sisa_valas = $valas;
+
+                if ($sisa_hutang_rp > 0 or $sisa_hutang_valas > 0) {
+
+                    if ($li->total_hutang_rp > 0) {
+                       $pelunasan_rp_update = $sisa_hutang_rp - $sisa_rupiah;
+                       $sisa_rupiah  = 0;
+                    }
+
+                    if ($li->total_hutang_valas > 0) {
+                       $pelunasan_valas_update = $sisa_hutang_valas - $sisa_valas;
+                       $sisa_valas  = 0;
+                    }
+
+                    $status_bayar = 'partial';
+
+                    $data_update = array(
+                        'id'  => $li->id,
+                        'pelunasan_rp'  => $pelunasan_rp_update,
+                        'pelunasan_valas' => $pelunasan_valas_update,
+                        'status_bayar'  => $status_bayar
+                    );
+
+                    array_push($tmp_update, $data_update);
+                    $status_bayar = '';
+                    
+                }
+            }
+
+            // var_dump($tmp_update);
+            if (!empty($tmp_update)) {
+                $update = $this->m_pelunasanhutang->update_pelunasan_invoice_by_kode($tmp_update, $no_pelunasan);
+                if (!empty($update)) {
+                    throw new \Exception('Data Gagal Disimpan !', 200);
+                }
+            }
+
+            return;
+        } catch (Exception $ex) {
+            return 1;
+            // return $tmp_update;
+        }
+    }
+
+
+
+
     function hitung_summary($no_pelunasan)
     {
         try {
@@ -982,22 +1075,32 @@ class Pelunasanhutang extends MY_Controller
             }
 
             // get total_hutang
-            $where_idr = ["no_pelunasan" => $no_pelunasan];
+            $where_idr = ["no_pelunasan" => $no_pelunasan, "tipe <> "=>"koreksi"];
             $get_total_idr = $this->m_pelunasanhutang->get_total_pelunasan($where_idr);
 
-            $where_valas = ["no_pelunasan" => $no_pelunasan];
+            $where_valas = ["no_pelunasan" => $no_pelunasan, "tipe <> "=>"koreksi"];
             $get_total_valas = $this->m_pelunasanhutang->get_total_pelunasan($where_valas);
 
             $get_curr   = $this->m_pelunasanhutang->get_currency_by_pelunasan(['no_pelunasan' => $no_pelunasan, 'currency' => 'IDR']);
 
             $get_curr_valas   = $this->m_pelunasanhutang->get_currency_by_pelunasan(['no_pelunasan' => $no_pelunasan, 'currency <>' => 'IDR']);
 
-            $get_hutang_idr   = $this->m_pelunasanhutang->get_total_hutang($where_idr);
-            $get_hutang_valas = $this->m_pelunasanhutang->get_total_hutang($where_valas);
+            $get_hutang_idr   = $this->m_pelunasanhutang->get_total_hutang(["no_pelunasan" => $no_pelunasan]);
+            $get_hutang_valas = $this->m_pelunasanhutang->get_total_hutang(["no_pelunasan" => $no_pelunasan]);
+
+            $where_idr_koreksi = ["no_pelunasan" => $no_pelunasan, "tipe"=>"koreksi"];
+            $get_total_idr_koreksi = $this->m_pelunasanhutang->get_total_pelunasan($where_idr_koreksi);
+            $total_koreksi_rp = $get_total_idr_koreksi->total_pelunasan_rp ?? 0;
+
+            $where_valas_koreksi = ["no_pelunasan" => $no_pelunasan, "tipe"=>"koreksi"];
+            $get_total_valas_koreksi = $this->m_pelunasanhutang->get_total_pelunasan($where_valas_koreksi);
+            $total_koreksi_valas = $get_total_valas_koreksi->total_pelunasan_valas ?? 0;
 
             $total_hutang_rp = $get_hutang_idr->total_hutang_rp ?? 0;
             $total_pelunasan_rp = $get_total_idr->total_pelunasan_rp ?? 0;
-            $selisih_rp = $total_pelunasan_rp - $total_hutang_rp;
+            $selisih_rp = ($total_pelunasan_rp ) - $total_hutang_rp + $total_koreksi_rp;
+
+     
 
             if ($selisih_rp > 0) {
                 $keterangan_rp = "Lebih Bayar";
@@ -1021,6 +1124,10 @@ class Pelunasanhutang extends MY_Controller
                 $keterangan_rp = 'Uang Muka';
             }
 
+            $cek_mt2 = $this->m_pelunasanhutang->get_metode_by_code(['no_pelunasan' => $no_pelunasan, 'tipe' => 'koreksi']);
+            if ($cek_mt2) {
+                $keterangan_rp = 'Koreksi Kurs';
+            }
 
             $insert_summary[] = array(
                 'tipe_currency' => 'Rp',
@@ -1030,6 +1137,7 @@ class Pelunasanhutang extends MY_Controller
                 'no_pelunasan'  => $no_pelunasan,
                 'pelunasan_hutang_id' => $cek->id,
                 'total_hutang' => $total_hutang_rp,
+                'total_koreksi' => $total_koreksi_rp,
                 'total_pelunasan' => $total_pelunasan_rp,
                 'keterangan' => $keterangan_rp,
                 'selisih'   => $selisih_rp,
@@ -1039,7 +1147,7 @@ class Pelunasanhutang extends MY_Controller
 
             $total_hutang_valas = $get_hutang_valas->total_hutang_valas ?? 0;
             $total_pelunasan_valas = $get_total_valas->total_pelunasan_valas ?? 0;
-            $selisih_valas = $total_pelunasan_valas - $total_hutang_valas;
+            $selisih_valas = ($total_pelunasan_valas ) - $total_hutang_valas + $total_koreksi_valas;
 
             if ($selisih_valas > 0) {
                 $keterangan_valas = "Lebih Bayar";
@@ -1061,6 +1169,10 @@ class Pelunasanhutang extends MY_Controller
                 $keterangan_valas = 'Uang Muka';
             }
 
+            if ($cek_mt2 && $selisih_valas != 0) {
+                $keterangan_valas = 'Koreksi Kurs';
+            }
+
             $insert_summary[] = array(
                 'tipe_currency' => 'Valas',
                 'currency_id'   => $get_curr_valas->currency_id ?? 0,
@@ -1069,6 +1181,7 @@ class Pelunasanhutang extends MY_Controller
                 'no_pelunasan'  => $no_pelunasan,
                 'pelunasan_hutang_id' => $cek->id,
                 'total_hutang' => $total_hutang_valas,
+                'total_koreksi' => $total_koreksi_valas,
                 'total_pelunasan' => $total_pelunasan_valas,
                 'keterangan' => $keterangan_valas,
                 'selisih'   => $selisih_valas,
@@ -1210,8 +1323,8 @@ class Pelunasanhutang extends MY_Controller
 
                         $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan]);
 
-                        if ((float) round($pelunasan_rp,2) >= (float) round($get_hutang_inv->total_hutang_rp,2)) {
-                            throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Sisa Hutang (Rp) ', 200);
+                        if ((float) round($pelunasan_rp,2) > (float) round($get_hutang_inv->total_hutang_rp,2)) {
+                            throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Sisa Hutang (Rp) '.$pelunasan_rp, 200);
                         }
 
                         if ((float) $pelunasan_valas > (float) $get_hutang_inv->total_hutang_valas) {
@@ -1220,7 +1333,7 @@ class Pelunasanhutang extends MY_Controller
 
                         $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan, 'id <>' => $id]);
 
-                        $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no($no_pelunasan);
+                        $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no(['no_pelunasan'=>$no_pelunasan]);
 
                         if (isset($get_tot->no_pelunasan)) {
                             $rupiah = $get_tot->sum_rp ?? 0;
@@ -1258,6 +1371,189 @@ class Pelunasanhutang extends MY_Controller
                         }
 
                         $callback = array('status' => 'success', 'message' => 'Data Berhasil diubah', 'icon' => 'fa fa-check', 'type' => 'success');
+                    }
+                }
+
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+        } catch (Exception $ex) {
+            // finish transaction
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('status' => 'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+        }
+    }
+
+    public function get_view_koreksi_kurs()
+    {
+        $no_pelunasan = $this->input->post("no_pelunasan");
+        $get_head     = $this->m_pelunasanhutang->get_data_by_code($no_pelunasan);
+        $get_curr     = $this->m_pelunasanhutang->get_list_currency_kurs();
+        $view = $this->load->view('modal/v_pelunasan_hutang_koreksi_kurs', ["get_head" => $get_head, "no_pelunasan" => $no_pelunasan, "get_curr" => $get_curr], true);
+        $this->output->set_status_header(200)
+            ->set_content_type('application/json', 'utf-8')
+            ->set_output(json_encode(['data' => $view]));
+    }
+
+    function save_koreksi_kurs()
+    {
+        try {
+            //code...
+            if (empty($this->session->userdata('status'))) { //cek apakah session masih adag
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            } else {
+
+                $validation = [
+                    [
+                        'field' => 'no_pelunasan',
+                        'label' => 'No Pelunasan',
+                        'rules' => ['required'],
+                        'errors' => [
+                            'required' => '{field} Kosong !',
+                        ]
+                    ],
+                    [
+                        'field' => 'uraian',
+                        'label' => 'Uraian',
+                        'rules' => ['required'],
+                        'errors' => [
+                            'required' => '{field} Kosong !',
+                        ]
+                    ],
+                    [
+                        'field' => 'currency',
+                        'label' => 'Currency',
+                        'errors' => [
+                            'required' => '{field} Kosong',
+                        ]
+                    ],
+                    [
+                        'field' => 'kurs',
+                        'label' => 'Kurs',
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'errors' => [
+                            'required' => '{field} Jika kosong maka isi angka 0',
+                            "regex_match" => "{field} harus berupa number / desimal"
+                        ]
+                    ],
+                    [
+                        'field' => 'value_valas',
+                        'label' => 'Total Valas',
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'errors' => [
+                            'required' => '{field} Jika kosong maka isi angka 0',
+                            "regex_match" => "{field} harus berupa number / desimal"
+                        ]
+                    ],
+
+                ];
+
+                $no_pelunasan   = $this->input->post('no_pelunasan');
+                $tanggal        = $this->input->post('tanggal');
+                $uraian         = $this->input->post('uraian');
+                $currency       = $this->input->post('currency');
+                $kurs           = $this->input->post('kurs');
+                $value_valas    = $this->input->post('value_valas');
+             
+                if (empty($no_pelunasan)) {
+                    throw new \Exception('No Pelunasan Kosong !', 200);
+                }
+
+                if ($currency == '' || $currency == null) {
+                    throw new \Exception('Currency Kosong !', 200);
+                }
+
+                // cek status done / cancel
+                $cek  = $this->m_pelunasanhutang->get_data_by_code($no_pelunasan);
+
+                if (empty($cek)) {
+                    throw new \Exception('Data Pelunasan tidak ditemukan !', 200);
+                } else if ($cek->status == 'done') {
+                    $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak Bisa Disimpan, Status Sudah Done !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                } else if ($cek->status == 'cancel') {
+                    $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak Bisa Disimpan, Status Cancel !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                } else {
+                    $sub_menu   = $this->uri->segment(2);
+                    $username   = addslashes($this->session->userdata('username'));
+                    $callback  = array();
+                    $tmp_update = array();
+                    $this->form_validation->set_rules($validation);
+                    if ($this->form_validation->run() == FALSE) {
+                        // throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+                        $callback = array('status' => 'failed', 'field' => '', 'message' => array_values($this->form_validation->error_array())[0], 'icon' => 'fa fa-warning', 'type' => 'danger');
+                    } else {
+
+                        // cek metode pelunasan tipe 
+                        $gettipe = $this->m_pelunasanhutang->cek_metode_pelunasan_tipe_by_id($cek->id);
+                        if ($gettipe) {
+                            if ($gettipe->tipe != 'koreksi') {
+                                throw new \Exception('Metode Pelunasan Harus sama dengan yang sudah diiinput !', 200);
+                            } else {
+                                throw new \Exception('Koreksi Kurs Bulan hanya boleh diinput 1 saja  !', 200);
+                            }
+                        }
+
+                        $get_row    = $this->m_pelunasanhutang->get_last_row_order_metode_by_id($cek->id);
+
+                        $ex_plh     = explode("PLH", $no_pelunasan);
+
+                        $id_bukti_ex = isset($ex_plh[1]) ? $get_row.''.$ex_plh[1] : ''; // antisipasi kalau gak ada "PLH"
+                        $no_bukti_ex = $no_pelunasan.'_'.$get_row;
+
+                        $curr = $this->m_pelunasanhutang->get_currency_kurs_by_id($currency);
+                        $curr_name = $curr->currency;
+
+                        $data_items[] = array(
+                            'pelunasan_hutang_id'   => $cek->id,
+                            'no_pelunasan'          => $no_pelunasan,
+                            'id_bukti'              => $id_bukti_ex,
+                            'no_bukti'              => $no_bukti_ex,
+                            'uraian'                => $uraian,
+                            'tanggal_bukti'         => $tanggal,
+                            'currency_id'           => $currency,
+                            'currency'              => $curr_name,
+                            'kurs'                  => $kurs,
+                            'total_rp'              => $kurs * $value_valas,
+                            'total_valas'           => $value_valas,
+                            'tipe'                  => 'koreksi',
+                            'tipe2'                 => 'koreksi',
+                            'row_order'             => $get_row
+                        );
+
+                        $insert = $this->m_pelunasanhutang->insert_data_pelunasan_hutang_metode($data_items);
+                        if (!empty($insert)) {
+                            throw new \Exception('Data Gagal Disimpan !', 200);
+                        }
+
+                        $jenis_log = "edit";
+                        $note_log  = "Tambah Data Koreksi Kurs Bulan";
+                        $data_history = array(
+                            'datelog'   => date("Y-m-d H:i:s"),
+                            'kode'      => $no_pelunasan,
+                            'jenis_log' => $jenis_log,
+                            'note'      => $note_log
+                        );
+
+                        // load in library
+                        $this->_module->gen_history_ip($sub_menu, $username, $data_history);
+
+                        $result = $this->distribusi_pelunasan_otomatis_koreksi($no_pelunasan);
+                        if (!empty($result)) {
+                            throw new \Exception('Distribusi Pelunasan Gagal !', 200);
+                        }
+
+                        $result2 = $this->hitung_summary($no_pelunasan);
+                        if (!empty($result2)) {
+                            throw new \Exception('Summary Gagal di update !', 200);
+                        }
+
+                        $callback = array('status' => 'success', 'message' => 'Data Berhasil disimpan', 'icon' => 'fa fa-check', 'type' => 'success');
                     }
                 }
 
@@ -1518,7 +1814,7 @@ class Pelunasanhutang extends MY_Controller
             $this->_module->startTransaction();
 
             //lock tabel
-            $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, main_menu_sub READ,log_history WRITE, user READ, acc_pelunasan_hutang_summary_koreksi WRITE, acc_jurnal_entries WRITE, acc_bank_keluar WRITE, acc_bank_keluar_detail WRITE, acc_kas_keluar WRITE, acc_kas_keluar_detail WRITE, acc_giro_keluar WRITE, acc_giro_keluar_detail WRITE, invoice as a WRITE, currency_kurs as c READ, invoice WRITE');
+            $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, main_menu_sub READ,log_history WRITE, user READ, acc_pelunasan_hutang_summary_koreksi WRITE, acc_jurnal_entries WRITE, acc_bank_keluar WRITE, acc_bank_keluar_detail WRITE, acc_kas_keluar WRITE, acc_kas_keluar_detail WRITE, acc_giro_keluar WRITE, acc_giro_keluar_detail WRITE, invoice WRITE, currency_kurs READ, invoice_retur WRITE');
 
             $callback  = array();
             if (empty($this->session->userdata('status'))) { //cek apakah session masih adag
@@ -1579,7 +1875,7 @@ class Pelunasanhutang extends MY_Controller
                                 $pelunasan_rp = $li->pelunasan_rp;
                                 $pelunasan_valas = $li->pelunasan_valas;
 
-                                $dt = $this->m_pelunasanhutang->get_data_invoice_by_id(['a.no_invoice' =>  $li->no_invoice]);
+                                $dt = $this->m_pelunasanhutang->get_data_invoice_by_id(['invoice.no_invoice' =>  $li->no_invoice]);
                                 if (isset($dt)) {
                                     $hutang_inv = (float) $dt->sisa_hutang_rp + (float) $pelunasan_rp;
                                     $hutang_inv_valas = (float) $dt->sisa_hutang_valas + (float) $pelunasan_valas;
@@ -1599,8 +1895,8 @@ class Pelunasanhutang extends MY_Controller
                             foreach ($list_mt as $mt) {
 
                                 foreach ($this->metodePelunasan2 as $metodeItems2) {
-                                    if ($metodeItems2['id'] == $mt->tipe2) {
-                                        $cek_mt = $this->m_pelunasanhutang->cek_data_metode_valid_by_code($mt->tipe2, [$metodeItems2['status'] => 'confirm', $metodeItems2['no_bukti'] => $mt->no_bukti, $metodeItems2['id_detail'] =>  $mt->id_bukti]);
+                                    if ($metodeItems2['id'] == $mt->tipe2 && $metodeItems2['check'] == 'true') {
+                                        $cek_mt = $this->m_pelunasanhutang->cek_data_metode_valid_by_code($mt->tipe2, [$metodeItems2['status'] => $metodeItems2['status_value'], $metodeItems2['no_bukti'] => $mt->no_bukti, $metodeItems2['id_detail'] =>  $mt->id_bukti]);
                                         if (isset($cek_mt)) {
                                             $update_metode = $this->m_pelunasanhutang->update_by_kode($metodeItems2['table_detail'], ['lunas' => 0], [$metodeItems2['no_bukti'] => $mt->no_bukti, $metodeItems2['id_detail'] => $mt->id_bukti]);
                                             if ($update_metode !== "") {
@@ -2096,10 +2392,10 @@ class Pelunasanhutang extends MY_Controller
             'posisi' => 'D',
             'kode_coa' => '2112.01'
         ),
-        array(
-            'posisi' => 'C',
-            'kode_coa' => '1192.01'
-        )
+        // array(
+        //     'posisi' => 'C',
+        //     'kode_coa' => '1192.01'
+        // )
     );
 
 
@@ -2117,7 +2413,7 @@ class Pelunasanhutang extends MY_Controller
             }
 
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("acc_pelunasan_hutang WRITE, main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_summary_koreksi WRITE, invoice as a WRITE, currency_kurs as c WRITE, invoice WRITE, acc_bank_keluar_detail WRITE, acc_giro_keluar_detail WRITE, acc_kas_keluar_detail WRITE, mst_jurnal WRITE, acc_jurnal_entries WRITE, acc_jurnal_entries_items WRITE, acc_pelunasan_koreksi WRITE, acc_pelunasan_hutang_summary_koreksi as aphsk WRITE, acc_pelunasan_hutang_summary as aphs WRITE, acc_bank_keluar WRITE, acc_giro_keluar WRITE,  acc_kas_keluar WRITE, invoice_retur WRITE");
+            $this->_module->lock_tabel("acc_pelunasan_hutang WRITE, main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_summary_koreksi WRITE, invoice WRITE, acc_bank_keluar_detail WRITE, acc_giro_keluar_detail WRITE, acc_kas_keluar_detail WRITE, mst_jurnal WRITE, acc_jurnal_entries WRITE, acc_jurnal_entries_items WRITE, acc_pelunasan_koreksi WRITE, acc_pelunasan_hutang_summary_koreksi as aphsk WRITE, acc_pelunasan_hutang_summary as aphs WRITE, acc_bank_keluar WRITE, acc_giro_keluar WRITE,  acc_kas_keluar WRITE, invoice_retur WRITE, acc_coa READ, acc_bank_keluar as a WRITE, acc_bank_keluar_detail as b WRITE, currency_kurs as c READ, acc_kas_keluar as h WRITE, acc_kas_keluar_detail as e WRITE, acc_giro_keluar as f WRITE, acc_giro_keluar_detail as  g WRITE, currency_kurs as i READ, currency_kurs as j READ, currency_kurs READ");
 
             $no_pelunasan = $this->input->post('no_pelunasan');
             $tgl = date('Y-m-d H:i:s');
@@ -2304,7 +2600,16 @@ class Pelunasanhutang extends MY_Controller
                             $currency = $mp->currency;
                             $kurs     = $mp->kurs;
                             $tmp_bukti .= $mp->no_bukti;
+
+                            //get_coa_um
+                            $dt = $this->m_pelunasanhutang->get_data_metode_pelunasan_by_id($cek->partner_id, 'um', ['no_bukti' => $mp->no_bukti, 'id' => $mp->id_bukti]);
+                            if (empty($dt)) {
+                                throw new \Exception('Data Pelunasan Uang Muka tidak ditemukan !', 200);
+                            }
+                            $this->coa_um[] =  array('posisi'=> 'C', 'kode_coa'=>$dt->kode_coa);
                         }
+
+                        // var_dump($this->coa_um);
 
                         foreach ($this->coa_um as $com) {
                             $items_entries[] = array(
@@ -2355,7 +2660,7 @@ class Pelunasanhutang extends MY_Controller
                         }
 
                         // cek total_hutang  di summary
-                        $result_selisih = (float) $gs->total_pelunasan -  (float) $gs->total_hutang;
+                        $result_selisih = ((float) $gs->total_pelunasan + (float) $gs->total_koreksi ) - (float) $gs->total_hutang;
                         if (round($result_selisih, 2) != round((float) $gs->selisih, 2)) {
                             throw new \Exception('perhitungan Selisih ' . $gs->tipe_currency . ' tidak Valid !', 422);
                         }
@@ -2565,6 +2870,11 @@ class Pelunasanhutang extends MY_Controller
                             }
                         } else {
                             throw new \Exception('Metode Pelunasan Retur Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                        }
+                    } else if ($mt->tipe2 == 'koreksi') { //kurs bulan
+                        $cek_mt_koreksi = $this->m_pelunasanhutang->cek_metode_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_bukti' => $mt->no_bukti, 'id_bukti' =>'123']);
+                        if (!isset($cek_mt_koreksi)) {
+                            throw new \Exception('Koreksi Kurs Bulan tidak ditemukan !', 200);
                         }
                     } else {
                         throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas/Retur  !', 200);

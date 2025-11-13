@@ -7,6 +7,7 @@
                     <th class="no">No</th>
                     <th>No Bukti</th>
                     <th>Tanggal</th>
+                    <th>Uraian</th>
                     <th>Curr</th>
                     <th>Kurs</th>
                     <th>Total (Rp)</th>
@@ -52,7 +53,7 @@
                     }
                 },
                 {
-                    'targets': [5, 6, 7],
+                    'targets': [ 6, 7, 8],
                     "className": "text-right"
                 }
             ]

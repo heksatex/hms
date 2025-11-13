@@ -38,6 +38,7 @@ class Outstandingkasbank extends MY_Controller
                     $row[] = $field->partner_nama;
                     $row[] = $field->coa;
                     $row[] = date('Y-m-d', strtotime($field->tanggal));
+                    $row[] = $field->uraian;
                     $row[] = $field->currency;
                     $row[] = $field->kurs;
                     $row[] = number_format($field->total_rp, 2);

@@ -32,6 +32,7 @@
                                         <th>Supplier</th>
                                         <th>CoA</th>
                                         <th>Tanggal</th>
+                                        <th>uraian</th>
                                         <th>Curr</th>
                                         <th>Kurs</th>
                                         <th>Total (Rp)</th>
@@ -72,7 +73,7 @@
                         "orderable": false
                     },
                     {
-                        'targets': [6, 7, 8],
+                        'targets': [ 7, 8, 9],
                         "className": "text-right"
                     }
                 ]

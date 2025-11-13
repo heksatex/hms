@@ -311,10 +311,10 @@ class M_bukubesarpembantuutang extends CI_Model
         $subquery_um           = $this->get_saldo_um($where_um, 'aph.partner_id',$currency);
         $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'aph.partner_id',$currency);
 
-
+        $cr_condition = ($currency === 'valas')? 'p.saldo_awal_utang_valas' : 'p.saldo_awal_utang';
         if($checkhidden == 'true'){
             $this->db->where("(
-                    (p.saldo_awal_utang 
+                    ($cr_condition 
                         + IFNULL(utang_sblm.total_utang, 0) 
                         - IFNULL(pelunasan_sblm.total_pelunasan, 0) 
                         - IFNULL(retur_sblm.total_retur, 0) 
@@ -336,8 +336,9 @@ class M_bukubesarpembantuutang extends CI_Model
         if(count($where) > 0){
             $this->db->where($where);
         }
-        $this->db->select("p.id, p.nama, p.saldo_awal_utang,
-                        (p.saldo_awal_utang + IFNULL(utang_sblm.total_utang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(um_sblm.total_uang_muka,0) + (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
+       
+        $this->db->select("p.id, p.nama, $cr_condition as saldo_awal_utang,
+                        ($cr_condition + IFNULL(utang_sblm.total_utang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(um_sblm.total_uang_muka,0) + (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
                         IFNULL(utang.total_utang,0) as total_utang,
                         IFNULL(pelunasan.total_pelunasan,0) as total_pelunasan,
                         IFNULL(retur.total_retur,0) as total_retur,
