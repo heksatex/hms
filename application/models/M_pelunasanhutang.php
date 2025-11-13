@@ -531,12 +531,13 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    function cek_invoice_input_by_kode($no_pelunasan, $no_invoice)
+    function cek_invoice_input_by_kode(array $where = [])
     {
-        $this->db->where('no_pelunasan', $no_pelunasan);
-        $this->db->where('no_invoice', $no_invoice);
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
         $query = $this->db->get('acc_pelunasan_hutang_invoice');
-        return $query->num_rows();
+        return $query;
     }
 
     function cek_metode_input_by_kode($where)

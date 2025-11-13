@@ -145,7 +145,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_batch">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_batch"border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no">No.</th>
@@ -188,7 +188,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_batch_items">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_batch_items"border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no">No.</th>
@@ -220,12 +220,12 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume" border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no"></th>
                                                             <th class="style bb text-right">Total Hutang</th>
-                                                            <th class="style bb text-right">Total Koreksi</th>
+                                                            <th class="style bb text-right">Total Koreksi Kurs</th>
                                                             <th class="style bb text-right">Total Pelunasan</th>
                                                             <th class="style bb">Keterangan</th>
                                                             <th class="style bb text-right">Selisih</th>

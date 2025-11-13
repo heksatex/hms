@@ -203,7 +203,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_invoice">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_invoice"border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no">No.</th>
@@ -219,7 +219,7 @@
                                                             <th class="style bb text-right">Pelunasan (Rp)</th>
                                                             <th class="style bb text-right">Pelunasan (Valas)</th>
                                                             <th class="style bb">Status Bayar</th>
-                                                            <th class="style bb" style="min-width:65px;">#</th>
+                                                            <th class="style bb" style="min-width:70px;">#</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -254,7 +254,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_pelunasan">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_pelunasan" border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no">No.</th>
@@ -295,12 +295,12 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume" border="0">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume" border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no"></th>
                                                             <th class="style bb text-right">Total Hutang</th>
-                                                            <th class="style bb text-right">Total Koreksi</th>
+                                                            <th class="style bb text-right">Total Koreksi Kurs</th>
                                                             <th class="style bb text-right">Total Pelunasan</th>
                                                             <th class="style bb">Keterangan</th>
                                                             <th class="style bb text-right">Selisih</th>
