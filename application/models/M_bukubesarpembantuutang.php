@@ -177,6 +177,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->where('aph.status', 'done');
         $this->db->where('aphm.tipe <> ','um');
         $this->db->where('aphm.tipe <> ','retur');
+        $this->db->where('aphm.tipe <> ','koreksi');
         $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner, CONCAT('Pembayaran: ', (SELECT GROUP_CONCAT(no_invoice) as group_invoice FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id), 
             
             IF('$currency' = 'valas', 
@@ -256,7 +257,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->where('aph.status', 'done');
         // $this->db->where('aphs.tipe_currency', 'Rp');
         $this->db->where('ack.koreksi_bb', 'true');
-        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner,  CONCAT('Koreksi Pembayaran : ', ack.nama_koreksi, IF('$currency' = 'valas', 
+        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', aphs.kurs), 
                 ''
             ))  as uraian, IFNULL(SUM($total),0) as total_koreksi,  

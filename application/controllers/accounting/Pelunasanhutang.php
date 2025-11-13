@@ -569,7 +569,7 @@ class Pelunasanhutang extends MY_Controller
 
                         // get data invoice 
                         $dt = $this->m_pelunasanhutang->get_data_invoice_by_id(['invoice.id' => $ad]);
-                        $cek_inv = $this->m_pelunasanhutang->cek_invoice_input_by_kode($no_pelunasan, $dt->no_invoice);
+                        $cek_inv = $this->m_pelunasanhutang->cek_invoice_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_invoice' => $dt->no_invoice])->num_rows();
 
                         if (($cek_inv) > 0) {
                             throw new \Exception('Data Invoice <b>' . $dt->no_invoice . '</b> sudah diinput  !', 200);
@@ -1418,21 +1418,21 @@ class Pelunasanhutang extends MY_Controller
                             'required' => '{field} Kosong !',
                         ]
                     ],
-                    [
-                        'field' => 'uraian',
-                        'label' => 'Uraian',
-                        'rules' => ['required'],
-                        'errors' => [
-                            'required' => '{field} Kosong !',
-                        ]
-                    ],
-                    [
-                        'field' => 'currency',
-                        'label' => 'Currency',
-                        'errors' => [
-                            'required' => '{field} Kosong',
-                        ]
-                    ],
+                    // [
+                    //     'field' => 'uraian',
+                    //     'label' => 'Uraian',
+                    //     'rules' => ['required'],
+                    //     'errors' => [
+                    //         'required' => '{field} Kosong !',
+                    //     ]
+                    // ],
+                    // [
+                    //     'field' => 'currency',
+                    //     'label' => 'Currency',
+                    //     'errors' => [
+                    //         'required' => '{field} Kosong',
+                    //     ]
+                    // ],
                     [
                         'field' => 'kurs',
                         'label' => 'Kurs',
@@ -1442,31 +1442,27 @@ class Pelunasanhutang extends MY_Controller
                             "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
-                    [
-                        'field' => 'value_valas',
-                        'label' => 'Total Valas',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
-                        'errors' => [
-                            'required' => '{field} Jika kosong maka isi angka 0',
-                            "regex_match" => "{field} harus berupa number / desimal"
-                        ]
-                    ],
+                    // [
+                    //     'field' => 'value_valas',
+                    //     'label' => 'Total Valas',
+                    //     'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                    //     'errors' => [
+                    //         'required' => '{field} Jika kosong maka isi angka 0',
+                    //         "regex_match" => "{field} harus berupa number / desimal"
+                    //     ]
+                    // ],
 
                 ];
 
                 $no_pelunasan   = $this->input->post('no_pelunasan');
                 $tanggal        = $this->input->post('tanggal');
                 $uraian         = $this->input->post('uraian');
-                $currency       = $this->input->post('currency');
+                // $currency       = $this->input->post('currency');
                 $kurs           = $this->input->post('kurs');
-                $value_valas    = $this->input->post('value_valas');
+                // $value_valas    = $this->input->post('value_valas');
              
                 if (empty($no_pelunasan)) {
                     throw new \Exception('No Pelunasan Kosong !', 200);
-                }
-
-                if ($currency == '' || $currency == null) {
-                    throw new \Exception('Currency Kosong !', 200);
                 }
 
                 // cek status done / cancel
@@ -1489,6 +1485,23 @@ class Pelunasanhutang extends MY_Controller
                         $callback = array('status' => 'failed', 'field' => '', 'message' => array_values($this->form_validation->error_array())[0], 'icon' => 'fa fa-warning', 'type' => 'danger');
                     } else {
 
+                        $currency = '';
+                        $value_valas = 0;
+
+                        $cek_inv = $this->m_pelunasanhutang->cek_invoice_input_by_kode(['no_pelunasan' => $no_pelunasan]);
+                        if($cek_inv->num_rows()){
+                            if ($cek_inv->num_rows() > 1) {
+                                throw new \Exception('Invoice harus diplih 1 !', 200);
+                            } else {
+                                $data_inv = $cek_inv->row();
+                                $currency_id = $data_inv->currency_id;
+                                $currency_name = $data_inv->currency;
+                                $value_valas  = $data_inv->sisa_hutang_valas;
+                            }
+                        } else {
+                            throw new \Exception('Invoice harus diplih dulu !', 200);
+                        }
+
                         // cek metode pelunasan tipe 
                         $gettipe = $this->m_pelunasanhutang->cek_metode_pelunasan_tipe_by_id($cek->id);
                         if ($gettipe) {
@@ -1506,9 +1519,6 @@ class Pelunasanhutang extends MY_Controller
                         $id_bukti_ex = isset($ex_plh[1]) ? $get_row.''.$ex_plh[1] : ''; // antisipasi kalau gak ada "PLH"
                         $no_bukti_ex = $no_pelunasan.'_'.$get_row;
 
-                        $curr = $this->m_pelunasanhutang->get_currency_kurs_by_id($currency);
-                        $curr_name = $curr->currency;
-
                         $data_items[] = array(
                             'pelunasan_hutang_id'   => $cek->id,
                             'no_pelunasan'          => $no_pelunasan,
@@ -1516,8 +1526,8 @@ class Pelunasanhutang extends MY_Controller
                             'no_bukti'              => $no_bukti_ex,
                             'uraian'                => $uraian,
                             'tanggal_bukti'         => $tanggal,
-                            'currency_id'           => $currency,
-                            'currency'              => $curr_name,
+                            'currency_id'           => $currency_id,
+                            'currency'              => $currency_name,
                             'kurs'                  => $kurs,
                             'total_rp'              => $kurs * $value_valas,
                             'total_valas'           => $value_valas,

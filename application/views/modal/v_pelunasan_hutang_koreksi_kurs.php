@@ -14,7 +14,7 @@
                         <input type="text" class="form-control input-sm" name="uraian" id="uraian"/>
                     </div>
                 </div>
-                <div class="col-md-12 col-xs-12">
+                <!-- <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Curr</label></div>
                     <div class="col-12 col-md-12 col-lg-8">
                         <select class="form-control input-sm" name="currency" id="currency">
@@ -26,19 +26,19 @@
                             ?>
                         </select>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Kurs</label></div>
                     <div class="col-12 col-md-12 col-lg-8">
                         <input type="text" class="form-control input-sm text-right formatAngka" name="kurs" id="kurs" data-decimal="4"  >
                     </div>
                 </div>
-                <div class="col-md-12 col-xs-12">
+                <!-- <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Total Valas</label></div>
                     <div class="col-12 col-md-12 col-lg-8">
                         <input type="text" class="form-control input-sm text-right formatAngka" name="value_valas" id="value_valas" data-decimal="2" />
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -58,9 +58,9 @@
         let no_pelunasan = "<?php echo $no_pelunasan; ?>";
         var tanggal      = $("#tanggal").val();
         var uraian       = $("#uraian").val();
-        var currency     = $("#currency").val();
+        // var currency     = $("#currency").val();
         var kurs = unformatNumber($("#kurs").val());
-        var value_valas = unformatNumber($("#value_valas").val());
+        // var value_valas = unformatNumber($("#value_valas").val());
 
         $('#btn-tambah').button('loading');
         please_wait(function() {});
@@ -77,9 +77,9 @@
                 no_pelunasan: no_pelunasan,
                 tanggal: tanggal,
                 uraian: uraian,
-                currency: currency,
+                // currency: currency,
                 kurs: kurs,
-                value_valas: value_valas,
+                // value_valas: value_valas,
             },
             success: function(data) {
                 if (data.status == 'failed') {
