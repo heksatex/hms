@@ -216,7 +216,7 @@ class M_pelunasanhutang extends CI_Model
     {
         $this->db->order_by('row_order', 'asc');
         $this->db->where('no_pelunasan', $kode);
-        $this->db->select("id, pelunasan_hutang_id, no_pelunasan, no_bukti, DATE(tanggal_bukti) as tanggal_bukti, currency_id, currency, kurs, total_rp, total_valas, row_order, tipe, tipe2, id_bukti");
+        $this->db->select("id, pelunasan_hutang_id, no_pelunasan, no_bukti, DATE(tanggal_bukti) as tanggal_bukti, uraian, currency_id, currency, kurs, total_rp, total_valas, row_order, tipe, tipe2, id_bukti");
         $this->db->from('acc_pelunasan_hutang_metode');
         $query = $this->db->get();
         return $query->result();
@@ -258,8 +258,31 @@ class M_pelunasanhutang extends CI_Model
     }
     
 
-    var $coa_kas = array('2112.01', '2112.02');
-    var $coa_um = array('1192.01', '1192.02', '1192.03', '1192.99');
+    // var $coa_kas = array('2112.01', '2112.02');
+    // var $coa_um = array('1192.01', '1192.02', '1192.03', '1192.99');
+    
+    var $where_jenis_transaksi_kas = array('utang_giro','utang');
+    var $where_jenis_transaksi_um = array('um_pembelian');
+
+    function get_list_coa_kas_by_transaksi()
+    {
+        $this->db->select('kode_coa');
+        $this->db->where_in('jenis_transaksi', $this->where_jenis_transaksi_kas);
+        $rows = $this->db->get('acc_coa')->result_array();
+
+        $list_coa = array_column($rows, 'kode_coa');
+        return array_map('strval', $list_coa);
+    }
+
+    function get_list_coa_um_by_transaksi()
+    {
+        $this->db->select('kode_coa');
+        $this->db->where_in('jenis_transaksi', $this->where_jenis_transaksi_um);
+        $rows = $this->db->get('acc_coa')->result_array();
+
+        $list_coa = array_column($rows, 'kode_coa');
+        return array_map('strval', $list_coa);
+    }
 
     function query_kas_keluar()
     {
@@ -270,9 +293,9 @@ class M_pelunasanhutang extends CI_Model
     function get_total_kas_keluar_by_partner($where, $type)
     {
         if ($type == 'kas') {
-            $this->db->where_in('b.kode_coa', $this->coa_kas);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_kas_by_transaksi());
         } else { // uang muka
-            $this->db->where_in('b.kode_coa', $this->coa_um);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_um_by_transaksi());
         }
         if (count($where) > 0) {
             $this->db->where($where);
@@ -293,9 +316,9 @@ class M_pelunasanhutang extends CI_Model
     function get_total_bank_keluar_by_partner($where, $type)
     {
         if ($type == 'kas') {
-            $this->db->where_in('b.kode_coa', $this->coa_kas);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_kas_by_transaksi());
         } else { // uang muka
-            $this->db->where_in('b.kode_coa', $this->coa_um);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_um_by_transaksi());
         }
         if (count($where) > 0) {
             $this->db->where($where);
@@ -316,9 +339,9 @@ class M_pelunasanhutang extends CI_Model
     function get_total_giro_keluar_by_partner($where, $type)
     {
         if ($type == 'kas') {
-            $this->db->where_in('b.kode_coa', $this->coa_kas);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_kas_by_transaksi());
         } else { // uang muka
-            $this->db->where_in('b.kode_coa', $this->coa_um);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_um_by_transaksi());
         }
         if (count($where) > 0) {
             $this->db->where($where);
@@ -358,16 +381,16 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    var $column_order2 = array(null, null, 'no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
-    var $column_search2 = array('no_invoice', 'origin', 'created_at', 'c.currency', 'a.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
+    var $column_order2 = array(null, null, 'no_invoice', 'origin', 'created_at', 'currency', 'invoice.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
+    var $column_search2 = array('no_invoice', 'origin', 'created_at', 'currency', 'invoice.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
     var $order2         = array('created_at' => 'asc');
 
     function query2()
     {
         $this->db->where('status', 'done');
-        $this->db->select("a.id,a.no_invoice, a.created_at, a.order_date, a.tanggal_invoice_supp, a.no_invoice_supp, a.origin, a.status, a.matauang, c.currency, a.nilai_matauang, IFNULL(total_rp, 0) as total_hutang_rp, IFNULL(total_valas,0) as total_hutang_valas, IFNULL(hutang_rp,0) as sisa_hutang_rp, IFNULL(hutang_valas,0) as sisa_hutang_valas");
-        $this->db->from("invoice a");
-        $this->db->join("currency_kurs c ", "a.matauang = c.id", "left");
+        $this->db->select("invoice.id,invoice.no_invoice, invoice.created_at, invoice.order_date, invoice.tanggal_invoice_supp, invoice.no_invoice_supp, invoice.origin, invoice.status, invoice.matauang, currency_kurs.currency, invoice.nilai_matauang, IFNULL(total_rp, 0) as total_hutang_rp, IFNULL(total_valas,0) as total_hutang_valas, IFNULL(hutang_rp,0) as sisa_hutang_rp, IFNULL(hutang_valas,0) as sisa_hutang_valas");
+        $this->db->from("invoice");
+        $this->db->join("currency_kurs ", "invoice.matauang = currency_kurs.id", "left");
     }
 
 
@@ -407,8 +430,8 @@ class M_pelunasanhutang extends CI_Model
     function get_datatables2($partner)
     {
         $this->_get_datatables_query2();
-        $this->db->where("a.id_supplier", $partner);
-        $this->db->where("a.lunas", 0);
+        $this->db->where("invoice.id_supplier", $partner);
+        $this->db->where("invoice.lunas", 0);
         if (isset($_POST["length"]) && $_POST["length"] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -417,8 +440,8 @@ class M_pelunasanhutang extends CI_Model
 
     function count_filtered2($partner)
     {
-        $this->db->where("a.id_supplier", $partner);
-        $this->db->where("a.lunas", 0);
+        $this->db->where("invoice.id_supplier", $partner);
+        $this->db->where("invoice.lunas", 0);
         $this->_get_datatables_query2();
         $query = $this->db->get();
         return $query->num_rows();
@@ -427,8 +450,8 @@ class M_pelunasanhutang extends CI_Model
     public function count_all2($partner)
     {
         $this->query2();
-        $this->db->where("a.lunas", 0);
-        $this->db->where("a.id_supplier", $partner);
+        $this->db->where("invoice.lunas", 0);
+        $this->db->where("invoice.id_supplier", $partner);
         return $this->db->count_all_results();
     }
 
@@ -526,22 +549,22 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    var $column_order3 = array(null, null, 'no_bukti', 'tanggal', 'currency', 'kurs', 'total_rp', 'total_valas');
-    var $column_search3 = array('no_bukti', 'tanggal', 'currency', 'kurs', 'total_rp', 'total_valas');
+    var $column_order3 = array(null, null, 'no_bukti', 'tanggal','uraian','currency', 'kurs', 'total_rp', 'total_valas');
+    var $column_search3 = array('no_bukti', 'tanggal', 'currency','uraian', 'kurs', 'total_rp', 'total_valas');
     var $order3         = array('tanggal' => 'asc');
 
     function query3($partner, $type)
     {
         if ($type == 'kas') {
-            $this->db->where_in('b.kode_coa', $this->coa_kas);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_kas_by_transaksi());
         } else { // uang muka
-            $this->db->where_in('b.kode_coa', $this->coa_um);
+            $this->db->where_in('b.kode_coa', $this->get_list_coa_um_by_transaksi());
         }
         $where = ["a.partner_id" => $partner, "a.status" => 'confirm', "b.lunas" => 0];
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("b.id,(a.no_bk) as no_bukti, b.tanggal, b.currency_id, c.currency, b.kurs, IF(c.currency='IDR', b.nominal, IFNULL(b.nominal*b.kurs,0)) as total_rp, IF(c.currency != 'IDR', b.nominal, 0) as total_valas, 'bank' as tipe2");
+        $this->db->select("b.id,(a.no_bk) as no_bukti, b.tanggal, b.currency_id, c.currency, b.kurs, IF(c.currency='IDR', b.nominal, IFNULL(b.nominal*b.kurs,0)) as total_rp, IF(c.currency != 'IDR', b.nominal, 0) as total_valas, 'bank' as tipe2, b.uraian, b.kode_coa");
         $this->db->from("acc_bank_keluar a");
         $this->db->join("acc_bank_keluar_detail b ", "a.id = b.bank_keluar_id", "left");
         $this->db->join("currency_kurs c ", "b.currency_id = c.id", "left");
@@ -551,15 +574,15 @@ class M_pelunasanhutang extends CI_Model
     function query3B($partner, $type)
     {
         if ($type == 'kas') {
-            $this->db->where_in('e.kode_coa', $this->coa_kas);
+            $this->db->where_in('e.kode_coa', $this->get_list_coa_kas_by_transaksi());
         } else { // uang muka
-            $this->db->where_in('e.kode_coa', $this->coa_um);
+            $this->db->where_in('e.kode_coa', $this->get_list_coa_um_by_transaksi());
         }
         $where = ["h.partner_id" => $partner, "h.status" => 'confirm', 'e.lunas' => 0];
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("e.id,(h.no_kk) as no_bukti , e.tanggal, e.currency_id, i.currency, e.kurs, IF(i.currency='IDR', e.nominal, IFNULL(e.nominal*e.kurs,0) ) as total_rp, IF(i.currency != 'IDR', e.nominal, 0) as total_valas, 'kas' as tipe2");
+        $this->db->select("e.id,(h.no_kk) as no_bukti , e.tanggal, e.currency_id, i.currency, e.kurs, IF(i.currency='IDR', e.nominal, IFNULL(e.nominal*e.kurs,0) ) as total_rp, IF(i.currency != 'IDR', e.nominal, 0) as total_valas, 'kas' as tipe2, e.uraian, e.kode_coa");
         $this->db->from("acc_kas_keluar h");
         $this->db->join("acc_kas_keluar_detail e ", "h.id = e.kas_keluar_id", "left");
         $this->db->join("currency_kurs i ", "e.currency_id = i.id", "left");
@@ -569,15 +592,15 @@ class M_pelunasanhutang extends CI_Model
     function query3C($partner, $type)
     {
         if ($type == 'kas') {
-            $this->db->where_in('g.kode_coa', $this->coa_kas);
+            $this->db->where_in('g.kode_coa', $this->get_list_coa_kas_by_transaksi());
         } else { // uang muka
-            $this->db->where_in('g.kode_coa', $this->coa_um);
+            $this->db->where_in('g.kode_coa', $this->get_list_coa_um_by_transaksi());
         }
         $where = ["f.partner_id" => $partner, "f.status" => 'confirm', 'g.lunas' => 0];
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("g.id,(f.no_gk) as no_bukti, g.tanggal, g.currency_id, j.currency, g.kurs, IF(j.currency='IDR', g.nominal, IFNULL(g.nominal*g.kurs,0)) as total_rp, IF(j.currency != 'IDR', g.nominal, 0) as total_valas, 'giro' as tipe2");
+        $this->db->select("g.id,(f.no_gk) as no_bukti, g.tanggal, g.currency_id, j.currency, g.kurs, IF(j.currency='IDR', g.nominal, IFNULL(g.nominal*g.kurs,0)) as total_rp, IF(j.currency != 'IDR', g.nominal, 0) as total_valas, 'giro' as tipe2, iF(f.transinfo !='', f.transinfo, f.lain2 ) as uraian, g.kode_coa");
         $this->db->from("acc_giro_keluar f");
         $this->db->join("acc_giro_keluar_detail g ", "f.id = g.giro_keluar_id", "left");
         $this->db->join("currency_kurs j ", "g.currency_id = j.id", "left");
@@ -648,20 +671,25 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    function get_data_metode_pelunasan_by_id($partner, $type, $no_bukti)
+    function get_data_metode_pelunasan_by_id($partner, $type, array $where = [])
     {
         $union_sql = $this->query3($partner, $type) . ' UNION ALL ' . $this->query3B($partner, $type) . ' UNION ALL ' . $this->query3C($partner, $type);
 
-        $this->db->where('no_bukti', $no_bukti);
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
         $this->db->SELECT('*');
         $this->db->from('(' . $union_sql . ') as sub');
         $query = $this->db->get();
         return $query->row();
     }
 
-    function get_total_metode_pelunasan_by_no($no_pelunasan)
+    function get_total_metode_pelunasan_by_no(array $where = [])
     {
-        $this->db->where('no_pelunasan', $no_pelunasan);
+        // $this->db->where('no_pelunasan', $no_pelunasan);
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
         $this->db->select('no_pelunasan, IFNULL(sum(total_rp),0) as sum_rp, ifnull(sum(total_valas),0) as sum_valas');
         $this->db->from('acc_pelunasan_hutang_metode');
         $query = $this->db->get();
@@ -893,10 +921,12 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    function get_data_metode_pelunasan_retur_by_id($partner, $no_bukti)
+    function get_data_metode_pelunasan_retur_by_id($partner, array $where = [])
     {
         $union_sql = $this->query4($partner);
-        $this->db->where('no_bukti', $no_bukti);
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
         $this->db->SELECT('*');
         $this->db->from('(' . $union_sql . ') as sub');
         $query = $this->db->get();
@@ -1195,7 +1225,7 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-      function update_by_kode($table, $data_update, $where)
+    function update_by_kode($table, $data_update, $where)
     {
         try {
             $this->db->update($table, $data_update, $where);
@@ -1214,5 +1244,23 @@ class M_pelunasanhutang extends CI_Model
             return $ex->getMessage();
         }
     }
+
+    function get_list_currency_kurs()
+    {
+        $this->db->order_by('currency', 'asc');
+        $query = $this->db->get('currency_kurs');
+        return $query->result();
+    }
+
+    function get_currency_kurs_by_id($id)
+    {
+        $this->db->where('id',$id);
+        $this->db->order_by('currency', 'asc');
+        $query = $this->db->get('currency_kurs');
+        return $query->row();
+    }
+
+
+    
 
 }
