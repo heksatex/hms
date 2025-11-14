@@ -1336,6 +1336,15 @@ class Pelunasanhutang extends MY_Controller
                         $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no(['no_pelunasan'=>$no_pelunasan]);
 
                         if (isset($get_tot->no_pelunasan)) {
+
+                            // cek metode pelunasan tipe 
+                            $gettipe = $this->m_pelunasanhutang->cek_metode_pelunasan_tipe_by_id($cek->id);
+                            if ($gettipe) {
+                                if ($gettipe->tipe == 'koreksi') {
+                                    throw new \Exception('Data Distribusi Pelunasan tidak bisa disimpan, karena Metode Pelunasan menggunakan Koreksi Kurs Bulan !', 200);
+                                } 
+                            }
+
                             $rupiah = $get_tot->sum_rp ?? 0;
                             $valas  = $get_tot->sum_valas ?? 0;
 
