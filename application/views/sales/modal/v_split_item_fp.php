@@ -35,7 +35,7 @@
             <?php
             if ($data->no_acc !== "") {
                 ?>
-                <option value="<?= $data->no_acc ?>" selected><?= $data->coa_nama ?></option>
+                <option value="<?= $data->no_acc ?>" selected><?= $data->no_acc ?></option>
                 <?php
             }
             ?>

@@ -290,7 +290,7 @@
                                                                     </select>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="harga[]" value="<?= number_format($value->harga, 2, ".", ",") ?>" 
+                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="harga[]" value="<?= number_format($value->harga, 4, ".", ",") ?>" 
                                                                            class="form-control input-sm text-right edited-read harga harga_<?= $key ?>" readonly/>
                                                                 </td>
                                                                 <td>
