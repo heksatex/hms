@@ -233,7 +233,7 @@ class Fakturpenjualan extends MY_Controller {
                     ->setSearch(["do.no_sj", "do.no_picklist", "pr.nama", "msg.nama_sales_group"])
                     ->setJoins("partner pr", "pr.id = p.customer_id", "left")
                     ->setOrders([null, "do.no_sj", "do.no_picklist", "do.tanggal_dokumen", "pr.nama", "msg.nama_sales_group"])
-                    ->setOrder(["do.tanggal_dokumen" => "desc"])->setWheres(["do.status" => "done", "faktur" => 0])
+                    ->setOrder(["do.tanggal_dokumen" => "asc"])->setWheres(["do.status" => "done", "faktur" => 0])
                     ->setSelects(["do.no_sj,do.no_picklist,tanggal_dokumen", "pr.nama as buyer", "msg.nama_sales_group as marketing"]);
             $exp = implode("|", ($this->sj_tipe[$tipe] ?? []));
             switch ($tipe) {
@@ -1511,7 +1511,8 @@ class Fakturpenjualan extends MY_Controller {
                         $vls = trim($vls);
                         $no[$k] = $vls;
                     }
-                    $uraian = str_split($value->uraian, 41);
+                    $warna = ($value->warna === "") ? "":" / {$value->warna}";
+                    $uraian = str_split($value->uraian.$warna, 41);
                     foreach ($uraian as $k => $vls) {
                         $vls = trim($vls);
                         $uraian[$k] = $vls;
@@ -1526,12 +1527,12 @@ class Fakturpenjualan extends MY_Controller {
                         }
                     }
 
-                    $qtylot = str_split("{$value->qty_lot} {$value->lot}", 15);
+                    $qtylot = str_split(number_format($value->qty_lot,2)." {$value->lot}", 15);
                     foreach ($qtylot as $k => $vls) {
                         $vls = trim($vls);
                         $qtylot[$k] = $vls;
                     }
-                    $qtyuom = str_split("{$value->qty} {$value->uom}", 15);
+                    $qtyuom = str_split(number_format($value->qty,2)." {$value->uom}", 15);
                     foreach ($qtyuom as $k => $vls) {
                         $vls = trim($vls);
                         $qtyuom[$k] = $vls;
