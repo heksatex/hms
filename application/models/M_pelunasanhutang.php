@@ -10,8 +10,8 @@ use Google\Service\Iam\Oidc;
 class M_pelunasanhutang extends CI_Model
 {
 
-    var $column_order = array(null, 'no_pelunasan', 'tanggal_dibuat', 'partner_nama', 'nama_status');
-    var $column_search = array('no_pelunasan', 'tanggal_dibuat', 'partner_nama', 'nama_status');
+    var $column_order = array(null, 'no_pelunasan', 'tanggal_transaksi', 'partner_nama', 'nama_status');
+    var $column_search = array('no_pelunasan', 'tanggal_transaksi', 'partner_nama', 'nama_status');
     var $order        = array('no_pelunasan' => 'desc');
 
 
@@ -261,7 +261,7 @@ class M_pelunasanhutang extends CI_Model
     // var $coa_kas = array('2112.01', '2112.02');
     // var $coa_um = array('1192.01', '1192.02', '1192.03', '1192.99');
     
-    var $where_jenis_transaksi_kas = array('utang_giro','utang');
+    var $where_jenis_transaksi_kas = array('utang');
     var $where_jenis_transaksi_um = array('um_pembelian');
 
     function get_list_coa_kas_by_transaksi()

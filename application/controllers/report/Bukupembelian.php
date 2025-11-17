@@ -85,7 +85,7 @@ class Bukupembelian extends MY_Controller
             $num++;
             $tmp_data[]= array(
                             'no_invoice'=>$datas->no_invoice,
-                            'tanggal'   =>$datas->created_at,
+                            'tanggal'   =>date('Y-m-d', strtotime($datas->created_at)),
                             'rcv'       =>$datas->origin,
                             'no_po'     =>$datas->no_po,
                             'nama_partner'=> $datas->nama_partner,

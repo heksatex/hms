@@ -38,6 +38,7 @@ class M_bukupembelian extends CI_Model
             $this->db->where($where);
         }
 
+        $this->db->order_by("created_at", "asc");
         $this->db->SELECT(" inv.no_invoice,
                             inv.created_at,
                             inv.origin,
