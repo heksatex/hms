@@ -29,7 +29,7 @@
                                     <tr>
                                         <th class="no">No</th>
                                         <th>No Pelunasan</th>
-                                        <th>Tanggal dibuat</th>
+                                        <th>Tanggal Transaksi</th>
                                         <th>Supplier</th>
                                         <th>Status</th>
                                     </tr>

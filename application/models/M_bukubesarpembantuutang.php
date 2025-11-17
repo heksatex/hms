@@ -146,9 +146,9 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->SELECT("id as id_bukti, no_invoice as no_bukti,created_at as tgl, id_supplier as id_partner,
         CONCAT(
             'Pembelian: ',
-            IF(origin = '', '', CONCAT('RCV: ',origin, ' - ')),
-            IF(no_invoice_supp = '', '', CONCAT('No: ', no_invoice_supp, ' - ')),
-            IF(no_sj_supp = '', '', CONCAT('SJ: ', no_sj_supp)),
+            IF(origin = '', '', CONCAT('RCV: ',origin)),
+            IF(no_invoice_supp = '', '', CONCAT(' - ','No: ', no_invoice_supp)),
+            IF(no_sj_supp = '', '', CONCAT(' - ','SJ: ', no_sj_supp)),
             IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = matauang), ' - Kurs: ', nilai_matauang), 
                 ''
@@ -178,11 +178,11 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->where('aphm.tipe <> ','um');
         $this->db->where('aphm.tipe <> ','retur');
         $this->db->where('aphm.tipe <> ','koreksi');
-        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner, CONCAT('Pembayaran: ', (SELECT GROUP_CONCAT(no_invoice) as group_invoice FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id), 
+        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner, CONCAT('Pembayaran: ', (SELECT GROUP_CONCAT(no_invoice) as group_invoice FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id),' - ', 
             
             IF('$currency' = 'valas', 
-                GROUP_CONCAT(' - ',aphm.no_bukti,' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), '  Kurs: ', aphm.kurs,' '), 
-                GROUP_CONCAT(' - ',,aphm.no_bukti)
+                CONCAT(GROUP_CONCAT(aphm.no_bukti), ' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), '  Kurs: ', aphm.kurs, ' '), 
+                GROUP_CONCAT(aphm.no_bukti)
             )) as uraian, IFNULL(SUM($total),0) as total_pelunasan,   IFNULL(SUM($total),0) as debit , 0 as credit, aph.status, 'plh' as link ");
         $this->db->FROM('acc_pelunasan_hutang aph');
         $this->db->jOIN("acc_pelunasan_hutang_metode aphm","aph.id = aphm.pelunasan_hutang_id", "INNER");
@@ -259,7 +259,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->where('ack.koreksi_bb', 'true');
         $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', aphs.kurs), 
-                ''
+                CONCAT(' - ',(SELECT GROUP_CONCAT(no_invoice) as group_no FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id))
             ))  as uraian, IFNULL(SUM($total),0) as total_koreksi,  
                         (CASE 
                             WHEN aphs.selisih < 0 THEN abs($total) 

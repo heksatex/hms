@@ -227,7 +227,7 @@ class Pelunasanhutang extends MY_Controller
                 $row = array();
                 $row[] = $no;
                 $row[] = '<a href="' . base_url('accounting/pelunasanhutang/edit/' . $kode_encrypt) . '">' . $field->no_pelunasan . '</a>';
-                $row[] = $field->tanggal_dibuat;
+                $row[] = date("Y-m-d", strtotime($field->tanggal_transaksi));
                 $row[] = $field->partner_nama;
                 $row[] = $field->nama_status;
 
@@ -2721,7 +2721,7 @@ class Pelunasanhutang extends MY_Controller
                                         $items_entries[] = array(
                                             'kode'          => $jurnal,
                                             'nama'          => 'Koreksi ' . $cek_koreksi->nama_koreksi ?? '',
-                                            'reff_note'     => 'Pelunasan Utang',
+                                            'reff_note'     => ($cok->koreksi <> 'selisih_kurs_akhir_bulan')? 'Pelunasan Utang' : '',
                                             'partner'       => $cek->partner_id, // partner_id
                                             'kode_coa'      => $cok->kode_coa,
                                             'posisi'        => $cok->posisi,
