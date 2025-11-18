@@ -52,7 +52,6 @@
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= ": {$head->no_faktur_internal}" ?>
                     </div>
                     <div id="column-news-2" style="text-align: left; width: 40%;">
-                        <strong>No. PO</strong> : <?= $head->po_cust ?>
                     </div>
                 </div>
                 <div id="row" >

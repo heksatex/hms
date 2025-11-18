@@ -71,10 +71,10 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/fakturpenjualan/update/{$id}") ?>">
+                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/returpenjualan/update/{$id}") ?>">
                             <input type="hidden" name="ids" value="<?= $datas->id ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title"><?= ($datas->no_faktur_internal === "") ? "" : "No Faktur <strong>{$datas->no_faktur_internal}</strong>" ?></h3>
+                                <h3 class="box-title"><?= ($datas->no_retur_internal === "") ? "" : "No Retur <strong>{$datas->no_retur_internal}</strong>" ?></h3>
                                 <div class="pull-right text-right" id="btn-header">
                                     <?php
                                     if ($datas->status == 'cancel') {
@@ -118,7 +118,7 @@
                                                     <div class="input-group">
                                                         <input type="text" name="no_sj" id="no_sj" class="form-control input-sm no_sj clear-tipe" value="<?= $datas->no_sj ?>" required readonly/>
                                                         <input type="hidden" name="no_sj_old" id="no_sj_old" class="form-control input-sm no_sj_old" value="<?= $datas->no_sj ?>"/>
-                                                        <span class="input-group-addon get-no-sj" title="Cari No SJ"><i class="fa fa-search"><span></i>
+                                                        <span class="input-group-addon get-no-sj" title="Cari No SJ"><i class="fa fa-search"></i></span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -164,9 +164,9 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Faktur Internal</label></div>
+                                                <div class="col-xs-4"><label class="form-label">No Retur Internal</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_faktur_internal" class="form-control input-sm no_faktur_internal edited-read" value="<?= $datas->no_faktur_internal ?>" readonly/>
+                                                    <input type="text" name="no_retur_internal" class="form-control input-sm no_retur_internal edited-read" value="<?= $datas->no_retur_internal ?>" readonly/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -225,7 +225,7 @@
                                                     <th class="style" style="width: 100px">No PO</th>
                                                     <th class="style" style="width: 60px;text-align: right">QTY/LOT</th>
                                                     <th class="style" style="width: 60px;">UOM LOT</th>
-                                                    <th class="style text-right" style="width: 75px">QTY</th>
+                                                    <th class="style text-center" style="width: 100px">QTY</th>
                                                     <th class="style" style="width: 100px">No ACC</th>
                                                     <th class="style text-right" style="width: 100px">Harga</th>
                                                     <th class="style text-right" style="width: 120px">Jumlah</th>
@@ -260,7 +260,7 @@
                                                                 </td>
                                                                 <td class="text-right">
                                                                     <input type="text" name="qtylot[]" value="<?= "{$value->qty_lot}" ?>" 
-                                                                           class="form-control input-sm text-right qty-lot qty-lot_<?= $key ?>" readonly/>
+                                                                           class="form-control input-sm edited-read text-right qty-lot qty-lot_<?= $key ?>" readonly/>
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm edited uomlot uomlot_<?= $key ?>" style="width:100%" name="uomlot[]" disabled>
@@ -274,8 +274,10 @@
                                                                     </select>
                                                                 </td>
                                                                 <td class="text-right">
-                                                                    <input value="<?= $value->qty ?>" type="hidden" name="qty[]">
-                                                                    <input class="form-control input-sm" disabled value="<?= "{$value->qty} {$value->uom}" ?>">
+                                                                    <div class="input-group">
+                                                                        <input value="<?= $value->qty ?>" type="text" class="form-control edited-read input-sm text-right" name="qty[]" readonly>
+                                                                        <span class="input-group-addon" title="Cari No SJ"><?= $value->uom ?></span>
+                                                                    </div>
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm select2-coa edited noacc noacc_<?= $key ?>" style="width:100%" name="noacc[]" disabled>
@@ -290,11 +292,11 @@
                                                                     </select>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="harga[]" value="<?= number_format($value->harga, 4, ".", ",") ?>" 
+                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="harga[]" value="<?= number_format($value->harga, 2, ".", ",") ?>" 
                                                                            class="form-control input-sm text-right edited-read harga harga_<?= $key ?>" readonly/>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="jumlah[]" value="<?= number_format($value->jumlah, 4, ".", ",") ?>" 
+                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="jumlah[]" value="<?= number_format($value->jumlah, 2, ".", ",") ?>" 
                                                                            class="form-control input-sm text-right jumlah jumlah_<?= $key ?>" readonly/>
                                                                 </td>
                                                             </tr> 
@@ -663,7 +665,7 @@ if ($datas->status == 'confirm') {
 
         const updateStatus = ((status) => {
             $.ajax({
-                url: "<?= base_url('sales/fakturpenjualan/update_status/' . $id) ?>",
+                url: "<?= base_url('sales/returpenjualan/update_status/' . $id) ?>",
                 type: "POST",
                 data: {status: status.trim()},
                 beforeSend: function (xhr) {
@@ -713,7 +715,7 @@ if ($datas->status == 'confirm') {
 
         $("#btn-update-fp").unbind("click").off("click").on("click", function () {
             $.ajax({
-                url: "<?= base_url('sales/fakturpenjualan/update_faktur/' . $id) ?>",
+                url: "<?= base_url('sales/returpenjualan/update_faktur/' . $id) ?>",
                 type: "POST",
                 data: {
                     pajak: $("#no_faktur_pajak").val()
@@ -743,7 +745,7 @@ if ($datas->status == 'confirm') {
             const tt = $(this);
             var ids = $(this).data("ids");
             $.ajax({
-                url: "<?= base_url('sales/fakturpenjualan/split/' . $id) ?>",
+                url: "<?= base_url('sales/returpenjualan/split/' . $id) ?>",
                 type: "POST",
                 data: {ids: ids},
                 beforeSend: function (xhr) {
@@ -781,7 +783,7 @@ if ($datas->status == 'confirm') {
 
             confirmRequest("Faktur Penjualan", "Delete Item Dipilih ? ", function () {
                 $.ajax({
-                    url: "<?= base_url('sales/fakturpenjualan/delete_item/' . $id) ?>",
+                    url: "<?= base_url('sales/returpenjualan/delete_item/' . $id) ?>",
                     type: "POST",
                     data: {ids: val.join()},
                     beforeSend: function (xhr) {
@@ -813,7 +815,7 @@ if ($datas->status == 'confirm') {
 
             confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
                 $.ajax({
-                    url: "<?= base_url('sales/fakturpenjualan/join/' . $id) ?>",
+                    url: "<?= base_url('sales/returpenjualan/join/' . $id) ?>",
                     type: "POST",
                     data: {ids: val.join()},
                     beforeSend: function (xhr) {
@@ -848,7 +850,7 @@ if ($datas->status == 'confirm') {
             $('.modal-title').text("List SJ");
             $("#btn-tambah").html("Pilih");
             var tipee = $("#tipe").val();
-            $.post("<?= base_url('sales/fakturpenjualan/get_view_sj') ?>", {tipe: tipee}, function (data) {
+            $.post("<?= base_url('sales/returpenjualan/get_view_sj') ?>", {tipe: tipee}, function (data) {
                 setTimeout(function () {
                     $(".tambah_data").html(data.data);
                     $("#btn-tambah").hide();
@@ -880,7 +882,7 @@ if ($datas->status == 'confirm') {
             $(".btn-simpan-item").off("click").unbind("click").on("click", function (e) {
                 confirmRequest("Faktur Penjualan", "Simpan Item Baru ? ", function () {
                     $.ajax({
-                        url: "<?= base_url('sales/fakturpenjualan/save_item/' . $id) ?>",
+                        url: "<?= base_url('sales/returpenjualan/save_item/' . $id) ?>",
                         type: "POST",
                         data: {
                             uraian: $("#uraian").val(),
@@ -917,7 +919,7 @@ if ($datas->status == 'confirm') {
         $("#btn-print").on("click", function (e) {
             e.preventDefault();
             $.ajax({
-                url: "<?= base_url('sales/fakturpenjualan/print') ?>",
+                url: "<?= base_url('sales/returpenjualan/print') ?>",
                 type: "POST",
                 data: {
                     no: "<?= $id ?>"
@@ -940,7 +942,7 @@ if ($datas->status == 'confirm') {
 
         $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
             $.ajax({
-                url: "<?= base_url('sales/fakturpenjualan/print_pdf/') ?>",
+                url: "<?= base_url('sales/returpenjualan/print_pdf/') ?>",
                 type: "POST",
                 data: {
                     id: "<?= $id ?>"
@@ -980,7 +982,7 @@ if ($datas->status == 'confirm') {
     const saveSplit = (() => {
         confirmRequest("Faktur Penjualan", "Simpan Split Item? ", function () {
             $.ajax({
-                url: "<?= base_url('sales/fakturpenjualan/save_split/' . $id) ?>",
+                url: "<?= base_url('sales/returpenjualan/save_split/' . $id) ?>",
                 type: "POST",
                 data: {
                     ids: $("#ids").val(),
@@ -1010,7 +1012,7 @@ if ($datas->status == 'confirm') {
 
     const addTotable = ((nosj) => {
         $.ajax({
-            url: "<?= base_url('sales/fakturpenjualan/addsj') ?>",
+            url: "<?= base_url('sales/returpenjualan/addsj') ?>",
             type: "POST",
             data: {
                 no: nosj

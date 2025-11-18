@@ -90,7 +90,8 @@ class Bukugiro extends MY_Controller {
 
             $table = "({$queryBankMasuk} union all {$queryBankKeluar} union all {$quergiroKeluar}) as buku_giro";
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = buku_giro.kode_coa", "left")
-                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(buku_giro.kode_coa,'-',acc_coa.nama) as coa"]);
+                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(buku_giro.kode_coa,'-',acc_coa.nama) as coa"])
+                     ->setOrder(["tanggal"=>"asc","uraian"=>"asc"]);
             return $model;
         } catch (Exception $ex) {
             throw $ex;

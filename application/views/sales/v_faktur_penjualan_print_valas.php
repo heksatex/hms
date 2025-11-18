@@ -63,10 +63,10 @@
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= ": {$head->no_faktur_internal}" ?>
                     </div>
                     <div id="column" style="text-align: right;">
-                        <strong>No. PO</strong>
+                       
                     </div>
                     <div id="column">
-                        <?= " : {$head->po_cust}" ?>
+                        
                     </div>
                 </div>
                 <div id="row" >
