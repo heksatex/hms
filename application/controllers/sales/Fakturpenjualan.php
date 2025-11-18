@@ -779,9 +779,10 @@ class Fakturpenjualan extends MY_Controller {
                         );
                     }
                     foreach ($detail as $key => $value) {
+                        $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "{$value->uraian} {$value->warna} {$value->qty} {$value->uom}",
+                            "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $value->no_acc,
@@ -816,13 +817,13 @@ class Fakturpenjualan extends MY_Controller {
                     }
                     break;
                 default:
-//                    if ($data->lunas == 1) {
-//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
-//                    }
-//                    $finalTotal = $data->final_total * $data->kurs_nominal;
-//                    if ((double)$finalTotal !== (double)$data->piutang_rp) {
-//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
-//                    }
+                    if ($data->lunas == 1) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
+                    }
+                    $finalTotal = $data->final_total * $data->kurs_nominal;
+                    if ((double)$finalTotal !== (double)$data->piutang_rp) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
+                    }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
                     $this->_module->gen_history_new("jurnal_entries", $data->jurnal, 'edit', "Merubah Status Ke unposted dari penjualan", $username);

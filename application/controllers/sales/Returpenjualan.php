@@ -762,9 +762,10 @@ class Returpenjualan extends MY_Controller {
                         );
                     }
                     foreach ($detail as $key => $value) {
+                        $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "{$value->uraian} {$value->warna} {$value->qty} {$value->uom}",
+                            "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $value->no_acc,
