@@ -1378,7 +1378,7 @@ class Fakturpenjualan extends MY_Controller {
             }
             $data["alamat"] = $model->setTables("setting")->setWheres(["setting_name" => "alamat_fp"])->getDetail();
             $data["npwp"] = $model->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
-            $data["detail"] = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->setOrder(["uraian" => "asc"])->getData();
+            $data["detail"] = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->setOrder(["uraian" => "asc","warna"=>"asc"])->getData();
             if ($data["head"]->kurs_nominal > 1) {
                 $data["curr"] = $curr = $model->setTables("currency_kurs")->setWheres(["currency_kurs.id" => $data["head"]->kurs])
                                 ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
@@ -1492,7 +1492,7 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text($line . "\n");
             }
 
-            $detail = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->setOrder(["uraian" => "asc"])->getData();
+            $detail = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->setOrder(["uraian" => "asc","warna"=>"asc"])->getData();
             $printer->selectPrintMode();
             $buff->write("\x1bX" . chr(15));
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);

@@ -1092,4 +1092,50 @@ class Returpenjualan extends MY_Controller {
             $this->_module->unlock_tabel();
         }
     }
+    
+    public function print_pdf() {
+        try {
+            $kode = decrypt_url($this->input->post("id"));
+            $model = new $this->m_global;
+
+            $data["head"] = $model->setTables("acc_retur_penjualan")
+                            ->setJoins("partner", "partner.id = partner_id", "left")
+                            ->setJoins("tax", "tax.id = tax_id", "left")
+                            ->setSelects(["acc_retur_penjualan.*", 'invoice_street as alamat',
+                                "tax.nama as nama_tax"])->setWheres(["no_retur" => $kode])->getDetail();
+            if (!$data["head"]) {
+                throw new \exception("Data retur Penjualan {$kode} tidak ditemukan", 500);
+            }
+            $data["alamat"] = $model->setTables("setting")->setWheres(["setting_name" => "alamat_fp"])->getDetail();
+            $data["npwp"] = $model->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
+            $data["detail"] = $model->setTables("acc_retur_penjualan_detail")->setWheres(["retur_no" => $kode])->setOrder(["uraian" => "asc","warna"=>"asc"])->getData();
+            if ($data["head"]->kurs_nominal > 1) {
+                $data["curr"] = $curr = $model->setTables("currency_kurs")->setWheres(["currency_kurs.id" => $data["head"]->kurs])
+                                ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
+                                ->setSelects(["currency.*,ket"])->getDetail();
+                $view = 'sales/v_retur_penjualan_print_valas';
+            } else {
+                $view = 'sales/v_retur_penjualan_print';
+            }
+            $html = $this->load->view($view, $data, true);
+
+            $url = "dist/storages/print/returpenjulan";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
+            $mpdf->WriteHTML($html);
+            $filename = str_replace("/", "-", $data["head"]->no_retur_internal);
+            $pathFile = "{$url}/{$filename}.pdf";
+            $mpdf->Output(FCPATH . $pathFile, "F");
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
 }
