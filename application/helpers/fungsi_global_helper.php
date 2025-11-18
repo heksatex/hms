@@ -253,4 +253,19 @@ function Kwitansi($x) {
     }
 }
 
+function KwitansiDesimal($x) {
+    $rst = "";
+    $bilangan = array("Nol", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan");
+    $char = str_split($x);
+    if(end($char) === "0"){
+        unset($char[count($char) - 1]);
+        return KwitansiDesimal(join("", $char));
+    }
+    foreach ($char as $value) {
+        $rst .= " {$bilangan[$value]}";
+    }
+    
+    return $rst;
+}
+
 ?>

@@ -156,7 +156,7 @@ class Fakturpenjualan extends MY_Controller {
                 show_404();
             }
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
-            $data["detail"] = $model->setTables("acc_faktur_penjualan_detail fjd")
+            $data["detail"] = $model->setTables("acc_faktur_penjualan_detail fjd")->setOrder(["uraian" => "asc"])
                             ->setJoins("acc_coa", "kode_coa = no_acc", "left")
                             ->setWheres(["faktur_id" => $data['datas']->id])
                             ->setSelects(["fjd.*", "acc_coa.nama as coa_nama"])->getData();
@@ -174,7 +174,7 @@ class Fakturpenjualan extends MY_Controller {
             $data = array();
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_faktur_penjualan.status", "left")
-                    ->setOrder(["acc_faktur_penjualan.tanggal" => "desc"])->setSearch(["no_faktur", "no_faktur_pajak", "no_sj", "partner_nama","no_faktur_internal"])
+                    ->setOrder(["acc_faktur_penjualan.tanggal" => "desc"])->setSearch(["no_faktur", "no_faktur_pajak", "no_sj", "partner_nama", "no_faktur_internal"])
                     ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "marketing_nama", "partner_nama"])->setSelects(["acc_faktur_penjualan.*", "nama_status"]);
             $no = $_POST['start'];
             $tanggal = $this->input->post("tanggal");
@@ -254,7 +254,7 @@ class Fakturpenjualan extends MY_Controller {
                 $data[] = [
                     $no,
                     $field->no_sj,
-                    date("Y-m-d",strtotime($field->tanggal_dokumen)),
+                    date("Y-m-d", strtotime($field->tanggal_dokumen)),
                     $field->no_picklist,
                     $field->buyer,
                     $field->marketing,
@@ -328,7 +328,7 @@ class Fakturpenjualan extends MY_Controller {
             $checkSJ = $model->setTables("delivery_order do")->setJoins("delivery_order_detail dod", "(do.id = do_id and dod.status = 'done')", "left")
                             ->setJoins("picklist_detail pd", "picklist_detail_id = pd.id")->setWheres(["do.no_sj" => $nosj])
                             ->setGroups(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom"])
-                            ->setSelects(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom", "faktur"])
+                            ->setSelects(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom", "faktur"])->setOrder(["pd.corak_remark" => "asc", "pd.warna_remark" => "asc"])
                             ->setSelects(["count(dod.barcode_id) as total_lot", "sum(pd.qty) as total_qty"])->getData();
             if (count($checkSJ) > 0) {
                 if ((string) $checkSJ[0]->faktur === "1") {
@@ -363,7 +363,7 @@ class Fakturpenjualan extends MY_Controller {
                 "kurs" => $kurs,
                 "kurs_nominal" => $kursNominal,
                 "create_date" => date("Y-m-d H:i:s"),
-                "dari_sj"=>$dariSJ
+                "dari_sj" => $dariSJ
             ];
 
             $idFaktur = $model->setTables("acc_faktur_penjualan")->save($header);
@@ -511,8 +511,10 @@ class Fakturpenjualan extends MY_Controller {
             $ppns = 0;
             $detail = [];
             $this->_module->startTransaction();
+            $new = true;
             if ($nosj === $nosjold) {
                 if (count($noAcc) > 0) {
+                    $new = false;
                     $ppns = 0;
                     $grandDiskon = 0;
                     $grandTotal = 0;
@@ -557,19 +559,33 @@ class Fakturpenjualan extends MY_Controller {
                             "diskon_ppn" => $ppn_diskon
                         ];
                     }
+
+                    if ($header["kurs_nominal"] > 1) {
+                        $header["total_piutang_valas"] = $header["final_total"];
+                        $header["piutang_valas"] = $header["final_total"];
+                    }
+                    $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
+                    $header["piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
+
                     $header["diskon"] = ($header["kurs_nominal"] > 1) ? $grandDiskon : round($grandDiskon);
                     $header["diskon_ppn"] = $grandDiskonPpn;
                     $header["grand_total"] = ($header["kurs_nominal"] > 1) ? $grandTotal : round($grandTotal);
 
                     $model->setTables("acc_faktur_penjualan_detail")->updateBatch($detail, "id");
                 }
-            } else {
+            }
+            if ($new) {
                 $header["grand_total"] = 0;
                 $header["ppn"] = 0;
                 $header["dpp_lain"] = 0;
                 $header["diskon"] = 0;
                 $header["final_total"] = 0;
                 $header["diskon_ppn"] = 0;
+                $header["total_piutang_valas"] = 0;
+                $header["piutang_valas"] = 0;
+                $header["total_piutang_rp"] = 0;
+                $header["piutang_rp"] = 0;
+
                 $lock = "main_menu_sub READ, log_history WRITE,delivery_order do WRITE,delivery_order_detail dod READ,picklist_detail pd READ,acc_faktur_penjualan WRITE, acc_faktur_penjualan_detail WRITE";
                 $this->_module->lock_tabel($lock);
 
@@ -800,6 +816,13 @@ class Fakturpenjualan extends MY_Controller {
                     }
                     break;
                 default:
+                    if ($data->lunas == 1) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
+                    }
+                    $finalTotal = $data->final_total * $data->kurs_nominal;
+                    if ($finalTotal !== $data->piutang_rp) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
+                    }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
                     $this->_module->gen_history_new("jurnal_entries", $data->jurnal, 'edit', "Merubah Status Ke unposted dari penjualan", $username);
@@ -823,7 +846,7 @@ class Fakturpenjualan extends MY_Controller {
             $this->_module->unlock_tabel();
         }
     }
-    
+
     public function update_faktur($id) {
         try {
             $sub_menu = $this->uri->segment(2);
@@ -832,10 +855,10 @@ class Fakturpenjualan extends MY_Controller {
             $kode = decrypt_url($id);
             $pajak = $this->input->post("pajak");
             $update = [
-                "no_faktur_pajak"=>$pajak
+                "no_faktur_pajak" => $pajak
             ];
-            $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur"=>$kode])->update($update);
-            
+            $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" => $kode])->update($update);
+
             $log = "Update " . logArrayToString("; ", $update);
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
             $this->output->set_status_header(200)
@@ -890,14 +913,6 @@ class Fakturpenjualan extends MY_Controller {
                     'errors' => [
                         'required' => '{field} Harus diisi',
                         "regex_match" => "{field} harus berupa number / desimal"
-                    ]
-                ],
-                [
-                    'field' => 'no_acc',
-                    'label' => 'No ACC',
-                    'rules' => ['required'],
-                    'errors' => [
-                        'required' => '{field} Harus dipilih',
                     ]
                 ]
             ];
@@ -1060,6 +1075,13 @@ class Fakturpenjualan extends MY_Controller {
             $check->grand_total -= ($check->kurs_nominal > 1) ? $total : round($total);
             $check->ppn -= ($check->kurs_nominal > 1) ? $pajak : round($pajak);
             $check->dpp_lain -= ($check->kurs_nominal > 1) ? $dpp : round($dpp);
+
+            if ($check->kurs_nominal > 1) {
+                $check->total_piutang_valas = $check->final_total;
+                $check->piutang_valas = $check->final_total;
+            }
+            $check->total_piutang_rp = round($check->final_total * $check->kurs_nominal);
+            $check->piutang_rp = round($check->final_total * $check->kurs_nominal);
 
             $idss = $check->id;
             unset($check->id);
@@ -1292,6 +1314,14 @@ class Fakturpenjualan extends MY_Controller {
             $check->ppn += ($check->kurs_nominal > 1) ? $pajak : round($pajak);
             $check->grand_total += ($check->kurs_nominal > 1) ? $jumlah : round($jumlah);
             $check->final_total += ($check->kurs_nominal > 1) ? $totalHarga : round($totalHarga);
+
+            if ($check->kurs_nominal > 1) {
+                $check->total_piutang_valas = $check->final_total;
+                $check->piutang_valas = $check->final_total;
+            }
+            $check->total_piutang_rp = round($check->final_total * $check->kurs_nominal);
+            $check->piutang_rp = round($check->final_total * $check->kurs_nominal);
+
             $ids = $check->id;
             unset($check->id);
             $model->setTables("acc_faktur_penjualan")->setWheres(["id" => $ids])->update((array) $check);
@@ -1341,7 +1371,7 @@ class Fakturpenjualan extends MY_Controller {
             $data["head"] = $model->setTables("acc_faktur_penjualan")
                             ->setJoins("partner", "partner.id = partner_id", "left")
                             ->setJoins("tax", "tax.id = tax_id", "left")
-                            ->setSelects(["acc_faktur_penjualan.*", 'CONCAT(invoice_street," ",invoice_city," ",invoice_zip," ",invoice_state," ",invoice_country) as alamat',
+                            ->setSelects(["acc_faktur_penjualan.*", 'invoice_street as alamat',
                                 "tax.nama as nama_tax"])->setWheres(["no_faktur" => $kode])->getDetail();
             if (!$data["head"]) {
                 throw new \exception("Data Faktur Penjualan {$kode} tidak ditemukan", 500);
@@ -1414,7 +1444,7 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text(trim($value));
                 if ($key === 0) {
                     $printer->text(str_pad("", 35));
-                    $printer->text(str_pad("Bandung, " . date("d-m-Y"), 30," ",STR_PAD_LEFT));
+                    $printer->text(str_pad("Bandung, " . date("d-m-Y"), 30, " ", STR_PAD_LEFT));
                 }
                 $printer->text("\n");
             }
@@ -1455,7 +1485,7 @@ class Fakturpenjualan extends MY_Controller {
             $printer->text("Alamat 1 :\n");
 //            $alm = str_split(trim(preg_replace('/\s+/', '*#*', "Alamat 1 : {$head->alamat}")), 40);
             $alm = preg_replace('/\s\s+/', '*#*', "{$head->alamat}");
-            $alm = explode("*#*", str_replace(array("\n","\r"),"*#*",$alm));
+            $alm = explode("*#*", str_replace(array("\n", "\r"), "*#*", $alm));
             foreach ($alm as $key => $value) {
                 $line = str_pad("", 69);
                 $line .= str_pad(trim($value), 50);
@@ -1491,7 +1521,6 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text(str_pad("IDR", 22, " ", STR_PAD_BOTH));
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
                 $printer->feed();
-                $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $subtotal = 0;
                 $subtotalValas = 0;
                 $totalQty = 0;
@@ -1511,8 +1540,8 @@ class Fakturpenjualan extends MY_Controller {
                         $vls = trim($vls);
                         $no[$k] = $vls;
                     }
-                    $warna = ($value->warna === "") ? "":" / {$value->warna}";
-                    $uraian = str_split($value->uraian.$warna, 41);
+                    $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                    $uraian = str_split($value->uraian . $warna, 41);
                     foreach ($uraian as $k => $vls) {
                         $vls = trim($vls);
                         $uraian[$k] = $vls;
@@ -1520,19 +1549,19 @@ class Fakturpenjualan extends MY_Controller {
                     if ($value->no_po != "") {
                         $np = preg_replace('/\s\s+/', '*#*', "No.PO :{$value->no_po}");
 //                        $nopo = str_split($np, 49);
-                        $nopo = explode("*#*", str_replace(array("\n","\r"),"*#*",$np));
+                        $nopo = explode("*#*", str_replace(array("\n", "\r"), "*#*", $np));
                         foreach ($nopo as $k => $vls) {
                             $vls = trim($vls);
                             $uraian[] = $vls;
                         }
                     }
 
-                    $qtylot = str_split(number_format($value->qty_lot,2)." {$value->lot}", 15);
+                    $qtylot = str_split(number_format($value->qty_lot, 2) . " {$value->lot}", 14);
                     foreach ($qtylot as $k => $vls) {
                         $vls = trim($vls);
                         $qtylot[$k] = $vls;
                     }
-                    $qtyuom = str_split(number_format($value->qty,2)." {$value->uom}", 15);
+                    $qtyuom = str_split(number_format($value->qty, 2) . " {$value->uom}", 14);
                     foreach ($qtyuom as $k => $vls) {
                         $vls = trim($vls);
                         $qtyuom[$k] = $vls;
@@ -1585,8 +1614,8 @@ class Fakturpenjualan extends MY_Controller {
                         }
                         $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
                         $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 42, " ", STR_PAD_RIGHT) : str_pad("", 42, " ", STR_PAD_RIGHT);
-                        $line .= (isset($qtylot[$i])) ? str_pad($qtylot[$i], 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
-                        $line .= (isset($qtyuom[$i])) ? str_pad($qtyuom[$i], 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]} ", 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i]} ", 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
                         $line .= (isset($symbol[$i])) ? str_pad($symbol[$i], 4, " ") : str_pad("", 4, " ");
                         $line .= (isset($valHarga[$i])) ? str_pad($valHarga[$i], 7, " ", STR_PAD_LEFT) : str_pad("", 7, " ", STR_PAD_LEFT);
                         $line .= (isset($symbolRp[$i])) ? str_pad($symbolRp[$i], 4, " ") : str_pad("", 4, " ");
@@ -1606,8 +1635,8 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->feed();
                 $printer->text(str_pad("", 45));
-                $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 15," ",STR_PAD_LEFT));
-                $printer->text(str_pad("{$totalQty} {$uom}", 15," ",STR_PAD_LEFT));
+                $printer->text(str_pad("{$totalQtyLot} {$uomLot} ", 15, " ", STR_PAD_LEFT));
+                $printer->text(str_pad("{$totalQty} {$uom} ", 15, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("", 62));
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
@@ -1618,33 +1647,42 @@ class Fakturpenjualan extends MY_Controller {
                 $ppn = number_format(round(($head->ppn - $head->diskon_ppn) * $head->kurs_nominal), 2, ".", ",");
                 $finalTotalValas = number_format(($head->final_total), 2, ".", ",");
                 $finalTotal = number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",");
-                $terbilang = Kwitansi($head->final_total);
-                $spltTbl = str_split(trim($terbilang) . " {$curr->ket}", 73);
+                $totals = explode(".", $head->final_total);
 
-                $printer->text(str_pad("(*)Kurs : Rp. ".number_format($head->kurs_nominal,2), 91, " "));
-                $printer->text(str_pad("Subtotal", 10, " ", STR_PAD_RIGHT));
+                $terbilang = Kwitansi($totals[0]);
+                $terbilang2 = "";
+                if (isset($totals[1])) {
+                    if ($totals[1] > 0) {
+                        $terbilang2 .= " Koma";
+                        $terbilang2 .= KwitansiDesimal($totals[1]);
+                    }
+                }
+                $spltTbl = str_split(trim($terbilang) . "{$terbilang2} {$curr->ket}", 73);
+
+                $printer->text(str_pad("(*)Kurs : Rp. " . number_format($head->kurs_nominal, 2), 91, " "));
+                $printer->text(str_pad("Subtotal", 8, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
-                $printer->text(str_pad(number_format($subtotalValas, 2), 10, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format($subtotalValas, 4), 10, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
                 $printer->text(str_pad(number_format(($subtotal), 2), 17, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad("", 91));
-                $printer->text(str_pad("Discount", 10, " ", STR_PAD_RIGHT));
+                $printer->text(str_pad("Discount", 8, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
-                $printer->text(str_pad(number_format(round($diskonValas), 2), 10, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format(round($diskonValas), 4), 10, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
                 $printer->text(str_pad(number_format(round($diskon * $head->kurs_nominal), 2), 17, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" Terbilang : " . ($spltTbl[0] ?? " "), 91, " "));
-                $printer->text(str_pad("PPN", 10, " ", STR_PAD_RIGHT));
+                $printer->text(str_pad("PPN", 8, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
-                $printer->text(str_pad(number_format($ppnValas, 2), 10, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format($ppnValas, 4), 10, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
                 $printer->text(str_pad($ppn, 17, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(($spltTbl[1] ?? " "), 78, " "));
-                $printer->text(str_pad("TOTAL", 10, " ", STR_PAD_RIGHT));
+                $printer->text(str_pad("TOTAL", 8, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad($finalTotalValas, 10, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
@@ -1690,7 +1728,8 @@ class Fakturpenjualan extends MY_Controller {
                         $vls = trim($vls);
                         $no[$k] = $vls;
                     }
-                    $uraian = str_split($value->uraian, 50);
+                    $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                    $uraian = str_split($value->uraian . $warna, 50);
                     foreach ($uraian as $k => $vls) {
                         $vls = trim($vls);
                         $uraian[$k] = $vls;
@@ -1698,19 +1737,19 @@ class Fakturpenjualan extends MY_Controller {
                     if ($value->no_po != "") {
                         $np = preg_replace('/\s\s+/', '*#*', "No.PO :{$value->no_po}");
 //                        $nopo = str_split($np, 49);
-                        $nopo = explode("*#*", str_replace(array("\n","\r"),"*#*",$np));
+                        $nopo = explode("*#*", str_replace(array("\n", "\r"), "*#*", $np));
                         foreach ($nopo as $k => $vls) {
                             $vls = trim($vls);
                             $uraian[] = $vls;
                         }
                     }
 
-                    $qtylot = str_split(number_format($value->qty_lot,2)." {$value->lot}", 18);
+                    $qtylot = str_split(number_format($value->qty_lot, 2) . " {$value->lot}", 18);
                     foreach ($qtylot as $k => $vls) {
                         $vls = trim($vls);
                         $qtylot[$k] = $vls;
                     }
-                    $qtyuom = str_split(number_format($value->qty,2)." {$value->uom}", 19);
+                    $qtyuom = str_split(number_format($value->qty, 2) . " {$value->uom}", 19);
                     foreach ($qtyuom as $k => $vls) {
                         $vls = trim($vls);
                         $qtyuom[$k] = $vls;
@@ -1741,8 +1780,8 @@ class Fakturpenjualan extends MY_Controller {
                         }
                         $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
                         $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 50, " ", STR_PAD_RIGHT) : str_pad("", 50, " ", STR_PAD_RIGHT);
-                        $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]}", 19, " ", STR_PAD_LEFT) : str_pad("", 19, " ", STR_PAD_LEFT);
-                        $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i]}", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]} ", 19, " ", STR_PAD_LEFT) : str_pad("", 19, " ", STR_PAD_LEFT);
+                        $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i]} ", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
                         $line .= (isset($harga[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
                         $line .= (isset($harga[$i])) ? str_pad($harga[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
                         $line .= (isset($jumlah[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
@@ -1758,7 +1797,7 @@ class Fakturpenjualan extends MY_Controller {
                 $totalQty = number_format($totalQty, 2);
                 $printer->feed();
                 $printer->text(str_pad("", 53));
-                $printer->text(str_pad("{$totalQtyLot} {$uomLot}", 19, " ", STR_PAD_LEFT));
+                $printer->text(str_pad("{$totalQtyLot} {$uomLot} ", 19, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("{$totalQty} {$uom}", 20, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("", 45));
                 $printer->feed();

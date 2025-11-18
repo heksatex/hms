@@ -26,7 +26,7 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/fakturpenjualan/simpan") ?>">
+                        <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/returpenjualan/simpan") ?>">
                             <button class="btn btn-default btn-sm btn-save hide" type="submit"> Simpan </button>
                             <div class="box-header with-border">
                                 <h3 class="box-title">Retur Penjualan</h3>

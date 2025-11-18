@@ -88,7 +88,8 @@ class Bukukas extends MY_Controller {
 
             $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")
-                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa", "partner_nama,lain2,nama_curr,kurs"]);
+                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa", "partner_nama,lain2,nama_curr,kurs"])
+                    ->setOrder(["tanggal"=>"asc","uraian"=>"asc"]);
             return $model;
         } catch (Exception $ex) {
             throw $ex;
