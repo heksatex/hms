@@ -139,22 +139,32 @@
                     $totalQtyLot += $value->qty_lot;
                     $uomLot = $value->lot;
                     $uom = $value->uom;
+                    $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                     ?>
                     <tr>
                         <td style="text-align: center;">
                             <?= ($key + 1) ?>
                         </td>
                         <td>
-                            <?= $value->uraian ?>
+                            <?= $value->uraian.$warna ?>
                         </td>
                         <td style="text-align: center"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: center"><?= "{$value->qty} {$value->uom}" ?></td>
-                        <td style="text-align: right"><?= number_format($value->harga, 2) ?></td>
+                        <td style="text-align: right"><?= number_format($value->harga, 4) ?></td>
                         <td style="text-align: right"><?= number_format($value->harga * $head->kurs_nominal, 2) ?></td>
-                        <td style="text-align: right"><?= number_format($value->jumlah, 2) ?></td>
+                        <td style="text-align: right"><?= number_format($value->jumlah, 4) ?></td>
                         <td style="text-align: right"><?= number_format($value->jumlah * $head->kurs_nominal, 2) ?></td>
                     </tr>
                     <?php
+                }
+                $totals = explode(".", round($head->final_total,2));
+                $terbilang = Kwitansi($totals[0]);
+                $terbilang2 = "";
+                if (isset($totals[1])) {
+                    if ($totals[1] > 0) {
+                        $terbilang2 .= " Koma";
+                        $terbilang2 .= KwitansiDesimal($totals[1]);
+                    }
                 }
                 ?>
                 <tr>
@@ -167,16 +177,16 @@
                 <tr>
                     <td rowspan="4" colspan="5">
                         <p><?= "(*)Kurs : Rp. {$head->kurs_nominal}" ?></p>
-                        Terbilang : <?= Kwitansi($head->final_total) ?> <?= $curr->ket ?>
+                        Terbilang : <?= $terbilang.$terbilang2 ?> <?= $curr->ket ?>
                     </td>
                     <td style="font-weight: bold;">
                         Subtotal
                     </td>
                     <td style="text-align: right">
-                        <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($subtotal, 2) ?>
+                        <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($subtotalValas, 2) ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format($subtotal * $head->kurs_nominal, 2) ?>
+                        <?= number_format($subtotal, 2) ?>
                     </td>
                 </tr>
                 <tr>

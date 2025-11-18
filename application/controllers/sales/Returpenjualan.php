@@ -155,7 +155,7 @@ class Returpenjualan extends MY_Controller {
                 show_404();
             }
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
-            $data["detail"] = $model->setTables("acc_retur_penjualan_detail fjd")->setOrder(["fjd.uraian"=>"asc"])
+            $data["detail"] = $model->setTables("acc_retur_penjualan_detail fjd")->setOrder(["uraian" => "asc","warna"=>"asc"])
                             ->setJoins("acc_coa", "kode_coa = no_acc", "left")
                             ->setWheres(["retur_id" => $data['datas']->id])
                             ->setSelects(["fjd.*", "acc_coa.nama as coa_nama"])->getData();
@@ -803,7 +803,7 @@ class Returpenjualan extends MY_Controller {
                         throw new \exception("Data Retur Penjualan {$kode} sudah masuk pada pelunasan", 500);
                     }
                     $finalTotal = $data->final_total * $data->kurs_nominal;
-                    if ($finalTotal !== $data->piutang_rp) {
+                    if ((double)$finalTotal !== (double)$data->piutang_rp) {
                         throw new \exception("Data Retur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
                     }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
