@@ -219,11 +219,11 @@
                                                                     $totalDebit += $value->nominal;
                                                                     ?>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
-                                                                               value="<?= ($jurnal->status === 'unposted') ? number_format($value->nominal, 2, ".", "") : number_format($value->nominal, 2) ?>">
+                                                                        <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                               value="<?= ($jurnal->status === 'unposted') ? number_format($value->nominal, 2, ".", ",") : number_format($value->nominal, 2, ".", ",") ?>">
                                                                     </td>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                        <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
                                                                                value="0">
                                                                     </td>
                                                                     <?php
@@ -231,12 +231,12 @@
                                                                     $totalKredit += $value->nominal;
                                                                     ?>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                        <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
                                                                                value="0">
                                                                     </td>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
-                                                                               value="<?= ($jurnal->status === 'unposted') ? number_format($value->nominal, 2, ".", "") : number_format($value->nominal, 2) ?>">
+                                                                        <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                               value="<?= ($jurnal->status === 'unposted') ? number_format($value->nominal, 2, ".", ",") : number_format($value->nominal, 2, ".", ",") ?>">
                                                                     </td>
                                                                     <?php
                                                                 }
@@ -321,10 +321,10 @@
                     </div>
                 </td>
                 <td>
-                    <input data-row=":nourut" class="form-control input-sm nominal_d nominal_d_:nourut newline_:nourut text-right" style="width: 120px" name="debet[]" type="text" value="0" required>
+                    <input data-row=":nourut" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm nominal_d nominal_d_:nourut newline_:nourut text-right" style="width: 120px" name="debet[]" type="text" value="0" required>
                 </td>
                 <td>
-                    <input data-row=":nourut" class="form-control text-right input-sm nominal_k newline_:nourut nominal_k_:nourut" style="width: 120px" name="kredit[]" type="text" value="0" required>
+                    <input data-row=":nourut" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control text-right input-sm nominal_k newline_:nourut nominal_k_:nourut" style="width: 120px" name="kredit[]" type="text" value="0" required>
                 </td>
                 <td> 
                     <input type="text" name="kurs[]" style="width: 80px" value="1.00" class="form-control input-sm text-right kurs newline_:nourut edited-read" required />
@@ -342,6 +342,19 @@
             </tr>
         </template>
         <script>
+            const setNominalCurrency = (() => {
+                $("input[data-type='currency']").on({
+                    keyup: function () {
+                        formatCurrency($(this));
+                    },
+                    drop: function () {
+                        formatCurrency($(this));
+                    },
+                    blur: function () {
+                        formatCurrency($(this), "blur");
+                    }
+                });
+            });
             const lainInput = ((textbox, callback = function(e) {}) => {
                 if (textbox.length > 0) {
                     ["input"].forEach(function (event) {
@@ -354,7 +367,7 @@
             });
             var no = <?= count($detail) ?>;
             $(function () {
-
+            setNominalCurrency();
                 $("#tbl-jurnal").on("click", ".btn-rmv-item", function () {
                     $(this).closest("tr").remove();
                     calculateTotal();
@@ -367,11 +380,11 @@
                     const kredit = document.querySelectorAll('.nominal_k');
 
                     $.each(debet, function (idx, nomina) {
-                        let ttl = $(nomina).val();
+                        let ttl = $(nomina).val().replace(/,/g, "");
                         totalDebet += parseInt(ttl);
                     });
                     $.each(kredit, function (idx, nomina) {
-                        let ttl = $(nomina).val();
+                        let ttl = $(nomina).val().replace(/,/g, "");
                         totalKredit += parseInt(ttl);
                     });
                     if (totalDebet === NaN) {
@@ -430,6 +443,7 @@
                         calculateTotal();
                     }));
                     $(".nama_" + no).focus();
+                    setNominalCurrency();
                 });
                 const setCurr = (() => {
                     $(".select2-curr").select2({
