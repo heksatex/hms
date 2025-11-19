@@ -5,8 +5,8 @@
         <link href="<?= base_url('dist/css/popup_img.css') ?>" rel="stylesheet">
         <style>
             #btn-cancel{
-                    display: none;
-                }
+                display: none;
+            }
             <?php if ($jurnal->status === "posted" || $jurnal->status === "cancel") {
                 ?>
                 #btn-simpan{
@@ -219,11 +219,11 @@
                                                                     $totalDebit += $value->nominal;
                                                                     ?>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
                                                                                value="<?= ($jurnal->status === 'unposted') ? number_format($value->nominal, 2, ".", "") : number_format($value->nominal, 2) ?>">
                                                                     </td>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
                                                                                value="0">
                                                                     </td>
                                                                     <?php
@@ -231,11 +231,11 @@
                                                                     $totalKredit += $value->nominal;
                                                                     ?>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
                                                                                value="0">
                                                                     </td>
                                                                     <td>
-                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
+                                                                        <input data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
                                                                                value="<?= ($jurnal->status === 'unposted') ? number_format($value->nominal, 2, ".", "") : number_format($value->nominal, 2) ?>">
                                                                     </td>
                                                                     <?php
@@ -244,7 +244,7 @@
 
                                                                 <td> <input type="text" name="kurs[]" style="width: 80px" 
                                                                             value="<?= ($jurnal->status === 'unposted') ? number_format($value->kurs, 2, ".", "") : number_format($value->kurs, 2) ?>" 
-                                                                            class="form-control input-sm text-right kurs edited-read" required <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>/>
+                                                                            class="form-control input-sm text-right kurs edited-read newline" required <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>/>
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm select2-curr" style="width:100%" name="curr[]" 
@@ -299,7 +299,7 @@
                         <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
                     </div>
                 </td>
-                <td><input type="text" class="form-control input-sm nama" value="" name="nama[]"></td>
+                <td><input type="text" class="form-control input-sm nama nama_:nourut" value="" name="nama[]"></td>
                 <td><input type="text" class="form-control input-sm reffnote_item" value="" name="reffnote_item[]"></td>
                 <td>
                     <div class="form-group">
@@ -321,16 +321,16 @@
                     </div>
                 </td>
                 <td>
-                    <input data-row=":nourut" class="form-control input-sm nominal_d nominal_d_:nourut text-right" style="width: 120px" name="debet[]" type="text" value="0" required>
+                    <input data-row=":nourut" class="form-control input-sm nominal_d nominal_d_:nourut newline_:nourut text-right" style="width: 120px" name="debet[]" type="text" value="0" required>
                 </td>
                 <td>
-                    <input data-row=":nourut" class="form-control text-right input-sm nominal_k nominal_k_:nourut" style="width: 120px" name="kredit[]" type="text" value="0" required>
+                    <input data-row=":nourut" class="form-control text-right input-sm nominal_k newline_:nourut nominal_k_:nourut" style="width: 120px" name="kredit[]" type="text" value="0" required>
                 </td>
                 <td> 
-                    <input type="text" name="kurs[]" style="width: 80px" value="1.00" class="form-control input-sm text-right kurs edited-read" required />
+                    <input type="text" name="kurs[]" style="width: 80px" value="1.00" class="form-control input-sm text-right kurs newline_:nourut edited-read" required />
                 </td>
                 <td>
-                    <select class="form-control input-sm select2-curr" style="width:100%" name="curr[]" 
+                    <select class="form-control input-sm select2-curr newline_:nourut" style="width:100%" name="curr[]" 
                             required >
                                 <?php foreach ($curr as $key => $values) {
                                     ?>
@@ -399,6 +399,12 @@
                     calculateTotal();
                 });
 
+                $(".newline").keyup(function (ev) {
+                    if (ev.keyCode === 13) {
+                        $(".btn-add-item").trigger("click");
+                    }
+                });
+
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
@@ -406,6 +412,11 @@
                     var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                     $("#tbl-jurnal tbody").append(isi_tmplt);
                     $(".nourut" + no).html(no);
+                    $(".newline_" + no).keyup(function (ev) {
+                        if (ev.keyCode === 13) {
+                            $(".btn-add-item").trigger("click");
+                        }
+                    });
                     setCoa();
                     setCurr();
                     setPartner();
@@ -418,7 +429,7 @@
                         $(".nominal_d_" + no).val(0);
                         calculateTotal();
                     }));
-
+                    $(".nama_" + no).focus();
                 });
                 const setCurr = (() => {
                     $(".select2-curr").select2({
@@ -619,6 +630,26 @@
                 });
 
             });
+            $(document).ready(function () {
+                $(window).keydown(function (event) {
+                    if (event.keyCode === 13) {
+                        event.preventDefault();
+                        return false;
+                    }
+                });
+            });
+            $(document).on('focus', '.select2', function (e) {
+                if (e.originalEvent) {
+                    var s2element = $(this).siblings('select');
+                    s2element.select2('open');
+
+                    // Set focus back to select2 element on closing.
+                    s2element.on('select2:closing', function (e) {
+                        s2element.select2('focus');
+                    });
+                }
+            });
+
         </script>
     </body>
 </html>
