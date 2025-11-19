@@ -11,9 +11,6 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  *
  * @author RONI
  */
-require FCPATH . 'vendor/autoload.php';
-
-use Mpdf\Mpdf;
 class Jurnalentries extends MY_Controller {
 
     //put your code here
@@ -28,7 +25,7 @@ class Jurnalentries extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'JNE';
-        $this->load->view('accounting/v_jurnal_entries', $data);
+        $this->load->view('purchase/v_jurnal_entries', $data);
     }
 
     public function get_periode() {
@@ -55,7 +52,7 @@ class Jurnalentries extends MY_Controller {
         $model = new $this->m_global;
 
         $data["jurnal"] = $model->setTables("mst_jurnal")->setOrder(["kode"])->setSelects(["nama,kode"])->getData();
-        $this->load->view('accounting/v_jurnal_entries_add', $data);
+        $this->load->view('purchase/v_jurnal_entries_add', $data);
     }
 
     public function data() {
@@ -75,7 +72,7 @@ class Jurnalentries extends MY_Controller {
                 $no++;
                 $data [] = array(
                     $no,
-                    '<a href="' . base_url('accounting/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
+                    '<a href="' . base_url('purchase/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
                     $field->nama_jurnal,
                     $field->tanggal_dibuat,
 //                    $field->tanggal_posting,
@@ -138,8 +135,8 @@ class Jurnalentries extends MY_Controller {
             }
             $input = [
                 "tanggal_dibuat" => $tanggal,
-//                "periode" => $periode,
-                "origin" => "",
+                "periode" => $periode,
+                "origin" => $origin,
                 "reff_note" => $refnote,
                 "tipe" => $jurnal,
                 "status" => "unposted",
@@ -152,7 +149,7 @@ class Jurnalentries extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $kode, 'create', "DATA -> " . logArrayToString("; ", $input), $username);
-            $url = site_url("accounting/jurnalentries/edit/" . encrypt_url($kode));
+            $url = site_url("purchase/jurnalentries/edit/" . encrypt_url($kode));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -187,7 +184,7 @@ class Jurnalentries extends MY_Controller {
                             ->setWheres(["je.kode" => $kode_decrypt])->getData();
             $data["coas"] = $detail->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
                             ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $this->load->view('accounting/v_jurnal_entries_edit', $data);
+            $this->load->view('purchase/v_jurnal_entries_edit', $data);
         } catch (Exception $ex) {
             return show_404();
         }
@@ -204,7 +201,7 @@ class Jurnalentries extends MY_Controller {
             $periode = $this->input->post("periode");
             $model = new $this->m_global;
             $headUpdate = ["reff_note" => $refnote,
-                "origin" => $origin ?? "",
+                "origin" => $origin,
                 "periode" => $periode
             ];
             $this->_module->startTransaction();
@@ -336,41 +333,6 @@ class Jurnalentries extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => [])));
-        }
-    }
-    
-    public function print() {
-        try {
-            $id = $this->input->post("ids");
-            $kode = decrypt_url($id);
-            $model = new $this->m_global;
-            $data["jurnal"] = $model->setTables("acc_jurnal_entries je")->setJoins("mst_jurnal mj","mj.kode = je.tipe")
-                    ->setWheres(["je.kode"=>$kode])->setSelects(["je.*","mj.nama as jurnal_nama","date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
-            if (!$data["jurnal"]) {
-                throw new \exception("Data Jurnal Entries {$kode} tidak ditemukan", 500);
-            }
-            $data["detail"] = $model->setTables("acc_jurnal_entries_items jei")->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
-                            ->setJoins("partner", "partner.id = jei.partner", "left")
-                            ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
-                            ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
-                            ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
-                            ->setWheres(["je.kode" => $kode])->getData();
-            
-            $html = $this->load->view("accounting/v_jurnal_entries_print",$data,true);
-            $url = "dist/storages/print/jurnalentries";
-            if (!is_dir(FCPATH . $url)) {
-                mkdir(FCPATH . $url, 0775, TRUE);
-            }
-            $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
-            $mpdf->WriteHTML($html);
-            $filename = str_replace("/", "-", $data["jurnal"]->kode);
-            $pathFile = "{$url}/{$filename}.pdf";
-            $mpdf->Output(FCPATH . $pathFile, "F");
-            $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array("url" => base_url($pathFile))));
-        } catch (Exception $ex) {
-            
         }
     }
 }
