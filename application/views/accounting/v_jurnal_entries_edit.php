@@ -5,9 +5,8 @@
         <link href="<?= base_url('dist/css/popup_img.css') ?>" rel="stylesheet">
         <style>
             #btn-cancel{
-                display: none;
-            }
-
+                    display: none;
+                }
             <?php if ($jurnal->status === "posted" || $jurnal->status === "cancel") {
                 ?>
                 #btn-simpan{
@@ -19,6 +18,14 @@
                 ?>
                 .btn-sm{
                     display: none;
+                }
+                <?php
+            }
+            if ($jurnal->status === "posted" && $jurnal->origin === "") {
+                ?>
+
+                #btn-cancel{
+                    display: inline;
                 }
                 <?php
             }
@@ -57,9 +64,18 @@
                             <div class="pull-right text-right" id="btn-header">
                                 <?php if ($jurnal->status === "unposted" && count($detail) > 0) { ?>
                                     <button class="btn btn-success btn-sm" id="btn-update-status" data-status="posted"  data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
-                                        <i class="fa fa-check">&nbsp;Posted</i>
+                                        <i class="fa fa-check">&nbsp;Post</i>
                                     </button>
-                                <?php } ?>
+                                    <?php
+                                }
+                                if ($jurnal->status === "posted") {
+                                    ?>
+                                    <button class="btn btn-success btn-sm" id="btn-print" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-print">&nbsp;Print</i>
+                                    </button>
+                                    <?php
+                                }
+                                ?>
                             </div>
                         </div>
                         <form  class="form-horizontal" method="POST" name="form-jurnal" id="form-jurnal" action="<?= base_url('accounting/jurnalentries/update/' . $id) ?>">
@@ -76,8 +92,6 @@
                                                     <span><?= $jurnal->nama_jurnal ?? "" ?></span>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">Tanggal Dibuat</label>
@@ -86,43 +100,33 @@
                                                     <span><?= $jurnal->tanggal_dibuat ?></span>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label required">Periode</label>
+                                            <?php if ($jurnal->origin !== "") { ?>
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label required">Periode</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8 text-uppercase">
+                                                        <select class="form-control input-sm periode" name="periode" style="width: 100%" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?> required>
+                                                            <option value="<?= $jurnal->periode ?>" selected><?= $jurnal->periode ?></option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                                <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <select class="form-control input-sm periode" name="periode" style="width: 100%" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?> required>
-                                                        <option value="<?= $jurnal->periode ?>" selected><?= $jurnal->periode ?></option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                            <?php } ?>
                                         </div>
-                                        <!--                                        <div class="form-group">
-                                                                                    <div class="col-md-12 col-xs-12">
-                                                                                        <div class="col-xs-4">
-                                                                                            <label class="form-label">Tanggal Posting</label>
-                                                                                        </div>
-                                                                                        <div class="col-xs-8 col-md-8 text-uppercase">
-                                                                                            <span><?= $jurnal->tanggal_posting ?? "" ?></span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>-->
                                     </div>
                                     <div class="col-md-6 col-xs-12">
 
                                         <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">Origin</label>
+                                            <?php if ($jurnal->origin !== "") { ?>
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">Origin</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8 text-uppercase">
+                                                        <input type="text" value="<?= $jurnal->origin ?>" class="form-control input-sm" name="origin" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>>
+                                                    </div>
                                                 </div>
-                                                <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="text" value="<?= $jurnal->origin ?>" class="form-control input-sm" name="origin" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
+                                            <?php } ?>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">Reff Note</label>
@@ -169,7 +173,7 @@
                                                                     <div class="input-group">
                                                                         <span class="input-group-addon" style="border:none;"><?= ($keys + 1) ?></span>
                                                                         <?php if ($jurnal->status === "unposted") { ?>
-                                                                        <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
+                                                                            <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
                                                                         <?php } ?>
                                                                     </div>
                                                                 </td>
@@ -590,6 +594,29 @@
                     });
                 });
                 setPartner();
+
+                $("#btn-print").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url("accounting/jurnalentries/print"); ?>",
+                        type: "POST",
+                        data: {
+                            ids: "<?= $id ?>"
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        }, success: function (data) {
+                            unblockUI(function () {});
+                            window.open(data.url, "_blank").focus();
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
 
             });
         </script>

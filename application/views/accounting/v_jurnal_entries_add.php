@@ -65,7 +65,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-12 col-xs-12">
+<!--                                        <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="form-label">Periode</label>
                                             </div>
@@ -73,21 +73,21 @@
                                                 <select class="form-control input-sm periode" name="periode" style="width: 100%">
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div>-->
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 col-xs-12">
                                 <div class="field-group">
                                     <div class="form-group">
-                                        <div class="col-md-12 col-xs-12">
+<!--                                        <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="form-label">Origin</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <input type="text" class="form-control input-sm origin" name="origin">
                                             </div>
-                                        </div>
+                                        </div>-->
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="form-label">Reff Note</label>
