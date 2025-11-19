@@ -224,7 +224,7 @@ class Jurnalentries extends MY_Controller {
                     [
                         'field' => 'debet[]',
                         'label' => 'Debit',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -233,7 +233,7 @@ class Jurnalentries extends MY_Controller {
                     [
                         'field' => 'kredit[]',
                         'label' => 'Credit',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -261,6 +261,8 @@ class Jurnalentries extends MY_Controller {
 
                 foreach ($account as $key => $value) {
                     $no++;
+                    $db = str_replace(",", "", $debit[$key]);
+                    $kr = str_replace(",", "", $kredit[$key]);
                     $itemUpdate[] = [
                         "kode_coa" => $value,
                         "kode" => $kode_decrypt,
@@ -269,9 +271,9 @@ class Jurnalentries extends MY_Controller {
                         "partner" => $partner[$key] ?? 0,
                         "kurs" => $kurs[$key],
                         "kode_mua" => $curr[$key],
-                        "nominal" => ($debit[$key] > 0) ? $debit[$key] : $kredit[$key],
+                        "nominal" => ($db > 0) ? $db : $kr,
                         "row_order" => $no,
-                        "posisi" => ($debit[$key] > 0) ? "D" : "C"
+                        "posisi" => ($db > 0) ? "D" : "C"
                     ];
                 }
                 $model->setTables("acc_jurnal_entries_items")->saveBatch($itemUpdate);
