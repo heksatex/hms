@@ -307,8 +307,10 @@ class Jurnalentries extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $jurnal = new $this->m_global;
             $update = ["status" => $status];
+            $kredit = str_replace(",", "", $this->input->post("kredit"));
+            $debit = str_replace(",", "", $this->input->post("debit"));
             if ($status === "posted") {
-                if ($this->input->post("kredit") !== $this->input->post("debit")) {
+                if ((double)$kredit !== (double)$debit) {
                     throw new \Exception('Total Kredit dan Debit belum balance', 500);
                 }
                 $update = array_merge($update, ["tanggal_posting" => date("Y-m-d H:i:s")]);
