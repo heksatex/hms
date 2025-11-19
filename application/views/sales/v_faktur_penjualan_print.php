@@ -100,13 +100,14 @@
                 $subtotal = 0;
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
+                     $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                     ?>
                     <tr>
                         <td style="text-align: center;">
                             <?= ($key + 1) ?>
                         </td>
                         <td>
-                            <?= $value->uraian ?>
+                            <?= $value->uraian.$warna ?>
                         </td>
                         <td style="text-align: center"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: center"><?= "{$value->qty} {$value->uom}" ?></td>
