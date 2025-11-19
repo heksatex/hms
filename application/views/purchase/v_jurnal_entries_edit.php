@@ -381,11 +381,11 @@
 
                     $.each(debet, function (idx, nomina) {
                         let ttl = $(nomina).val().replace(/,/g, "");
-                        totalDebet += parseInt(ttl);
+                        totalDebet += parseFloat(ttl);
                     });
                     $.each(kredit, function (idx, nomina) {
                         let ttl = $(nomina).val().replace(/,/g, "");
-                        totalKredit += parseInt(ttl);
+                        totalKredit += parseFloat(ttl);
                     });
                     if (totalDebet === NaN) {
                         totalDebet = 0;
