@@ -14,6 +14,7 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
 require FCPATH . 'vendor/autoload.php';
 
 use Mpdf\Mpdf;
+
 class Jurnalentries extends MY_Controller {
 
     //put your code here
@@ -28,7 +29,7 @@ class Jurnalentries extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'JNE';
-        $this->load->view('purchase/v_jurnal_entries', $data);
+        $this->load->view('accounting/v_jurnal_entries', $data);
     }
 
     public function get_periode() {
@@ -55,7 +56,7 @@ class Jurnalentries extends MY_Controller {
         $model = new $this->m_global;
 
         $data["jurnal"] = $model->setTables("mst_jurnal")->setOrder(["kode"])->setSelects(["nama,kode"])->getData();
-        $this->load->view('purchase/v_jurnal_entries_add', $data);
+        $this->load->view('accounting/v_jurnal_entries_add', $data);
     }
 
     public function data() {
@@ -75,7 +76,7 @@ class Jurnalentries extends MY_Controller {
                 $no++;
                 $data [] = array(
                     $no,
-                    '<a href="' . base_url('purchase/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
+                    '<a href="' . base_url('accounting/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
                     $field->nama_jurnal,
                     $field->tanggal_dibuat,
 //                    $field->tanggal_posting,
@@ -152,7 +153,7 @@ class Jurnalentries extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $kode, 'create', "DATA -> " . logArrayToString("; ", $input), $username);
-            $url = site_url("purchase/jurnalentries/edit/" . encrypt_url($kode));
+            $url = site_url("accounting/jurnalentries/edit/" . encrypt_url($kode));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -179,15 +180,20 @@ class Jurnalentries extends MY_Controller {
             if ($data["jurnal"] === null) {
                 throw new \Exception();
             }
-            $data["detail"] = $detail->setTables("acc_jurnal_entries_items jei")->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
-                            ->setJoins("partner", "partner.id = jei.partner", "left")
-                            ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
-                            ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
-                            ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
-                            ->setWheres(["je.kode" => $kode_decrypt])->getData();
+            $details = $detail->setTables("acc_jurnal_entries_items jei")
+                    ->setJoins("partner", "partner.id = jei.partner", "left")
+                    ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
+                    ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
+                    //->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
+                    ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
+                    ->setWheres(["je.kode" => $kode_decrypt]);
+            if ($data["jurnal"]->origin !== "") {
+                $details->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"]);
+            }
+            $data["detail"] = $details->getData();
             $data["coas"] = $detail->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
                             ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $this->load->view('purchase/v_jurnal_entries_edit', $data);
+            $this->load->view('accounting/v_jurnal_entries_edit', $data);
         } catch (Exception $ex) {
             return show_404();
         }
@@ -218,7 +224,7 @@ class Jurnalentries extends MY_Controller {
                     [
                         'field' => 'debet[]',
                         'label' => 'Debit',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -227,20 +233,20 @@ class Jurnalentries extends MY_Controller {
                     [
                         'field' => 'kredit[]',
                         'label' => 'Credit',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
-                    [
-                        'field' => 'kode_coa[]',
-                        'label' => 'Account',
-                        'rules' => ['trim', 'required'],
-                        'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
-                        ]
-                    ]
+//                    [
+//                        'field' => 'kode_coa[]',
+//                        'label' => 'Account',
+//                        'rules' => ['trim', 'required'],
+//                        'errors' => [
+//                            'required' => '{field} Pada Item harus diisi'
+//                        ]
+//                    ]
                 ]);
                 if ($this->form_validation->run() == FALSE) {
                     throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
@@ -255,17 +261,19 @@ class Jurnalentries extends MY_Controller {
 
                 foreach ($account as $key => $value) {
                     $no++;
+                    $db = str_replace(",", "", $debit[$key]);
+                    $kr = str_replace(",", "", $kredit[$key]);
                     $itemUpdate[] = [
                         "kode_coa" => $value,
                         "kode" => $kode_decrypt,
-                        "nama" => $nama[$key],
-                        "reff_note" => $noteItem[$key],
-                        "partner" => $partner[$key],
+                        "nama" => $nama[$key] ?? "",
+                        "reff_note" => $noteItem[$key] ?? "",
+                        "partner" => $partner[$key] ?? 0,
                         "kurs" => $kurs[$key],
                         "kode_mua" => $curr[$key],
-                        "nominal" => ($debit[$key] > 0) ? $debit[$key] : $kredit[$key],
+                        "nominal" => ($db > 0) ? $db : $kr,
                         "row_order" => $no,
-                        "posisi" => ($debit[$key] > 0) ? "D" : "C"
+                        "posisi" => ($db > 0) ? "D" : "C"
                     ];
                 }
                 $model->setTables("acc_jurnal_entries_items")->saveBatch($itemUpdate);
@@ -300,7 +308,7 @@ class Jurnalentries extends MY_Controller {
             $jurnal = new $this->m_global;
             $update = ["status" => $status];
             if ($status === "posted") {
-                if($this->input->post("kredit") !== $this->input->post("debit")) {
+                if ($this->input->post("kredit") !== $this->input->post("debit")) {
                     throw new \Exception('Total Kredit dan Debit belum balance', 500);
                 }
                 $update = array_merge($update, ["tanggal_posting" => date("Y-m-d H:i:s")]);
@@ -338,25 +346,30 @@ class Jurnalentries extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => [])));
         }
     }
-    
+
     public function print() {
         try {
             $id = $this->input->post("ids");
             $kode = decrypt_url($id);
             $model = new $this->m_global;
-            $data["jurnal"] = $model->setTables("acc_jurnal_entries je")->setJoins("mst_jurnal mj","mj.kode = je.tipe")
-                    ->setWheres(["je.kode"=>$kode])->setSelects(["je.*","mj.nama as jurnal_nama","date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
+            $data["jurnal"] = $model->setTables("acc_jurnal_entries je")->setJoins("mst_jurnal mj", "mj.kode = je.tipe")
+                            ->setWheres(["je.kode" => $kode])->setSelects(["je.*", "mj.nama as jurnal_nama", "date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
             if (!$data["jurnal"]) {
                 throw new \exception("Data Jurnal Entries {$kode} tidak ditemukan", 500);
             }
-            $data["detail"] = $model->setTables("acc_jurnal_entries_items jei")->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
-                            ->setJoins("partner", "partner.id = jei.partner", "left")
-                            ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
-                            ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
-                            ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
-                            ->setWheres(["je.kode" => $kode])->getData();
-            
-            $html = $this->load->view("purchase/v_jurnal_entries_print",$data,true);
+            $details = $model->setTables("acc_jurnal_entries_items jei")
+                    ->setJoins("partner", "partner.id = jei.partner", "left")
+                    ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
+                    ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
+                    ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
+                    ->setWheres(["je.kode" => $kode]);
+            if ($data["jurnal"]->origin !== "") {
+                $details->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"]);
+            }
+
+            $data["detail"] = $details->getData();
+
+            $html = $this->load->view("accounting/v_jurnal_entries_print", $data, true);
             $url = "dist/storages/print/jurnalentries";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
