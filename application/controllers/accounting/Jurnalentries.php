@@ -310,7 +310,7 @@ class Jurnalentries extends MY_Controller {
             $kredit = str_replace(",", "", $this->input->post("kredit"));
             $debit = str_replace(",", "", $this->input->post("debit"));
             if ($status === "posted") {
-                if ((double)$kredit !== (double)$debit) {
+                if (round($kredit,4) !== round($debit,4)) {
                     throw new \Exception('Total Kredit dan Debit belum balance', 500);
                 }
                 $update = array_merge($update, ["tanggal_posting" => date("Y-m-d H:i:s")]);
@@ -385,7 +385,7 @@ class Jurnalentries extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array("url" => base_url($pathFile))));
         } catch (Exception $ex) {
-            
+            log_message("error", $ex->getMessage());
         }
     }
 }
