@@ -1013,6 +1013,8 @@ class Pelunasanhutang extends MY_Controller
             $get_tot2 = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no(['no_pelunasan'=> $no_pelunasan, 'tipe'=> 'koreksi']);
             $rupiah = $get_tot2->sum_rp;
             $valas  = $get_tot2->sum_valas;
+            $pelunasan_valas_update = 0;
+            $pelunasan_rp_update    = 0;
             foreach ($list_inv as $li) {
                 $sisa_hutang_rp = floatval($li->sisa_hutang_rp);
                 $sisa_hutang_valas = floatval($li->sisa_hutang_valas);
@@ -1321,13 +1323,13 @@ class Pelunasanhutang extends MY_Controller
 
                         array_push($tmp_update, $data_update);
 
-                        $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan]);
+                        $get_hutang_inv1   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan]);
 
-                        if ((float) round($pelunasan_rp,2) > (float) round($get_hutang_inv->total_hutang_rp,2)) {
+                        if ((float) round($pelunasan_rp,2) > (float) round($get_hutang_inv1->total_hutang_rp,2)) {
                             throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Sisa Hutang (Rp) '.$pelunasan_rp, 200);
                         }
 
-                        if ((float) $pelunasan_valas > (float) $get_hutang_inv->total_hutang_valas) {
+                        if ((float) $pelunasan_valas > (float) $get_hutang_inv1->total_hutang_valas) {
                             throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Sisa Hutang (Valas) ', 200);
                         }
 
@@ -1354,6 +1356,15 @@ class Pelunasanhutang extends MY_Controller
 
                             if (((float) $get_hutang_inv->total_pelunasan_valas + (float) $pelunasan_valas)  > (float)  $valas) {
                                 throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Total Pelunasan (Valas) ', 200);
+                            }
+
+                            if($status_bayar == 'belum_bayar' && (($pelunasan_rp) > 0 || ($pelunasan_valas) > 0 )){
+                                throw new \Exception('Status Bayar tidak bisa diubah ke <b>Belum Bayar</b>, Karena sudah ada pelunasan !', 200);
+                            }
+
+                            
+                            if($status_bayar == 'partial' && ((round( (float) $pelunasan_rp,2) == round($get_hutang_inv1->total_hutang_rp,2) && $get_hutang_inv1->total_hutang_rp )  || (round((float)  $pelunasan_valas,2) ==  round($get_hutang_inv1->total_hutang_valas,2) && $get_hutang_inv1->total_hutang_valas > 0) )){
+                                throw new \Exception('Status Bayar tidak bisa diubah ke <b>Partial</b>, Karena Total Pelunasan sama dengan Sisa Utang !', 200);
                             }
 
                             $update = $this->m_pelunasanhutang->update_pelunasan_invoice_by_kode($tmp_update, $no_pelunasan);
@@ -1503,6 +1514,9 @@ class Pelunasanhutang extends MY_Controller
                                 throw new \Exception('Invoice harus diplih 1 !', 200);
                             } else {
                                 $data_inv = $cek_inv->row();
+                                if($data_inv->currency_id == 1){ // IDR
+                                    throw new \Exception('Currency Invoice tidak boleh IDR !', 200);
+                                }
                                 $currency_id = $data_inv->currency_id;
                                 $currency_name = $data_inv->currency;
                                 $value_valas  = $data_inv->sisa_hutang_valas;
@@ -2010,37 +2024,37 @@ class Pelunasanhutang extends MY_Controller
         $id_summary      = $this->input->post('id');
         $posisi          = $this->input->post('posisi');
         $where_in        = array('');
-        $get_sum = $this->m_pelunasanhutang->get_data_summary_by_id($id_summary);
+        // $get_sum = $this->m_pelunasanhutang->get_data_summary_by_id($id_summary);
 
-        if ((float) $get_sum->selisih > 0) {
-            if ($jenis_koreksi == 'pembulatan') {
-                if ($posisi == 'D') {
-                    $where_in = array('8251.03');
-                } else {
-                    $where_in = array('2112.01');
-                }
-            } else if ($jenis_koreksi == 'selisih_kurs') {
-                if ($posisi == 'D') {
-                    $where_in = array('8241.01');
-                } else {
-                    $where_in = array('2112.01');
-                }
-            }
-        } else if ((float) $get_sum->selisih < 0) {
-            if ($jenis_koreksi == 'pembulatan') {
-                if ($posisi == 'D') {
-                    $where_in = array('2112.01');
-                } else {
-                    $where_in = array('8251.03');
-                }
-            } else if ($jenis_koreksi == 'selisih_kurs') {
-                if ($posisi == 'D') {
-                    $where_in = array('2112.01');
-                } else {
-                    $where_in = array('8241.01');
-                }
-            }
-        }
+        // if ((float) $get_sum->selisih > 0) {
+        //     if ($jenis_koreksi == 'pembulatan') {
+        //         if ($posisi == 'D') {
+        //             $where_in = array('8251.03');
+        //         } else {
+        //             $where_in = array('2112.01');
+        //         }
+        //     } else if ($jenis_koreksi == 'selisih_kurs') {
+        //         if ($posisi == 'D') {
+        //             $where_in = array('8241.01');
+        //         } else {
+        //             $where_in = array('2112.01');
+        //         }
+        //     }
+        // } else if ((float) $get_sum->selisih < 0) {
+        //     if ($jenis_koreksi == 'pembulatan') {
+        //         if ($posisi == 'D') {
+        //             $where_in = array('2112.01');
+        //         } else {
+        //             $where_in = array('8251.03');
+        //         }
+        //     } else if ($jenis_koreksi == 'selisih_kurs') {
+        //         if ($posisi == 'D') {
+        //             $where_in = array('2112.01');
+        //         } else {
+        //             $where_in = array('8241.01');
+        //         }
+        //     }
+        // }
 
         $callback = $this->m_pelunasanhutang->get_list_coa_by_kode($name);
         echo json_encode($callback);
@@ -2891,7 +2905,7 @@ class Pelunasanhutang extends MY_Controller
                             throw new \Exception('Metode Pelunasan Retur Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                         }
                     } else if ($mt->tipe2 == 'koreksi') { //kurs bulan
-                        $cek_mt_koreksi = $this->m_pelunasanhutang->cek_metode_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_bukti' => $mt->no_bukti, 'id_bukti' =>'123']);
+                        $cek_mt_koreksi = $this->m_pelunasanhutang->cek_metode_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_bukti' => $mt->no_bukti, 'id_bukti' =>$mt->id_bukti]);
                         if (!isset($cek_mt_koreksi)) {
                             throw new \Exception('Koreksi Kurs Bulan tidak ditemukan !', 200);
                         }
