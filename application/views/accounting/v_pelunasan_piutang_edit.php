@@ -88,7 +88,7 @@
             display: block;
         }
 
-        .warna-hutang {
+        .warna-piutang {
             color: red
         }
 
@@ -160,7 +160,7 @@
                             <!-- <div class="col-md-6 col-xs-12">
                                 <div class="form-group">
                                     <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4"><label>Supplier</label></div>
+                                        <div class="col-xs-4"><label>Customer</label></div>
                                         <div class="col-xs-8">
                                             <input type="text" class="form-control input-sm" name="partner" id="partner" value="<?php echo $list->partner_nama; ?>" readonly="readonly">
                                         </div>
@@ -171,7 +171,7 @@
                             <div class="col-md-6 col-xs-12">
                                 <div class="form-group">
                                     <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4"><label>Supplier</label></div>
+                                        <div class="col-xs-4"><label>Customer</label></div>
                                         <div class="col-xs-8">
                                             <select class="form-control input-sm" name="partner" id="partner" disabled></select>
                                         </div>
@@ -196,10 +196,10 @@
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
                                                         <div class="col-md-3 col-lg-3">
-                                                            <label>Invoice Akan dilunasi</label>
+                                                            <label>Faktur Akan dilunasi</label>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <button class="btn btn-default btn-sm <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-inv" name="btn-inv" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-file-text' style='color: orange'></i> Invoice (<span id='tinv'>0</span>)</button>
+                                                            <button class="btn btn-default btn-sm <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-inv" name="btn-inv" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-file-text' style='color: orange'></i> Faktur (<span id='tinv'>0</span>)</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -207,18 +207,18 @@
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no">No.</th>
-                                                            <th class="style bb">No Inv</th>
-                                                            <th class="style bb">Origin</th>
+                                                            <th class="style bb" style="width:100px;">No Faktur</th>
+                                                            <th class="style bb" style="width:130px;">No SJ</th>
                                                             <th class="style bb">Tanggal</th>
                                                             <th class="style bb">Curr</th>
                                                             <th class="style bb text-right">Kurs</th>
-                                                            <th class="style bb text-right">Total Utang (Rp)</th>
-                                                            <th class="style bb text-right">Total Utang (Valas)</th>
-                                                            <th class="style bb text-right">Sisa Utang (Rp)</th>
-                                                            <th class="style bb text-right">Sisa Utang (Valas)</th>
+                                                            <th class="style bb text-right">Total Piutang (Rp)</th>
+                                                            <th class="style bb text-right">Total Piutang (Valas)</th>
+                                                            <th class="style bb text-right">Sisa Piutang (Rp)</th>
+                                                            <th class="style bb text-right">Sisa Piutang (Valas)</th>
                                                             <th class="style bb text-right">Pelunasan (Rp)</th>
                                                             <th class="style bb text-right">Pelunasan (Valas)</th>
-                                                            <th class="style bb">Status Bayar</th>
+                                                            <th class="style bb " style="max-width:60px;">Status Bayar</th>
                                                             <th class="style bb" style="min-width:70px;">#</th>
                                                         </tr>
                                                     </thead>
@@ -299,7 +299,7 @@
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no"></th>
-                                                            <th class="style bb text-right">Total Hutang</th>
+                                                            <th class="style bb text-right">Total Piutang</th>
                                                             <th class="style bb text-right">Total Koreksi Kurs</th>
                                                             <th class="style bb text-right">Total Pelunasan</th>
                                                             <th class="style bb">Keterangan</th>
@@ -482,7 +482,7 @@
                 $.ajax({
                     type: "POST",
                     dataType: "JSON",
-                    url: "<?php echo base_url('accounting/pelunasanhutang/get_total_by_partner') ?>",
+                    url: "<?php echo base_url('accounting/pelunasanpiutang/get_total_by_partner') ?>",
                     data: {
                         partner: partner
                     },
@@ -502,14 +502,14 @@
 
 
 
-            //select 2 supplier
+            //select 2 Customer
             $('#partner').select2({
                 allowClear: true,
-                placeholder: "Select Supplier",
+                placeholder: "Select Customer",
                 ajax: {
                     dataType: 'JSON',
                     type: "POST",
-                    url: "<?php echo base_url(); ?>accounting/pelunasanhutang/get_list_supplier",
+                    url: "<?php echo base_url(); ?>accounting/pelunasanpiutang/get_list_customer",
                     data: function(params) {
                         return {
                             name: params.term,
@@ -550,7 +550,7 @@
                 $.ajax({
                     type: "POST",
                     dataType: "json",
-                    url: baseUrl + 'accounting/pelunasanhutang/simpan',
+                    url: baseUrl + 'accounting/pelunasanpiutang/simpan',
                     data: {
                         kode: $('#kode').val(),
                         partner: $('#partner').val(),
@@ -631,7 +631,7 @@
 
             $('#btn-simpan').off('click').on('click', function() {
                 if (!$('#partner').val()) {
-                    alert_notify('fa fa-warning', 'Supplier Harus diisi !', 'danger');
+                    alert_notify('fa fa-warning', 'Customer Harus diisi !', 'danger');
                     return;
                 }
                 simpanData(false);
@@ -664,7 +664,7 @@
                             please_wait(function() {});
                             $.ajax({
                                 type: "POST",
-                                url: '<?php echo base_url('accounting/pelunasanhutang/confirm_pelunasan_hutang') ?>',
+                                url: '<?php echo base_url('accounting/pelunasanpiutang/confirm_pelunasan_piutang') ?>',
                                 dataType: 'JSON',
                                 data: {
                                     no_pelunasan: no_pelunasan,
@@ -739,7 +739,7 @@
                             please_wait(function() {});
                             $.ajax({
                                 type: "POST",
-                                url: '<?php echo base_url('accounting/pelunasanhutang/cancel_pelunasan_hutang') ?>',
+                                url: '<?php echo base_url('accounting/pelunasanpiutang/cancel_pelunasan_piutang') ?>',
                                 dataType: 'JSON',
                                 data: {
                                     no_pelunasan: no_pelunasan,
@@ -794,8 +794,8 @@
                 });
                 $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
                 $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-                $('.modal-title').text('List Invoice');
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_invoice') ?>", {
+                $('.modal-title').text('List Faktur');
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_invoice') ?>", {
                     no_pelunasan: "<?php echo $list->no_pelunasan; ?>",
                     partner: $("#partner").val()
                 }, function(data) {
@@ -819,7 +819,7 @@
                 $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                 $('.modal-title').text('List Kas Bank');
                 $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_kas_bank') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_kas_bank') ?>", {
                     no_pelunasan: "<?php echo $list->no_pelunasan; ?>",
                     partner: $("#partner").val(),
                     type: 'kas',
@@ -846,7 +846,7 @@
                 $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                 $('.modal-title').text('List Uang Muka');
                 $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_kas_bank') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_kas_bank') ?>", {
                     no_pelunasan: "<?php echo $list->no_pelunasan; ?>",
                     partner: $("#partner").val(),
                     type: 'um',
@@ -873,7 +873,7 @@
                 $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                 $('.modal-title').text('List Retur');
                 $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_retur') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_retur') ?>", {
                     no_pelunasan: "<?php echo $list->no_pelunasan; ?>",
                     partner: $("#partner").val()
                 }, function(data) {
@@ -912,7 +912,7 @@
                 );
                 $(".modal-title").html("Edit Distribusi Pelunasan <b>" + no_inv + "</b>");
 
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_edit_distribusi') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_edit_distribusi') ?>", {
                     no_pelunasan: "<?= $list->no_pelunasan; ?>",
                     partner: "<?= $list->partner_id; ?>",
                     id: id
@@ -952,7 +952,7 @@
                 );
                 $(".modal-title").html("Koreksi Kurs Bulan ");
 
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_koreksi_kurs') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_koreksi_kurs') ?>", {
                     no_pelunasan: "<?= $list->no_pelunasan; ?>",
                     partner: "<?= $list->partner_id; ?>",
                 }, function(data) {
@@ -983,7 +983,7 @@
                 var no_pelunasan = "<?php echo $list->no_pelunasan; ?>";
 
                 bootbox.confirm({
-                    message: "Apakah Anda ingin menghapus data Invoice " + no_inv + " ?",
+                    message: "Apakah Anda ingin menghapus data Faktur " + no_inv + " ?",
                     title: "<i class='glyphicon glyphicon-trash' style='color: red'></i> Delete !",
                     buttons: {
                         confirm: {
@@ -1003,12 +1003,12 @@
                             please_wait(function() {});
                             $.ajax({
                                 type: "POST",
-                                url: '<?php echo base_url('accounting/pelunasanhutang/delete_pelunasan_hutang_invoice') ?>',
+                                url: '<?php echo base_url('accounting/pelunasanpiutang/delete_pelunasan_piutang_faktur') ?>',
                                 dataType: 'JSON',
                                 data: {
                                     no_pelunasan: no_pelunasan,
                                     id: id,
-                                    no_inv: no_inv,
+                                    no_faktur: no_inv,
                                 },
                                 success: function(data) {
                                     if (data.status == 'failed') {
@@ -1073,7 +1073,7 @@
                             please_wait(function() {});
                             $.ajax({
                                 type: "POST",
-                                url: '<?php echo base_url('accounting/pelunasanhutang/delete_pelunasan_hutang_metode') ?>',
+                                url: '<?php echo base_url('accounting/pelunasanpiutang/delete_pelunasan_piutang_metode') ?>',
                                 dataType: 'JSON',
                                 data: {
                                     no_pelunasan: no_pelunasan,
@@ -1154,7 +1154,7 @@
                 $.ajax({
                     type: "POST",
                     dataType: "JSON",
-                    url: "<?php echo site_url('accounting/pelunasanhutang/loadData') ?>",
+                    url: "<?php echo site_url('accounting/pelunasanpiutang/loadData') ?>",
                     data: {
                         id: id,
                         no_pelunasan: no_pelunasan,
@@ -1175,7 +1175,7 @@
                             let koreksiCell = renderKoreksiCell(value, status);
                             var tr = $("<tr>").append(
                                 $("<td style='font-weight:bold;'>").text(value.tipe_currency),
-                                $("<td class='text-right warna-hutang'>").text(formatNumber(value.total_hutang)),
+                                $("<td class='text-right warna-piutang'>").text(formatNumber(value.total_piutang)),
                                 $("<td class='text-right warna-koreksi'>").text(formatNumber(value.total_koreksi)),
                                 $("<td class='text-right warna-pelunasan'>").text(formatNumber(value.total_pelunasan)),
                                 $("<td style=''>").text(value.keterangan),
@@ -1216,7 +1216,7 @@
                 $.ajax({
                     type: "POST",
                     dataType: "JSON",
-                    url: "<?php echo site_url('accounting/pelunasanhutang/loadData') ?>",
+                    url: "<?php echo site_url('accounting/pelunasanpiutang/loadData') ?>",
                     data: {
                         id: id,
                         no_pelunasan: no_pelunasan,
@@ -1293,7 +1293,10 @@
 
             }
 
-            function loadInvoice() {
+            function 
+            
+            
+            loadInvoice() {
 
                 $("#example1_processing").css('display', ''); // show loading
                 var id = "<?php echo $list->id; ?>";
@@ -1301,7 +1304,7 @@
                 $.ajax({
                     type: "POST",
                     dataType: "JSON",
-                    url: "<?php echo site_url('accounting/pelunasanhutang/loadData') ?>",
+                    url: "<?php echo site_url('accounting/pelunasanpiutang/loadData') ?>",
                     data: {
                         id: id,
                         no_pelunasan: no_pelunasan,
@@ -1317,16 +1320,16 @@
                         let tfoot = $("<tfoot />");
                         let sum_pelunasan_rp = 0.00;
                         let sum_pelunasan_valas = 0.00;
-                        let sum_total_hutang_rp = 0.00;
-                        let sum_total_hutang_valas = 0.00;
-                        let sum_sisa_hutang_rp = 0.00;
-                        let sum_sisa_hutang_valas = 0.00;
+                        let sum_total_piutang_rp = 0.00;
+                        let sum_total_piutang_valas = 0.00;
+                        let sum_sisa_piutang_rp = 0.00;
+                        let sum_sisa_piutang_valas = 0.00;
                         let status = data.head.status;
                         $.each(data.record, function(key, value) {
 
                             empty = false;
                             if (status == 'draft') {
-                                btn = '<button class="btn btn-primary btn-xs btn-distribusi" name="btn-distribusi" data-toggle="tootlip" title="Distribusi" data-id="' + value.id + '" data-inv="' + value.no_invoice + '"><i class="fa fa-edit"></i></button>  <button class="btn btn-danger btn-xs btn-delete-invoice" name="btn-delete-invoice" data-toggle="tooltip" title="Hapus" data-id="' + value.id + '" data-inv="' + value.no_invoice + '"><i class="fa fa-trash"></i></button>';
+                                btn = '<button class="btn btn-primary btn-xs btn-distribusi" name="btn-distribusi" data-toggle="tootlip" title="Distribusi" data-id="' + value.id + '" data-inv="' + value.no_faktur + '"><i class="fa fa-edit"></i></button>  <button class="btn btn-danger btn-xs btn-delete-invoice" name="btn-delete-invoice" data-toggle="tooltip" title="Hapus" data-id="' + value.id + '" data-inv="' + value.no_faktur + '"><i class="fa fa-trash"></i></button>';
                             } else {
                                 btn = '';
                             }
@@ -1335,15 +1338,15 @@
 
                             var tr = $("<tr>").append(
                                 $("<td style=''>").text(no),
-                                $("<td style=''>").text(value.no_invoice),
-                                $("<td style=''>").html('<a href="#" class="detail-origin" data-origin="' + value.origin + '">' + value.origin + '</a>'),
-                                $("<td style=''>").text(value.tanggal_invoice),
+                                $("<td style=''>").text(value.no_faktur),
+                                $("<td style=''>").html('<a href="#" class="detail-sj" data-sj="' + value.no_sj + '">' + value.no_sj + '</a>'),
+                                $("<td style=''>").text(value.tanggal_faktur),
                                 $("<td style=''>").text(value.currency),
                                 $("<td class='text-right'>").text(value.kurs),
-                                $("<td class='text-right'>").text(formatNumber(value.total_hutang_rp)),
-                                $("<td class='text-right'>").text(formatNumber(value.total_hutang_valas)),
-                                $("<td class='text-right'>").text(formatNumber(value.sisa_hutang_rp)),
-                                $("<td class='text-right'>").text(formatNumber(value.sisa_hutang_valas)),
+                                $("<td class='text-right'>").text(formatNumber(value.total_piutang_rp)),
+                                $("<td class='text-right'>").text(formatNumber(value.total_piutang_valas)),
+                                $("<td class='text-right'>").text(formatNumber(value.sisa_piutang_rp)),
+                                $("<td class='text-right'>").text(formatNumber(value.sisa_piutang_valas)),
                                 $("<td class='text-right'>").text(formatNumber(value.pelunasan_rp)),
                                 $("<td class='text-right'>").text(formatNumber(value.pelunasan_valas)),
                                 $("<td class='text-center'>").append(statusHtml),
@@ -1353,10 +1356,10 @@
                             sum_pelunasan_rp = sum_pelunasan_rp + parseFloat(value.pelunasan_rp);
                             sum_pelunasan_valas = sum_pelunasan_valas + parseFloat(value.pelunasan_valas);
 
-                            sum_total_hutang_rp = sum_total_hutang_rp + parseFloat(value.total_hutang_rp);
-                            sum_total_hutang_valas = sum_total_hutang_valas + parseFloat(value.total_hutang_valas);
-                            sum_sisa_hutang_rp = sum_sisa_hutang_rp + parseFloat(value.sisa_hutang_rp);
-                            sum_sisa_hutang_valas = sum_sisa_hutang_valas + parseFloat(value.sisa_hutang_valas);
+                            sum_total_piutang_rp = sum_total_piutang_rp + parseFloat(value.total_piutang_rp);
+                            sum_total_piutang_valas = sum_total_piutang_valas + parseFloat(value.total_piutang_valas);
+                            sum_sisa_piutang_rp = sum_sisa_piutang_rp + parseFloat(value.sisa_piutang_rp);
+                            sum_sisa_piutang_valas = sum_sisa_piutang_valas + parseFloat(value.sisa_piutang_valas);
                             tbody.append(tr);
                             no++;
                         });
@@ -1367,10 +1370,10 @@
                         } else {
                             var trfoot = $("<tr class='style_total'>").append(
                                 $("<td colspan='6' class='text-right'>").text('Total'),
-                                $("<td class='text-right'>").text(formatNumber(sum_total_hutang_rp)),
-                                $("<td class='text-right'>").text(formatNumber(sum_total_hutang_valas)),
-                                $("<td class='text-right warna-hutang'>").text(formatNumber(sum_sisa_hutang_rp)),
-                                $("<td class='text-right warna-hutang'>").text(formatNumber(sum_sisa_hutang_valas)),
+                                $("<td class='text-right'>").text(formatNumber(sum_total_piutang_rp)),
+                                $("<td class='text-right'>").text(formatNumber(sum_total_piutang_valas)),
+                                $("<td class='text-right warna-piutang'>").text(formatNumber(sum_sisa_piutang_rp)),
+                                $("<td class='text-right warna-piutang'>").text(formatNumber(sum_sisa_piutang_valas)),
                                 $("<td class='text-right'>").text(formatNumber(sum_pelunasan_rp)),
                                 $("<td class='text-right'>").text(formatNumber(sum_pelunasan_valas)),
                                 $("<td colspan='2'>").html('&nbsp'),
@@ -1443,7 +1446,7 @@
                     ajax: {
                         dataType: 'json',
                         type: "POST",
-                        url: "<?php echo base_url(); ?>accounting/pelunasanhutang/get_list_koreksi_select2",
+                        url: "<?php echo base_url(); ?>accounting/pelunasanpiutang/get_list_koreksi_select2",
                         data: function(params) {
                             // ambil currency dari atribut data-currency di elemen select
                             let currency = $(this).data('currency') || '';
@@ -1548,7 +1551,7 @@
                 let koreksiNama = value.koreksi_text;
                 let hasCoa = value.koreksi_get_coa;
                 let keterangan = value.keterangan;
-                
+
                 let tipe =  (keterangan == 'Uang Muka')? 'um' : 'koreksi';
 
                 // bikin select
@@ -1557,8 +1560,8 @@
                     class: 'form-control input-sm select-koreksi',
                     name: 'koreksi',
                     style: 'width:100% !important;',
-                    'data-id': value.id,
                     'data-tipe' : tipe,
+                    'data-id': value.id,
                     'data-default': koreksiId,
                     'data-currency': value.tipe_currency
                 });
@@ -1654,7 +1657,7 @@
                 }
 
                 $.ajax({
-                    url: "<?php echo site_url('accounting/pelunasanhutang/getCoaByKoreksi') ?>",
+                    url: "<?php echo site_url('accounting/pelunasanpiutang/getCoaByKoreksi') ?>",
                     type: "POST",
                     dataType: "JSON",
                     data: {
@@ -1691,7 +1694,7 @@
                 // let nama_koreksi = $(this).attr('data-nm-koreksi');
                 let no_pelunasan = "<?= $list->no_pelunasan; ?>";
                 $.ajax({
-                    url: "<?php echo site_url('accounting/pelunasanhutang/delete_koreksi') ?>",
+                    url: "<?php echo site_url('accounting/pelunasanpiutang/delete_koreksi') ?>",
                     type: "POST",
                     dataType: "JSON",
                     data: {
@@ -1718,7 +1721,7 @@
                 // let nama_koreksi = $(this).attr('data-nm-koreksi');
                 let no_pelunasan = "<?= $list->no_pelunasan; ?>";
                 $.ajax({
-                    url: "<?php echo site_url('accounting/pelunasanhutang/save_koreksi2') ?>",
+                    url: "<?php echo site_url('accounting/pelunasanpiutang/save_koreksi2') ?>",
                     type: "POST",
                     dataType: "JSON",
                     data: {
@@ -1754,7 +1757,7 @@
                 );
                 $(".modal-title").html("Koreksi <b>" + nama_koreksi + "</b>");
 
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_koreksi') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_koreksi') ?>", {
                     no_pelunasan: "<?= $list->no_pelunasan; ?>",
                     id: id_summary,
                     jenis_koreksi: jenis_koreksi
@@ -1774,14 +1777,14 @@
 
             }
 
-            $(document).on("click", ".detail-origin", function(e) {
+            $(document).on("click", ".detail-sj", function(e) {
                 e.preventDefault();
 
-                let data_origin = $(this).data("origin");
-                detail_origin(data_origin);
+                let data_sj = $(this).data("sj");
+                detail_sj(data_sj);
             });
 
-            function detail_origin(origin) {
+            function detail_sj(sj) {
                 // tampilkan modal
                 const $modal = $("#view_data");
 
@@ -1800,12 +1803,12 @@
                     </center>
                 `);
 
-                $(".modal-title").html(`Origin : <b>${origin}</b>`);
+                $(".modal-title").html(`No SJ : <b>${sj}</b>`);
 
                 // ambil data via AJAX POST
-                $.post("<?= base_url('accounting/pelunasanhutang/get_view_origin') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_sj') ?>", {
                         no_pelunasan: "<?= $list->no_pelunasan; ?>",
-                        origin: origin,
+                        sj: sj,
                     })
                     .done(function(data) {
                         // tampilkan isi modal
@@ -1815,9 +1818,12 @@
                         }, 500);
                     })
                     .fail(function(xhr) {
-                        $(".view_data").html("<p style='color:red'>Terjadi kesalahan saat memuat data.</p>");
+                        $("#view_data .view_body").html(
+                            "<p>" + (xhr.responseJSON?.error ?? "Terjadi kesalahan saat memuat data.") + "</p>"
+                        );
                         console.error(xhr.responseText);
                     });
+
 
                 // reset isi modal saat ditutup, tapi pastikan tidak mendaftarkan event berkali-kali
                 $modal.off("hidden.bs.modal").on("hidden.bs.modal", function() {
