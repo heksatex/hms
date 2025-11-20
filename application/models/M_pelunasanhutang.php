@@ -942,7 +942,10 @@ class M_pelunasanhutang extends CI_Model
         // }
         $this->db->limit(50);
         $this->db->where('level',5);
-        $this->db->like('nama', $name);
+        $this->db->group_start();
+            $this->db->like('kode_coa', $name);
+            $this->db->or_like('nama', $name);
+        $this->db->group_end();
         $this->db->order_by('kode_coa', 'asc');
         $this->db->select('*');
         $this->db->from("acc_coa");
@@ -1079,7 +1082,7 @@ class M_pelunasanhutang extends CI_Model
         }
     }
 
-    function get_list_koreksi($tipe_currency = null, $where = null)
+    function get_list_koreksi($tipe_currency = null, $where = null, $tipe = null)
     {
         $this->db->order_by('nama_koreksi', 'asc');
         if(($where)){
@@ -1090,6 +1093,9 @@ class M_pelunasanhutang extends CI_Model
         }
         if($tipe_currency == 'Valas') { // Rp, VALAS
             $this->db->WHERE('show_valas', 'true'); // I
+        }
+        if($tipe){
+            $this->db->WHERE('tipe', $tipe); // um / koreksi
         }
         $query = $this->db->get('acc_pelunasan_koreksi');
         return $query->result();

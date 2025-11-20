@@ -404,6 +404,7 @@
                 $("#btn-edit").hide(); //sembuyikan btn-edit
                 $("#btn-confirm").hide(); //sembuyikan btn-confirm
                 $('#partner').prop('disabled', false);
+                $('.select-koreksi').prop('disabled', true);
 
                 $("#btn-cancel").attr('id', 'btn-cancel-edit'); // ubah id btn-cancel jadi btn-cancel-edit
                 // $('#tanggal_transaksi').attr('disabled', false).attr('id', 'tanggal_transaksi');
@@ -432,6 +433,7 @@
                 $("#btn-edit").show(); //tampilkan btn-edit
                 $("#btn-confirm").show(); //tampilkan btn-confirm
                 $('#partner').prop('disabled', true);
+                $('.select-koreksi').prop('disabled', false);
 
                 $("#btn-cancel-edit").attr('id', 'btn-cancel'); // ubah id btn-cancel-edit jadi btn-cancel
                 $('#tanggal_transaksi').attr('disabled', true);
@@ -1447,7 +1449,8 @@
                             let currency = $(this).data('currency') || '';
                             return {
                                 name: params.term, // keyword pencarian
-                                tipe_currency: currency // filter tambahan
+                                tipe_currency: currency, // filter tambahan
+                                tipe: $(this).attr('data-tipe')
                             };
                         },
                         processResults: function(data) {
@@ -1545,6 +1548,8 @@
                 let koreksiNama = value.koreksi_text;
                 let hasCoa = value.koreksi_get_coa;
                 let keterangan = value.keterangan;
+                
+                let tipe =  (keterangan == 'Uang Muka')? 'um' : 'koreksi';
 
                 // bikin select
                 let $select = $('<select>', {
@@ -1553,6 +1558,7 @@
                     name: 'koreksi',
                     style: 'width:100% !important;',
                     'data-id': value.id,
+                    'data-tipe' : tipe,
                     'data-default': koreksiId,
                     'data-currency': value.tipe_currency
                 });
@@ -1564,7 +1570,7 @@
                 }
 
                 let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
-                if (keterangan.length === 0 || keterangan === 'Uang Muka') {
+                if (keterangan.length === 0 || (keterangan === 'Uang Muka'  && value.tipe_currency == 'Valas')) {
                     $wrapper = $('<div>').append('').append($coaInfo);
                 } else {
                     // tempat info COA
