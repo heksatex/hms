@@ -5,47 +5,49 @@ function formatNumber(value, maxDecimals, locale = "en-US", prefix = "") {
     const decimalSeparator = (1.1).toLocaleString(locale).substring(1, 2);
 
     // hanya izinkan angka & decimal
-    let regex = new RegExp(`[^0-9${decimalSeparator}]`, "g");
+    let regex = new RegExp(`[^0-9${decimalSeparator}-]`, "g");
     let cleanValue = value.replace(regex, "");
 
-    // ganti decimal separator ke titik (.) untuk proses parsing
+    // ganti decimal separator ke titik (.) untuk parsing
     if (decimalSeparator !== ".") {
         cleanValue = cleanValue.replace(decimalSeparator, ".");
     }
 
-    // jaga supaya hanya ada 1 titik desimal
-    let firstDotIndex = cleanValue.indexOf(".");
-    if (firstDotIndex !== -1) {
+    // hilangkan lebih dari 1 titik desimal
+    let firstDot = cleanValue.indexOf(".");
+    if (firstDot !== -1) {
         cleanValue =
-            cleanValue.substring(0, firstDotIndex + 1) +
-            cleanValue.substring(firstDotIndex + 1).replace(/\./g, "");
+        cleanValue.substring(0, firstDot + 1) +
+        cleanValue.substring(firstDot + 1).replace(/\./g, "");
     }
 
-    // kalau user baru ketik titik di akhir
+    // kalau baru ketik titik di akhir
     if (cleanValue.endsWith(".")) {
         let parts = cleanValue.split(".");
-        let integerPart = parts[0] || "0";
-        return prefix + formatter.format(parseInt(integerPart, 10)) + decimalSeparator;
+        let intPart = parts[0] || "0";
+        return prefix + formatter.format(parseInt(intPart, 10)) + decimalSeparator;
     }
 
-    let parts = cleanValue.split(".");
-    let integerPart = parts[0] || "0";
-    let decimalPart = parts[1] !== undefined ? parts[1] : "";
-
-    // format integer pakai locale
-    integerPart = formatter.format(parseInt(integerPart, 10));
-
-    // batasi jumlah decimal
-    if (maxDecimals > 0 && decimalPart.length > maxDecimals) {
-        decimalPart = decimalPart.substring(0, maxDecimals);
+    // 🔥 PROSES ROUNDING DI SINI
+    let numberValue = parseFloat(cleanValue);
+    if (!isNaN(numberValue) && maxDecimals >= 0) {
+        numberValue = Number(numberValue.toFixed(maxDecimals));
     }
 
-    let formatted = (maxDecimals > 0 && decimalPart)
-        ? integerPart + decimalSeparator + decimalPart
-        : integerPart;
+    // sekarang format kembali ke locale
+    let [intPart, decPart] = numberValue.toString().split(".");
 
-    return prefix + formatted;
+    intPart = formatter.format(intPart);
+
+    if (decPart && maxDecimals > 0) {
+        // pastikan trailing zero tetap tampil sesuai maxDecimals
+        decPart = decPart.padEnd(maxDecimals, "0");
+        return prefix + intPart + decimalSeparator + decPart;
+    }
+
+    return prefix + intPart;
 }
+
 
 function bindFormatAngka(context = document) {
     context.querySelectorAll(".formatAngka").forEach(input => {
