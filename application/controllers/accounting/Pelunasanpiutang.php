@@ -1380,7 +1380,7 @@ class Pelunasanpiutang extends MY_Controller
 
             $total_piutang_rp = $get_piutang_idr->total_piutang_rp ?? 0;
             $total_pelunasan_rp = $get_total_idr->total_pelunasan_rp ?? 0;
-            $selisih_rp = round($total_pelunasan_rp, 2) - round($total_piutang_rp, 2) + round($total_koreksi_rp, 2);
+            $selisih_rp =  round($total_piutang_rp, 2) - round($total_pelunasan_rp, 2) + round($total_koreksi_rp, 2);
 
 
 
@@ -1429,7 +1429,7 @@ class Pelunasanpiutang extends MY_Controller
 
             $total_piutang_valas = (float) $get_piutang_valas->total_piutang_valas ?? 0;
             $total_pelunasan_valas = (float) $get_total_valas->total_pelunasan_valas ?? 0;
-            $selisih_valas = round($total_pelunasan_valas, 2) - round($total_piutang_valas, 2) + round($total_koreksi_valas, 2);
+            $selisih_valas = round($total_piutang_valas, 2) - round($total_pelunasan_valas, 2) + round($total_koreksi_valas, 2);
 
             if ($selisih_valas > 0) {
                 $keterangan_valas = "Lebih Bayar";

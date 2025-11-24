@@ -167,9 +167,9 @@ class M_bukubesarpembantupiutang extends CI_Model
         IFNULL(($total), 0) as debit,
         0 as credit,
         status, 'fak' as link,
-        sum(fakd.qty*fakd.harga*fak.kurs_nominal) as dpp_piutang,
-        sum((fakd.qty*fakd.harga*fak.kurs_nominal) * 11/12 * fak.tax_value) as ppn_piutang,
-        sum((fakd.qty*fakd.harga*fak.kurs_nominal) +  ((fakd.qty*fakd.harga*fak.kurs_nominal) * 11/12 * fak.tax_value)  ) as total_piutang_dpp_ppn");
+        sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001)) as dpp_piutang,
+        sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value) as ppn_piutang,
+        sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)  ) as total_piutang_dpp_ppn");
         $this->db->FROM('acc_faktur_penjualan fak');
         $this->db->JOIN("acc_faktur_penjualan_detail fakd", "fak.id = fakd.faktur_id", "INNER");
         return $this->db->get_compiled_select();
@@ -197,9 +197,9 @@ class M_bukubesarpembantupiutang extends CI_Model
                 ''
             )
         ) as uraian,
-        IFNULL(SUM($total), 0) as total_diskon,
+        IFNULL(($total), 0) as total_diskon,
         0 as debit,
-        IFNULL(SUM($total), 0) as credit,
+        IFNULL(($total), 0) as credit,
         status, 'fak' as link,
         sum(fakd.diskon) as dpp_diskon,
         sum((fakd.diskon) * 11/12 * fak.tax_value) as ppn_diskon,
@@ -338,7 +338,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         0 as total_dpp_ppn");
         $this->db->FROM('acc_pelunasan_piutang app');
         $this->db->jOIN("acc_pelunasan_piutang_summary apps","app.id = apps.pelunasan_piutang_id", "INNER");
-        $this->db->JOIN("acc_pelunasan_koreksi ack","apps.koreksi = ack.kode","left");
+        $this->db->JOIN("acc_pelunasan_koreksi_piutang ack","apps.koreksi = ack.kode","left");
         return $this->db->get_compiled_select();
     } 
 
