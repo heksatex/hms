@@ -49,7 +49,7 @@
                 <div id="row" >
                     <div id="column-news-1" style="width: 60%;" >
                         <strong>No Retur</strong>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= ": {$head->no_retur_internal}" ?>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= ": {$head->no_retur}" ?>
                     </div>
                     <div id="column-news-2" style="text-align: left; width: 40%;">
                     </div>
@@ -67,7 +67,7 @@
                 </div>
                 <div id="row">
                     <div id="column" style="padding-top: 20px;">
-                        Kepada Yth., 
+                        Dari., 
                     </div>
                 </div>
                 <div id="row">

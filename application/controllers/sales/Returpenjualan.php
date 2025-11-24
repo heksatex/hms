@@ -155,7 +155,7 @@ class Returpenjualan extends MY_Controller {
                 show_404();
             }
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
-            $data["detail"] = $model->setTables("acc_retur_penjualan_detail fjd")->setOrder(["uraian" => "asc","warna"=>"asc"])
+            $data["detail"] = $model->setTables("acc_retur_penjualan_detail fjd")->setOrder(["uraian" => "asc", "warna" => "asc"])
                             ->setJoins("acc_coa", "kode_coa = no_acc", "left")
                             ->setWheres(["retur_id" => $data['datas']->id])
                             ->setSelects(["fjd.*", "acc_coa.nama as coa_nama"])->getData();
@@ -235,8 +235,8 @@ class Returpenjualan extends MY_Controller {
             $data = array();
             $model = new $this->m_global;
             $model->setTables("acc_retur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_retur_penjualan.status", "left")
-                    ->setOrder(["acc_retur_penjualan.tanggal" => "desc"])->setSearch(["no_retur", "no_faktur_pajak", "no_sj", "partner_nama", "no_retur_internal"])
-                    ->setOrders([null, "no_retur", "no_faktur_pajak", "tanggal", "no_sj", "marketing_nama", "partner_nama"])->setSelects(["acc_retur_penjualan.*", "nama_status"]);
+                    ->setOrder(["acc_retur_penjualan.tanggal" => "desc"])->setSearch(["no_retur", "no_sj", "partner_nama"])
+                    ->setOrders([null, "no_retur", "tanggal", "no_sj", "marketing_nama", "partner_nama"])->setSelects(["acc_retur_penjualan.*", "nama_status"]);
             $no = $_POST['start'];
             $tanggal = $this->input->post("tanggal");
             $marketing = $this->input->post("marketing");
@@ -250,11 +250,10 @@ class Returpenjualan extends MY_Controller {
             foreach ($model->getData() as $key => $value) {
                 $no += 1;
                 $kode_encrypt = encrypt_url($value->no_retur);
-                $fk = ($value->no_retur_internal === '') ? $value->no_retur : $value->no_retur_internal;
+                $fk = $value->no_retur;
                 $data [] = [
                     $no,
                     "<a href='" . base_url("sales/returpenjualan/edit/{$kode_encrypt}") . "'>{$fk}</a>",
-                    $value->no_faktur_pajak,
                     $value->tanggal,
                     $value->no_sj,
                     $value->marketing_nama,
@@ -316,8 +315,6 @@ class Returpenjualan extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $customer = $this->input->post("customer");
             $customerNama = $this->input->post("customer_nama");
-            $noReturInternal = $this->input->post("no_retur_internal");
-            $noFakturPajak = $this->input->post("no_faktur_pajak");
             $kurs = $this->input->post("kurs");
             $kursNominal = $this->input->post("kurs_nominal");
             $dariSJ = "0";
@@ -337,21 +334,15 @@ class Returpenjualan extends MY_Controller {
                 }
                 $dariSJ = "1";
             }
-            if ($noReturInternal !== "") {
-                $fk = $model->setTables("acc_retur_penjualan")->setWheres(["no_retur_internal" => $noReturInternal])->getDetail();
-                if ($fk) {
-                    throw new \Exception("No Retur Internal sudah terpakai", 500);
-                }
-            }
 
-            if (!$noRetur = $this->token->noUrut('returpenjualan', date('y', strtotime($tanggal)) . '/' . getRomawi(date('m', strtotime($tanggal))), true)
-                            ->generate('RP/', '/%04d')->get()) {
+
+            if (!$noRetur = $this->token->noUrut('returpenjualan', date('y', strtotime($tanggal)) . '/' . date('m', strtotime($tanggal)), true)
+                            ->generate('CN/', '/%04d')->get()) {
                 throw new \Exception("No Retur tidak terbuat", 500);
             }
 
             $header = [
                 "no_retur" => $noRetur,
-                "no_retur_internal" => $noReturInternal,
                 "tanggal" => $tanggal,
                 "tipe" => $tipe,
                 "no_sj" => $nosj,
@@ -360,7 +351,6 @@ class Returpenjualan extends MY_Controller {
                 "marketing_nama" => $marNama,
                 "partner_id" => $customer,
                 "partner_nama" => $customerNama,
-                "no_faktur_pajak" => $noFakturPajak,
                 "kurs" => $kurs,
                 "kurs_nominal" => $kursNominal,
                 "create_date" => date("Y-m-d H:i:s"),
@@ -462,14 +452,7 @@ class Returpenjualan extends MY_Controller {
             $nosj = $this->input->post("no_sj");
             $ids = $this->input->post("ids");
             $nosjold = $this->input->post("no_sj_old");
-            $noReturInternal = $this->input->post("no_retur_internal");
             $model = new $this->m_global;
-            if ($noReturInternal !== "") {
-                $fk = $model->setTables("acc_retur_penjualan")->setWheres(["no_retur_internal" => $noReturInternal, "id <>" => $ids])->getDetail();
-                if ($fk) {
-                    throw new \Exception("No Retur Internal sudah terpakai", 500);
-                }
-            }
             $header = [
                 "tipe" => $this->input->post("tipe"),
                 "no_sj" => $nosj,
@@ -478,8 +461,6 @@ class Returpenjualan extends MY_Controller {
                 "marketing_nama" => $this->input->post("marketing_nama"),
                 "partner_id" => $this->input->post("customer"),
                 "partner_nama" => $this->input->post("customer_nama"),
-                "no_faktur_pajak" => $this->input->post("no_faktur_pajak"),
-                "no_retur_internal" => $noReturInternal,
                 "kurs" => $this->input->post("kurs"),
                 "kurs_nominal" => $this->input->post("kurs_nominal"),
                 "tipe_diskon" => $tipediskon,
@@ -557,8 +538,8 @@ class Returpenjualan extends MY_Controller {
 
                     $model->setTables("acc_retur_penjualan_detail")->updateBatch($detail, "id");
                 }
-            } 
-            if ($new)  {
+            }
+            if ($new) {
                 $header["grand_total"] = 0;
                 $header["ppn"] = 0;
                 $header["dpp_lain"] = 0;
@@ -574,7 +555,7 @@ class Returpenjualan extends MY_Controller {
 
                 $checkSJ = $model->setTables("delivery_order do")->setJoins("delivery_order_detail dod", "(do.id = do_id and dod.status = 'retur')", "left")
                                 ->setJoins("picklist_detail pd", "picklist_detail_id = pd.id")->setWheres(["do.no_sj" => $nosj])
-                                ->setGroups(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom"])->setOrder(["pd.corak_remark"=>"asc","pd.warna_remark"=>"asc"])
+                                ->setGroups(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom"])->setOrder(["pd.corak_remark" => "asc", "pd.warna_remark" => "asc"])
                                 ->setSelects(["pd.corak_remark", "pd.warna_remark", "lebar_jadi", "uom_lebar_jadi", "uom", "faktur"])
                                 ->setSelects(["count(dod.barcode_id) as total_lot", "sum(pd.qty) as total_qty"])->getData();
                 if (count($checkSJ) > 0) {
@@ -671,14 +652,14 @@ class Returpenjualan extends MY_Controller {
                         $stt = "edit";
                     } else {
                         if (!$jurnal = $this->token->noUrut("penjualan_", date('y', strtotime($data->tanggal)) . '/' . date('m', strtotime($data->tanggal)), true)
-                                        ->generate("PJ/", '/%05d')->get()) {
+                                        ->generate("RPJ/", '/%05d')->get()) {
                             throw new \Exception("No jurnal tidak terbuat", 500);
                         }
                         $stt = "create";
                     }
 
                     $jurnalData = ["kode" => $jurnal, "periode" => date("Y/m", strtotime($data->tanggal)),
-                        "origin" => "{$data->no_retur_internal}", "status" => "posted", "tanggal_dibuat" => $data->tanggal, "tipe" => "RPJ",
+                        "origin" => "{$data->no_retur}", "status" => "posted", "tanggal_dibuat" => $data->tanggal, "tipe" => "RPJ",
                         "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => "{$data->partner_nama}"];
 
                     $detail = $model->setTables("acc_retur_penjualan_detail")->setWheres(["retur_no" => $kode])->getData();
@@ -686,7 +667,7 @@ class Returpenjualan extends MY_Controller {
 
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
-                        "nama" => "Hutamg",
+                        "nama" => "Utang (Retur)",
                         "reff_note" => "",
                         "partner" => $data->partner_id,
                         "kode_coa" => $getCoaDefault->value,
@@ -702,7 +683,7 @@ class Returpenjualan extends MY_Controller {
                     if ($data->diskon_ppn > 0) {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "PPN Diskon",
+                            "nama" => "PPN Diskon (Retur)",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $getCoaDefaultPpnDisc->value,
@@ -718,7 +699,7 @@ class Returpenjualan extends MY_Controller {
                     if ($data->diskon > 0) {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "DPP Diskon",
+                            "nama" => "DPP Diskon (Retur)",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $getCoaDefaultDppDisc->value,
@@ -734,7 +715,7 @@ class Returpenjualan extends MY_Controller {
                     if ($allDiskon > 0) {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "Diskon",
+                            "nama" => "Diskon (Retur)",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $getCoaDefault->value,
@@ -749,7 +730,7 @@ class Returpenjualan extends MY_Controller {
                     if ($data->ppn > 0) {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "PPN",
+                            "nama" => "PPN (Retur)",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $getCoaDefaultPpnDisc->value,
@@ -765,7 +746,7 @@ class Returpenjualan extends MY_Controller {
                         $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
+                            "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom} (Retur)",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $value->no_acc,
@@ -804,7 +785,7 @@ class Returpenjualan extends MY_Controller {
                         throw new \exception("Data Retur Penjualan {$kode} sudah masuk pada pelunasan", 500);
                     }
                     $finalTotal = $data->final_total * $data->kurs_nominal;
-                    if ((double)$finalTotal !== (double)$data->piutang_rp) {
+                    if ((double) $finalTotal !== (double) $data->piutang_rp) {
                         throw new \exception("Data Retur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
                     }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
@@ -828,31 +809,6 @@ class Returpenjualan extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
-        }
-    }
-
-    public function update_faktur($id) {
-        try {
-            $sub_menu = $this->uri->segment(2);
-            $username = addslashes($this->session->userdata('username'));
-            $model = new $this->m_global;
-            $kode = decrypt_url($id);
-            $pajak = $this->input->post("pajak");
-            $update = [
-                "no_faktur_pajak" => $pajak
-            ];
-            $model->setTables("acc_retur_penjualan")->setWheres(["no_retur" => $kode])->update($update);
-
-            $log = "Update " . logArrayToString("; ", $update);
-            $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
-            $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
-        } catch (Exception $ex) {
-            log_message("error", json_encode($ex));
-            $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
@@ -1093,7 +1049,7 @@ class Returpenjualan extends MY_Controller {
             $this->_module->unlock_tabel();
         }
     }
-    
+
     public function print_pdf() {
         try {
             $kode = decrypt_url($this->input->post("id"));
@@ -1109,7 +1065,7 @@ class Returpenjualan extends MY_Controller {
             }
             $data["alamat"] = $model->setTables("setting")->setWheres(["setting_name" => "alamat_fp"])->getDetail();
             $data["npwp"] = $model->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
-            $data["detail"] = $model->setTables("acc_retur_penjualan_detail")->setWheres(["retur_no" => $kode])->setOrder(["uraian" => "asc","warna"=>"asc"])->getData();
+            $data["detail"] = $model->setTables("acc_retur_penjualan_detail")->setWheres(["retur_no" => $kode])->setOrder(["uraian" => "asc", "warna" => "asc"])->getData();
             if ($data["head"]->kurs_nominal > 1) {
                 $data["curr"] = $curr = $model->setTables("currency_kurs")->setWheres(["currency_kurs.id" => $data["head"]->kurs])
                                 ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
@@ -1126,7 +1082,7 @@ class Returpenjualan extends MY_Controller {
             }
             $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
             $mpdf->WriteHTML($html);
-            $filename = str_replace("/", "-", $data["head"]->no_retur_internal);
+            $filename = str_replace("/", "-", $data["head"]->no_retur);
             $pathFile = "{$url}/{$filename}.pdf";
             $mpdf->Output(FCPATH . $pathFile, "F");
             $this->output->set_status_header(200)

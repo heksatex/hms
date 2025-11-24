@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <style>
-            #btn-cancel,#btn-simpan,#btn-print,#btn-print-pdf,#btn-update-fp {
+            #btn-cancel,#btn-simpan,#btn-print,#btn-print-pdf {
                 display: none;
             }
             .select2-container--focus{
@@ -29,7 +29,7 @@
                 #btn-edit{
                     display: none;
                 }
-                #btn-print,#btn-print-pdf,#btn-update-fp {
+               #btn-print-pdf {
                     display:inline;
                 }
             </style>
@@ -74,7 +74,7 @@
                         <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/returpenjualan/update/{$id}") ?>">
                             <input type="hidden" name="ids" value="<?= $datas->id ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title"><?= ($datas->no_retur_internal === "") ? "" : "No Retur <strong>{$datas->no_retur_internal}</strong>" ?></h3>
+                                <h3 class="box-title"><?="No Retur <strong>{$datas->no_retur}</strong>" ?></h3>
                                 <div class="pull-right text-right" id="btn-header">
                                     <?php
                                     if ($datas->status == 'cancel') {
@@ -86,9 +86,6 @@
                                     ?>
                                     <button class="btn btn-primary btn-sm" type="button" id="btn-print-pdf" data-ids="<?= $id ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         <i class="fa fa-print"></i>&nbsp;Print PDF
-                                    </button>
-                                    <button class="btn btn-default btn-sm" type="button" id="btn-update-fp" data-ids="<?= $id ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
-                                        </i>&nbsp;Update Faktur Pajak
                                     </button>
                                 </div>
                             </div>
@@ -161,19 +158,6 @@
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="hidden" class="form-control input-sm customer clear-tipe" id="customer" name="customer" value="<?= $datas->partner_id ?>">
                                                     <input type="text" class="form-control input-sm customer_nama clear-tipe" id="customer_nama" name="customer_nama" value="<?= $datas->partner_nama ?>" readonly>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Retur Internal</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_retur_internal" class="form-control input-sm no_retur_internal edited-read" value="<?= $datas->no_retur_internal ?>" readonly/>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Faktur Pajak</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_faktur_pajak" id="no_faktur_pajak" class="form-control input-sm no_faktur_pajak edited-read" value="<?= $datas->no_faktur_pajak ?>"
-                                                           <?= ($datas->status !== 'confirm') ? 'readonly' : "" ?>/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -713,30 +697,6 @@ if ($datas->status == 'confirm') {
             $("#tax_value").val("0.0000");
         });
 
-        $("#btn-update-fp").unbind("click").off("click").on("click", function () {
-            $.ajax({
-                url: "<?= base_url('sales/returpenjualan/update_faktur/' . $id) ?>",
-                type: "POST",
-                data: {
-                    pajak: $("#no_faktur_pajak").val()
-                },
-                beforeSend: function (xhr) {
-                    please_wait(function () {});
-                },
-                error: function (req, error) {
-                    unblockUI(function () {
-                        setTimeout(function () {
-                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                        }, 500);
-                    });
-                },
-                complete: function (jqXHR, textStatus) {
-                    unblockUI(function () {}, 200);
-                }, success: function (data) {
-                    location.reload();
-                }
-            });
-        });
 
         $(".split-item").unbind("click").off("click").on("click", function () {
             $(".btn-rmv-item").hide();

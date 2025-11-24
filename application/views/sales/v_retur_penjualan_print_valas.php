@@ -60,7 +60,7 @@
                 <div id="row" >
                     <div id="column">
                         <strong>No Faktur</strong>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= ": {$head->no_retur_internal}" ?>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= ": {$head->no_retur}" ?>
                     </div>
                     <div id="column" style="text-align: right;">
                        
@@ -82,7 +82,7 @@
                 </div>
                 <div id="row">
                     <div id="column" style="padding-top: 20px;">
-                        Kepada Yth., 
+                        Dari., 
                     </div>
                 </div>
                 <div id="row">

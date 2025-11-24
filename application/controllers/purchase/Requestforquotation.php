@@ -73,11 +73,11 @@ class Requestforquotation extends MY_Controller {
             $stt = ($_GET["stt"] ?? '');
             $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)
                     ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
-             if($prd !== "") {
+            if ($prd !== "") {
                 $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
             }
-            if($stt !== "") {
-                $model1->setWhereIn("po.status", explode(",",$stt));
+            if ($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",", $stt));
             }
             if (strtolower($level) === "direksi") {
                 $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
@@ -87,18 +87,18 @@ class Requestforquotation extends MY_Controller {
 
             $nextPage = $model1->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po). "?produk={$prd}&stt={$stt}");
+                $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po) . "?produk={$prd}&stt={$stt}");
             }
 
             $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true)
                     ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
-            if($prd !== "") {
+            if ($prd !== "") {
                 $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
             }
-            if($stt !== "") {
-                $model1->setWhereIn("po.status", explode(",",$stt));
+            if ($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",", $stt));
             }
-            
+
             if (strtolower($level) === "direksi") {
                 $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
             } else {
@@ -108,7 +108,7 @@ class Requestforquotation extends MY_Controller {
             $prevPage = $model1->getDetail();
 
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po). "?produk={$prd}&stt={$stt}");
+                $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}");
             }
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
@@ -147,15 +147,16 @@ class Requestforquotation extends MY_Controller {
             } else {
                 if ($jenis !== "FPT")
                     $list->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
+                if (gettype($status) === 'string')
+                    $list->setWhereRaw("po.status in ('draft','waiting_approve')");
+                else
+                if (count($status) > 0) {
+                    $list->setWhereIn("po.status", $status);
+                    $statuss = implode(",", $status);
+                }
             }
 
-            if (gettype($status) === 'string')
-                $list->setWhereRaw("po.status in ('draft','waiting_approve')");
-            else
-            if (count($status) > 0) {
-                $list->setWhereIn("po.status", $status);
-                $statuss = implode(",", $status);
-            }
+
 
             if ($nama_produk !== "")
                 $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
