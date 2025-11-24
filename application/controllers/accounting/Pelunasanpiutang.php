@@ -1384,9 +1384,9 @@ class Pelunasanpiutang extends MY_Controller
 
 
 
-            if ($selisih_rp > 0) {
+            if ($selisih_rp < 0) {
                 $keterangan_rp = "Lebih Bayar";
-            } else if ($selisih_rp < 0) {
+            } else if ($selisih_rp > 0) {
 
                 // cek invoice yng status nya bukan lunas ada ga 
                 $keterangan_rp = "Kurang Bayar";
@@ -1431,9 +1431,9 @@ class Pelunasanpiutang extends MY_Controller
             $total_pelunasan_valas = (float) $get_total_valas->total_pelunasan_valas ?? 0;
             $selisih_valas = round($total_piutang_valas, 2) - round($total_pelunasan_valas, 2) + round($total_koreksi_valas, 2);
 
-            if ($selisih_valas > 0) {
+            if ($selisih_valas < 0) {
                 $keterangan_valas = "Lebih Bayar";
-            } else if ($selisih_valas < 0) {
+            } else if ($selisih_valas > 0) {
                 // cek invoice yng status nya bukan lunas ada ga 
                 // $ceksb = $this->m_pelunasanhutang->get_invoice_by_code(['no_pelunasan' => $no_pelunasan, 'status_bayar <>' => 'lunas']);
                 $keterangan_valas = "Kurang Bayar";
