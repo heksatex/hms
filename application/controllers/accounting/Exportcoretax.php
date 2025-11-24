@@ -17,6 +17,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 class Exportcoretax extends MY_Controller {
 
@@ -107,7 +108,7 @@ class Exportcoretax extends MY_Controller {
 
             $model = new $this->m_global();
             $npwp = $model->setTables("setting")->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
-            $vNpwp = str_replace(" ","" , ($npwp->value ?? ""));
+            $vNpwp = str_replace(" ", "", ($npwp->value ?? ""));
             $sheetF->setCellValue("A{$rowF}", "NPWP PENJUAL");
             $sheetF->mergeCells("A{$rowF}:B{$rowF}");
             $sheetF->setCellValue("C{$rowF}", $vNpwp);
@@ -133,8 +134,8 @@ class Exportcoretax extends MY_Controller {
             $sheetF->setCellValue("r{$rowF}", "ID TKU Pembeli");
             $this->getData();
             $data = $this->data->setJoins("partner p", "p.id = partner_id", "left")
-                    ->setSelects(["fp.*", "p.npwp,p.invoice_street,p.invoice_city,p.invoice_state,p.invoice_country,p.invoice_zip,p.email"], true)
-                    ->setGroups(["faktur_id"])->getData();
+                            ->setSelects(["fp.*", "p.npwp,p.invoice_street,p.invoice_city,p.invoice_state,p.invoice_country,p.invoice_zip,p.email"], true)
+                            ->setGroups(["faktur_id"])->getData();
             $no = 0;
             $namaPembeli = "";
             foreach ($data as $key => $value) {
@@ -148,13 +149,13 @@ class Exportcoretax extends MY_Controller {
                 $sheetF->setCellValue("D{$rowF}", "04");
                 $sheetF->setCellValue("H{$rowF}", $value->no_sj);
                 $sheetF->setCellValue("j{$rowF}", "{$vNpwp}000000");
-                $sheetF->setCellValue("K{$rowF}", "$npwpp");
-                $sheetF->setCellValue("L{$rowF}", ($npwpp === "")?"":"TIN");
+                $sheetF->setCellValueExplicit("K{$rowF}", (string) $npwpp, DataType::TYPE_STRING2);
+                $sheetF->setCellValue("L{$rowF}", ($npwpp === "") ? "" : "TIN");
                 $sheetF->setCellValue("M{$rowF}", "IDN");
                 $sheetF->setCellValue("o{$rowF}", $value->partner_nama);
                 $sheetF->setCellValue("P{$rowF}", $value->invoice_street);
                 $sheetF->setCellValue("Q{$rowF}", $value->email);
-                $npwpp = ($npwpp === "") ? "":"{$npwpp}000000";
+                $npwpp = ($npwpp === "") ? "" : "{$npwpp}000000";
                 $sheetF->setCellValue("R{$rowF}", $npwpp);
             }
             if (count($data) > 0) {
@@ -177,7 +178,7 @@ class Exportcoretax extends MY_Controller {
             $sheetFD->setCellValue("l{$rowFD}", "PPN");
             $sheetFD->setCellValue("m{$rowFD}", "Tarif PPnBM");
             $sheetFD->setCellValue("n{$rowFD}", "PPnBM");
-            $data = $this->data->setJoins("uom uo","uo.short = fpd.uom","left")->setSelects(["no_sj", "tanggal", "tax_value", "kurs_nominal", "fpd.*","satuan_ukur"],true)->setGroups(["fpd.id"])->getData();
+            $data = $this->data->setJoins("uom uo", "uo.short = fpd.uom", "left")->setSelects(["no_sj", "tanggal", "tax_value", "kurs_nominal", "fpd.*", "satuan_ukur"], true)->setGroups(["fpd.id"])->getData();
             $tempSj = "";
             $baris = 0;
             foreach ($data as $key => $value) {
@@ -200,7 +201,7 @@ class Exportcoretax extends MY_Controller {
 
                 $tempSj = $value->no_sj;
             }
-            if(count($data) > 1) {
+            if (count($data) > 1) {
                 $rowFD += 1;
                 $sheetFD->setCellValue("A{$rowFD}", "END");
             }
