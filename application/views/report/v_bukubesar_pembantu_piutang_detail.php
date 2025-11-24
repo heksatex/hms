@@ -413,9 +413,9 @@
                                 if (value2.link === 'plp') {
                                     linkUrl = "<?php echo site_url('accounting/pelunasanpiutang/edit/') ?>" + value2.no_bukti_ecr;
                                 } else if (value2.link === 'fak') {
-                                    linkUrl = "<?php echo site_url('purchase/fakturpenjualan/edit/') ?>" + value2.id_bukti_ecr;
+                                    linkUrl = "<?php echo site_url('sales/fakturpenjualan/edit/') ?>" + value2.id_bukti_ecr;
                                 } else {
-                                    linkUrl = "<?php echo site_url('purchase/returpenjualan/edit/') ?>" + value2.no_bukti_ecr;
+                                    linkUrl = "<?php echo site_url('sales/returpenjualan/edit/') ?>" + value2.no_bukti_ecr;
                                 }
 
                                 // Buat kolom No Bukti dengan link (buka tab baru)
