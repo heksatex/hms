@@ -148,7 +148,7 @@ class Exportcoretax extends MY_Controller {
                 $sheetF->setCellValue("D{$rowF}", "04");
                 $sheetF->setCellValue("H{$rowF}", $value->no_sj);
                 $sheetF->setCellValue("j{$rowF}", "{$vNpwp}000000");
-                $sheetF->setCellValue("K{$rowF}", $npwpp);
+                $sheetF->setCellValue("K{$rowF}", "$npwpp");
                 $sheetF->setCellValue("L{$rowF}", ($npwpp === "")?"":"TIN");
                 $sheetF->setCellValue("M{$rowF}", "IDN");
                 $sheetF->setCellValue("o{$rowF}", $value->partner_nama);
