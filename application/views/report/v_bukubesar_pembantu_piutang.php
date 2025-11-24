@@ -126,7 +126,8 @@
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="3">Diskon</th>
                                                         <th class='style bb' style="min-width: 150px" rowspan="2">Uang Muka</th>
                                                         <th class='style bb' style="min-width: 100px" rowspan="2">Koreksi</th>
-                                                        <th class='style bb' style="min-width: 150px" rowspan="2">Saldo Akhir</th>
+                                                        <th class='style bb' style="min-width: 150px" rowspan="2" 
+                                                            title="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi"> &#x2757; Saldo Akhir</th>
                                                     </tr>
                                                     <tr>
                                                         <th class='style bb' style="min-width: 50px" >DPP</th>
@@ -171,6 +172,9 @@
     <?php $this->load->view("admin/_partials/js.php"); ?>
 
     <script type="text/javascript">
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
         // set date tgldari
         $('#tgldari').datetimepicker({
             // defaultDate: new Date().toLocaleString('en-US', {

@@ -125,7 +125,7 @@
                                                         <th class='style bb' style="min-width: 150px">Retur</th>
                                                         <th class='style bb' style="min-width: 150px">Uang Muka</th>
                                                         <th class='style bb' style="min-width: 100px">Koreksi</th>
-                                                        <th class='style bb' style="min-width: 150px">Saldo Akhir</th>
+                                                        <th class='style bb' style="min-width: 150px"  title="Saldo Akhir = Saldo Awal + Utang - Pelunasan - Retur - Uang Muka + Koreksi"> &#x2757; Saldo Akhir</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
