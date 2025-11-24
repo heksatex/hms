@@ -452,7 +452,7 @@ class Pelunasanpiutang extends MY_Controller
     }
 
 
-    public function get_view_invoice()
+    public function get_view_faktur()
     {
         $no_pelunasan = $this->input->post("no_pelunasan");
         $partner      = $this->input->post("partner"); // partner_id
@@ -565,6 +565,10 @@ class Pelunasanpiutang extends MY_Controller
 
                         if (($cek_inv) > 0) {
                             throw new \Exception('Data Faktur <b>' . $dt->no_faktur . '</b> sudah diinput  !', 200);
+                        }
+
+                        if(empty($dt->no_faktur) || !isset($dt->no_faktur)){
+                            throw new \Exception('No Faktur tidak boleh kosong  !', 200);
                         }
 
                         $data_items[] = array(
@@ -2566,7 +2570,7 @@ class Pelunasanpiutang extends MY_Controller
             // get_list_faktur
             $get_inv = $this->m_pelunasanpiutang->get_data_faktur_by_code2(['no_pelunasan' => $no_pelunasan]);
             foreach ($get_inv as $gi) {
-                $getInv = $this->m_pelunasanpiutang->get_faktur_by_kode(['no_faktur' => $gi->no_faktur, 'lunas' => 0])->row();
+                $getInv = $this->m_pelunasanpiutang->get_faktur_by_kode(['no_faktur_internal' => $gi->no_faktur, 'lunas' => 0, 'faktur.id' => $gi->faktur_id])->row();
                 if ($getInv) {
 
                     if ((float) $getInv->sisa_piutang_rp != (float) $gi->sisa_piutang_rp) {
@@ -2579,7 +2583,7 @@ class Pelunasanpiutang extends MY_Controller
                     $sisa_piutang_valas = (float) $getInv->sisa_piutang_valas -  (float) $gi->pelunasan_valas;
                     $sisa_piutang_rp = (float) $getInv->sisa_piutang_rp -  (float) $gi->pelunasan_rp;
                     $data_update = array(
-                        'no_faktur'  => $gi->no_faktur,
+                        'id'  => $gi->faktur_id,
                         'piutang_rp'   => $sisa_piutang_rp,
                         'piutang_valas'   => $sisa_piutang_valas
                     );
@@ -2609,18 +2613,18 @@ class Pelunasanpiutang extends MY_Controller
                 $get_inv = $this->m_pelunasanpiutang->get_data_faktur_by_code($no_pelunasan);
                 foreach ($get_inv as $gi) {
 
-                    $getInv = $this->m_pelunasanpiutang->get_faktur_by_kode(['no_faktur' => $gi->no_faktur, 'lunas' => 0])->row();
+                    $getInv = $this->m_pelunasanpiutang->get_faktur_by_kode(['no_faktur_internal' => $gi->no_faktur, 'lunas' => 0, 'faktur.id' => $gi->faktur_id])->row();
                     if (isset($getInv)) {
                         if ((float)$getInv->sisa_piutang_rp == 0 and (float) $getInv->sisa_piutang_valas == 0) {
                             $data_update = array(
-                                'no_faktur'  => $gi->no_faktur,
+                                'id'  => $gi->faktur_id,
                                 'lunas'   => 1
                             );
                             array_push($tmp_update, $data_update);
                         } else {
                             if ($gi->status_bayar == 'lunas') {
                                 $data_update = array(
-                                    'no_faktur'  => $gi->no_faktur,
+                                    'id'  => $gi->faktur_id,
                                     'lunas'   => 1
                                 );
                                 array_push($tmp_update, $data_update);
@@ -2896,13 +2900,13 @@ class Pelunasanpiutang extends MY_Controller
                                 $pelunasan_rp = $li->pelunasan_rp;
                                 $pelunasan_valas = $li->pelunasan_valas;
 
-                                $dt = $this->m_pelunasanpiutang->get_data_faktur_by_id(['faktur.no_faktur' =>  $li->no_faktur]);
+                                $dt = $this->m_pelunasanpiutang->get_data_faktur_by_id(['faktur.no_faktur_internal' =>  $li->no_faktur, 'faktur.id' => $li->faktur_id]);
                                 if (isset($dt)) {
                                     $piutang_inv = (float) $dt->sisa_piutang_rp + (float) $pelunasan_rp;
                                     $piutang_inv_valas = (float) $dt->sisa_piutang_valas + (float) $pelunasan_valas;
 
                                     //update to faktur
-                                    $update_inv = $this->m_pelunasanpiutang->update_by_kode('acc_faktur_penjualan', ['lunas' => 0, 'piutang_rp' => $piutang_inv, 'piutang_valas' => $piutang_inv_valas], ['no_faktur' => $li->no_faktur]);
+                                    $update_inv = $this->m_pelunasanpiutang->update_by_kode('acc_faktur_penjualan', ['lunas' => 0, 'piutang_rp' => $piutang_inv, 'piutang_valas' => $piutang_inv_valas], ['id' => $li->faktur_id]);
                                     if ($update_inv !== "") {
                                         throw new \Exception('Gagal Update Faktur ' . $li->no_faktur . ', Tidak ada data yang diperbaharui  !', 200);
                                     }

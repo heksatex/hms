@@ -363,7 +363,7 @@ class M_pelunasanpiutang extends CI_Model
     function query_get_faktur()
     {
         $this->db->order_by('row_order', 'asc');
-        $this->db->select('id, pelunasan_piutang_id, no_pelunasan, no_faktur, no_sj, DATE(tanggal_faktur) as tanggal_faktur, currency_id, currency, kurs, total_piutang_valas, total_piutang_rp, sisa_piutang_rp, sisa_piutang_valas, pelunasan_rp, pelunasan_valas, row_order, status_bayar');
+        $this->db->select('id, pelunasan_piutang_id, no_pelunasan, faktur_id,no_faktur, no_sj, DATE(tanggal_faktur) as tanggal_faktur, currency_id, currency, kurs, total_piutang_valas, total_piutang_rp, sisa_piutang_rp, sisa_piutang_valas, pelunasan_rp, pelunasan_valas, row_order, status_bayar');
         $this->db->from('acc_pelunasan_piutang_faktur');
 
     }
@@ -388,14 +388,14 @@ class M_pelunasanpiutang extends CI_Model
     }
 
 
-    var $column_order2 = array(null, null, 'no_faktur', 'no_sj', 'tanggal', 'currency', 'faktur.kurs_nominal', 'total_piutang_rp', 'total_piutang_valas', 'piutang_rp', 'piutang_valas');
-    var $column_search2 = array('no_faktur', 'no_sj', 'tanggal', 'currency', 'faktur.kurs_nominal', 'total_piutang_rp', 'total_piutang_valas', 'piutang_rp', 'piutang_valas');
+    var $column_order2 = array(null, null, 'no_faktur_internal', 'no_sj', 'tanggal', 'currency', 'faktur.kurs_nominal', 'total_piutang_rp', 'total_piutang_valas', 'piutang_rp', 'piutang_valas');
+    var $column_search2 = array('no_faktur_internal', 'no_sj', 'tanggal', 'currency', 'faktur.kurs_nominal', 'total_piutang_rp', 'total_piutang_valas', 'piutang_rp', 'piutang_valas');
     var $order2         = array('tanggal' => 'asc');
 
     function query2()
     {
         $this->db->where('status', 'confirm');
-        $this->db->select("faktur.id,faktur.no_faktur, faktur.tanggal, faktur.no_sj, faktur.tipe, faktur.status, faktur.kurs, currency_kurs.currency, faktur.kurs_nominal, IFNULL(total_piutang_rp, 0) as total_piutang_rp, IFNULL(total_piutang_valas,0) as total_piutang_valas, IFNULL(piutang_rp,0) as sisa_piutang_rp, IFNULL(piutang_valas,0) as sisa_piutang_valas");
+        $this->db->select("faktur.id,faktur.no_faktur_internal as no_faktur, faktur.tanggal, faktur.no_sj, faktur.tipe, faktur.status, faktur.kurs, currency_kurs.currency, faktur.kurs_nominal, IFNULL(total_piutang_rp, 0) as total_piutang_rp, IFNULL(total_piutang_valas,0) as total_piutang_valas, IFNULL(piutang_rp,0) as sisa_piutang_rp, IFNULL(piutang_valas,0) as sisa_piutang_valas");
         $this->db->from("acc_faktur_penjualan faktur");
         $this->db->join("currency_kurs ", "faktur.kurs = currency_kurs.id", "left");
     }
@@ -1056,7 +1056,7 @@ class M_pelunasanpiutang extends CI_Model
     function update_faktur_by_kode($data_update)
     {
         try {
-            $this->db->update_batch('acc_faktur_penjualan', $data_update, 'no_faktur');
+            $this->db->update_batch('acc_faktur_penjualan', $data_update, 'id');
             $db_error = $this->db->error();
             if ($db_error['code'] > 0) {
                 throw new Exception($db_error['message']);
