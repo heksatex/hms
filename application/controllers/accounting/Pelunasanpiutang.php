@@ -2381,7 +2381,7 @@ class Pelunasanpiutang extends MY_Controller
                 $get_selisih = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
                 foreach ($get_selisih as $gs) {
                     if ($gs->total_piutang > 0 && $gs->total_pelunasan > 0) {
-                        if ($gs->selisih < 0) { // < 0 atau > 0
+                        if ($gs->selisih > 0) { // < 0 atau > 0
                             // if (!empty($gs->koreksi)) {
                             //     throw new \Exception('Koreksi Untuk Uang Muka tidak harus dipilih !', 422);
                             // }
@@ -2505,7 +2505,7 @@ class Pelunasanpiutang extends MY_Controller
                         }
 
                         // cek total_piutang  di summary
-                        $result_selisih = ((float) $gs->total_pelunasan + (float) $gs->total_koreksi) - (float) $gs->total_piutang;
+                        $result_selisih = (float) $gs->total_piutang - ((float) $gs->total_pelunasan + (float) $gs->total_koreksi);
                         if (round($result_selisih, 2) != round((float) $gs->selisih, 2)) {
                             throw new \Exception('perhitungan Selisih ' . $gs->tipe_currency . ' tidak Valid !', 422);
                         }
