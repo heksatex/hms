@@ -163,8 +163,8 @@ class M_bukubesarpembantupiutang extends CI_Model
                 ''
             )
         ) as uraian,
-        IFNULL(SUM($total), 0) as total_piutang,
-        IFNULL(SUM($total), 0) as debit,
+        IFNULL(($total), 0) as total_piutang,
+        IFNULL(($total), 0) as debit,
         0 as credit,
         status, 'fak' as link,
         sum(fakd.qty*fakd.harga*fak.kurs_nominal) as dpp_piutang,
@@ -445,7 +445,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         } else {
            $cr_condition = ($currency === 'valas')? '<>' : '';
             
-           $where_utang = ['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm', 'matauang ' . $cr_condition => 1 ];
+           $where_utang = ['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm', 'kurs ' . $cr_condition => 1 ];
            $where_pelunasan = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai, 'appm.currency_id ' .$cr_condition => 1];
            $where_retur = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai, 'appm.currency_id ' .$cr_condition => 1];
            $where_um    = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','apps.tipe_currency ' .$cr_condition => 'Rp'];
