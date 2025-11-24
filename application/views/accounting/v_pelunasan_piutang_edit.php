@@ -795,7 +795,7 @@
                 $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
                 $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                 $('.modal-title').text('List Faktur');
-                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_invoice') ?>", {
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_faktur') ?>", {
                     no_pelunasan: "<?php echo $list->no_pelunasan; ?>",
                     partner: $("#partner").val()
                 }, function(data) {
