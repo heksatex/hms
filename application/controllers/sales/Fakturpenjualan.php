@@ -817,13 +817,13 @@ class Fakturpenjualan extends MY_Controller {
                     }
                     break;
                 default:
-                    if ($data->lunas == 1) {
-                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
-                    }
-                    $finalTotal = $data->final_total * $data->kurs_nominal;
-                    if ((double)$finalTotal !== (double)$data->piutang_rp) {
-                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
-                    }
+//                    if ($data->lunas == 1) {
+//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
+//                    }
+//                    $finalTotal = $data->final_total * $data->kurs_nominal;
+//                    if ((double)$finalTotal !== (double)$data->piutang_rp) {
+//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
+//                    }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
                     $this->_module->gen_history_new("jurnal_entries", $data->jurnal, 'edit', "Merubah Status Ke unposted dari penjualan", $username);
@@ -1381,7 +1381,7 @@ class Fakturpenjualan extends MY_Controller {
             $data["npwp"] = $model->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
             $data["detail"] = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->setOrder(["uraian" => "asc","warna"=>"asc"])->getData();
             if ($data["head"]->kurs_nominal > 1) {
-                $data["curr"] = $curr = $model->setTables("currency_kurs")->setWheres(["currency_kurs.id" => $data["head"]->kurs])
+                $data["curr"] = $model->setTables("currency_kurs")->setWheres(["currency_kurs.id" => $data["head"]->kurs])
                                 ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
                                 ->setSelects(["currency.*,ket"])->getDetail();
                 $view = 'sales/v_faktur_penjualan_print_valas';

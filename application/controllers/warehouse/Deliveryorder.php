@@ -5,12 +5,15 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
  */
+require FCPATH . 'vendor/autoload.php';
 
 /**
  * Description of Deliveryorder
  *
  * @author RONI
  */
+use Mpdf\Mpdf;
+
 class Deliveryorder extends MY_Controller {
 
     //put your code here
@@ -28,6 +31,7 @@ class Deliveryorder extends MY_Controller {
         $this->load->model("m_Pickliststockquant");
         $this->load->library("token");
         $this->load->library("wa_message");
+        $this->load->model("m_global");
     }
 
     public function index() {
@@ -214,7 +218,7 @@ class Deliveryorder extends MY_Controller {
                     $join = ["BULK"];
                 }
 //                $condition = array_merge($condition, ['pd.valid !=' => 'cancel']);
-                 $condition = array_merge($condition);
+                $condition = array_merge($condition);
                 $list = $this->m_deliveryorderdetail->getDataDetail($condition, $join);
                 $recordsTotal = $this->m_deliveryorderdetail->getDataDetailCountAll($condition, $join);
                 $recordsFiltered = $this->m_deliveryorderdetail->getDataDetailCountFiltered($condition);
@@ -517,7 +521,7 @@ class Deliveryorder extends MY_Controller {
                     throw new \Exception("ada Duplikat Barcode di Picklist", 500);
                 }
                 $insertDetail[] = ['do_id' => $data_do->id, 'barcode_id' => $value->barcode_id, 'picklist_detail_id' => $value->picklist_detail_id, 'status' => 'done'];
-                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . addslashes($value->nama_produk). "','" .
+                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . addslashes($value->nama_produk) . "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','" . $value->lebar_greige . "','" . $value->uom_lebar_greige . "','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
                 $updateStokQuant [] = ["move_date" => date('Y-m-d H:i:s'), "lokasi_fisik" => "", "lokasi" => "CST/Stock", 'quant_id' => $value->quant_id];
@@ -1073,7 +1077,7 @@ class Deliveryorder extends MY_Controller {
             $barcode = $this->input->post("search");
             $do = $this->input->post("do");
 
-            $condition = ["do.no" => $do, 'dod.barcode_id' => $barcode,"pd.valid"=>"done"];
+            $condition = ["do.no" => $do, 'dod.barcode_id' => $barcode, "pd.valid" => "done"];
             $data = $this->m_deliveryorderdetail->getDetail($condition);
             if (empty($data)) {
                 throw new Exception("data item tidak ditemukan", 500);
@@ -1327,169 +1331,37 @@ class Deliveryorder extends MY_Controller {
         }
     }
 
-//    public function add_item() {
-//        try {
-//            $username = $this->session->userdata('username');
-//            $users = $this->session->userdata('nama');
-//            $sub_menu = $this->uri->segment(2);
-//
-//            $type = $this->input->post("type");
-//            $barcode = $this->input->post("search");
-//            $pl = $this->input->post('picklist');
-//            $do = $this->input->post("do");
-//            $data = [];
-//            if ($type === "BAL") {
-//                $data = $this->getItemBarcode(["no" => $pl, "bulk_no_bulk" => $barcode]);
-//            } else {
-//                $dt = $this->m_PicklistDetail->detailData(['no_pl' => $pl, 'barcode_id' => $barcode, 'valid !=' => 'cancel']);
-//                if (!is_null($dt)) {
-//                    array_push($data, $dt);
-//                }
-//            }
-//            $this->_module->startTransaction();
-//            foreach ($data as $key => $value) {
-//                $this->m_deliveryorderdetail->insert(["do_id" => $do, 'barcode_id' => $value->barcode_id, 'status' => '']);
-//            }
-//            if (!$this->_module->finishTransaction()) {
-//                throw new \Exception('Gagal Menyimpan Data', 500);
-//            }
-//            $this->_module->gen_history($sub_menu, $data['no_bulk'], 'edit', ($users["nama"] ?? $username) . ' Menambahkan bal / Bulk.', $username);
-//            $this->output->set_status_header(200)
-//                    ->set_content_type('application/json', 'utf-8')
-//                    ->set_output(json_encode(array('message' => 'Item berhasil ditambahkan', 'icon' => 'fa fa-check', 'type' => 'success')));
-//        } catch (Exception $ex) {
-//            $this->_module->finishTransaction();
-//            $this->output->set_status_header($ex->getCode() ?? 500)
-//                    ->set_content_type('application/json', 'utf-8')
-//                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-//        }
-//    }
-//    public function delete_item_pl() {
-//        try {
-//            $barcode = $this->input->post("id");
-//            $this->_module->startTransaction();
-//            $this->m_bulkdetail->delete(['barcode' => $barcode]);
-//            $status = $this->m_PicklistDetail->updateStatus(['barcode_id' => $barcode], ['valid' => "cancel"]);
-//            if ($status != "") {
-//                throw new \Exception($status, 500);
-//            }
-//            if (!$this->_module->finishTransaction()) {
-//                throw new \Exception('Gagal Mengeluarkan Item dari PL', 500);
-//            }
-//            $this->output->set_status_header(200)
-//                    ->set_content_type('application/json', 'utf-8')
-//                    ->set_output(json_encode(array('message' => '', 'icon' => 'fa fa-check', 'type' => 'success')));
-//        } catch (Exception $ex) {
-//            $this->output->set_status_header($ex->getCode() ?? 500)
-//                    ->set_content_type('application/json', 'utf-8')
-//                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-//        }
-//    }
-//    public function delivery() {
-//        try {
-//            $username = $this->session->userdata('username');
-//            $users = $this->session->userdata('nama');
-//            $sub_menu = $this->uri->segment(2);
-//
-//            $nodo_ex = $this->input->post("nodo");
-//
-//            $this->_module->startTransaction();
-//
-//            $dataDO = $this->m_deliveryorder->getDataDetail(['no' => $nodo_ex]);
-//            if (empty($dataDO)) {
-//                throw new \Exception("Data Delivery tidak ditemukan", 500);
-//            }
-//
-//            if (!$nodo = $this->token->noUrut('deliveryorder', date('ym'), true)->generate('DO', '%04d')->get()) {
-//                throw new \Exception("No Delivery Order tidak terbuat", 500);
-//            }
-//            $nosjs = $this->m_deliveryorder->checkNoSJ(['no_sj LIKE' => $tipe_no_sj . '/' . date('y', $time_dokumen) . '/' . getRomawi(date('m', $time_dokumen)) . '%']);
-//            $nosjs = $this->m_deliveryorder->checkNoSJ(['no_sj LIKE' => $dataDO->tipe_no_sj . '%']);
-//            if (!is_null($nosjs)) {
-//                $nosj = $nosjs->no_sj;
-//                $this->m_deliveryorder->deleteNoSJ(['no_sj' => $nosj]);
-//            } else {
-//                if (!$nosj = $this->token->noUrut('delivery_' . $dataDO->tipe_no_sj, date('y') . getRomawi(date('m')), true)->generate($dataDO->tipe_no_sj . '/', '/%04d')->get()) {
-//                    throw new \Exception("No SJ tidak terbuat", 500);
-//                }
-//            }
-//            $data = [
-//                'no' => $nodo,
-//                'no_sj' => $nosj,
-//                'tanggal_dokumen' => date("Y-m-d H:i:s"),
-//                'tanggal_buat' => date("Y-m-d H:i:s"),
-//                'note' => $this->input->post("note"),
-//                'status' => 'done',
-//                'no_picklist' => $dataDO->no_picklist,
-//                'rev' => $this->input->post("rev"),
-//                'tipe_no_sj' => $dataDO->tipe_no_sj,
-//            ];
-//            $idd = $this->m_deliveryorder->insert($data);
-//            if (is_null($idd)) {
-//                throw new Exception("Gagal Membuat Surat Jalan ", 500);
-//            }
-//
-//            $nosm = "SM" . $this->_module->get_kode_stock_move();
-//            $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|OUT','GJD/Stock','CST/Stock','done','1','')";
-//            $this->_module->create_stock_move_batch($smdata);
-//            $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
-//            $smproduk = [];
-//            $insertDetail = [];
-//            $insertStokMvItem = [];
-//            $insertStokMvProd = [];
-//            $updateStokQuant = [];
-//            $listBarcode = [];
-//            $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $dataDO->id, 'status' => 'cancel'], ['PD', 'SQ']);
-//            foreach ($list as $key => $value) {
-//                $listBarcode[] = $value->barcode_id;
-//
-//                $check = $this->checkLokasi(['stock_quant.quant_id' => $value->quant_id]);
-//                if (!empty($check)) {
-//                    throw new \Exception($check, 500);
-//                }
-//                $insertDetail[] = ['do_id' => $idd, 'barcode_id' => $value->barcode_id, 'status' => 'done'];
-//                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
-//                        $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
-//                        $value->lokasi_fisik . "','" . $value->lebar_greige . "','" . $value->uom_lebar_greige . "','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
-//                $updateStokQuant [] = ["move_date" => date('Y-m-d H:i:s'), "lokasi_fisik" => "", "lokasi" => "CST/Stock", 'quant_id' => $value->quant_id];
-//                if (isset($smproduk[$value->kode_produk])) {
-//                    $smproduk[$value->kode_produk]["qty"] += $value->qty;
-//                } else {
-//                    $smproduk[$value->kode_produk] = array(
-//                        'qty' => $value->qty,
-//                        'uom' => $value->uom,
-//                        'nama' => $value->nama_produk,
-//                        'order' => count($smproduk) + 1
-//                    );
-//                }
-//                $rowMoveItem++;
-//            }
-//            foreach ($smproduk as $key => $value) {
-//                $insertStokMvProd[] = "('" . $nosm . "','" . $key . "','" . $value['nama'] . "','" . $value['qty'] . "','" . $value['uom'] . "','done','" . $value['order'] . "','')";
-//            }
-//            $this->m_deliveryorder->update(['no_ex' => $nodo], ['no' => $dataDO->no]);
-//
-//            $this->m_deliveryorderdetail->insertBatch($insertDetail);
-//            $this->_module->simpan_stock_move_items_batch(implode(",", $insertStokMvItem));
-//            $this->_module->create_stock_move_produk_batch(implode(",", $insertStokMvProd));
-//            $this->m_Pickliststockquant->updateBatch($updateStokQuant, 'quant_id');
-//            $this->m_Picklist->update(['status' => 'done'], ["no" => $dataDO->no_picklist, 'status' => 'validasi']);
-//            $this->m_PicklistDetail->updateStatusWin(['no_pl' => $dataDO->no_picklist, 'valid' => 'validasi'], ['valid' => 'done'], ['barcode_id' => $listBarcode], true);
-//            $this->m_deliveryorder->insertDoMove(['move_id' => $nosm, 'no_do' => $nodo]);
-//
-//            $this->_module->gen_history($sub_menu, $data['no'], 'create', ($users["nama"] ?? $username) . ' Menambahkan Dokumen DO - ' . $data["no"], $username);
-//            if (!$this->_module->finishTransaction()) {
-//                throw new \Exception('Gagal Menyimpan Data', 500);
-//            }
-//            $kode_decrypt = encrypt_url($data["no"]);
-//            $this->output->set_status_header(200)
-//                    ->set_content_type('application/json', 'utf-8')
-//                    ->set_output(json_encode(array('message' => 'Surat Jalan berhasil dibuat', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $kode_decrypt)));
-//        } catch (Exception $ex) {
-//            $this->_module->rollbackTransaction();
-//            $this->output->set_status_header($ex->getCode() ?? 500)
-//                    ->set_content_type('application/json', 'utf-8')
-//                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-//        }
-//    }
+    public function print_retur() {
+        try {
+            $doid = $this->input->post("doid");
+            $model = new $this->m_global;
+            $model->setTables("delivery_order_detail dod")->setJoins("delivery_order do", "do.id = dod.do_id")
+                    ->setJoins("picklist_detail pd", "(pd.barcode_id = dod.barcode_id) and (pd.no_pl = do.no_picklist)")
+                    ->setWheres(['dod.do_id' => $doid, 'dod.status' => 'retur'])
+                    ->setSelects(["do.no_sj,do.no"])
+                    ->setSelects(["pd.kode_produk,no_pl,pd.nama_produk,pd.warna_remark,pd.corak_remark,pd.barcode_id"])
+                    ->setSelects(["pd.qty as qty_jual,pd.uom as uom_jual,pd.qty2 as qty2_jual,pd.uom2 as uom2_jual,pd.qty_hph as qty,pd.qty2_hph as qty2,pd.uom_hph as uom,pd.uom2_hph as uom2"]);
+            $data["data"] = $model->getData();
+            $data["user"] = $this->session->userdata('nama');
+            $html = $this->load->view("print/do/retur", $data, true);
+
+            $url = "dist/storages/print/returdo";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
+            $mpdf->WriteHTML($html);
+            $filename = str_replace("/", "-", $data["data"][0]->no);
+            $pathFile = "{$url}/{$filename}.pdf";
+            $mpdf->Output(FCPATH . $pathFile, "F");
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
 }

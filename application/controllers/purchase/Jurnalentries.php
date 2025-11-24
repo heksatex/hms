@@ -354,6 +354,7 @@ class Jurnalentries extends MY_Controller {
             $id = $this->input->post("ids");
             $kode = decrypt_url($id);
             $model = new $this->m_global;
+            $users = $this->session->userdata('nama');
             $data["jurnal"] = $model->setTables("acc_jurnal_entries je")->setJoins("mst_jurnal mj", "mj.kode = je.tipe")
                             ->setWheres(["je.kode" => $kode])->setSelects(["je.*", "mj.nama as jurnal_nama", "date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
             if (!$data["jurnal"]) {
@@ -370,6 +371,7 @@ class Jurnalentries extends MY_Controller {
             }
 
             $data["detail"] = $details->getData();
+            $data["user"] = $users;
 
             $html = $this->load->view("purchase/v_jurnal_entries_print", $data, true);
             $url = "dist/storages/print/jurnalentries";

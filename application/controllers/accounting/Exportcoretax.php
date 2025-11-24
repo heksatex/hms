@@ -75,7 +75,7 @@ class Exportcoretax extends MY_Controller {
     }
 
     public function index() {
-        $data['id_dept'] = '';
+        $data['id_dept'] = 'accec';
         $this->load->view('report/acc/v_export_coretax', $data);
     }
 

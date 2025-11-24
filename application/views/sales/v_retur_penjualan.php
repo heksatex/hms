@@ -101,7 +101,6 @@
                                         <tr>
                                             <th class="no">No</th>
                                             <th>No Retur</th>
-                                            <th>No Faktur Pajak</th>
                                             <th>Tanggal</th>
                                             <th>No SJ</th>
                                             <th>Marketing</th>
@@ -144,7 +143,7 @@
                     },
                     columnDefs: [
                         {
-                            "targets": [0,7],
+                            "targets": [0,6],
                             "orderable": false
                         }
                     ]

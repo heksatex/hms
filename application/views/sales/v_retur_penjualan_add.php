@@ -102,18 +102,6 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Retur Internal</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_retur_internal" id="no_retur_internal" class="form-control input-sm no_retur_internal"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Faktur Pajak</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_faktur_pajak" id="no_faktur_pajak" class="form-control input-sm no_faktur_pajak"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label required">Kurs</label></div>
                                                 <div class="col-xs-4">
                                                     <select name="kurs" id="kurs" class="form-control input-sm kurs" required>

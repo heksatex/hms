@@ -39,6 +39,16 @@
 
     <body style="padding:  0 30px 0 30px;font-size: 10px;">
         <div id="row">
+            <div id="column">
+            </div>
+            <div id="column" style="text-align: center;">
+                <h2>JURNAL ENTRIES</h2>
+            </div>
+            <div id="column">
+            </div>
+        </div>
+
+        <div id="row">
             <div id="column-news-1">
                 <h2><?= $jurnal->kode ?></h2>
             </div>
@@ -151,12 +161,32 @@
                             <strong><?= number_format($totalDebit, 2) ?></strong>
                         </td>
                         <td style="text-align: right;">
-                         <strong>   <?= number_format($totalKredit, 2) ?></strong>
+                            <strong>   <?= number_format($totalKredit, 2) ?></strong>
                         </td>
                     </tr>
                 </tfoot>
             </table>
 
+        </div>
+        <div id="row" style="padding-top: 20px;">
+            <div id="column">
+            </div>
+            <div id="column" style="text-align: right;">
+                <span><strong>Yang Menyetujui,</strong></span>
+            </div>
+            <div id="column" style="text-align: center;">
+                <span><strong>Yang Membuat,</strong></span>
+            </div>
+        </div>
+        <div id="row" style="padding-top: 20px;">
+            <div id="column">
+            </div>
+            <div id="column" style="text-align: right;">
+                <span>.....................&nbsp;&nbsp;&nbsp;</span>
+            </div>
+            <div id="column" style="text-align: center;">
+                <span><?= $user["nama"] ?></span>
+            </div>
         </div>
 
     </body>

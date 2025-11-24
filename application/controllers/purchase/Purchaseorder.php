@@ -496,8 +496,10 @@ class Purchaseorder extends MY_Controller {
 //                                    if ($cekUpdateIn !== "") {
 //                                        throw new \Exception(json_encode($cekUpdateIn), 500);
 //                                    }
-                                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
-                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""]);
+//                                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+//                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""]);
+                                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
                                 }
                             }
                         }
@@ -506,8 +508,10 @@ class Purchaseorder extends MY_Controller {
                     $model = new $this->m_global;
                     $model->setTables("purchase_order_edited")->setWheres(["po_id" => $kode_decrypt])
                             ->setWhereRaw("status not in('cancel','retur','done')")->update(["status" => $status_]);
-                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
-                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""]);
+//                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
+//                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""]);
+                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
+                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""];
                     break;
             }
             $po = new $this->m_po;
