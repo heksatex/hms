@@ -255,6 +255,9 @@
 
         function proses_outstanding(this_btn) {
             var partner = $('#partner').val();
+            let slowProcessWarning = setTimeout(function() {
+                please_wait(function(){});
+            }, 5000); // 5 detik
 
             $("#example1_processing").css('display', ''); // show loading
             this_btn.button('loading');
@@ -266,7 +269,8 @@
                     partner: partner
                 },
                 success: function(data) {
-
+                    clearTimeout(slowProcessWarning);
+                    unblockUI(function () { });
                     if (data.status == 'failed') {
                         unblockUI(function() {
                             setTimeout(function() {
@@ -350,6 +354,8 @@
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
+                    clearTimeout(slowProcessWarning);
+                    unblockUI(function () { });
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }
