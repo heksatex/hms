@@ -190,7 +190,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         // $this->db->having('total_diskon <> 0');
 
         // $total  = ($currency === 'valas')? 'fak.diskon' : 'fak.diskon';
-        $total = "sum((fakd.diskon) +  round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001)";
+        $total = "sum(round(fakd.diskon+0.0001) +  round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001)";
 
         $this->db->SELECT("fak.id as id_bukti, fak.no_faktur as id_bukti_ecr, no_faktur_internal as no_bukti,tanggal as tgl, partner_id as id_partner,
         CONCAT(
@@ -205,7 +205,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         0 as debit,
         IFNULL(($total), 0) as credit,
         status, 'fak' as link,
-        sum(fakd.diskon) as dpp_diskon,
+        sum(round(fakd.diskon+0.0001)) as dpp_diskon,
         sum(round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001) as ppn_diskon,
         sum((fakd.diskon) +  round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001) as total_diskon_dpp_ppn");
         $this->db->FROM('acc_faktur_penjualan fak');
