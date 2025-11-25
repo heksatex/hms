@@ -176,6 +176,15 @@
                                                            <?= ($datas->status !== 'confirm') ? 'readonly' : "" ?>/>
                                                 </div>
                                             </div>
+                                            <?php if ($datas->tipe === "ekspor") { ?>
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4"><label class="form-label">No Inv Ekspor</label></div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input type="text" name="no_inv_ekspor" id="no_inv_ekspor" class="form-control input-sm no_inv_ekspor edited-read" value="<?= $datas->no_inv_ekspor ?>" readonly
+                                                               <?= ($datas->status !== 'confirm') ? 'readonly' : "" ?>/>
+                                                    </div>
+                                                </div>
+                                            <?php } ?>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label required">Kurs</label></div>
                                                 <div class="col-xs-4">
@@ -225,7 +234,8 @@
                                                     <th class="style" style="width: 100px">No PO</th>
                                                     <th class="style" style="width: 60px;text-align: right">QTY/LOT</th>
                                                     <th class="style" style="width: 60px;">UOM LOT</th>
-                                                    <th class="style text-right" style="width: 75px">QTY</th>
+                                                    <th class="style text-right" style="width: 60px">QTY</th>
+                                                    <th class="style" style="width: 60px">Uom</th>
                                                     <th class="style" style="width: 100px">No ACC</th>
                                                     <th class="style text-right" style="width: 100px">Harga</th>
                                                     <th class="style text-right" style="width: 120px">Jumlah</th>
@@ -260,7 +270,7 @@
                                                                 </td>
                                                                 <td class="text-right">
                                                                     <input type="text" name="qtylot[]" value="<?= "{$value->qty_lot}" ?>" 
-                                                                           class="form-control input-sm text-right qty-lot qty-lot_<?= $key ?>" readonly/>
+                                                                           class="form-control edited-read input-sm text-right qty-lot qty-lot_<?= $key ?>" readonly/>
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm edited uomlot uomlot_<?= $key ?>" style="width:100%" name="uomlot[]" disabled>
@@ -274,8 +284,19 @@
                                                                     </select>
                                                                 </td>
                                                                 <td class="text-right">
-                                                                    <input value="<?= $value->qty ?>" type="hidden" name="qty[]">
-                                                                    <input class="form-control input-sm" disabled value="<?= "{$value->qty} {$value->uom}" ?>">
+                                                                    <input type="text" name="qty[]" value="<?= "{$value->qty}" ?>" 
+                                                                           class="form-control input-sm edited-read text-right qty qty_<?= $key ?>" readonly/>
+                                                                </td>
+                                                                <td>
+                                                                    <select class="form-control input-sm edited uom uom_<?= $key ?>" style="width:100%" name="uom[]" disabled>
+                                                                        <?php
+                                                                        foreach ($uom as $keys => $uoms) {
+                                                                            ?>
+                                                                            <option value="<?= $uoms->short ?>" <?= ($uoms->short === $value->uom) ? "selected" : "" ?> ><?= $uoms->short ?></option>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </select>
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm select2-coa edited noacc noacc_<?= $key ?>" style="width:100%" name="noacc[]" disabled>
@@ -308,12 +329,12 @@
                                                         if (count($detail) > 0) {
                                                             ?>
                                                             <tr>
-                                                                <td colspan="8"></td>
+                                                                <td colspan="9"></td>
                                                                 <td class="text-right"><strong>Subtotal</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($subTotal * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->grand_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="7"></td>
+                                                                <td colspan="8"></td>
                                                                 <td>
 
                                                                     <div class="input-group">
@@ -330,17 +351,20 @@
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->diskon * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="8"></td>
+                                                                <td colspan="9"></td>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($subTotal - $datas->diskon) * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                <?php
+                                                                $subtotal2 = (round($datas->grand_total * $datas->kurs_nominal) - round($datas->diskon * $datas->kurs_nominal));
+                                                                ?>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subtotal2, 2, ".", ",") ?>"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="9"></td>
+                                                                <td class="text-right"><strong>DPP Nilai Lain</strong></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($subtotal2 * 11 / 12)), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="8"></td>
-                                                                <td class="text-right"><strong>DPP Nilai Lain</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round((($datas->grand_total - $datas->diskon) * 11 / 12) * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="7"></td>
                                                                 <td class="pull-right">
 
                                                                     <select class="form-control input-sm select2 edited" style="width: 100%" name="tax" id="tax" disabled>
@@ -358,12 +382,12 @@
 
                                                                 </td>
                                                                 <td class="text-right"><strong>Ppn</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($datas->ppn - $datas->diskon_ppn) * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Foot Note</td>
                                                                 <td><input class="form-control input-sm  footnote edited-read" value="<?= $datas->foot_note ?? "" ?>" name="footnote" readonly> </td>
-                                                                <td colspan="4"></td>
+                                                                <td colspan="5"></td>
                                                                 <td class="text-right">
                                                                     *Payment Term
                                                                 </td>
@@ -378,7 +402,7 @@
                                                                             <?php
                                                                         }
                                                                         ?>
-                                                                    </select
+                                                                    </select>
                                                                 </td>
                                                                 <td class="text-right"><strong>Total</strong></td>
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->final_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
@@ -479,7 +503,7 @@
             </select>
         </td>
         <td class="">
-            <input type="text" id="qty"  class="form-control input-sm text-right qty-lot qty-lot_:no">
+            <input type="text" id="qty"  class="form-control input-sm text-right qty qty_:no">
             <select class="form-control input-sm temp-select2 uom uom_:no" style="width:100%" id="uom">
 
             </select>

@@ -489,11 +489,11 @@ class Returpenjualan extends MY_Controller {
                     $dppSet = $model->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
                     foreach ($noAcc as $key => $value) {
                         $hrg = str_replace(",", "", $harga[$key]);
-                        $jumlah = $qty[$key] * $hrg;
+                        $jumlah = round($qty[$key] * $hrg, 4);
                         $grandTotal += $jumlah;
                         $ddskon = ($tipediskon === "%") ? ($jumlah * ($nominalDiskon / 100)) : $nominalDiskon;
                         $grandDiskon += $ddskon;
-                        $dpp = ($jumlah * 11) / 12;
+                        $dpp = ($jumlah - $ddskon) * 11 / 12;
                         if (!$dppSet) {
                             $pajak = ($jumlah) * $taxVal;
                             $ppn_diskon = ($ddskon) * $taxVal;
@@ -502,11 +502,12 @@ class Returpenjualan extends MY_Controller {
                             $dppDikson = ($ddskon * 11) / 12;
                             $ppn_diskon = $dppDikson * $taxVal;
                         }
-                        $header["ppn"] += ($header["kurs_nominal"] > 1) ? $pajak : round($pajak);
-                        $header["dpp_lain"] += ($header["kurs_nominal"] > 1) ? $dpp : round($dpp);
                         $grandDiskonPpn += $ppn_diskon;
-                        $totalHarga = (($jumlah - $ddskon) + ($pajak - $ppn_diskon));
-                        $header["final_total"] += ($header["kurs_nominal"] > 1) ? $totalHarga : round($totalHarga);
+                        $totalHarga = (($jumlah - $ddskon) + ($pajak));
+                        $header["ppn"] += $pajak;
+                        $header["dpp_lain"] += $dpp;
+                        $header["final_total"] += $totalHarga;
+                        
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],
                             "warna" => $this->input->post("warna")[$key],
@@ -528,13 +529,19 @@ class Returpenjualan extends MY_Controller {
                     if ($header["kurs_nominal"] > 1) {
                         $header["total_piutang_valas"] = $header["final_total"];
                         $header["piutang_valas"] = $header["final_total"];
+                        $header["diskon"] = $grandDiskon;
+                        $header["grand_total"] = $grandTotal;
+                        $header["diskon_ppn"] = $grandDiskonPpn;
+                    } else {
+                        $header["diskon"] = round($grandDiskon);
+                        $header["grand_total"] = round($grandTotal);
+                        $header["diskon_ppn"] = round($grandDiskonPpn);
+                        $header["ppn"] = round($header["ppn"]);
+                        $header["dpp_lain"] = round($header["dpp_lain"]);
+                        $header["final_total"] = round($header["final_total"]);
                     }
                     $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
                     $header["piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
-
-                    $header["diskon"] = ($header["kurs_nominal"] > 1) ? $grandDiskon : round($grandDiskon);
-                    $header["diskon_ppn"] = $grandDiskonPpn;
-                    $header["grand_total"] = ($header["kurs_nominal"] > 1) ? $grandTotal : round($grandTotal);
 
                     $model->setTables("acc_retur_penjualan_detail")->updateBatch($detail, "id");
                 }
@@ -891,9 +898,9 @@ class Returpenjualan extends MY_Controller {
             }
             $dppSet = $model->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
 
-            $jumlah = $hasilKurang * $getDetail->harga;
+            $jumlah = round($hasilKurang * $getDetail->harga,4);
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
-            $dpp = (($jumlah) * 11) / 12;
+            $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
                 $pajak = $jumlah * $getDetail->tax_value;
                 $ppn_diskon = $ddskon * $getDetail->tax_value;
@@ -902,7 +909,7 @@ class Returpenjualan extends MY_Controller {
                 $dppDis = $dpp = (($ddskon) * 11) / 12;
                 $ppn_diskon = $dppDis * $getDetail->tax_value;
             }
-            $totalHarga = (($jumlah - $ddskon) + ($pajak - $ppn_diskon));
+            $totalHarga = (($jumlah - $ddskon) + ($pajak));
             $updateSpilit = [
                 "qty_lot" => $hasilKurangLot,
                 "qty" => $hasilKurang,
@@ -914,9 +921,9 @@ class Returpenjualan extends MY_Controller {
                 "dpp_lain" => $dpp,
             ];
 
-            $jumlah = $qty * $getDetail->harga;
+            $jumlah = round($qty * $getDetail->harga,4);
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
-            $dpp = (($jumlah) * 11) / 12;
+            $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
                 $pajak = $jumlah * $getDetail->tax_value;
                 $ppn_diskon = $ddskon * $getDetail->tax_value;
@@ -925,7 +932,7 @@ class Returpenjualan extends MY_Controller {
                 $dppDis = $dpp = (($ddskon) * 11) / 12;
                 $ppn_diskon = $dppDis * $getDetail->tax_value;
             }
-            $totalHarga = (($jumlah - $ddskon) + ($pajak - $ppn_diskon));
+            $totalHarga = (($jumlah - $ddskon) + ($pajak));
             $split = [
                 "retur_id" => $getDetail->retur_id,
                 "retur_no" => $getDetail->retur_no,

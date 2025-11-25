@@ -109,7 +109,7 @@
                                             <div class="col-md-12">
                                                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
                                                 <button class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
-                                                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button>
+                                                <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button>
                                             </div>
                                         </div>
                                     </div>
@@ -223,6 +223,61 @@
                         }),
                     });
                 });
+                $("#btn-pdf").on("click", function () {
+                    $.ajax({
+                        type: "post",
+                        url: "<?php echo base_url(); ?>report/umurpiutang/pdf",
+                        data: {
+                            customer: $("#customer").val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait((() => {
+
+                            }));
+                        },
+                        success: ((data) => {
+                            window.open(data.url, '_blank').focus();
+                        }),
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 200);
+                        }
+                    });
+                })
+
+                const formrd = document.forms.namedItem("form-search");
+                formrd.addEventListener(
+                        "submit",
+                        (event) => {
+                    please_wait(function () {});
+                    request("form-search").then(
+                            response => {
+                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {
+
+                                });
+                                if (response.status === 200) {
+                                    const a = document.createElement('a');
+                                    a.style.display = 'none';
+                                    a.href = response.data.data;
+                                    a.download = response.data.text_name;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                }
+                            }
+                    ).catch().finally(() => {
+                        unblockUI(function () {}, 100);
+                    });
+                    event.preventDefault();
+                },
+                        false
+                        );
+
             });
 
         </script>
