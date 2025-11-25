@@ -83,7 +83,7 @@
             <strong style="padding-top:20px;"><?php echo "Per Tgl. ".$periode; ?></strong><br>
         </div>
     </div>
-    <table>
+    <table border="1">
         <thead>
             <tr>
                 <th class="style" style="width: 5px;">No. </th>
@@ -108,7 +108,7 @@
 
             ?>
                 <tr>
-                    <td colspan='9' class='bold'><?php echo $rows['nama_partner'] ?></td>
+                    <td colspan='10' class='bold'>Suppplier : <?php echo $rows['nama_partner'] ?></td>
                 </tr>
             <?php
                 $no = 1;
@@ -145,6 +145,7 @@
                     <td class="text-right"> <?php echo number_format($total_sisa_hutang, 2); ?></td>
                     <td class="text-right"><?php echo number_format($total_hutang_valas, 2); ?></td>
                     <td class="text-right"> <?php echo number_format($total_sisa_hutang_valas, 2); ?></td>
+                    <td></td>
                 </tr>
             <?php
             }

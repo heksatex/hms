@@ -89,7 +89,7 @@ function limit_text($text, $max = 15)
             <strong style="padding-top:20px;"><?php echo ($tgl_dari) . ' s.d ' . ($tgl_sampai); ?></strong><br>
         </div>
     </div>
-    <table>
+    <table border="1">
         <thead>
             <tr>
                 <th class="style" style="width: 5px">No. </th>

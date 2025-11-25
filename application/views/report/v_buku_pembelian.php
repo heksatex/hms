@@ -145,7 +145,7 @@
                         <div class="box-body">
                             <div class="col-xs-12 table-responsive example1 divListviewHead">
                                 <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
-                                    <table id="example1" class="table table-condesed table-hover" border="0">
+                                    <table id="example1" class="table table-condesed table-hover" border="1">
                                         <thead>
                                             <tr>
                                                 <th class="style bb ws no">No. </th>

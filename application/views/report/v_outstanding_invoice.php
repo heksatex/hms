@@ -125,7 +125,7 @@
                                 <div class="table_scroll">
                                     <div class="table_scroll_head">
                                         <div class="divListviewHead">
-                                            <table id="example1" class="table table-condesed table-hover" border="0">
+                                            <table id="example1" class="table table-condesed table-hover" border="">
                                                 <thead>
                                                     <tr>
                                                         <th class="style bb no">No. </th>
@@ -293,8 +293,8 @@
                             empty = false;
                             var tr = $("<tr>").append(
                                 // $("<td>").text(''),
-                                $("<td colspan='5' class='text-left'>").html('<b>Supplier : </b> ' + value.nama_partner),
-                                $("<td colspan='2'>").text(''),
+                                $("<td colspan='11' class='text-left'>").html('<b>Supplier : </b> ' + value.nama_partner),
+                                // $("<td colspan=''>").text(''),
                             );
                             tbody.append(tr);
 
