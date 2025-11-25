@@ -779,7 +779,7 @@ class Fakturpenjualan extends MY_Controller {
                             "nominal_curr" => $data->diskon,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon_rp * $data->kurs_nominal,2),
+                            "nominal" => round($data->diskon * $data->kurs_nominal,2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }

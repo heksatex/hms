@@ -698,7 +698,7 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $data->diskon_ppn,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon_ppn * $data->kurs_nominal),
+                            "nominal" => round($data->diskon_ppn * $data->kurs_nominal,2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -714,7 +714,7 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $data->diskon,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon * $data->kurs_nominal),
+                            "nominal" => round($data->diskon * $data->kurs_nominal,2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -730,7 +730,7 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $allDiskon,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($allDiskon * $data->kurs_nominal),
+                            "nominal" => round($allDiskon * $data->kurs_nominal,2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -745,11 +745,15 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $data->ppn,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->ppn * $data->kurs_nominal),
+                            "nominal" => round($data->ppn * $data->kurs_nominal,2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
+                    $totalPiutangCurr = 0;
+                    $totalPiutang = 0;
                     foreach ($detail as $key => $value) {
+                        $totalPiutang += round($value->jumlah * $data->kurs_nominal,2);
+                        $totalPiutangCurr += $value->jumlah;
                         $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
@@ -761,10 +765,12 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $value->jumlah,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($value->jumlah * $data->kurs_nominal),
+                            "nominal" => round($value->jumlah * $data->kurs_nominal,2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
+                    $jurnalItems[0]["nominal_curr"] = ($totalPiutangCurr + $data->ppn);
+                    $jurnalItems[0]["nominal"] = $totalPiutang + ($data->ppn * $data->kurs_nominal);
 
                     if ($data->jurnal !== "") {
                         $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
