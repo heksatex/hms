@@ -591,8 +591,8 @@ class Fakturpenjualan extends MY_Controller {
                     }
 
                     if ($header["kurs_nominal"] > 1) {
-                        $header["total_piutang_valas"] = $header["final_total"];
-                        $header["piutang_valas"] = $header["final_total"];
+                        $header["total_piutang_valas"] = round($header["final_total"],2);
+                        $header["piutang_valas"] = round($header["final_total"],2);
                         $header["diskon"] = $grandDiskon;
                         $header["grand_total"] = $grandTotal;
                         $header["diskon_ppn"] = $grandDiskonPpn;
@@ -1121,8 +1121,8 @@ class Fakturpenjualan extends MY_Controller {
             $check->dpp_lain -= ($check->kurs_nominal > 1) ? $dpp : round($dpp);
 
             if ($check->kurs_nominal > 1) {
-                $check->total_piutang_valas = $check->final_total;
-                $check->piutang_valas = $check->final_total;
+                $check->total_piutang_valas = round($check->final_total,2);
+                $check->piutang_valas = round($check->final_total,2);
             }
             $check->total_piutang_rp = round($check->final_total * $check->kurs_nominal);
             $check->piutang_rp = round($check->final_total * $check->kurs_nominal);
@@ -1359,8 +1359,8 @@ class Fakturpenjualan extends MY_Controller {
                 $check->ppn += $pajak;
                 $check->grand_total += $jumlah;
                 $check->final_total += $totalHarga;
-                $check->total_piutang_valas = $check->final_total;
-                $check->piutang_valas = $check->final_total;
+                $check->total_piutang_valas = round($check->final_total,2);
+                $check->piutang_valas = round($check->final_total,2);
                 $check->diskon_ppn += $ppn_diskon;
             } else {
                 $check->dpp_lain += round($dpp);
