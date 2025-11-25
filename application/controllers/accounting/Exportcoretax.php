@@ -203,10 +203,12 @@ class Exportcoretax extends MY_Controller {
             }
             if (count($data) > 1) {
                 $rowFD += 1;
+                $rowF += 1;
                 $sheetFD->setCellValue("A{$rowFD}", "END");
+                $sheetFD->setCellValue("A{$rowF}", "END");
             }
             $periode = $this->input->post("periode");
-            $nm = str_replace(" ", "_", $namaPembeli);
+            $nm = str_replace(".", "_", $namaPembeli);
             $filename = "coretax_{$nm}_{$periode}";
             $url = "dist/storages/report/fakturpenjualan";
             if (!is_dir(FCPATH . $url)) {
