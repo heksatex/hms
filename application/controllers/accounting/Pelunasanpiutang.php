@@ -105,7 +105,7 @@ class Pelunasanpiutang extends MY_Controller
 
             $get_tinv = $this->m_pelunasanpiutang->get_total_faktur_by_partner(['partner_id' => $partner, 'status' => 'confirm', 'lunas' => 0]);
 
-            $where = ['partner_id' => $partner, 'status' => 'confirm'];
+            $where = ['partner_id' => $partner, 'status' => 'confirm', 'lunas' => 0];
             //get total 
             $gt_kk = $this->m_pelunasanpiutang->get_total_kas_masuk_by_partner($where, 'kas');
             $gt_bk = $this->m_pelunasanpiutang->get_total_bank_masuk_by_partner($where, 'kas');
