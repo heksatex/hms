@@ -114,7 +114,7 @@
                                 <div class="table_scroll">
                                     <div class="table_scroll_head">
                                         <div class="divListviewHead">
-                                            <table id="example1" class="table table-condesed table-hover" border="0">
+                                            <table id="example1" class="table table-condesed table-hover" border="1">
                                                 <thead>
                                                     <tr>
                                                         <th class="style bb no">No. </th>

@@ -87,9 +87,9 @@ class Bukubesarpembantupiutang extends MY_Controller
         foreach ($data as $datas) {
 
             $saldo_awal    = floatval($datas->saldo_awal_final);
-            $total_piutang   = (float) $datas->total_piutang;
+            $total_piutang   = (float) round($datas->total_piutang_dpp_ppn);
             $total_pelunasan   = (float) $datas->total_pelunasan;
-            $total_retur   = (float) $datas->total_retur;
+            $total_retur   = (float) round($datas->total_retur_dpp_ppn);
             $total_uang_muka   = (float) $datas->total_uang_muka;
             $total_koreksi   = (float) $datas->total_koreksi;
             $total_diskon  = (float) round($datas->total_diskon_dpp_ppn);
@@ -103,13 +103,13 @@ class Bukubesarpembantupiutang extends MY_Controller
                 'ppn_piutang' => (float) round($datas->ppn_piutang),
                 'total_piutang_dpp_ppn' => (float) round($datas->total_piutang_dpp_ppn),
                 'pelunasan'   => $total_pelunasan,
-                'retur'       => round($total_retur),
+                'retur'       => $total_retur,
                 'dpp_retur' => (float) round($datas->dpp_retur),
                 'ppn_retur' => (float) round($datas->ppn_retur),
                 'total_retur_dpp_ppn' => (float) round($datas->total_retur_dpp_ppn),
                 'dpp_diskon' => (float) round($datas->dpp_diskon),
                 'ppn_diskon' => (float) round($datas->ppn_diskon),
-                'total_diskon_dpp_ppn' => (float) round($datas->total_diskon_dpp_ppn),
+                'total_diskon_dpp_ppn' => $total_diskon,
                 'uang_muka'   => $total_uang_muka,
                 'koreksi'     => $total_koreksi,
                 'saldo_akhir' => $saldo_akhir
@@ -117,7 +117,8 @@ class Bukubesarpembantupiutang extends MY_Controller
             );
             $debit    = 0;
             $credit   = 0;
-            $saldo_awal = 0;
+            // $saldo_awal = 0;
+            // $saldo_akhir = 0;
             // }   
         }
 
