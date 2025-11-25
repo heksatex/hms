@@ -41,7 +41,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         - IFNULL(pelunasan_sblm.total_pelunasan, 0) 
                         - IFNULL(retur_sblm.total_retur, 0) 
                         - IFNULL(um_sblm.total_uang_muka, 0) 
-                        + IFNULL(koreksi_sblm.total_koreksi, 0)
+                        - IFNULL(koreksi_sblm.total_koreksi, 0)
                     ) <> 0
                     OR
                     (IFNULL(piutang.total_piutang, 0)
@@ -60,7 +60,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         }
         // $this->db->where_in('p.id', array(4195,4435,4494,5132,4210,5166,552));
         $this->db->select("p.id, p.nama, p.saldo_awal_piutang,
-                        (p.saldo_awal_piutang + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(um_sblm.total_uang_muka,0) + (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
+                        (p.saldo_awal_piutang + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(piutang.dpp_piutang,0) as dpp_piutang,
                         IFNULL(piutang.ppn_piutang,0) as ppn_piutang,
@@ -387,7 +387,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         - IFNULL(pelunasan_sblm.total_pelunasan, 0) 
                         - IFNULL(retur_sblm.total_retur, 0) 
                         - IFNULL(um_sblm.total_uang_muka, 0) 
-                        + IFNULL(koreksi_sblm.total_koreksi, 0)
+                        - IFNULL(koreksi_sblm.total_koreksi, 0)
                     ) <> 0
                     OR
                     (IFNULL(piutang.total_piutang, 0)
