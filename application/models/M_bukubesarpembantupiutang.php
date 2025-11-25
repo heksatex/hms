@@ -27,7 +27,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         // saldo berdasakran periode berjalan
         $subquery_faktur       = $this->get_saldo_piutang(['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm'], 'partner_id','');
-        $subquery_diskon       = $this->get_saldo_diskon(['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm'], 'partner_id','');
+        $subquery_diskon       = $this->get_saldo_diskon(['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm', 'fakd.diskon <>' => 0], 'partner_id','');
         $subquery_pelunasan    = $this->get_saldo_pelunasan(['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai], 'app.partner_id','');
         $subquery_retur        = $this->get_saldo_retur(['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai], 'app.partner_id','');
         $subquery_um           = $this->get_saldo_um(['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'apps.tipe_currency' => 'Rp'], 'app.partner_id','');
@@ -152,7 +152,8 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
 
-        $total  = ($currency === 'valas')? 'total_piutang_valas' : 'total_piutang_rp';
+        // $total  = ($currency === 'valas')? 'total_piutang_valas' : 'total_piutang_rp';
+        $total = "  ROUND(sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)  )+0.0001)";
 
         $this->db->SELECT("fak.id as id_bukti, fak.no_faktur as id_bukti_ecr,no_faktur_internal as no_bukti,tanggal as tgl, partner_id as id_partner,
         CONCAT(
@@ -186,11 +187,14 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
 
-        $total  = ($currency === 'valas')? 'fak.diskon' : 'fak.diskon';
+        // $this->db->having('total_diskon <> 0');
+
+        // $total  = ($currency === 'valas')? 'fak.diskon' : 'fak.diskon';
+        $total = "sum((fakd.diskon) +  round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001)";
 
         $this->db->SELECT("fak.id as id_bukti, fak.no_faktur as id_bukti_ecr, no_faktur_internal as no_bukti,tanggal as tgl, partner_id as id_partner,
         CONCAT(
-            'Penjualan: ', tipe, ' - ',
+            'Diskon: ', 
             IF(no_sj = '', '', CONCAT(' No SJ: ',no_sj)),
             IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = kurs), ' - Kurs: ', kurs_nominal), 
@@ -202,8 +206,8 @@ class M_bukubesarpembantupiutang extends CI_Model
         IFNULL(($total), 0) as credit,
         status, 'fak' as link,
         sum(fakd.diskon) as dpp_diskon,
-        sum((fakd.diskon) * 11/12 * fak.tax_value) as ppn_diskon,
-        sum((fakd.diskon) +  (fakd.diskon) * 11/12 * fak.tax_value) as total_diskon_dpp_ppn");
+        sum(round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001) as ppn_diskon,
+        sum((fakd.diskon) +  round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001) as total_diskon_dpp_ppn");
         $this->db->FROM('acc_faktur_penjualan fak');
         $this->db->JOIN("acc_faktur_penjualan_detail fakd", "fak.id = fakd.faktur_id", "INNER");
         return $this->db->get_compiled_select();
@@ -266,8 +270,8 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->jOIN("acc_pelunasan_piutang_metode appm","app.id = appm.pelunasan_piutang_id", "INNER");
         $this->db->JOIN("( SELECT ret.id , 
                 sum(retd.qty*retd.harga*ret.kurs_nominal) as dpp_retur,
-                sum((retd.qty*retd.harga*ret.kurs_nominal) * 11/12 * ret.tax_value) as ppn_retur,
-                sum((retd.qty*retd.harga*ret.kurs_nominal) +  ((retd.qty*retd.harga*ret.kurs_nominal) * 11/12 * ret.tax_value)  ) as total_retur_dpp_ppn                
+                sum(ROUND((retd.qty*retd.harga*ret.kurs_nominal) * 11/12 * ret.tax_value + 0.0001)) as ppn_retur,
+                sum(ROUND((retd.qty*retd.harga*ret.kurs_nominal)+0.0001) +  ROUND((retd.qty*retd.harga*ret.kurs_nominal) * 11/12 * ret.tax_value) + 0.0001 ) as total_retur_dpp_ppn                
                 FROM acc_retur_penjualan ret
                 INNER JOIN acc_retur_penjualan_detail retd ON ret.id = retd.retur_id
                 WHERE ret.status = 'confirm' and lunas = 1
@@ -438,6 +442,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         if($currency === 'all' || $currency === 'rp'){
             $where_utang = ['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm'];
+            $where_diskon = ['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm', 'fakd.diskon <>' => 0];
             $where_pelunasan = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai];
             $where_retur = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai];
             $where_um    = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','apps.tipe_currency' => 'Rp'];
@@ -445,14 +450,16 @@ class M_bukubesarpembantupiutang extends CI_Model
         } else {
            $cr_condition = ($currency === 'valas')? '<>' : '';
             
-           $where_utang = ['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm', 'kurs ' . $cr_condition => 1 ];
+           $where_utang = ['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm', 'kurs ' . $cr_condition => 1];
+           $where_diskon = ['tanggal >= '=> $tgldari, 'tanggal <= '=> $tglsampai, 'status'=>'confirm', 'kurs ' . $cr_condition => 1, 'fakd.diskon <>' => 0 ];
            $where_pelunasan = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai, 'appm.currency_id ' .$cr_condition => 1];
            $where_retur = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi  <= '=> $tglsampai, 'appm.currency_id ' .$cr_condition => 1];
            $where_um    = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','apps.tipe_currency ' .$cr_condition => 'Rp'];
            $where_koreksi = ['app.tanggal_transaksi >= '=> $tgldari, 'app.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'apps.tipe_currency ' .$cr_condition => 'Rp'];
         }
 
-        $subquery_faktur       = $this->get_saldo_piutang($where_utang, 'no_faktur',$currency);
+        $subquery_faktur       = $this->get_saldo_piutang($where_utang, 'no_faktur_internal',$currency);
+        $subquery_diskon       = $this->get_saldo_diskon($where_diskon, 'no_faktur_internal',$currency);
         $subquery_pelunasan    = $this->get_saldo_pelunasan($where_pelunasan, 'app.no_pelunasan',$currency);
         $subquery_retur        = $this->get_saldo_retur($where_retur, 'app.no_pelunasan',$currency);
         $subquery_um           = $this->get_saldo_um($where_um,'app.no_pelunasan',$currency);
@@ -462,7 +469,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->where($where);
         }
 
-        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi;
+        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi . ' UNION ALL '.$subquery_diskon;
 
         $this->db->SELECT('id_bukti, id_bukti_ecr,  no_bukti, tgl, id_partner, uraian, debit, credit, status, link');
         $this->db->from('(' . $union_sql . ') as sub');
