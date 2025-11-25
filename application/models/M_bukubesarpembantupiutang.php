@@ -162,8 +162,13 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
 
-        // $total  = ($currency === 'valas')? 'total_piutang_valas' : 'total_piutang_rp';
-        $total = "  ROUND(sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)  )+0.0001)";
+        $total  = ($currency === 'valas') ? "ROUND(sum(ROUND(fakd.qty*fakd.harga+0.0001,2) +  (ROUND(fakd.qty*fakd.harga+0.0001,2) * 11/12 * fak.tax_value) ),2)" : " ROUND(sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)  )+0.0001)";
+
+        $total_dpp = ($currency === 'valas') ? "ROUND(fakd.qty*fakd.harga+0.0001,2)" :  "ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001)";
+        $total_ppn = ($currency === 'valas') ? "ROUND(fakd.qty*fakd.harga * 11/12 * fak.tax_value + 0.0001, 2)" : "ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value";
+        $total_all = ($currency === 'valas') ? "ROUND(fakd.qty*fakd.harga+0.0001) +  (ROUND(fakd.qty*fakd.harga * 11/12 * fak.tax_value+0.0001, 2))" : "ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)";
+
+        // $total = " ";
 
         $this->db->SELECT("fak.id as id_bukti, fak.no_faktur as id_bukti_ecr,no_faktur_internal as no_bukti,tanggal as tgl, partner_id as id_partner,
         CONCAT(
@@ -178,9 +183,9 @@ class M_bukubesarpembantupiutang extends CI_Model
         IFNULL(($total), 0) as debit,
         0 as credit,
         status, 'fak' as link,
-        sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001)) as dpp_piutang,
-        sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value) as ppn_piutang,
-        sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)  ) as total_piutang_dpp_ppn");
+        sum($total_dpp) as dpp_piutang,
+        sum($total_ppn) as ppn_piutang,
+        sum($total_all) as total_piutang_dpp_ppn");
         $this->db->FROM('acc_faktur_penjualan fak');
         $this->db->JOIN("acc_faktur_penjualan_detail fakd", "fak.id = fakd.faktur_id", "INNER");
         return $this->db->get_compiled_select();
