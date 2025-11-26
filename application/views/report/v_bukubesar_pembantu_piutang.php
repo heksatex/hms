@@ -19,6 +19,14 @@
         table tbody tr td {
             padding: 0px 5px 0px 5px !important;
         }
+
+        .style_space {
+            white-space: nowrap !important;
+            /* font-weight: 700; */
+            background: #F0F0F0;
+            border-top: 2px solid #ddd !important;
+            border-bottom: 2px solid #ddd !important;
+        }
         
         /*
     .btn-setTgl {
@@ -295,67 +303,94 @@
 
                             empty = false;
 
-                            func2 = "view_detail2('" + value.id_partner + "')";
                             var tr = $("<tr>").append(
-                                $("<td class='no'>").html(no),
-                                $("<td>").html("<a href='javascript:void(0)' onclick=\"" + func2 + "\">" + value.nama_partner + "</a>"),
-                                $("<td align='right'>").text(formatNumber(value.saldo_awal.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.dpp_piutang.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.ppn_piutang.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.total_piutang_dpp_ppn.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.pelunasan.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.dpp_retur.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.ppn_retur.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.total_retur_dpp_ppn.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.dpp_diskon.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.ppn_diskon.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.total_diskon_dpp_ppn.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.uang_muka.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.koreksi.toFixed(2))),
-                                $("<td align='right'>").text(formatNumber(value.saldo_akhir.toFixed(2))),
+                                $("<td colspan='16' class='text-left'>").html('<b> ' + value.gol_nama + '</b>'),
                             );
-
                             tbody.append(tr);
-                            no++;
-                            s_awal = s_awal + value.saldo_awal;
-                            piutang_dpp  = piutang_dpp + value.dpp_piutang;
-                            piutang_ppn  = piutang_ppn + value.ppn_piutang;
-                            piutang_total  = piutang_total + value.total_piutang_dpp_ppn;
-                            pelunasan   = pelunasan + value.pelunasan;
-                            retur_dpp  = retur_dpp + value.dpp_retur;
-                            retur_ppn  = retur_ppn + value.ppn_retur;
-                            retur_total  = retur_total + value.total_retur_dpp_ppn;
-                            uang_muka   = uang_muka + value.uang_muka;
-                            diskon_dpp  = diskon_dpp + value.dpp_diskon;
-                            diskon_ppn  = diskon_ppn + value.ppn_diskon;
-                            diskon_total  = diskon_total + value.total_diskon_dpp_ppn;
-                            koreksi   = koreksi + value.koreksi;
-                            s_akhir = s_akhir + value.saldo_akhir;
+
+                            no = 1;
+                            s_awal = 0;
+                            piutang_dpp = 0;
+                            piutang_ppn = 0;
+                            piutang_total = 0;
+                            pelunasan = 0;
+                            retur_dpp = 0;
+                            retur_ppn = 0;
+                            retur_total = 0;
+                            diskon_dpp = 0;
+                            diskon_ppn = 0;
+                            diskon_total = 0;
+                            uang_muka = 0;
+                            koreksi = 0;
+                            s_akhir = 0;
+
+                            $.each(value.tmp_data, function(key, value) {
+
+                                func2 = "view_detail2('" + value.id_partner + "')";
+                                var tr2 = $("<tr>").append(
+                                    $("<td class='no'>").html(no),
+                                    $("<td>").html("<a href='javascript:void(0)' onclick=\"" + func2 + "\">" + value.nama_partner + "</a>"),
+                                    $("<td align='right'>").text(formatNumber(value.saldo_awal.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.dpp_piutang.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.ppn_piutang.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.total_piutang_dpp_ppn.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.pelunasan.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.dpp_retur.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.ppn_retur.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.total_retur_dpp_ppn.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.dpp_diskon.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.ppn_diskon.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.total_diskon_dpp_ppn.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.uang_muka.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.koreksi.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.saldo_akhir.toFixed(2))),
+                                );
+
+                                tbody.append(tr2);
+                                no++;
+                                s_awal = s_awal + value.saldo_awal;
+                                piutang_dpp  = piutang_dpp + value.dpp_piutang;
+                                piutang_ppn  = piutang_ppn + value.ppn_piutang;
+                                piutang_total  = piutang_total + value.total_piutang_dpp_ppn;
+                                pelunasan   = pelunasan + value.pelunasan;
+                                retur_dpp  = retur_dpp + value.dpp_retur;
+                                retur_ppn  = retur_ppn + value.ppn_retur;
+                                retur_total  = retur_total + value.total_retur_dpp_ppn;
+                                uang_muka   = uang_muka + value.uang_muka;
+                                diskon_dpp  = diskon_dpp + value.dpp_diskon;
+                                diskon_ppn  = diskon_ppn + value.ppn_diskon;
+                                diskon_total  = diskon_total + value.total_diskon_dpp_ppn;
+                                koreksi   = koreksi + value.koreksi;
+                                s_akhir = s_akhir + value.saldo_akhir;
+                            });
+
+                            tr3 = $("<tr>").append(
+                                $("<td class='style_space text-right' colspan='2'>").html('<b>Total '+value.gol_nama+':<b>'),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(s_awal.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_dpp.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_ppn.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_total.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(pelunasan.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(retur_dpp.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(retur_ppn.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(retur_total.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(diskon_dpp.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(diskon_ppn.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(diskon_total.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(uang_muka.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(koreksi.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(s_akhir.toFixed(2))),
+                            );
+                            tbody.append(tr3);
+                            tbody.append("<tr><td colspan='16'>&nbsp</td></tr>");
+
                         });
 
                         if (empty == true) {
                             var tr = $("<tr>").append($("<td colspan='9'>").text('Tidak ada Data'));
                             tbody.append(tr);
                         } else {
-                            tbody.append("<tr><td colspan='16'>&nbsp</td></tr>");
-                            tr2 = $("<tr>").append(
-                                $("<td align='right' colspan='2'>").html('<b>Total :<b>'),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(s_awal.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(piutang_dpp.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(piutang_ppn.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(piutang_total.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(pelunasan.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(retur_dpp.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(retur_ppn.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(retur_total.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(diskon_dpp.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(diskon_ppn.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(diskon_total.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(uang_muka.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(koreksi.toFixed(2))),
-                                $("<td align='right' style='font-weight:bold;'>").text(formatNumber(s_akhir.toFixed(2))),
-                            );
-                            tbody.append(tr2);
+                          
                         }
 
                         $("#example1").append(tbody); // append parents
