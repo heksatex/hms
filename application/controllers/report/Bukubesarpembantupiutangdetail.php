@@ -73,7 +73,7 @@ class Bukubesarpembantupiutangdetail extends MY_Controller
                 $debit  = floatval($datas2->debit);
                 $credit = floatval($datas2->credit);
               
-                $saldo_akhir =  $saldo_awal + ($debit) - ($credit);
+                $saldo_akhir =  $saldo_awal + ($debit) - round($credit,2);
 
                 $tmp_data_akun_isi[] = array(
                     'tanggal'   => date("Y-m-d",strtotime($datas2->tgl)),
