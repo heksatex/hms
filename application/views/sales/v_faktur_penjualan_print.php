@@ -100,14 +100,14 @@
                 $subtotal = 0;
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
-                     $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                    $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                     ?>
                     <tr>
                         <td style="text-align: center;">
                             <?= ($key + 1) ?>
                         </td>
                         <td>
-                            <?= $value->uraian.$warna ?>
+                            <?= $value->uraian . $warna ?>
                         </td>
                         <td style="text-align: center"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: center"><?= "{$value->qty} {$value->uom}" ?></td>
@@ -121,21 +121,24 @@
             <tfoot>
                 <tr>
                     <td rowspan="5" colspan="4">
-                        Terbilang : <?= Kwitansi($head->final_total) ?> Rupiah
+                        Terbilang : <?= Kwitansi(round($head->final_total)) ?> Rupiah
                     </td>
                     <td style="font-weight: bold;">
                         Subtotal
                     </td>
                     <td style="text-align: right">
-                        <?= number_format($subtotal, 2) ?>
+                        <?= number_format(round($head->grand_total), 2) ?>
                     </td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold;">
                         Dpp Nilai Lain
                     </td>
+                    <?php
+                    $subtotal2 = (round($head->grand_total) - round($head->diskon));
+                    ?>
                     <td style="text-align: right">
-                        <?= $dpp ?>
+                        <?= number_format($head->dpp_lain, 2, ".", ",") ?>
                     </td>
                 </tr>
                 <tr>
@@ -151,7 +154,7 @@
                         <?= $head->nama_tax ?? "Ppn " ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format($head->ppn - $head->diskon_ppn, 2, ".", ","); ?>
+                        <?= number_format(round($head->ppn), 2, ".", ","); ?>
                     </td>
                 </tr>
                 <tr>
@@ -166,7 +169,7 @@
         </table>
         <div id="row">
             <div id="column">
-                
+
             </div>
         </div>
         <div id="row">

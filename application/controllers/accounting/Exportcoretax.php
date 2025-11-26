@@ -193,9 +193,9 @@ class Exportcoretax extends MY_Controller {
                 $sheetFD->setCellValue("g{$rowFD}", $value->qty);
                 $sheetFD->setCellValue("h{$rowFD}", ($value->diskon * $value->kurs_nominal));
                 $sheetFD->setCellValue("i{$rowFD}", (($value->jumlah - $value->diskon) * $value->kurs_nominal));
-                $sheetFD->setCellValue("j{$rowFD}", ($value->dpp_lain - $dpplainDikon) * $value->kurs_nominal);
+                $sheetFD->setCellValue("j{$rowFD}", ($value->dpp_lain) * $value->kurs_nominal);
                 $sheetFD->setCellValue("k{$rowFD}", ($value->tax_value * 100));
-                $sheetFD->setCellValue("l{$rowFD}", ($value->pajak - $value->diskon_ppn) * $value->kurs_nominal);
+                $sheetFD->setCellValue("l{$rowFD}", ($value->pajak) * $value->kurs_nominal);
                 $sheetFD->setCellValue("m{$rowFD}", 0.00);
                 $sheetFD->setCellValue("n{$rowFD}", 0.00);
 

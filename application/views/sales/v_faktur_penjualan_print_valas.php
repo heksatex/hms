@@ -186,7 +186,7 @@
                         <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($subtotalValas, 2) ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format($subtotal, 2) ?>
+                        <?= number_format(round($head->grand_total), 2) ?>
                     </td>
                 </tr>
                 <tr>
@@ -205,10 +205,10 @@
                         <?= "Ppn " ?>
                     </td>
                     <td style="text-align: right">
-                        <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($head->ppn - $head->diskon_ppn, 2, ".", ",") ?>
+                        <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($head->ppn , 2, ".", ",") ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format(($head->ppn - $head->diskon_ppn) * $head->kurs_nominal, 2, ".", ","); ?>
+                        <?= number_format(($head->ppn) * $head->kurs_nominal, 2, ".", ","); ?>
                     </td>
                 </tr>
                 <tr>

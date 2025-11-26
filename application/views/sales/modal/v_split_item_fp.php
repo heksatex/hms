@@ -30,6 +30,17 @@
         <input class="form-control input-sm text-right" value="<?= $data->qty ?>" id="qty_split">
     </td>
     <td>
+        <select class="form-control input-sm" style="width:100%" id="uom_split">
+            <?php
+            foreach ($uom as $keys => $val) {
+                ?>
+                <option value="<?= $val->short ?>" <?= ($val->short === $data->uom) ? "selected" : "" ?> ><?= $val->short ?></option>
+                <?php
+            }
+            ?>
+        </select>
+    </td>
+    <td>
         <select class="form-control input-sm select2-coa" style="width:100%" id="no_acc_split">
             <option></option>
             <?php
@@ -43,6 +54,6 @@
     </td>
     <td>
         <input id="ids" type="hidden" value="<?= $data->id ?>">
-        <input class="form-control input-sm text-right" value="<?= number_format($data->harga,2,".",",") ?>" readonly>
+        <input class="form-control input-sm text-right" value="<?= number_format($data->harga,4,".",",") ?>" readonly>
     </td>
 </tr>
