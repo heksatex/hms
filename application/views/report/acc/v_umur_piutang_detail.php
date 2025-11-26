@@ -42,7 +42,7 @@ foreach ($head as $key => $value) {
                 <?= $no ?>
             </td>
             <td>
-                <?= $value->partner_nama ?>
+                <a href=" <?=base_url("report/outstandingfaktur?partner={$value->partner_id}"); ?>" target="_blank"><?= $value->partner_nama ?> </a>  
             </td>
             <td class="text-right">
                 <?= number_format($value->total_piutang, 2) ?>
