@@ -409,6 +409,7 @@ class Fakturpenjualan extends MY_Controller {
             $username = $this->session->userdata('username');
             $users = (object) $this->session->userdata('nama');
             $noAcc = $this->input->post("noacc");
+            $tanggal = $this->input->post("tanggal");
             $nominalDiskon = $this->input->post("nominaldiskon");
             unset($this->valForm[2]); //unset validation  no faktur
             if ($nominalDiskon !== "") {
@@ -523,6 +524,7 @@ class Fakturpenjualan extends MY_Controller {
                 "tax_value" => $taxVal,
                 "dpp_lain" => 0,
                 "ppn" => 0,
+                "tanggal"=>$tanggal,
                 "final_total" => 0,
                 "payment_term" => $this->input->post("payment_term"),
                 "foot_note" => $this->input->post("footnote"),
