@@ -15,7 +15,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
 
 
-    public function get_list_bukubesar($tgldari, $tglsampai, $checkhidden, array $where = [])
+    public function get_list_bukubesar($tgldari, $tglsampai, $checkhidden, array $where = [], array $not_in = [])
     {
         // saldo sebelum periode berjalan
         $subquery_faktur_sblm   = $this->get_saldo_sblm($tgldari, 'faktur');
@@ -61,6 +61,13 @@ class M_bukubesarpembantupiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
+
+        if (count($not_in) > 0) {
+            foreach ($not_in as $field => $arr) {
+                $this->db->where_not_in($field, $arr);
+            }
+        }
+
         // $this->db->where_in('p.id', array(4195,4435,4494,5132,4210,5166,552));
         $this->db->select("p.id, p.nama, p.saldo_awal_piutang,
                         (p.saldo_awal_piutang + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon,0)- IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
@@ -162,11 +169,13 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
 
-        $total  = ($currency === 'valas') ? "ROUND(sum(ROUND(fakd.qty*fakd.harga+0.0001,2) +  (ROUND(fakd.qty*fakd.harga+0.0001,2) * 11/12 * fak.tax_value) ),2)" : " ROUND(sum(ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)  )+0.0001)";
+// ROUND(CAST(nilai AS DECIMAL(20,4)), 2)
 
-        $total_dpp = ($currency === 'valas') ? "ROUND(fakd.qty*fakd.harga+0.0001,2)" :  "ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001)";
-        $total_ppn = ($currency === 'valas') ? "ROUND(fakd.qty*fakd.harga * 11/12 * fak.tax_value + 0.0001, 2)" : "ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value";
-        $total_all = ($currency === 'valas') ? "ROUND(fakd.qty*fakd.harga+0.0001) +  (ROUND(fakd.qty*fakd.harga * 11/12 * fak.tax_value+0.0001, 2))" : "ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) +  (ROUND(fakd.qty*fakd.harga*fak.kurs_nominal+0.0001) * 11/12 * fak.tax_value)";
+        $total  = ($currency === 'valas') ? "sum(ROUND(CAST(fakd.qty*fakd.harga as DECIMAL(20,4)),2) +  (ROUND(CAST(fakd.qty*fakd.harga * 11/12 * fak.tax_value as DECIMAL(20,4)),2)))" : " sum(ROUND(CAST(fakd.qty*fakd.harga*fak.kurs_nominal as DECIMAL(20,4))) +  ROUND(CAST(fakd.qty*fakd.harga*fak.kurs_nominal * 11/12 * fak.tax_value AS DECIMAL(20,4))) )";
+
+        $total_dpp = ($currency === 'valas') ? "ROUND(CAST(fakd.qty*fakd.harga as DECIMAL(20,4)),2)" :  "ROUND(CAST(fakd.qty*fakd.harga*fak.kurs_nominal as DECIMAL(20,4)))";
+        $total_ppn = ($currency === 'valas') ? "ROUND(CAST(fakd.qty*fakd.harga * 11/12 * fak.tax_value as DECIMAL(20,4)),2))" : "ROUND(CAST(fakd.qty*fakd.harga*fak.kurs_nominal * 11/12 * fak.tax_value AS DECIMAL(20,4)))";
+        $total_all = ($currency === 'valas') ? "ROUND(CAST(fakd.qty*fakd.harga as DECIMAL(20,4)),2) +  ROUND(CAST(fakd.qty*fakd.harga * 11/12 * fak.tax_value as DECIMAL(20,4)),2))" : "ROUND(CAST(fakd.qty*fakd.harga*fak.kurs_nominal as DECIMAL(20,4))) +  (ROUND(CAST(fakd.qty*fakd.harga*fak.kurs_nominal * 11/12 * fak.tax_value AS DECIMAL(20,4))))";
 
         // $total = " ";
 
@@ -201,11 +210,14 @@ class M_bukubesarpembantupiutang extends CI_Model
         if ($group) {
             $this->db->group_by($group);
         }
+        $this->db->having('total_diskon <> 0');
 
-        // $this->db->having('total_diskon <> 0');
+        $total  = ($currency === 'valas')? 'sum(round(cast(fakd.diskon as decimal(20,4)),2) +  round(cast(fakd.diskon * 11/12 * fak.tax_value as decimal(20,4)), 2) )' : 'sum(round(cast(fakd.diskon as decimal(20,4))) +  round(cast(fakd.diskon * 11/12 * fak.tax_value as decimal(20,4))) )';
+        $total_dpp  = ($currency === 'valas') ? 'round(cast(fakd.diskon as DECIMAL(20,4)),2)' : 'round(cast(fakd.diskon as DECIMAL(20,4)))';
+        $total_ppn  = ($currency === 'valas') ? 'round(cast(fakd.diskon * 11/12 * fak.tax_value as DECIMAL(20,4)),2)' : 'round(cast(fakd.diskon * 11/12 * fak.tax_value as DECIMAL(20,4)))';
+        $total_all  = ($currency === 'valas') ? '(round(cast(fakd.diskon as decimal(20,4)),2) +  round(cast(fakd.diskon * 11/12 * fak.tax_value as decimal(20,4)), 2)) ' : 'round(cast(fakd.diskon as decimal(20,4))) +  round(cast(fakd.diskon * 11/12 * fak.tax_value as decimal(20,4))) ';
 
-        // $total  = ($currency === 'valas')? 'fak.diskon' : 'fak.diskon';
-        $total = "sum(round(fakd.diskon+0.0001) +  round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001)";
+        // $total = "";
 
         $this->db->SELECT("fak.id as id_bukti, fak.no_faktur as id_bukti_ecr, no_faktur_internal as no_bukti,tanggal as tgl, partner_id as id_partner,
         CONCAT(
@@ -220,9 +232,9 @@ class M_bukubesarpembantupiutang extends CI_Model
         0 as debit,
         IFNULL(($total), 0) as credit,
         status, 'fak' as link,
-        sum(round(fakd.diskon+0.0001)) as dpp_diskon,
-        sum(round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001) as ppn_diskon,
-        sum((fakd.diskon) +  round((fakd.diskon) * 11/12 * fak.tax_value)+0.0001) as total_diskon_dpp_ppn");
+        sum($total_dpp) as dpp_diskon,
+        sum($total_ppn) as ppn_diskon,
+        sum($total_all) as total_diskon_dpp_ppn");
         $this->db->FROM('acc_faktur_penjualan fak');
         $this->db->JOIN("acc_faktur_penjualan_detail fakd", "fak.id = fakd.faktur_id", "INNER");
         return $this->db->get_compiled_select();
@@ -494,9 +506,17 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->SELECT('id_bukti, id_bukti_ecr,  no_bukti, tgl, id_partner, uraian, debit, credit, status, link');
         $this->db->from('(' . $union_sql . ') as sub');
         $this->db->order_by('tgl', 'asc');
+        $this->db->order_by('no_bukti', 'asc');
         $this->db->order_by('debit', 'desc');
         // $this->db->order_by('credit','asc');
         $query = $this->db->get();
+        return $query->result();
+    }
+
+    function get_list_golongan()
+    {
+        $this->db->order_by('id','asc');
+        $query = $this->db->get('partner_gol');
         return $query->result();
     }
 }
