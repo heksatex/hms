@@ -345,7 +345,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             IF('$currency' = 'valas', 
                 GROUP_CONCAT(' - ',appm.no_bukti,' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), '  Kurs: ', appm.kurs,' '), 
                 GROUP_CONCAT(' - ',,appm.no_bukti)
-            )) as uraian, IFNULL(SUM($total),0) as total_retur,  0 as debit ,  IFNULL(SUM($total),0)  as credit, app.status, 'ret' as link,
+            )) as uraian, IFNULL(SUM($total),0) as total_retur,  0 as debit ,  IFNULL(SUM($total),0)  as credit, app.status, 'plp' as link,
             dpp_retur as dpp_retur,
             ppn_retur as ppn_retur,
             total_retur_dpp_ppn as total_retur_dpp_ppn");
