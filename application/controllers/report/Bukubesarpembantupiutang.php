@@ -412,6 +412,6 @@ class Bukubesarpembantupiutang extends MY_Controller
         $data['tgl_dari']   = tgl_indo(date('d-m-Y', strtotime($tgl_dari)));
         $data['tgl_sampai'] = tgl_indo(date('d-m-Y', strtotime($tgl_sampai)));
         $cnt = $this->load->view('accounting/v_bukubesar_pembantu_piutang_pdf', $data, true);
-        $this->dompdflib->generate($cnt, 'Buku Besar Pembantu Piutang', 0, 'A4', 'Landscape');
+        $this->dompdflib->generate($cnt, 'Buku Besar Pembantu Piutang', 0, 'A3', 'Landscape');
     }
 }

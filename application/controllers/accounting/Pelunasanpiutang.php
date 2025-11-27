@@ -954,7 +954,7 @@ class Pelunasanpiutang extends MY_Controller
                 $this->_module->startTransaction();
 
                 //lock tabel
-                $this->_module->lock_tabel('acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as  agmd WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_summary WRITE, acc_retur_penjualan as arj WRITE,   acc_pelunasan_piutang_summary_koreksi WRITE, acc_coa READ, currency_kurs as ck1 READ,currency_kurs as ck2 READ,currency_kurs as ck3 READ');
+                $this->_module->lock_tabel('acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as  agmd WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_summary WRITE, acc_retur_penjualan as arj WRITE,   acc_pelunasan_piutang_summary_koreksi WRITE, acc_coa READ, currency_kurs as ck1 READ,currency_kurs as ck2 READ,currency_kurs as ck3 READ, currency_kurs as ck READ');
 
                 if (empty($no_pelunasan)) {
                     throw new \Exception('No Pelunasan Kosong !', 200);
@@ -2285,7 +2285,7 @@ class Pelunasanpiutang extends MY_Controller
 
             $this->_module->startTransaction();
 
-            $this->_module->lock_tabel("main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_metode WRITE, acc_pelunasan_piutang_summary WRITE, acc_pelunasan_piutang_summary_koreksi WRITE, acc_pelunasan_piutang_summary_koreksi as apphsk WRITE, acc_pelunasan_piutang_summary as apps WRITE,  mst_jurnal WRITE, acc_faktur_penjualan WRITE, acc_bank_masuk_detail WRITE, acc_giro_masuk_detail WRITE, acc_kas_masuk_detail WRITE,  acc_bank_masuk WRITE, acc_giro_masuk WRITE,  acc_kas_masuk WRITE, acc_pelunasan_koreksi_piutang WRITE, acc_pelunasan_piutang_summary_koreksi as appsk WRITE, acc_faktur_penjualan as faktur WRITE, currency_kurs WRITE, acc_jurnal_entries WRITE, acc_jurnal_entries_items WRITE, acc_coa READ, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, currency_kurs as ck1 READ, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, currency_kurs as ck2 READ, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as agmd WRITE, currency_kurs as ck3 READ");
+            $this->_module->lock_tabel("main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_metode WRITE, acc_pelunasan_piutang_summary WRITE, acc_pelunasan_piutang_summary_koreksi WRITE, acc_pelunasan_piutang_summary_koreksi as apphsk WRITE, acc_pelunasan_piutang_summary as apps WRITE,  mst_jurnal WRITE, acc_faktur_penjualan WRITE, acc_bank_masuk_detail WRITE, acc_giro_masuk_detail WRITE, acc_kas_masuk_detail WRITE,  acc_bank_masuk WRITE, acc_giro_masuk WRITE,  acc_kas_masuk WRITE, acc_pelunasan_koreksi_piutang WRITE, acc_pelunasan_piutang_summary_koreksi as appsk WRITE, acc_faktur_penjualan as faktur WRITE, currency_kurs WRITE, acc_jurnal_entries WRITE, acc_jurnal_entries_items WRITE, acc_coa READ, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, currency_kurs as ck1 READ, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, currency_kurs as ck2 READ, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as agmd WRITE, currency_kurs as ck3 READ, acc_retur_penjualan WRITE");
 
 
             $no_pelunasan = $this->input->post('no_pelunasan');
@@ -2701,9 +2701,9 @@ class Pelunasanpiutang extends MY_Controller
                             throw new \Exception('Metode Pelunasan Kas Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                         }
                     } else if ($mt->tipe2 == 'retur') { //invoice retur
-                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('retur', ['status' => 'done', 'no_retur' => $mt->no_bukti, 'id' => $mt->id_bukti, 'lunas' => 0]);
+                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('retur', ['status' => 'confirm', 'no_retur' => $mt->no_bukti, 'id' => $mt->id_bukti, 'lunas' => 0]);
                         if (isset($cek_mt)) {
-                            if ((float) $cek_mt->total == (float) $total) {
+                            if ((float) $cek_mt->total_rp == (float) $mt->total_rp && (float) $cek_mt->total_valas == (float) $mt->total_valas) {
                                 $data_update4 = array(
                                     'id'  => $mt->id_bukti,
                                     'lunas'   => 1

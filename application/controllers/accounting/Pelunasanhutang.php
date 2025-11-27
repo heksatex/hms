@@ -2936,7 +2936,7 @@ class Pelunasanhutang extends MY_Controller
                     } else if ($mt->tipe2 == 'retur') { //invoice retur
                         $cek_mt = $this->m_pelunasanhutang->cek_data_metode_valid_by_code('retur', ['status' => 'done', 'no_inv_retur' => $mt->no_bukti, 'id' => $mt->id_bukti, 'lunas' => 0]);
                         if (isset($cek_mt)) {
-                            if ((float) $cek_mt->total == (float) $total) {
+                            if ((float) $cek_mt->total_rp == (float)  $mt->total_rp && (float) $cek_mt->total_valas == (float)  $mt->total_valas) {
                                 $data_update4 = array(
                                     'id'  => $mt->id_bukti,
                                     'lunas'   => 1
