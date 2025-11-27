@@ -6,7 +6,7 @@
         @page {
             /* margin: 20px; */
             /* rapat, bisa diubah ke 0 jika benar-benar ingin full page */
-            margin: 30px 20px 30px 20px;
+            margin: 80px 30px 30px 30px;
             header: page-header;
             footer: page-footer;
         }
@@ -14,7 +14,7 @@
         body {
             font-family: sans-serif;
             font-size: 12px;
-            margin-top: 37px;
+            /* margin-top: 37px; */
         }
 
         .kop {
@@ -66,11 +66,10 @@
 
         .header {
             position: fixed;
-            top: -20px;
+            top: -60px;
             left: 0;
             right: 0;
             height: 60px;
-            font-size: 12px;
             text-align: center;
         }
 

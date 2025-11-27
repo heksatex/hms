@@ -5,7 +5,7 @@
         @page {
             /* margin: 20px; */
             /* rapat, bisa diubah ke 0 jika benar-benar ingin full page */
-            margin: 30px 10px 30px 10px;
+            margin: 80px 20px 30px 20px;
             header: page-header;
             footer: page-footer;
         }
@@ -13,7 +13,7 @@
         body {
             font-family: sans-serif;
             font-size: 12px;
-            margin-top: 37px;
+            /* margin-top: 37px; */
         }
 
         .kop {
@@ -60,11 +60,10 @@
 
         .header {
             position: fixed;
-            top: -20px;
+            top: -60px;
             left: 0;
             right: 0;
             height: 60px;
-            font-size: 12px;
             text-align: center;
         }
 
@@ -85,9 +84,11 @@
             width: 100px;
         }
 
-        th:nth-child(5),
-        th:nth-child(10){
+        th:nth-child(5){
             width: 55px;
+        }
+        th:nth-child(10){
+            width: 40px;
         }
         
         th:nth-child(6),
