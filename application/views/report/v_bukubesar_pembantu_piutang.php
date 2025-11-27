@@ -211,26 +211,32 @@
         var arr_filter = [];
 
 
-        // btn generate
+         // btn generate
         $("#btn-generate").on('click', function() {
 
-            var tgldari = $('#tgldari').val();
-            var tglsampai = $('#tglsampai').val();
-            var this_btn = $(this);
+            const tgldari = $('#tgldari').val();
+            const tglsampai = $('#tglsampai').val();
+            const this_btn = $(this);
 
-            var tgldari_2 = $('#tgldari').data("DateTimePicker").date();
-            var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
-
-            if (tgldari == '' || tglsampai == '') {
+            if (!tgldari || !tglsampai) {
                 alert_modal_warning('Periode Tanggal Harus diisi !');
-
-            } else if (tglsampai_2 < tgldari_2) {
-                alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
-            } else {
-                arr_filter = [];
-                process_bukubesar(this_btn);
-
+                return;
             }
+
+            // Convert string → Date()
+            const dariDate = moment(tgldari, "D-MMMM-YYYY").toDate();
+            const sampaiDate = moment(tglsampai, "D-MMMM-YYYY").toDate();
+
+            // Validasi logika tanggal
+            if (sampaiDate < dariDate) {
+                alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+                return;
+            }
+
+            // Lanjut proses
+            arr_filter = [];
+            process_bukubesar(this_btn);
+
         });
 
 

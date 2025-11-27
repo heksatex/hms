@@ -299,28 +299,37 @@
         // btn generate
         $("#btn-generate").on('click', function() {
 
-            var tgldari = $('#tgldari').val();
-            var tglsampai = $('#tglsampai').val();
-            var this_btn = $(this);
+            const tgldari = $('#tgldari').val();
+            const tglsampai = $('#tglsampai').val();
+            const this_btn = $(this);
 
-            var tgldari_2 = $('#tgldari').data("DateTimePicker").date();
-            var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
-            var selectedCurrency = $('input[name="currency"]:checked').val();
+            const selectedCurrency = $('input[name="currency"]:checked').val();
 
-
-            if (tgldari == '' || tglsampai == '') {
+            if (!tgldari || !tglsampai) {
                 alert_modal_warning('Periode Tanggal Harus diisi !');
-            } else if (selectedCurrency == '' || selectedCurrency === 'undefined') {
-                alert_modal_warning('Currency Harus dipilih !');
-            } else if (tglsampai_2 < tgldari_2) {
-                alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
-            } else {
-                arr_filter = [];
-                process_bukubesar(this_btn);
-
+                return;
             }
-        });
 
+            if (!selectedCurrency) {
+                alert_modal_warning('Currency Harus dipilih !');
+                return;
+            }
+
+            // Convert string → Date()
+            const dariDate = moment(tgldari, "D-MMMM-YYYY").toDate();
+            const sampaiDate = moment(tglsampai, "D-MMMM-YYYY").toDate();
+
+            // Validasi logika tanggal
+            if (sampaiDate < dariDate) {
+                alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+                return;
+            }
+
+            // Lanjut proses
+            arr_filter = [];
+            process_bukubesar(this_btn);
+
+        });
 
 
         function formatNumber(n) {
@@ -338,7 +347,7 @@
             var selectedCurrency = $('input[name="currency"]:checked').val();
 
             let slowProcessWarning = setTimeout(function() {
-                please_wait(function(){});
+                please_wait(function() {});
             }, 5000); // 5 detik
 
             $("#example1_processing").css('display', ''); // show loading
@@ -356,7 +365,7 @@
                 },
                 success: function(data) {
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     if (data.status == 'failed') {
                         unblockUI(function() {
                             setTimeout(function() {
@@ -465,7 +474,7 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }
