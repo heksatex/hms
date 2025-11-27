@@ -41,7 +41,8 @@
         }
 
         thead {
-            background-color: rgba(156, 153, 153, 1)
+            /* background-color: rgba(156, 153, 153, 1) */
+            background-color: #CCC;
         }
 
         th {
@@ -51,11 +52,44 @@
 
         table th,
         table td {
-            font-size: 7px !important;
+            font-size: 10px !important;
             padding: 2px 2px !important;
             word-wrap: break-word;
             white-space: normal;
+        }
 
+        table,
+        th,
+        td {
+            border: 1px solid #000;
+        }
+
+        th:nth-child(1) {
+            width: 15px;
+        }
+
+        th:nth-child(2) {
+            width: 80px;
+        }
+
+        th:nth-child(3),
+        th:nth-child(16) {
+            width: 70px;
+        }
+
+        th:nth-child(4),
+        th:nth-child(5),
+        th:nth-child(6),
+        th:nth-child(7),
+        th:nth-child(8),
+        th:nth-child(9),
+        th:nth-child(10),
+        th:nth-child(11),
+        th:nth-child(12),
+        th:nth-child(13),
+        th:nth-child(14),
+        th:nth-child(15) {
+            width: 60px;
         }
 
 
@@ -94,25 +128,25 @@ function limit_text($text, $max = 15)
             <strong style="padding-top:20px;"><?php echo ($tgl_dari) . ' s.d ' . ($tgl_sampai); ?></strong><br>
         </div>
     </div>
-    <table border>
+    <table>
         <thead>
             <tr>
-                <th class="style" style="width: 15px">No. </th>
-                <th class='style' style="width: 60px">Customer</th>
-                <th class='style' style="width: 70px">Saldo Awal</th>
-                <th class='style' style="width: 60px">Piutang DPP</th>
-                <th class='style' style="width: 60px">Piutang PPN</th>
-                <th class='style' style="width: 60px">Piutang Total</th>
-                <th class='style' style="width: 60px">Pelunasan</th>
-                <th class='style' style="width: 60px">Retur DPP</th>
-                <th class='style' style="width: 60px">Retur PPN</th>
-                <th class='style' style="width: 60px">Retur Total</th>
-                <th class='style' style="width: 60px">Diskon DPP</th>
-                <th class='style' style="width: 60px">Diskon PPN</th>
-                <th class='style' style="width: 60px">Diskon Total</th>
-                <th class='style' style="width: 60px">Uang Muka</th>
-                <th class='style' style="width: 60px">Koreksi</th>
-                <th class='style' style="width: 70px">Saldo Akhir</th>
+                <th>No. </th>
+                <th>Customer</th>
+                <th>Saldo Awal</th>
+                <th>Piutang DPP</th>
+                <th>Piutang PPN</th>
+                <th>Piutang Total</th>
+                <th>Pelunasan</th>
+                <th>Retur DPP</th>
+                <th>Retur PPN</th>
+                <th>Retur Total</th>
+                <th>Diskon DPP</th>
+                <th>Diskon PPN</th>
+                <th>Diskon Total</th>
+                <th>Uang Muka</th>
+                <th>Koreksi</th>
+                <th>Saldo Akhir</th>
             </tr>
         </thead>
         <tbody>
@@ -120,10 +154,10 @@ function limit_text($text, $max = 15)
             foreach ($list as $head) {
             ?>
                 <tr>
-                    <td colspan="16" class="bold"><?php echo $head['gol_nama']?></td>
+                    <td colspan="16" class="bold"><?php echo $head['gol_nama'] ?></td>
                 </tr>
-            <?php
-                
+                <?php
+
                 $no = 1;
                 $piutang_dpp      = 0;
                 $piutang_ppn      = 0;
@@ -140,10 +174,10 @@ function limit_text($text, $max = 15)
                 $s_awal     = 0;
                 $s_akhir   = 0;
                 foreach ($head['tmp_data'] as $items) {
-            ?>
+                ?>
                     <tr>
                         <td><?php echo $no++; ?></td>
-                        <td><?php echo htmlspecialchars(limit_text($items['nama_partner'], 10));  ?></td>
+                        <td><?php echo htmlspecialchars(limit_text($items['nama_partner'], 18));  ?></td>
                         <td class='text-right'><?php echo number_format($items['saldo_awal'], 2); ?></td>
                         <td class='text-right'><?php echo number_format($items['dpp_piutang'], 2); ?></td>
                         <td class='text-right'><?php echo number_format($items['ppn_piutang'], 2); ?></td>
@@ -177,7 +211,7 @@ function limit_text($text, $max = 15)
                 }
                 ?>
                 <tr>
-                    <td class="bold text-right" colspan="2">Total  <?php echo $head['gol_nama'].' :';?></td>
+                    <td class="bold text-right" colspan="2">Total <?php echo $head['gol_nama'] . ' :'; ?></td>
                     <td class='bold text-right'><?php echo number_format($s_awal, 2); ?></td>
                     <td class='bold text-right'><?php echo number_format($piutang_dpp, 2); ?></td>
                     <td class='bold text-right'><?php echo number_format($piutang_ppn, 2); ?></td>

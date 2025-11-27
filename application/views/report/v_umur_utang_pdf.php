@@ -6,7 +6,7 @@
         @page {
             /* margin: 20px; */
             /* rapat, bisa diubah ke 0 jika benar-benar ingin full page */
-            margin: 30px 30px 30px 30px;
+            margin: 30px 20px 30px 20px;
             header: page-header;
             footer: page-footer;
         }
@@ -33,6 +33,11 @@
             margin-top: 10px;
             text-align: center;
         }
+        table,
+        th,
+        td {
+            border: 1px solid #000;
+        }
 
         table {
             width: 100%;
@@ -41,7 +46,7 @@
         }
 
         thead {
-            background-color: rgba(156, 153, 153, 1)
+            background-color: #CCC;
         }
 
         th {

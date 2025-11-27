@@ -5,7 +5,7 @@
         @page {
             /* margin: 20px; */
             /* rapat, bisa diubah ke 0 jika benar-benar ingin full page */
-            margin: 30px 20px 30px 20px;
+            margin: 30px 10px 30px 10px;
             header: page-header;
             footer: page-footer;
         }
@@ -40,7 +40,7 @@
         }
 
         thead {
-            background-color: rgba(156, 153, 153, 1)
+           background-color: #CCC;
         }
 
         th {
@@ -71,6 +71,31 @@
         .bold {
             font-weight: bold;
         }
+
+        th:nth-child(1){
+            width: 5px;
+        }
+        th:nth-child(2){
+            width: 100px;
+        }
+        th:nth-child(3){
+            width: 80px;
+        }
+        th:nth-child(90){
+            width: 100px;
+        }
+
+        th:nth-child(5),
+        th:nth-child(10){
+            width: 55px;
+        }
+        
+        th:nth-child(6),
+        th:nth-child(7),
+        th:nth-child(8),
+        th:nth-child(9){
+            width: 85px;
+        }
     </style>
 
 </head>
@@ -86,17 +111,17 @@
     <table border="1">
         <thead>
             <tr>
-                <th class="style" style="width: 5px;">No. </th>
+                <th>No. </th>
                 <!-- <th class='style' style="width: 60px">Supplier</th> -->
-                <th class='style' style="width: 100px">Invoice</th>
-                <th class='style' style="width: 80px">PO</th>
-                <th class='style' style="width: 90px">Receiving</th>
-                <th class='style' style="width: 55px">Tanggal</th>
-                <th class='style text-right' style="width: 85px">Total Hutang (Rp)</th>
-                <th class='style text-right' style="width: 85px">Sisa Hutang (Rp)</th>
-                <th class='style text-right' style="width: 85px">Total Hutang (Valas)</th>
-                <th class='style text-right' style="width: 85px">Sisa Hutang (Valas)</th>
-                <th class='style text-right' style="width: 50px">Umur (Hari)</th>
+                <th>Invoice</th>
+                <th>PO</th>
+                <th>Receiving</th>
+                <th>Tanggal</th>
+                <th>Total Hutang (Rp)</th>
+                <th>Sisa Hutang (Rp)</th>
+                <th>Total Hutang (Valas)</th>
+                <th>Sisa Hutang (Valas)</th>
+                <th>Umur (Hari)</th>
             </tr>
         </thead>
         <tbody>
@@ -127,7 +152,7 @@
                     <td ><?php echo $items['tanggal'] ?></td>
                     <td class='text-right'><?php echo number_format($items['hutang_rp'],2) ?></td>
                     <td class='text-right'><?php echo number_format($items['sisa_hutang_rp'],2) ?></td>
-                    <td class='text-right'><?php echo number_format($items['hutang_valas'],2) ?></td>
+                    <td class='text-right'><?php echo number_format($items['hutang_valas'],2) ?></td>   
                     <td class='text-right'><?php echo number_format($items['sisa_hutang_valas'],2) ?></td>
                     <td class='text-right'><?php echo $items['hari'] ?></td>
                 </tr>
