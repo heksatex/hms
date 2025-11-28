@@ -510,8 +510,8 @@ class Purchaseorder extends MY_Controller {
                             ->setWhereRaw("status not in('cancel','retur','done')")->update(["status" => $status_]);
 //                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
 //                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""]);
-                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
-                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""];
+//                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
+//                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""];
                     break;
             }
             $po = new $this->m_po;

@@ -90,4 +90,68 @@ class Outstandingfaktur extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
+    
+    public function pdf() {
+        try {
+            $partner = $this->_query_customer_faktur()->getData();
+            $lData = $this->_query_data();
+            $dt = [];
+            foreach ($partner as $key => $value) {
+                $datas = $lData->setWheres(["lunas" => 0, "status" => "confirm", "partner_id" => $value->partner_id], true)->getData();
+                $data = [];
+                foreach ($datas as $keys => $values) {
+                    $data[] = $values;
+                }
+                $dt[$value->partner_nama] = $data;
+            }
+            $data["data"] = $dt;
+            
+            $html = $this->load->view('report/acc/v_outstanding_faktur_pdf', $data, true);
+            $url = "dist/storages/print/outstandingfaktur";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $tanggal = date("Y-m-d");
+            $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
+            $mpdf->WriteHTML($html);
+            $filename = $tanggal;
+            $pathFile = "{$url}/outstanding faktur pertanggal {$filename}.pdf";
+            $mpdf->Output(FCPATH . $pathFile, "F");
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+    
+    public function export() {
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $row = 4;
+            $customer = $this->input->post("customer");
+            $filter = "";
+            if (!empty($customer)) {
+                $filter .= "Customer : ".$data[0]->partner_nama ?? ''.", ";
+            }
+            
+            $sheet->setCellValue("A{$row}", 'No');
+            $sheet->setCellValue("B{$row}", 'No Faktur');
+            $sheet->setCellValue("C{$row}", 'No SJ');
+            $sheet->setCellValue("d{$row}", 'Tanggal');
+            $sheet->setCellValue("e{$row}", 'Total Piutang (Rp)');
+            $sheet->setCellValue("f{$row}", 'Puitang (Rp)');
+            $sheet->setCellValue("g{$row}", 'Total Piutang (Valas)');
+            $sheet->setCellValue("h{$row}", 'Piutang (Valas)');
+            $sheet->setCellValue("i{$row}", 'Payment Term (Hari)');
+            $sheet->setCellValue("j{$row}", 'Umur (Hari)');
+        } catch (Exception $ex) {
+            
+        }
+    }
+    
 }
