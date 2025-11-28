@@ -141,7 +141,7 @@
                                                             <th class='style bb' style="min-width: 105px; width:105px;">No SJ</th>
                                                             <th class='style bb' style="min-width: 105px; width:105px;">Tanggal</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Rp)</th>
-                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Puitang (Rp)</th>
+                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Piutang (Rp)</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Valas)</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Piutang (Valas)</th>
                                                             <th class='style bb text-right' style="min-width: 100px; width:100px;">Payment Term (Hari)</th>
