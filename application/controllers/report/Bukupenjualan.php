@@ -141,7 +141,7 @@ class Bukupenjualan extends MY_Controller {
                 $no++;
                 $harga = $value->harga * $value->kurs;
                 $dpp = $value->jumlah * $value->kurs;
-                $pajak = $value->pajak - (($value->diskon * 11 / 12) * $value->tax_value);
+                $pajak = $value->pajak * $value->kurs;
                 $diskon = $value->diskon * $value->kurs;
 
                 $sheet->setCellValue("A{$row}", $no);

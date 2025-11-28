@@ -25,6 +25,7 @@ foreach ($data as $key => $value) {
             <td class='text-right' ><?= number_format($values->piutang_rp, 2) ?></td>
             <td class='text-right' ><?= number_format($values->total_piutang_valas, 2) ?></td>
             <td class='text-right' ><?= number_format($values->piutang_valas, 2) ?></td>
+            <td class='text-right' ><?= $values->payment_term ?></td>
             <td class='text-right' ><?= $values->hari ?></td>
         </tr>
         <?php
@@ -37,7 +38,8 @@ foreach ($data as $key => $value) {
              <td class="text-right style_space" ><b><?= number_format($piutang_rp, 2) ?></b></td>
              <td class="text-right style_space" ><b><?= number_format($total_piutang_valas, 2) ?></b></td>
              <td class="text-right style_space" ><b><?= number_format($piutang_valas, 2) ?></b></td>
-             <td class="style_space" ><b</b></td>
+             <td class="style_space" ><b></b></td>
+             <td class="style_space" ><b></b></td>
         </tr>
         <?php
 }

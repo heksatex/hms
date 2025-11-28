@@ -1,7 +1,7 @@
 <tr style="background-color:#FFA500">
     <td style="width:70px;">
         <button type="button" data-toggle="tooltip" data-placement="top" title="Cancel" class="cancel-split btn-sm" onclick="cancelSplit(this)"><i style="color: black;" class="fa fa-trash"></i></button>
-        <button type="button" data-toggle="tooltip" data-placement="top" title="Save" class="save-split btn btn-success btn-sm" onclick="saveSplit()"><i style="color: black;" class="fa fa-save"></i></button> 
+        <button type="button" data-toggle="tooltip" data-placement="top" title="Save" class="save-split btn btn-success btn-sm" onclick="saveSplit(this)"><i style="color: black;" class="fa fa-save"></i></button> 
     </td>
     <td>
         <input class="form-control input-sm" value="<?= $data->uraian ?>" id="uraian_split" readonly>

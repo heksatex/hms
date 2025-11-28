@@ -4,7 +4,7 @@ foreach ($data as $key => $value) {
     $no++;
     $harga = $value->harga * $value->kurs;
     $dpp = $value->jumlah * $value->kurs;
-    $pajak = $value->pajak - (($value->diskon * 11 / 12) * $value->tax_value);
+    $pajak = $value->pajak * $value->kurs;
     $diskon = $value->diskon * $value->kurs;
     ?>
     <tr>

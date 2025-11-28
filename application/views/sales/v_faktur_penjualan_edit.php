@@ -247,7 +247,7 @@
                                                         foreach ($detail as $key => $value) {
                                                             $no += 1;
                                                             ?>
-                                                            <tr>
+                                                            <tr class="tr-<?= $value->id ?>">
                                                                 <td style="width: 50px">
     <!--                                                                        <div class="col-xs-4"><span class="input-group-addon" style="border:none;"><?= $no ?></span></div>
                                                                         <div class="col-xs-4"><button class="btn btn-warning btn-sm btn-rmv-item" style="display: none;"><i class="fa fa-copy"></i></button></div>
@@ -386,7 +386,9 @@
                                                             </tr>
                                                             <tr>
                                                                 <td>Foot Note</td>
-                                                                <td><input class="form-control input-sm  footnote edited-read" value="<?= $datas->foot_note ?? "" ?>" name="footnote" readonly> </td>
+                                                                <td>
+                                                                    <textarea class="form-control footnote edited-read"  name="footnote" readonly><?= $datas->foot_note ?? "" ?></textarea>
+                                                                </td>
                                                                 <td colspan="5"></td>
                                                                 <td class="text-right">
                                                                     *Payment Term
@@ -829,12 +831,13 @@ if ($datas->status == 'confirm') {
 
         $(".btn-split").unbind("click").off("click").on("click", function () {
             var val = [];
+            var trIndex = [];
             $(".join-item:checked").each(function (i) {
                 val[i] = $(this).val();
+                trIndex.push($("#fpenjualan tbody tr").index($(this).closest('tr')));
             });
             if (val.length < 2)
                 return;
-
             confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
                 $.ajax({
                     url: "<?= base_url('sales/fakturpenjualan/join/' . $id) ?>",
@@ -850,7 +853,11 @@ if ($datas->status == 'confirm') {
                             }, 500);
                         });
                     }, success: function (data) {
-                        location.reload();
+                        $('#fpenjualan tbody tr:last').after(data.data);
+                        $.each(trIndex, function (index, value) {
+                            $('#fpenjualan tbody tr').eq(value).remove();
+                        });
+
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {}, 200);
@@ -1001,19 +1008,22 @@ if ($datas->status == 'confirm') {
         $("#btn-simpan").show();
         $("#btn-cancel").show();
     });
-    const saveSplit = (() => {
+    const saveSplit = ((e) => {
+        var trIndex = $("#fpenjualan tbody tr").index($(e).closest('tr'));
         confirmRequest("Faktur Penjualan", "Simpan Split Item? ", function () {
+            var ids = $("#ids").val();
             $.ajax({
                 url: "<?= base_url('sales/fakturpenjualan/save_split/' . $id) ?>",
                 type: "POST",
                 data: {
-                    ids: $("#ids").val(),
+                    ids: ids,
                     qty: $("#qty_split").val(),
                     qty_lot: $("#qty_lot_split").val(),
                     no_acc: $("#no_acc_split").val(),
                     uom_lot: $("#uom_lot_split").val()
                 },
                 beforeSend: function (xhr) {
+//                    cancelSplit(e);
                     please_wait(function () {});
                 },
                 error: function (req, error) {
@@ -1023,7 +1033,10 @@ if ($datas->status == 'confirm') {
                         }, 500);
                     });
                 }, success: function (data) {
-                    location.reload();
+                    $('#fpenjualan tbody tr').eq(trIndex - 1).after(data.data);
+                    $('#fpenjualan tbody tr').eq(trIndex - 1).remove();
+                    cancelSplit(e);
+
                 },
                 complete: function (jqXHR, textStatus) {
                     unblockUI(function () {});

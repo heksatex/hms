@@ -87,7 +87,7 @@ class Umurpiutang extends MY_Controller {
             $customer = $this->input->post("customer");
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan fp")->setWheres(["fp.status" => "confirm", "fp.lunas" => 0])
-                    ->setOrder(["fp.tanggal" => "asc","partner_nama"=>"Asc", "no_faktur_internal" => "asc"])
+                    ->setOrder(["partner_nama"=>"asc"])
                     ->setSelects(["partner_id, partner_nama,SUM(piutang_rp) AS total_piutang"])
                     ->setSelects(["SUM(
                             CASE 

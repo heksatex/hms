@@ -144,12 +144,13 @@
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Puitang (Rp)</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Valas)</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Piutang (Valas)</th>
+                                                            <th class='style bb text-right' style="min-width: 100px; width:100px;">Payment Term (Hari)</th>
                                                             <th class='style bb text-right' style="min-width: 100px; width:100px;">Umur (Hari)</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td colspan="9">Tidak ada Data</td>
+                                                            <td colspan="10">Tidak ada Data</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>

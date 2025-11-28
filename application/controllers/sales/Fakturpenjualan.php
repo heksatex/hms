@@ -16,6 +16,8 @@ require FCPATH . 'vendor/autoload.php';
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mpdf\Mpdf;
+use Mike42\Escpos\PrintBuffers\ImagePrintBuffer;
+use Mike42\Escpos\CapabilityProfile;
 
 class Fakturpenjualan extends MY_Controller {
 
@@ -524,7 +526,7 @@ class Fakturpenjualan extends MY_Controller {
                 "tax_value" => $taxVal,
                 "dpp_lain" => 0,
                 "ppn" => 0,
-                "tanggal"=>$tanggal,
+                "tanggal" => $tanggal,
                 "final_total" => 0,
                 "payment_term" => $this->input->post("payment_term"),
                 "foot_note" => $this->input->post("footnote"),
@@ -593,8 +595,8 @@ class Fakturpenjualan extends MY_Controller {
                     }
 
                     if ($header["kurs_nominal"] > 1) {
-                        $header["total_piutang_valas"] = round($header["final_total"],2);
-                        $header["piutang_valas"] = round($header["final_total"],2);
+                        $header["total_piutang_valas"] = round($header["final_total"], 2);
+                        $header["piutang_valas"] = round($header["final_total"], 2);
                         $header["diskon"] = $grandDiskon;
                         $header["grand_total"] = $grandTotal;
                         $header["diskon_ppn"] = $grandDiskonPpn;
@@ -765,7 +767,7 @@ class Fakturpenjualan extends MY_Controller {
                             "nominal_curr" => $data->diskon_ppn,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon_ppn * $data->kurs_nominal,2),
+                            "nominal" => round($data->diskon_ppn * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -781,7 +783,7 @@ class Fakturpenjualan extends MY_Controller {
                             "nominal_curr" => $data->diskon,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon * $data->kurs_nominal,2),
+                            "nominal" => round($data->diskon * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -797,7 +799,7 @@ class Fakturpenjualan extends MY_Controller {
                             "nominal_curr" => $allDiskon,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($allDiskon * $data->kurs_nominal,2),
+                            "nominal" => round($allDiskon * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -812,7 +814,7 @@ class Fakturpenjualan extends MY_Controller {
                             "nominal_curr" => $data->ppn,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->ppn * $data->kurs_nominal,2),
+                            "nominal" => round($data->ppn * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -820,7 +822,7 @@ class Fakturpenjualan extends MY_Controller {
                     $totalPiutang = 0;
                     foreach ($detail as $key => $value) {
                         $warna = ($value->warna === "") ? "" : " / {$value->warna}";
-                        $totalPiutang += round($value->jumlah * $data->kurs_nominal,2);
+                        $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
                         $totalPiutangCurr += $value->jumlah;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
@@ -832,7 +834,7 @@ class Fakturpenjualan extends MY_Controller {
                             "nominal_curr" => $value->jumlah,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($value->jumlah * $data->kurs_nominal,2),
+                            "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
@@ -864,7 +866,8 @@ class Fakturpenjualan extends MY_Controller {
 //                    if ($data->lunas == 1) {
 //                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
 //                    }
-//                    if ((double) $data->final_total_rp !== (double) $data->piutang_rp) {
+//                    $fin = $data->final_total + $data->kurs_nominal;
+//                    if ((double) $fin !== (double) $data->piutang_rp) {
 //                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
 //                    }
 
@@ -978,7 +981,7 @@ class Fakturpenjualan extends MY_Controller {
             $noAcc = $this->input->post("no_acc");
 
             $this->_module->startTransaction();
-            $lock = "acc_faktur_penjualan READ, acc_faktur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ";
+            $lock = "acc_faktur_penjualan READ, acc_faktur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ,uom read";
             $this->_module->lock_tabel($lock);
             $model = new $this->m_global;
             $getDetail = $model->setTables("acc_faktur_penjualan_detail")->setJoins("acc_faktur_penjualan", "faktur_id = acc_faktur_penjualan.id")
@@ -999,7 +1002,7 @@ class Fakturpenjualan extends MY_Controller {
 
             $jumlah = $hasilKurang * $getDetail->harga;
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
-            $dpp = (($jumlah) * 11) / 12;
+            $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
                 $pajak = $jumlah * $getDetail->tax_value;
                 $ppn_diskon = $ddskon * $getDetail->tax_value;
@@ -1008,7 +1011,7 @@ class Fakturpenjualan extends MY_Controller {
                 $dppDis = $dpp = (($ddskon) * 11) / 12;
                 $ppn_diskon = $dppDis * $getDetail->tax_value;
             }
-            $totalHarga = (($jumlah - $ddskon) + ($pajak - $ppn_diskon));
+            $totalHarga = (($jumlah - $ddskon) + ($pajak));
             $updateSpilit = [
                 "qty_lot" => $hasilKurangLot,
                 "qty" => $hasilKurang,
@@ -1022,7 +1025,7 @@ class Fakturpenjualan extends MY_Controller {
 
             $jumlah = $qty * $getDetail->harga;
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
-            $dpp = (($jumlah) * 11) / 12;
+            $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
                 $pajak = $jumlah * $getDetail->tax_value;
                 $ppn_diskon = $ddskon * $getDetail->tax_value;
@@ -1031,7 +1034,7 @@ class Fakturpenjualan extends MY_Controller {
                 $dppDis = $dpp = (($ddskon) * 11) / 12;
                 $ppn_diskon = $dppDis * $getDetail->tax_value;
             }
-            $totalHarga = (($jumlah - $ddskon) + ($pajak - $ppn_diskon));
+            $totalHarga = (($jumlah - $ddskon) + ($pajak));
             $split = [
                 "faktur_id" => $getDetail->faktur_id,
                 "faktur_no" => $getDetail->faktur_no,
@@ -1051,9 +1054,13 @@ class Fakturpenjualan extends MY_Controller {
                 "diskon_ppn" => $ppn_diskon,
                 "total_harga" => $totalHarga,
             ];
-            $model->setTables("acc_faktur_penjualan_detail")->save($split);
+            $idnew = $model->setTables("acc_faktur_penjualan_detail")->save($split);
             $model->setWheres(["id" => $ids])->update($updateSpilit);
 
+            $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
+            $data["uomLot"] = $this->uomLot;
+            $data["data"] = $model->setTables("acc_faktur_penjualan_detail")->setWhereIn("id", [$idnew, $ids])->getData();
+            $html = $this->load->view('sales/modal/v_split_join_tr', $data, true);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
@@ -1062,7 +1069,7 @@ class Fakturpenjualan extends MY_Controller {
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             log_message("error", json_encode($ex));
@@ -1123,8 +1130,8 @@ class Fakturpenjualan extends MY_Controller {
             $check->dpp_lain -= ($check->kurs_nominal > 1) ? $dpp : round($dpp);
 
             if ($check->kurs_nominal > 1) {
-                $check->total_piutang_valas = round($check->final_total,2);
-                $check->piutang_valas = round($check->final_total,2);
+                $check->total_piutang_valas = round($check->final_total, 2);
+                $check->piutang_valas = round($check->final_total, 2);
             }
             $check->total_piutang_rp = round($check->final_total * $check->kurs_nominal);
             $check->piutang_rp = round($check->final_total * $check->kurs_nominal);
@@ -1163,7 +1170,7 @@ class Fakturpenjualan extends MY_Controller {
 
             $dids = explode(",", $ids);
             $this->_module->startTransaction();
-            $lock = "acc_faktur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE";
+            $lock = "acc_faktur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,UOM read";
             $this->_module->lock_tabel($lock);
             $model = new $this->m_global;
             $getData = $model->setTables("acc_faktur_penjualan_detail")
@@ -1178,6 +1185,7 @@ class Fakturpenjualan extends MY_Controller {
             $diskons_ppn = 0;
             $log = "";
             $datas = [];
+            $html = "";
             foreach ($getData as $key => $value) {
                 $datas[] = logArrayToString("; ", (array) $value);
                 $qtys += $value->qty;
@@ -1210,11 +1218,17 @@ class Fakturpenjualan extends MY_Controller {
                 $data["diskon_ppn"] = $diskons_ppn;
 
                 $model->setTables("acc_faktur_penjualan_detail")->setWhereIn("acc_faktur_penjualan_detail.id", $dids)->delete();
-                $model->setTables("acc_faktur_penjualan_detail")->save($data);
+                $ids = $model->setTables("acc_faktur_penjualan_detail")->save($data);
 
                 $log .= "Join Item Data : " . logArrayToString("; ", (array) $datas);
                 $log .= "\nhasil split " . logArrayToString("; ", $data);
+
+                $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
+                $data["uomLot"] = $this->uomLot;
+                $data["data"] = $model->setTables("acc_faktur_penjualan_detail")->setWhereIn("id", [$ids])->getData();
+                $html = $this->load->view('sales/modal/v_split_join_tr', $data, true);
             }
+
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
@@ -1224,7 +1238,7 @@ class Fakturpenjualan extends MY_Controller {
 
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             log_message("error", json_encode($ex));
@@ -1361,8 +1375,8 @@ class Fakturpenjualan extends MY_Controller {
                 $check->ppn += $pajak;
                 $check->grand_total += $jumlah;
                 $check->final_total += $totalHarga;
-                $check->total_piutang_valas = round($check->final_total,2);
-                $check->piutang_valas = round($check->final_total,2);
+                $check->total_piutang_valas = round($check->final_total, 2);
+                $check->piutang_valas = round($check->final_total, 2);
                 $check->diskon_ppn += $ppn_diskon;
             } else {
                 $check->dpp_lain += round($dpp);
@@ -1489,7 +1503,6 @@ class Fakturpenjualan extends MY_Controller {
             $alamat = $model->setTables("setting")->setWheres(["setting_name" => "alamat_fp"])->getDetail();
             $npwp = $model->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
             $buff = $printer->getPrintConnector();
-            $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bg" . chr(1));
             $alamat = str_split(trim(preg_replace('/\s+/', ' ', $alamat->value)), 40);
             foreach ($alamat as $key => $value) {
@@ -1502,12 +1515,19 @@ class Fakturpenjualan extends MY_Controller {
             }
             $printer->text("NPWP : " . ($npwp->value ?? ""));
             $printer->feed();
-            $printer->feed();
-            $buff->write("\x1bE" . chr(1));
-            $printer->text("FAKTUR PENJUALAN");
-            $buff->write("\x1bF" . chr(0));
+//            $printer->feed();
+//            $buff->write("\x1bE" . chr(1));
+//            $printer->text("FAKTUR PENJUALAN");
+//            $buff->write("\x1bF" . chr(0));
+            $dataPrint[] = (object) ["img" => "logo300x50px.prn", "data" => serialize($connector->getData())];
+            $connector->clear();
+            $printer->close();
+//            $connector = new DummyPrintConnector();
+            $printer = new Printer($connector);
+//            $buff = $printer->getPrintConnector();
+            $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bg" . chr(1));
-            $printer->feed();
+//            $printer->feed();
             $printer->text(str_pad("No. Faktur", 15));
             $printer->text(str_pad(": {$head->no_faktur_internal}", 30));
             //
@@ -1850,7 +1870,7 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->feed();
                 $printer->text(str_pad("", 53));
                 $printer->text(str_pad("{$totalQtyLot} {$uomLot} ", 19, " ", STR_PAD_LEFT));
-                $printer->text(str_pad("{$totalQty} {$uom}", 20, " ", STR_PAD_LEFT));
+                $printer->text(str_pad("{$totalQty} {$uom} ", 20, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("", 45));
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_NONE);
@@ -1900,7 +1920,14 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->feed();
                 $printer->feed();
             }
-            $printer->text("{$head->foot_note} \n");
+
+            $fn = preg_replace('/\s\s+/', '*#*', "{$head->foot_note}");
+            $fn = explode("*#*", str_replace(array("\n", "\r"), "*#*", $fn));
+            foreach ($fn as $key => $value) {
+                $line = str_pad(trim($value), 130);
+                $printer->text($line . "\n");
+            }
+//            $printer->text("{$head->foot_note} \n");
             $printer->feed();
             $printer->feed();
             $buff->write("\x1bg" . chr(1));
@@ -1922,13 +1949,13 @@ class Fakturpenjualan extends MY_Controller {
             $printer->text(str_pad(" ", 72));
             $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
             $printer->feed();
-            $datas = $connector->getData();
+//            $datas = $connector->getData();
+            $dataPrint[] = (object) ["img" => "fp.prn", "data" => serialize($connector->getData())];
             $printer->close();
             $client = new GuzzleHttp\Client();
-            $resp = $client->request("POST", $this->config->item('url_web_print_w_logo'), [
+            $resp = $client->request("POST", $this->config->item('url_web_print_w_logo_multi'), [
                 "form_params" => [
-                    "data" => $datas,
-                    "logo" => "logo300x50px.prn", //logo300x50px.prn
+                    "data" => json_encode($dataPrint),
                     "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
                 ]
             ]);

@@ -674,7 +674,7 @@ class Returpenjualan extends MY_Controller {
 
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
-                        "nama" => "Utang (Retur)",
+                        "nama" => "Piutang (Retur)",
                         "reff_note" => "",
                         "partner" => $data->partner_id,
                         "kode_coa" => $getCoaDefault->value,

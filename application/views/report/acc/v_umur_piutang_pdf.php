@@ -19,17 +19,20 @@
                 border-top: 2px solid #ddd !important;
                 border-bottom: 2px solid #ddd !important;
             }
+            table, th, td {
+                border: 1px solid black;
+            }
         </style>
     </head>
     <body>
         <table cellspacing="0" style="font-size: 12px; width: 100%;border: 1px solid black;">
             <caption style="font-size: 11px">
                 <p> Periode Tanggal : <?= date("Y-m-d") ?></p>
-                <?php 
-                if($customer !== "") {
-                    ?>
-                <p> Filtered Customer : <?= $body[0]->partner_nama ?? "" ?></p>
                 <?php
+                if ($customer !== "") {
+                    ?>
+                    <p> Filtered Customer : <?= $body[0]->partner_nama ?? "" ?></p>
+                    <?php
                 }
                 ?>
             </caption>
