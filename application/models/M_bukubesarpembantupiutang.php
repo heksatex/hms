@@ -499,7 +499,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         }
 
         $this->db->select("p.id, p.nama, $cr_condition as saldo_awal_piutang,
-                        ($cr_condition + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon, 0) - IFNULL(um_sblm.total_uang_muka,0) + (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
+                        ($cr_condition + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon, 0) - IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(pelunasan.total_pelunasan,0) as total_pelunasan,
                         IFNULL(retur.total_retur,0) as total_retur,
