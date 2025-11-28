@@ -88,7 +88,7 @@
                     <!--  box content -->
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title"><b>Outstanding Invoice</b></h3>
+                            <h3 class="box-title"><b>Outstanding Faktur</b></h3>
                         </div>
                         <div class="box-body">
 
@@ -118,7 +118,7 @@
                                         <div class="col-md-12">
                                             <div class="col-md-12">
                                                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
-                                                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                                                <button class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                                                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button>
                                             </div>
                                         </div>
@@ -141,9 +141,9 @@
                                                             <th class='style bb' style="min-width: 105px; width:105px;">No SJ</th>
                                                             <th class='style bb' style="min-width: 105px; width:105px;">Tanggal</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Rp)</th>
-                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Puitang (Rp)</th>
+                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Puitang (Rp)</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Valas)</th>
-                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Piutang (Valas)</th>
+                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Piutang (Valas)</th>
                                                             <th class='style bb text-right' style="min-width: 100px; width:100px;">Payment Term (Hari)</th>
                                                             <th class='style bb text-right' style="min-width: 100px; width:100px;">Umur (Hari)</th>
                                                         </tr>
