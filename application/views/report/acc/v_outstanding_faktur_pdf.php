@@ -86,9 +86,9 @@
                         <th class='style bb' style="min-width: 105px; width:105px;">No SJ</th>
                         <th class='style bb' style="min-width: 105px; width:105px;">Tanggal</th>
                         <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Rp)</th>
-                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Puitang (Rp)</th>
+                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Puitang (Rp)</th>
                         <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Valas)</th>
-                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Piutang (Valas)</th>
+                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Piutang (Valas)</th>
                         <th class='style bb text-right' style="min-width: 100px; width:100px;">Payment Term (Hari)</th>
                         <th class='style bb text-right' style="min-width: 100px; width:100px;">Umur (Hari)</th>
                     </tr>
@@ -98,7 +98,7 @@
                     foreach ($data as $key => $value) {
                         ?>
                         <tr>
-                            <td colspan="10" id="font-wei">Supplier : <?= $key ?></td>
+                            <td colspan="10" id="font-wei">CUSTOMER : <?= $key ?></td>
                         </tr>
                         <?php
                         $no = 1;

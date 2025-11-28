@@ -2,7 +2,7 @@
 foreach ($data as $key => $value) {
     ?>
     <tr>
-        <td colspan="9"> <strong>Supplier :</strong> <?= $key ?> </td>
+        <td colspan="10"> <strong>CUSTOMER :</strong> <?= $key ?> </td>
     </tr>
     <?php
     $no = 1;
