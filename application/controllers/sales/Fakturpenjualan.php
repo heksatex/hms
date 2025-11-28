@@ -1716,11 +1716,12 @@ class Fakturpenjualan extends MY_Controller {
                 $diskonValas = number_format(round($head->diskon), 2, ".", ",");
                 $diskon = number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ",");
                 $ppnValas = number_format($head->ppn - $head->diskon_ppn, 2, ".", ",");
-                $ppn = number_format(round(($head->ppn - $head->diskon_ppn) * $head->kurs_nominal), 2, ".", ",");
+                $subtotal2 = (round($head->grand_total * $head->kurs_nominal) - round($head->diskon * $head->kurs_nominal));
+                $ppn = number_format(round($subtotal2), 2, ".", ",");
                 $finalTotalValas = number_format(round($head->final_total, 2), 2, ".", ",");
                 $finalTotal = number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",");
                 $totals = explode(".", round($head->final_total, 2));
-
+                
                 $terbilang = Kwitansi($totals[0]);
                 $terbilang2 = "";
                 if (isset($totals[1])) {
@@ -1736,14 +1737,14 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad(number_format($subtotalValas, 2), 12, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(($subtotal), 2), 17, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format((round($head->grand_total * $head->kurs_nominal)), 2, ".", ","), 17, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad("", 89));
                 $printer->text(str_pad("Discount", 8, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" {$curr->symbol}", 4));
                 $printer->text(str_pad(number_format(round($diskonValas), 2), 12, " ", STR_PAD_LEFT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(round($diskon * $head->kurs_nominal), 2), 17, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ","), 17, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" Terbilang : " . ($spltTbl[0] ?? " "), 89, " "));
                 $printer->text(str_pad("PPN", 8, " ", STR_PAD_RIGHT));
@@ -1877,10 +1878,11 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->feed();
 
                 $printer->feed();
-                $dpp = number_format(round(($head->grand_total - $head->diskon) * 11 / 12), 2, ".", ",");
+                $subtotal2 = (round($head->grand_total * $head->kurs_nominal) - round($head->diskon * $head->kurs_nominal));
+                $dpp = number_format(round($subtotal2 * 11 / 12), 2, ".", ",");
                 $diskon = number_format(round($head->diskon), 2, ".", ",");
                 $ppn = number_format(round($head->ppn - $head->diskon_ppn), 2, ".", ",");
-                $finalTotal = number_format($head->final_total, 2, ".", ",");
+                $finalTotal = number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",");
                 $terbilang = Kwitansi($head->final_total);
                 $spltTbl = str_split(trim($terbilang) . " Rupiah", 73);
                 //isi terbilang
@@ -1888,7 +1890,7 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text(str_pad($spltTbl[0] ?? " ", 79));
                 $printer->text(str_pad("Subtotal", 20, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(round($subtotal), 2), 21, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format(round($head->grand_total * $head->kurs_nominal), 2, ".", ","), 21, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(($spltTbl[1] ?? " "), 79));
@@ -1900,13 +1902,13 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text(str_pad(($spltTbl[2] ?? " "), 79));
                 $printer->text(str_pad("Discount", 20, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($diskon, 21, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ","), 21, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(" ", 79));
                 $printer->text(str_pad("PPN ", 20, " ", STR_PAD_RIGHT));
                 $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($ppn, 21, " ", STR_PAD_LEFT));
+                $printer->text(str_pad(number_format(round($head->ppn * $head->kurs_nominal), 2, ".", ","), 21, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(" ", 79));
@@ -1950,15 +1952,16 @@ class Fakturpenjualan extends MY_Controller {
             $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
             $printer->feed();
 //            $datas = $connector->getData();
+            log_message("error", $connector->getData());
             $dataPrint[] = (object) ["img" => "fp.prn", "data" => serialize($connector->getData())];
             $printer->close();
             $client = new GuzzleHttp\Client();
-            $resp = $client->request("POST", $this->config->item('url_web_print_w_logo_multi'), [
-                "form_params" => [
-                    "data" => json_encode($dataPrint),
-                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
-                ]
-            ]);
+//            $resp = $client->request("POST", $this->config->item('url_web_print_w_logo_multi'), [
+//                "form_params" => [
+//                    "data" => json_encode($dataPrint),
+//                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
+//                ]
+//            ]);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
