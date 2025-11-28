@@ -1952,16 +1952,16 @@ class Fakturpenjualan extends MY_Controller {
             $printer->text(str_pad("(__________________)", 20, " ", STR_PAD_BOTH));
             $printer->feed();
 //            $datas = $connector->getData();
-            log_message("error", $connector->getData());
+//            log_message("error", $connector->getData());
             $dataPrint[] = (object) ["img" => "fp.prn", "data" => serialize($connector->getData())];
             $printer->close();
             $client = new GuzzleHttp\Client();
-//            $resp = $client->request("POST", $this->config->item('url_web_print_w_logo_multi'), [
-//                "form_params" => [
-//                    "data" => json_encode($dataPrint),
-//                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
-//                ]
-//            ]);
+            $resp = $client->request("POST", $this->config->item('url_web_print_w_logo_multi'), [
+                "form_params" => [
+                    "data" => json_encode($dataPrint),
+                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
+                ]
+            ]);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
