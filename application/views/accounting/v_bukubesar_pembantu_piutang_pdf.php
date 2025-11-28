@@ -174,7 +174,7 @@ function limit_text($text, $max = 15)
                 ?>
                     <tr>
                         <td><?php echo $no++; ?></td>
-                        <td><?php echo htmlspecialchars(limit_text($items['nama_partner'], 18));  ?></td>
+                        <td><?php echo htmlspecialchars(limit_text($items['nama_partner'], 17));  ?></td>
                         <td class='text-right'><?php echo number_format($items['saldo_awal'], 2); ?></td>
                         <td class='text-right'><?php echo number_format($items['dpp_piutang'], 2); ?></td>
                         <td class='text-right'><?php echo number_format($items['ppn_piutang'], 2); ?></td>
