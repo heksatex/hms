@@ -954,7 +954,7 @@ class Pelunasanpiutang extends MY_Controller
                 $this->_module->startTransaction();
 
                 //lock tabel
-                $this->_module->lock_tabel('acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as  agmd WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_summary WRITE, acc_retur_penjualan as arj WRITE,   acc_pelunasan_piutang_summary_koreksi WRITE, acc_coa READ, currency_kurs as ck1 READ,currency_kurs as ck2 READ,currency_kurs as ck3 READ, currency_kurs as ck READ');
+                $this->_module->lock_tabel('acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as  agmd WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_summary WRITE, acc_retur_penjualan as arp WRITE,   acc_pelunasan_piutang_summary_koreksi WRITE, acc_coa READ, currency_kurs as ck1 READ,currency_kurs as ck2 READ,currency_kurs as ck3 READ, currency_kurs as ck READ');
 
                 if (empty($no_pelunasan)) {
                     throw new \Exception('No Pelunasan Kosong !', 200);
