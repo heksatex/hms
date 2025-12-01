@@ -852,7 +852,7 @@ class Bankkeluar extends MY_Controller {
 
                     $lunas =  $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id, "lunas" => 1])->getDetail();
                     if($lunas) {
-                         throw new \exception("Bank Sudah ada pada pelunasan", 500);
+                         throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
                     }
                     $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id, "giro_keluar_detail_id <>" => '0'])
                                     ->setSelects(["GROUP_CONCAT(giro_keluar_detail_id) as gids"])->getDetail();
