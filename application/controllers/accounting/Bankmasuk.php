@@ -253,7 +253,7 @@ class Bankmasuk extends MY_Controller {
 
             $data = $model->setTables("acc_giro_masuk_detail agkd")->setJoins("acc_giro_masuk agk", "agkd.giro_masuk_id = agk.id")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
-                            ->setSelects(["agkd.*","partner_id,partner_nama,agk.lain2 as lain,agk.transinfo"])
+                            ->setSelects(["agkd.*", "partner_id,partner_nama,agk.lain2 as lain,agk.transinfo"])
                             ->setSelects(["currency_kurs.currency as curr"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gm" => "asc"])->getData();
             $this->output->set_status_header(200)
@@ -926,6 +926,13 @@ class Bankmasuk extends MY_Controller {
                         $model->setTables("acc_giro_masuk_detail")->setWheres(["cair" => 1])->setWhereRaw("id in ({$item->gids})")
                                 ->update(["cair" => 0]);
                     }
+
+                    $lunas = $model->setTables("acc_bank_masuk_detail")->setWheres(["bank_masuk_id" => $head->id, "lunas" => 1])->getDetail();
+
+                    if ($lunas) {
+                        throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
+                    }
+
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $head->jurnal])->update(["status" => "unposted"]);
                     $this->_module->gen_history_new("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Kas Bank Masuk", $username);
                     break;

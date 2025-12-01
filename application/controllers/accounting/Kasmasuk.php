@@ -152,7 +152,7 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -172,7 +172,7 @@ class Kasmasuk extends MY_Controller {
                         'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -323,7 +323,7 @@ class Kasmasuk extends MY_Controller {
                 $ff = implode("','", $giro);
                 $model->setWhereRaw("agkd.id not in ('{$ff}')");
             }
-            $list = $model->setSelects(["agk.no_gk,agk.partner_nama,transinfo", "bank", "no_bg", "nominal", "tgl_jt", "agkd.id","if(partner_nama = '',lain2,partner_nama) as partner"]);
+            $list = $model->setSelects(["agk.no_gk,agk.partner_nama,transinfo", "bank", "no_bg", "nominal", "tgl_jt", "agkd.id", "if(partner_nama = '',lain2,partner_nama) as partner"]);
             $no = $_POST['start'];
             foreach ($list->getData() as $field) {
                 $no++;
@@ -358,7 +358,7 @@ class Kasmasuk extends MY_Controller {
             $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
                             ->setSelects(["agkd.nominal,agkd.no_gk,agkd.kode_coa", "agkd.id,if(partner_nama = '',agk.lain2,partner_nama) as lain"])
-                            ->setSelects(["agkd.currency_id as agk_curr,agkd.kurs", "currency_kurs.currency as curr","transinfo"])
+                            ->setSelects(["agkd.currency_id as agk_curr,agkd.kurs", "currency_kurs.currency as curr", "transinfo"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -398,7 +398,7 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -418,7 +418,7 @@ class Kasmasuk extends MY_Controller {
                         'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -702,7 +702,7 @@ class Kasmasuk extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_kas_masuk")->setJoins("acc_kas_masuk_detail", "acc_kas_masuk.id = kas_masuk_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_kas_masuk.*", "currency_kurs.currency,currency_kurs.kurs","kas_masuk_id"])
+                            ->setSelects(["acc_kas_masuk.*", "currency_kurs.currency,currency_kurs.kurs", "kas_masuk_id"])
                             ->setWheres(["acc_kas_masuk.no_km" => $kode])->getDetail();
 
             if (!$head) {
@@ -848,6 +848,12 @@ class Kasmasuk extends MY_Controller {
                         $model->setTables("acc_giro_keluar")->setWhereRaw("id in (select giro_keluar_id from acc_giro_keluar_detail where id in ({$poId->gids}))")->update(["no_bk2" => ""]);
                     }
 
+                    $lunas = $model->setTables("acc_kas_masuk_detail")->setWheres(["kas_masuk_id" => $head->id, "lunas" => 1])
+                            ->getDetail();
+                    if ($lunas) {
+                        throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
+                    }
+
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $head->jurnal])->update(["status" => "unposted"]);
                     $this->_module->gen_history_new("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Kas Masuk", $username);
 
@@ -878,7 +884,7 @@ class Kasmasuk extends MY_Controller {
         if ($bbln === 1) {
             $model = new $this->m_global();
             $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
-            if (date("j") >= (int)$pinDate->value) {
+            if (date("j") >= (int) $pinDate->value) {
 
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);
