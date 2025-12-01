@@ -52,7 +52,7 @@ class Giromasuk extends MY_Controller {
         $values = $this->input->post($field_name);
         $counts = array_count_values($values);
         $duplicates = array_filter($counts, function ($count) {
-            
+
             return $count > 1;
         });
 
@@ -133,7 +133,7 @@ class Giromasuk extends MY_Controller {
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi",["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi", ["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_giro_masuk_add', $data);
     }
@@ -199,7 +199,7 @@ class Giromasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -216,10 +216,10 @@ class Giromasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -327,7 +327,7 @@ class Giromasuk extends MY_Controller {
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi",["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi", ["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
             $data['id_dept'] = 'ACCGM';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -383,7 +383,7 @@ class Giromasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -400,13 +400,13 @@ class Giromasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
-                    ]);
+                ]);
             }
 
 
@@ -669,7 +669,7 @@ class Giromasuk extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_giro_masuk")->setJoins("acc_giro_masuk_detail", "acc_giro_masuk.id = giro_masuk_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_giro_masuk.*", "currency_kurs.currency,currency_kurs.kurs","giro_masuk_id"])
+                            ->setSelects(["acc_giro_masuk.*", "currency_kurs.currency,currency_kurs.kurs", "giro_masuk_id"])
                             ->setWheres(["acc_giro_masuk.no_gm" => $kode])->getDetail();
 
             if (!$head) {
@@ -771,6 +771,12 @@ class Giromasuk extends MY_Controller {
                     if ($checkCair) {
                         throw new \exception("Tidak Bisa Cancel / Batal. Item Sudah ada yang Cair", 500);
                     }
+
+                    $lunas = $model->setTables("acc_giro_masuk_detail")->setWheres(["giro_masuk_id" => $head->id, "lunas" => 1])->getDetail();
+                    if ($lunas) {
+                        throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
+                    }
+
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $head->jurnal])->update(["status" => "unposted"]);
                     $this->_module->gen_history_new("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Giro Masuk", $username);
                     break;
@@ -800,7 +806,7 @@ class Giromasuk extends MY_Controller {
         if ($bbln === 1) {
             $model = new $this->m_global();
             $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
-            if (date("j") >= (int)$pinDate->value) {
+            if (date("j") >= (int) $pinDate->value) {
 
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);
@@ -825,4 +831,3 @@ class Giromasuk extends MY_Controller {
         }
     }
 }
-

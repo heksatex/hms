@@ -891,7 +891,7 @@ class Kaskeluar extends MY_Controller {
                     
                     $lunas =  $model->setTables("acc_kas_keluar_detail")->setWheres(["kas_keluar_id" => $head->id, "lunas" => 1])->getDetail();
                     if($lunas) {
-                         throw new \exception("Kas Sudah ada pada pelunasan", 500);
+                         throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
                     }
                     
                     $poId = $model->setTables("acc_kas_keluar_detail")->setSelects(["GROUP_CONCAT(po_detail_id) as gids"])->setWheres(["kas_keluar_id" => $head->id])
