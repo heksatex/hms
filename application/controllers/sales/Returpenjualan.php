@@ -162,6 +162,7 @@ class Returpenjualan extends MY_Controller {
 
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $data["taxs"] = $model->setTables("tax")->setWheres(["type_inv" => "sale"])->setOrder(["nama" => "asc"])->getData();
+            $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
             $this->load->view('sales/v_retur_penjualan_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -515,6 +516,7 @@ class Returpenjualan extends MY_Controller {
                             "qty_lot" => $this->input->post("qtylot")[$key],
                             "qty" => $this->input->post("qty")[$key],
                             "lot" => $this->input->post("uomlot")[$key],
+                            "uom" => $this->input->post("uom")[$key],
                             "harga" => $hrg,
                             "no_acc" => $value,
                             "jumlah" => $jumlah,
@@ -798,7 +800,7 @@ class Returpenjualan extends MY_Controller {
                         throw new \exception("Data Retur Penjualan {$kode} sudah masuk pada pelunasan", 500);
                     }
                     $finalTotal = $data->final_total * $data->kurs_nominal;
-                    if ((double) $finalTotal !== (double) $data->piutang_rp) {
+                    if ((double) round($finalTotal) !== (double) $data->piutang_rp) {
                         throw new \exception("Data Retur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
                     }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
@@ -836,7 +838,8 @@ class Returpenjualan extends MY_Controller {
             if (!$detail) {
                 throw new \Exception('Data Item tidak ditemukan', 500);
             }
-            $html = $this->load->view('sales/modal/v_split_item_fp', ["data" => $detail, "id" => $id, "uomLot" => $this->uomLot], true);
+            $uom = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
+            $html = $this->load->view('sales/modal/v_split_item_fp', ["data" => $detail, "id" => $id, "uomLot" => $this->uomLot,"uom"=>$uom], true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
@@ -882,6 +885,7 @@ class Returpenjualan extends MY_Controller {
             $qty = $this->input->post("qty");
             $qtyLot = $this->input->post("qty_lot");
             $uomLot = $this->input->post("uom_lot");
+            $uom = $this->input->post("uom");
             $noAcc = $this->input->post("no_acc");
 
             $this->_module->startTransaction();
@@ -948,7 +952,7 @@ class Returpenjualan extends MY_Controller {
                 "qty_lot" => $qtyLot,
                 "lot" => $uomLot,
                 "qty" => $qty,
-                "uom" => $getDetail->uom,
+                "uom" => $uom,
                 "no_acc" => $noAcc,
                 "jumlah" => $jumlah,
                 "pajak" => $pajak,

@@ -29,7 +29,7 @@
                 #btn-edit{
                     display: none;
                 }
-               #btn-print-pdf {
+                #btn-print-pdf {
                     display:inline;
                 }
             </style>
@@ -74,7 +74,7 @@
                         <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("sales/returpenjualan/update/{$id}") ?>">
                             <input type="hidden" name="ids" value="<?= $datas->id ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title"><?="No Retur <strong>{$datas->no_retur}</strong>" ?></h3>
+                                <h3 class="box-title"><?= "No Retur <strong>{$datas->no_retur}</strong>" ?></h3>
                                 <div class="pull-right text-right" id="btn-header">
                                     <?php
                                     if ($datas->status == 'cancel') {
@@ -209,7 +209,8 @@
                                                     <th class="style" style="width: 100px">No PO</th>
                                                     <th class="style" style="width: 60px;text-align: right">QTY/LOT</th>
                                                     <th class="style" style="width: 60px;">UOM LOT</th>
-                                                    <th class="style text-center" style="width: 100px">QTY</th>
+                                                    <th class="style text-center" style="width: 60px">QTY</th>
+                                                    <th class="style" style="width: 60px;">UOM</th>
                                                     <th class="style" style="width: 100px">No ACC</th>
                                                     <th class="style text-right" style="width: 100px">Harga</th>
                                                     <th class="style text-right" style="width: 120px">Jumlah</th>
@@ -258,10 +259,18 @@
                                                                     </select>
                                                                 </td>
                                                                 <td class="text-right">
-                                                                    <div class="input-group">
-                                                                        <input value="<?= $value->qty ?>" type="text" class="form-control edited-read input-sm text-right" name="qty[]" readonly>
-                                                                        <span class="input-group-addon" title="Cari No SJ"><?= $value->uom ?></span>
-                                                                    </div>
+                                                                    <input value="<?= $value->qty ?>" type="text" class="form-control edited-read input-sm text-right" name="qty[]" readonly>
+                                                                </td>
+                                                                <td>
+                                                                    <select class="form-control input-sm edited uom uom_<?= $key ?>" style="width:100%" name="uom[]" disabled>
+                                                                        <?php
+                                                                        foreach ($uom as $keys => $uoms) {
+                                                                            ?>
+                                                                            <option value="<?= $uoms->short ?>" <?= ($uoms->short === $value->uom) ? "selected" : "" ?> ><?= $uoms->short ?></option>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </select>
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm select2-coa edited noacc noacc_<?= $key ?>" style="width:100%" name="noacc[]" disabled>
@@ -294,12 +303,12 @@
                                                         if (count($detail) > 0) {
                                                             ?>
                                                             <tr>
-                                                                <td colspan="8"></td>
+                                                                <td colspan="9"></td>
                                                                 <td class="text-right"><strong>Subtotal</strong></td>
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->grand_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="7"></td>
+                                                                <td colspan="8"></td>
                                                                 <td>
 
                                                                     <div class="input-group">
@@ -316,7 +325,7 @@
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->diskon * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="8"></td>
+                                                                <td colspan="9"></td>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
                                                                 <?php
                                                                 $subtotal2 = (round($datas->grand_total * $datas->kurs_nominal) - round($datas->diskon * $datas->kurs_nominal));
@@ -324,12 +333,12 @@
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subtotal2, 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="8"></td>
+                                                                <td colspan="9"></td>
                                                                 <td class="text-right"><strong>DPP Nilai Lain</strong></td>
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round(($subtotal2 * 11 / 12)), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="7"></td>
+                                                                <td colspan="8"></td>
                                                                 <td class="pull-right">
 
                                                                     <select class="form-control input-sm select2 edited" style="width: 100%" name="tax" id="tax" disabled>
@@ -351,8 +360,8 @@
                                                             </tr>
                                                             <tr>
                                                                 <td>Foot Note</td>
-                                                                <td><input class="form-control input-sm  footnote edited-read" value="<?= $datas->foot_note ?? "" ?>" name="footnote" readonly> </td>
-                                                                <td colspan="4"></td>
+                                                                <td><textarea class="form-control footnote edited-read"  name="footnote" readonly><?= $datas->foot_note ?? "" ?></textarea></td>
+                                                                <td colspan="5"></td>
                                                                 <td class="text-right">
                                                                     *Payment Term
                                                                 </td>
@@ -469,6 +478,9 @@
         </td>
         <td class="">
             <input type="text" id="qty"  class="form-control input-sm text-right qty-lot qty-lot_:no">
+
+        </td>
+        <td>
             <select class="form-control input-sm temp-select2 uom uom_:no" style="width:100%" id="uom">
 
             </select>

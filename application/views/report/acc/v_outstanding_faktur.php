@@ -97,7 +97,7 @@
                                     <div class="form-group">
                                         <div class="col-sm-12 col-md-12">
                                             <div class="col-md-2">
-                                                <label>Supplier</label>
+                                                <label>Customer</label>
                                             </div>
                                             <div class="col-sm-* col-md-8 col-lg-8">
                                                 <select class="form-control input-sm" name="customer" id="customer">
@@ -141,7 +141,7 @@
                                                             <th class='style bb' style="min-width: 105px; width:105px;">No SJ</th>
                                                             <th class='style bb' style="min-width: 105px; width:105px;">Tanggal</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Rp)</th>
-                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Puitang (Rp)</th>
+                                                            <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Piutang (Rp)</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Total Piutang (Valas)</th>
                                                             <th class='style bb text-right' style="min-width: 150px; width:100px;">Sisa Piutang (Valas)</th>
                                                             <th class='style bb text-right' style="min-width: 100px; width:100px;">Payment Term (Hari)</th>

@@ -863,13 +863,13 @@ class Fakturpenjualan extends MY_Controller {
                     }
                     break;
                 default:
-//                    if ($data->lunas == 1) {
-//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
-//                    }
-//                    $fin = $data->final_total + $data->kurs_nominal;
-//                    if ((double) $fin !== (double) $data->piutang_rp) {
-//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
-//                    }
+                    if ($data->lunas == 1) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
+                    }
+                    $fin = $data->final_total * $data->kurs_nominal;
+                    if ((double) round($fin) !== (double) $data->piutang_rp) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
+                    }
 
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
@@ -1688,14 +1688,14 @@ class Fakturpenjualan extends MY_Controller {
                         $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 40, " ", STR_PAD_RIGHT) : str_pad("", 40, " ", STR_PAD_RIGHT);
                         $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]} ", 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
                         $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i]} ", 15, " ", STR_PAD_LEFT) : str_pad("", 15, " ", STR_PAD_LEFT);
-                        $line .= (isset($symbol[$i])) ? str_pad($symbol[$i], 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($valHarga[$i])) ? str_pad($valHarga[$i], 7, " ", STR_PAD_LEFT) : str_pad("", 7, " ", STR_PAD_LEFT);
-                        $line .= (isset($symbolRp[$i])) ? str_pad($symbolRp[$i], 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($harga[$i])) ? str_pad($harga[$i], 13, " ", STR_PAD_LEFT) : str_pad("", 13, " ", STR_PAD_LEFT);
-                        $line .= (isset($symbol[$i])) ? str_pad($symbol[$i], 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($valJumlah[$i])) ? str_pad($valJumlah[$i], 12, " ", STR_PAD_LEFT) : str_pad("", 12, " ", STR_PAD_LEFT);
-                        $line .= (isset($symbolRp[$i])) ? str_pad($symbolRp[$i], 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($jumlah[$i])) ? str_pad($jumlah[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
+//                        $line .= (isset($symbol[$i])) ? str_pad($symbol[$i], 4, " ") : str_pad("", 4, " ");
+                        $line .= (isset($valHarga[$i])) ? str_pad("{$symbol[$i]} {$valHarga[$i]}", 11, " ", STR_PAD_LEFT) : str_pad("", 11, " ", STR_PAD_LEFT);
+//                        $line .= (isset($symbolRp[$i])) ? str_pad($symbolRp[$i], 4, " ") : str_pad("", 4, " ");
+                        $line .= (isset($harga[$i])) ? str_pad("{$symbolRp[$i]} {$harga[$i]}", 17, " ", STR_PAD_LEFT) : str_pad("", 17, " ", STR_PAD_LEFT);
+//                        $line .= (isset($symbol[$i])) ? str_pad($symbol[$i], 4, " ") : str_pad("", 4, " ");
+                        $line .= (isset($valJumlah[$i])) ? str_pad("{$symbol[$i]} {$valJumlah[$i]}", 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
+//                        $line .= (isset($symbolRp[$i])) ? str_pad($symbolRp[$i], 4, " ") : str_pad("", 4, " ");
+                        $line .= (isset($jumlah[$i])) ? str_pad("{$symbolRp[$i]} {$jumlah[$i]}", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
                         $printer->text($line . "\n");
                         if (($counter - 1) === $i) {
                             $printer->setUnderline(Printer::UNDERLINE_NONE);
@@ -1706,7 +1706,7 @@ class Fakturpenjualan extends MY_Controller {
                 $totalQty = number_format($totalQty, 2);
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->feed();
-                $printer->text(str_pad("", 43));
+                $printer->text(str_pad("Total Qty : ", 43," ",STR_PAD_LEFT));
                 $printer->text(str_pad("{$totalQtyLot} {$uomLot} ", 15, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("{$totalQty} {$uom} ", 15, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("", 64));
@@ -1734,32 +1734,32 @@ class Fakturpenjualan extends MY_Controller {
 
                 $printer->text(str_pad("(*)Kurs : Rp. " . number_format($head->kurs_nominal, 2), 89, " "));
                 $printer->text(str_pad("Subtotal", 8, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" {$curr->symbol}", 4));
-                $printer->text(str_pad(number_format($subtotalValas, 2), 12, " ", STR_PAD_LEFT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format((round($head->grand_total * $head->kurs_nominal)), 2, ".", ","), 17, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" {$curr->symbol}", 4));
+                $printer->text(str_pad("{$curr->symbol} ".number_format($subtotalValas, 2), 16, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".number_format((round($head->grand_total * $head->kurs_nominal)), 2, ".", ","), 21, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad("", 89));
                 $printer->text(str_pad("Discount", 8, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" {$curr->symbol}", 4));
-                $printer->text(str_pad(number_format(round($diskonValas), 2), 12, " ", STR_PAD_LEFT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ","), 17, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" {$curr->symbol}", 4));
+                $printer->text(str_pad("{$curr->symbol} ".number_format(round($diskonValas), 2), 16, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ","), 21, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" Terbilang : " . ($spltTbl[0] ?? " "), 89, " "));
                 $printer->text(str_pad("PPN", 8, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" {$curr->symbol}", 4));
-                $printer->text(str_pad(number_format($ppnValas, 2), 12, " ", STR_PAD_LEFT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($ppn, 17, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" {$curr->symbol}", 4));
+                $printer->text(str_pad("{$curr->symbol} ".number_format($ppnValas, 2), 16, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".$ppn, 21, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 12));
                 $printer->text(str_pad(($spltTbl[1] ?? " "), 77, " "));
                 $printer->text(str_pad("TOTAL", 8, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" {$curr->symbol}", 4));
-                $printer->text(str_pad($finalTotalValas, 12, " ", STR_PAD_LEFT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($finalTotal, 17, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" {$curr->symbol}", 4));
+                $printer->text(str_pad("{$curr->symbol} ".$finalTotalValas, 16, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".$finalTotal, 21, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->text(str_pad(" ", 137));
@@ -1855,10 +1855,10 @@ class Fakturpenjualan extends MY_Controller {
                         $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 50, " ", STR_PAD_RIGHT) : str_pad("", 50, " ", STR_PAD_RIGHT);
                         $line .= (isset($qtylot[$i])) ? str_pad("{$qtylot[$i]} ", 19, " ", STR_PAD_LEFT) : str_pad("", 19, " ", STR_PAD_LEFT);
                         $line .= (isset($qtyuom[$i])) ? str_pad("{$qtyuom[$i]} ", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
-                        $line .= (isset($harga[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($harga[$i])) ? str_pad($harga[$i], 16, " ", STR_PAD_LEFT) : str_pad("", 16, " ", STR_PAD_LEFT);
-                        $line .= (isset($jumlah[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
-                        $line .= (isset($jumlah[$i])) ? str_pad($jumlah[$i], 21, " ", STR_PAD_LEFT) : str_pad("", 21, " ", STR_PAD_LEFT);
+//                        $line .= (isset($harga[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
+                        $line .= (isset($harga[$i])) ? str_pad(" Rp. {$harga[$i]}", 20, " ", STR_PAD_LEFT) : str_pad("", 20, " ", STR_PAD_LEFT);
+//                        $line .= (isset($jumlah[$i])) ? str_pad(" Rp.", 4, " ") : str_pad("", 4, " ");
+                        $line .= (isset($jumlah[$i])) ? str_pad(" Rp. {$jumlah[$i]}", 25, " ", STR_PAD_LEFT) : str_pad("", 25, " ", STR_PAD_LEFT);
                         $printer->text($line . "\n");
                         if (($counter - 1) === $i) {
                             $printer->setUnderline(Printer::UNDERLINE_NONE);
@@ -1869,7 +1869,7 @@ class Fakturpenjualan extends MY_Controller {
                 $totalQtyLot = number_format($totalQtyLot, 2);
                 $totalQty = number_format($totalQty, 2);
                 $printer->feed();
-                $printer->text(str_pad("", 53));
+                $printer->text(str_pad("Total Qty : ", 53," ",STR_PAD_LEFT));
                 $printer->text(str_pad("{$totalQtyLot} {$uomLot} ", 19, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("{$totalQty} {$uom} ", 20, " ", STR_PAD_LEFT));
                 $printer->text(str_pad("", 45));
@@ -1889,32 +1889,32 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text(str_pad(" Terbilang : ", 13));
                 $printer->text(str_pad($spltTbl[0] ?? " ", 79));
                 $printer->text(str_pad("Subtotal", 20, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(round($head->grand_total * $head->kurs_nominal), 2, ".", ","), 21, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".number_format(round($head->grand_total * $head->kurs_nominal), 2, ".", ","), 25, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(($spltTbl[1] ?? " "), 79));
                 $printer->text(str_pad("Dpp Nilai Lain", 20, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($dpp, 21, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".$dpp, 25, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(($spltTbl[2] ?? " "), 79));
                 $printer->text(str_pad("Discount", 20, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ","), 21, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ","), 25, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(" ", 79));
                 $printer->text(str_pad("PPN ", 20, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad(number_format(round($head->ppn * $head->kurs_nominal), 2, ".", ","), 21, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".number_format(round($head->ppn * $head->kurs_nominal), 2, ".", ","), 25, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
                 $printer->text(str_pad(" ", 79));
                 $printer->text(str_pad("TOTAL", 20, " ", STR_PAD_RIGHT));
-                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad($finalTotal, 21, " ", STR_PAD_LEFT));
+//                $printer->text(str_pad(" Rp.", 4));
+                $printer->text(str_pad("Rp. ".$finalTotal, 25, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->setUnderline(Printer::UNDERLINE_SINGLE);
                 $printer->text(str_pad(" ", 137));

@@ -160,7 +160,7 @@ class Outstandingfaktur extends MY_Controller {
             $sheet->setCellValue("C{$row}", 'No SJ');
             $sheet->setCellValue("d{$row}", 'Tanggal');
             $sheet->setCellValue("e{$row}", 'Total Piutang (Rp)');
-            $sheet->setCellValue("f{$row}", 'Sisa Puitang (Rp)');
+            $sheet->setCellValue("f{$row}", 'Sisa Piutang (Rp)');
             $sheet->setCellValue("g{$row}", 'Total Piutang (Valas)');
             $sheet->setCellValue("h{$row}", 'Sisa Piutang (Valas)');
             $sheet->setCellValue("i{$row}", 'Payment Term (Hari)');
