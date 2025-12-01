@@ -97,7 +97,7 @@
                                     <div class="form-group">
                                         <div class="col-sm-12 col-md-12">
                                             <div class="col-md-2">
-                                                <label>Supplier</label>
+                                                <label>Customer</label>
                                             </div>
                                             <div class="col-sm-* col-md-8 col-lg-8">
                                                 <select class="form-control input-sm" name="customer" id="customer">

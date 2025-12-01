@@ -27,6 +27,7 @@ class Jurnalmemorial extends MY_Controller {
         "pel_p" => "Pelunasan Piutang", //8
         "pel_h" => "Pelunasan Hutang", //9,
         "pemb" => "Pembelian",
+        "penj" => "Penjualan",
     ];
 
     public function __construct() {
@@ -45,6 +46,7 @@ class Jurnalmemorial extends MY_Controller {
         $this->load->library('excelexp/Memorialpelpiutang', null, 'pelpiutang');
         $this->load->library('excelexp/Memorialpelhutang', null, 'pelhutang');
         $this->load->library('excelexp/Memorialpembelian', null, 'pemb');
+        $this->load->library('excelexp/Memorialpenjualan', null, 'penj');
 //        $this->data = new $this->m_global;
     }
     
@@ -198,6 +200,14 @@ class Jurnalmemorial extends MY_Controller {
                     $data["filter"] = $this->filter;
                     $data["data"] = $this->pemb->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pembelian_{$this->filter}", $data, true);
+                    break;
+                case "penj":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->penj->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_penjualan_{$this->filter}", $data, true);
                     break;
                 default://
                     break;
@@ -391,6 +401,20 @@ class Jurnalmemorial extends MY_Controller {
                         $view = $this->pemb->_detail($data, $filename);
                     else
                         $view = $this->pemb->_detail_2($data, $filename);
+                    break;
+                    case "penj":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->penj->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->penj->_global($data, $filename);
+                    else if ($this->filter === "detail")
+                        $view = $this->penj->_detail($data, $filename);
+                    else
+                        $view = $this->penj->_detail_2($data, $filename);
                     break;
                 default:
                     break;

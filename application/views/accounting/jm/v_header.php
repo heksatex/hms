@@ -2,7 +2,7 @@
 
 switch (true) {
     case ($header === "pen_kb_global" || $header === "peng_kb_global" || $header === "pen_g_global"
-            || $header === "peng_g_global" || $header === "pel_p_global" || $header === "pel_h_global" || $header === "pemb_global"):
+            || $header === "peng_g_global" || $header === "pel_p_global" || $header === "pel_h_global" || $header === "pemb_global" || $header === "penj_global"):
         ?>
         <tr>
             <th class="style bb ws no" >No</th>
@@ -15,7 +15,7 @@ switch (true) {
 
         break;
     case ($header === "pen_kb_detail" || $header === "pen_g_detail" || $header === "peng_g_detail" || $header === "pel_h_detail" || $header === "pel_p_detail"
-            || $header === "pemb_detail"):
+            || $header === "pemb_detail" || $header === "penj_detail"):
         ?>
         <tr>
             <th class="style bb ws no" >Tanggal</th>
@@ -32,7 +32,7 @@ switch (true) {
         break;
 
     case ($header === "pen_g_detail_2" || $header === "peng_g_detail_2" || $header === "peng_kb_detail" || $header === "pel_p_detail_2" || $header === "pel_h_detail_2"
-            || $header === "pemb_detail_2" ):
+            || $header === "pemb_detail_2" || $header === "penj_detail_2"):
         ?>
         <tr>
             <th class="style bb ws no">Tanggal</th>
