@@ -838,6 +838,8 @@ if ($datas->status == 'confirm') {
             });
             if (val.length < 2)
                 return;
+            
+            trIndex.sort((a, b) => b - a);
             confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
                 $.ajax({
                     url: "<?= base_url('sales/fakturpenjualan/join/' . $id) ?>",

@@ -633,6 +633,7 @@ class Returpenjualan extends MY_Controller {
                     . "acc_retur_penjualan_detail WRITE,token_increment WRITE,acc_jurnal_entries_items WRITE,acc_jurnal_entries WRITE,"
                     . "setting READ";
             $this->_module->lock_tabel($lock);
+            $updateHead = ["status" => $status];
             switch ($status) {
                 case "confirm":
                     if ($data->status !== "draft") {
@@ -788,6 +789,11 @@ class Returpenjualan extends MY_Controller {
                     $log = "Header -> " . logArrayToString("; ", $jurnalData);
                     $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                     $this->_module->gen_history_new("jurnal_entries", $jurnal, "{$stt}", $log, $username);
+                    
+                    if ((double)$data->total_piutang_rp === 0.0000) {
+                        $updateHead = array_merge($updateHead, ["lunas" => 1]);
+                    }
+                    
                     break;
 
                 case "draft":
@@ -808,7 +814,7 @@ class Returpenjualan extends MY_Controller {
                     $this->_module->gen_history_new("jurnal_entries", $data->jurnal, 'edit', "Merubah Status Ke unposted dari penjualan", $username);
                     break;
             }
-            $model->setTables("acc_retur_penjualan")->setWheres(["no_retur" => $kode])->update(["status" => strtolower($status)]);
+            $model->setTables("acc_retur_penjualan")->setWheres(["no_retur" => $kode])->update($updateHead);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
@@ -889,7 +895,7 @@ class Returpenjualan extends MY_Controller {
             $noAcc = $this->input->post("no_acc");
 
             $this->_module->startTransaction();
-            $lock = "acc_retur_penjualan READ, acc_retur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ";
+            $lock = "acc_retur_penjualan READ, acc_retur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ,UOM READ";
             $this->_module->lock_tabel($lock);
             $model = new $this->m_global;
             $getDetail = $model->setTables("acc_retur_penjualan_detail")->setJoins("acc_retur_penjualan", "retur_id = acc_retur_penjualan.id")
@@ -962,9 +968,14 @@ class Returpenjualan extends MY_Controller {
                 "diskon_ppn" => $ppn_diskon,
                 "total_harga" => $totalHarga,
             ];
-            $model->setTables("acc_retur_penjualan_detail")->save($split);
+            $idnew = $model->setTables("acc_retur_penjualan_detail")->save($split);
             $model->setWheres(["id" => $ids])->update($updateSpilit);
-
+            
+            $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
+            $data["uomLot"] = $this->uomLot;
+            $data["data"] = $model->setTables("acc_retur_penjualan_detail")->setWhereIn("id", [$idnew, $ids])->getData();
+            $html = $this->load->view('sales/modal/v_split_join_tr', $data, true);
+            
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
@@ -973,7 +984,7 @@ class Returpenjualan extends MY_Controller {
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             log_message("error", json_encode($ex));
@@ -994,7 +1005,7 @@ class Returpenjualan extends MY_Controller {
 
             $dids = explode(",", $ids);
             $this->_module->startTransaction();
-            $lock = "acc_retur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE";
+            $lock = "acc_retur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,UOM READ";
             $this->_module->lock_tabel($lock);
             $model = new $this->m_global;
             $getData = $model->setTables("acc_retur_penjualan_detail")
@@ -1008,6 +1019,7 @@ class Returpenjualan extends MY_Controller {
             $diskons = 0;
             $diskons_ppn = 0;
             $log = "";
+            $html = "";
             $datas = [];
             foreach ($getData as $key => $value) {
                 $datas[] = logArrayToString("; ", (array) $value);
@@ -1041,10 +1053,16 @@ class Returpenjualan extends MY_Controller {
                 $data["diskon_ppn"] = $diskons_ppn;
 
                 $model->setTables("acc_retur_penjualan_detail")->setWhereIn("acc_retur_penjualan_detail.id", $dids)->delete();
-                $model->setTables("acc_retur_penjualan_detail")->save($data);
+                $ids = $model->setTables("acc_retur_penjualan_detail")->save($data);
 
                 $log .= "Join Item Data : " . logArrayToString("; ", (array) $datas);
                 $log .= "\nhasil split " . logArrayToString("; ", $data);
+                
+                $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
+                $data["uomLot"] = $this->uomLot;
+                $data["data"] = $model->setTables("acc_retur_penjualan_detail")->setWhereIn("id", [$ids])->getData();
+                $html = $this->load->view('sales/modal/v_split_join_tr', $data, true);
+                
             }
 
             if (!$this->_module->finishTransaction()) {
@@ -1055,7 +1073,7 @@ class Returpenjualan extends MY_Controller {
 
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             log_message("error", json_encode($ex));

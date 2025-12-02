@@ -21,6 +21,7 @@ class Picklist extends MY_Controller {
         $this->load->library('prints');
         $this->load->library("wa_message");
         $this->load->model("m_user");
+        $this->load->model("m_global");
     }
 
     protected $val_form = array(
@@ -90,6 +91,33 @@ class Picklist extends MY_Controller {
             $data['bulk'] = $this->m_Picklist->getTypeBulk();
             $data['sales'] = $this->m_Picklist->getSales();
             $data['do'] = $this->m_deliveryorder->getDataDetail(['no_picklist' => $kode_decrypt]);
+            $model = new $this->m_global();
+            $dt = $model->setTables("picklist_detail")->setWheres(["no_pl" => $kode_decrypt, "valid <>" => "cancel"])
+                    ->setGroups(["warna_remark", "corak_remark", "uom_lebar_jadi", "uom", "uom2", "valid", "lebar_jadi"])
+                    ->setSelects(["warna_remark", "corak_remark", "uom_lebar_jadi", "uom", "uom2", "valid", "kode_produk", "lebar_jadi"])
+                    ->setSelects(["sum(qty) as qty_1,sum(qty2) as qty_2,count(valid) as c_valid"])
+                    ->setOrder(["corak_remark"=>"asc","warna_remark"=>"asc"])
+                    ->getData();
+            $status = [];
+            foreach ($dt as $key => $value) {
+                if (!isset($status[$value->kode_produk])) {
+                    $status[$value->kode_produk] = [
+                        "corak" => $value->corak_remark,
+                        "warna" => $value->warna_remark,
+                        "lebar_jadi" => "{$value->lebar_jadi} {$value->uom_lebar_jadi}",
+                        "qty" => "{$value->qty_1} {$value->uom}",
+                        "qty2" => "{$value->qty_2} {$value->uom2}",
+                        "status" => [
+                            "draft" => 0,
+                            "realisasi" => 0,
+                            "validasi" => 0,
+                            "done" => 0
+                        ]
+                    ];
+                }
+                $status[$value->kode_produk]["status"][$value->valid] = $value->c_valid;
+            }
+            $data["status_item"] = $status;
             $this->load->view('warehouse/v_picklist_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -776,7 +804,7 @@ class Picklist extends MY_Controller {
         $logo_type = pathinfo(FCPATH . 'dist/img/static/heksatex_c.jpg', PATHINFO_EXTENSION);
         $logo = base64_encode($logo_path);
         $data['picklist'] = $this->m_Picklist->getDataReportPL(['no' => $pl]);
-        $data['picklist_detail'] = $this->m_PicklistDetail->detailReport(['no_pl' => $pl, 'valid !=' => 'cancel'], ['warna_remark', 'corak_remark','lebar_jadi','uom_lebar_jadi','uom']);
+        $data['picklist_detail'] = $this->m_PicklistDetail->detailReport(['no_pl' => $pl, 'valid !=' => 'cancel'], ['warna_remark', 'corak_remark', 'lebar_jadi', 'uom_lebar_jadi', 'uom']);
         $data['nopl'] = $pl;
         $data['logo'] = 'data:image/' . $logo_type . ';base64,' . $logo;
         $data['barcode'] = 'data:image/' . $logo_type . ';base64,' . $gen_code;
