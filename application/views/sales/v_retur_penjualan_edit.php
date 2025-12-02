@@ -782,12 +782,15 @@ if ($datas->status == 'confirm') {
 
         $(".btn-split").unbind("click").off("click").on("click", function () {
             var val = [];
+            var trIndex = [];
             $(".join-item:checked").each(function (i) {
                 val[i] = $(this).val();
+                trIndex.push($("#fpenjualan tbody tr").index($(this).closest('tr')));
             });
             if (val.length < 2)
                 return;
 
+            trIndex.sort((a, b) => b - a);
             confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
                 $.ajax({
                     url: "<?= base_url('sales/returpenjualan/join/' . $id) ?>",
@@ -803,7 +806,10 @@ if ($datas->status == 'confirm') {
                             }, 500);
                         });
                     }, success: function (data) {
-                        location.reload();
+                        $('#fpenjualan tbody tr:last').after(data.data);
+                        $.each(trIndex, function (index, value) {
+                            $('#fpenjualan tbody tr').eq(value).remove();
+                        });
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {}, 200);
@@ -954,7 +960,8 @@ if ($datas->status == 'confirm') {
         $("#btn-simpan").show();
         $("#btn-cancel").show();
     });
-    const saveSplit = (() => {
+    const saveSplit = ((e) => {
+        var trIndex = $("#fpenjualan tbody tr").index($(e).closest('tr'));
         confirmRequest("Faktur Penjualan", "Simpan Split Item? ", function () {
             $.ajax({
                 url: "<?= base_url('sales/returpenjualan/save_split/' . $id) ?>",
@@ -976,7 +983,10 @@ if ($datas->status == 'confirm') {
                         }, 500);
                     });
                 }, success: function (data) {
-                    location.reload();
+//                    location.reload();
+                    $('#fpenjualan tbody tr').eq(trIndex - 1).after(data.data);
+                    $('#fpenjualan tbody tr').eq(trIndex - 1).remove();
+                    cancelSplit(e);
                 },
                 complete: function (jqXHR, textStatus) {
                     unblockUI(function () {});
