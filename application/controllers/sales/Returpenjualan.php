@@ -505,9 +505,9 @@ class Returpenjualan extends MY_Controller {
                         }
                         $grandDiskonPpn += $ppn_diskon;
                         $totalHarga = (($jumlah - $ddskon) + ($pajak));
-                        $header["ppn"] += $pajak;
+//                        $header["ppn"] += $pajak;
                         $header["dpp_lain"] += $dpp;
-                        $header["final_total"] += $totalHarga;
+//                        $header["final_total"] += $totalHarga;
                         
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],
@@ -529,18 +529,20 @@ class Returpenjualan extends MY_Controller {
                         ];
                     }
                     if ($header["kurs_nominal"] > 1) {
-                        $header["total_piutang_valas"] = round($header["final_total"],2);
-                        $header["piutang_valas"] = round($header["final_total"],2);
+                        $header["total_piutang_valas"] = round($header["final_total"], 2);
+                        $header["piutang_valas"] = round($header["final_total"], 2);
                         $header["diskon"] = $grandDiskon;
                         $header["grand_total"] = $grandTotal;
                         $header["diskon_ppn"] = $grandDiskonPpn;
+                        $header["ppn"] += $header["dpp_lain"] * $taxVal;
+                        $header["final_total"] += $header["grand_total"] + $header["ppn"];
                     } else {
                         $header["diskon"] = round($grandDiskon);
                         $header["grand_total"] = round($grandTotal);
                         $header["diskon_ppn"] = round($grandDiskonPpn);
-                        $header["ppn"] = round($header["ppn"]);
                         $header["dpp_lain"] = round($header["dpp_lain"]);
-                        $header["final_total"] = round($header["final_total"]);
+                        $header["ppn"] = round($header["dpp_lain"] * $taxVal);
+                        $header["final_total"] = round($header["grand_total"] + $header["ppn"]);
                     }
                     $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
                     $header["piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
