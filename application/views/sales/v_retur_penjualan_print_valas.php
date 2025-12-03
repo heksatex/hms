@@ -186,7 +186,7 @@
                         <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($subtotalValas, 2) ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format($subtotal, 2) ?>
+                        <?= number_format($head->grand_total * $head->kurs_nominal, 2) ?>
                     </td>
                 </tr>
                 <tr>
