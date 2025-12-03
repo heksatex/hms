@@ -70,10 +70,10 @@ class Bukubesarpembantupiutangdetail extends MY_Controller
             $data2 = $this->m_bukubesarpembantupiutang->get_list_bukubesar_detail_by_kode($tgl_dari,$tgl_sampai,$where2,$currency);
             foreach($data2 as $datas2){
 
-                $debit  = floatval($datas2->debit);
-                $credit = floatval($datas2->credit);
+                $debit  = round($datas2->debit,2);
+                $credit = round($datas2->credit,2);
               
-                $saldo_akhir =  $saldo_awal + ($debit) - round($credit,2);
+                $saldo_akhir =  round($saldo_awal + ($debit) - ($credit),2);
 
                 $tmp_data_akun_isi[] = array(
                     'tanggal'   => date("Y-m-d",strtotime($datas2->tgl)),
