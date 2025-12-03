@@ -168,10 +168,9 @@ class M_bukubesarpembantupiutang extends CI_Model
             // $this->db->group_by('a.no_faktur_internal');
             $this->db->group_by($group);
         }
-
-        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.qty*b.harga*a.kurs_nominal AS DECIMAL(20,4))), 0)";
-        $ppn    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga*11/12*a.tax_value AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.qty*b.harga*11/12*a.tax_value*a.kurs_nominal AS DECIMAL(20,4))), 0)";
-        $total = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2) + ROUND(SUM(CAST(b.qty*b.harga*11/12*a.tax_value AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.qty*b.harga*a.kurs_nominal AS DECIMAL(20,4))), 0) + ROUND(SUM(CAST(b.qty*b.harga*11/12*a.tax_value AS DECIMAL(20,4))), 0)";
+        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2)" : "ROUND(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 0) *a.kurs_nominal, 0)";
+        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2)" : "ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0)"; 
+        $total = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2) + ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2)" : "ROUND(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 0) *a.kurs_nominal, 0) + ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0)";
 
         $this->db->SELECT("a.id,a.no_faktur_internal,
                 IFNULL($dpp,0) as dpp_piutang,
@@ -314,7 +313,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             IF('$currency' = 'valas', 
                 CONCAT(GROUP_CONCAT(appm.no_bukti), ' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), '  Kurs: ', appm.kurs, ' '), 
                 GROUP_CONCAT(appm.no_bukti)
-            )) as uraian, IFNULL(SUM($total),0) as total_pelunasan,   0 as debit , IFNULL(SUM($total),0) as credit, app.status, 'plp' as link, 
+            )) as uraian, IFNULL(SUM(CAST( abs($total) AS DECIMAL(20,2))),0) as total_pelunasan,   0 as debit , IFNULL(SUM(CAST( abs($total) AS DECIMAL(20,2))),0) as credit, app.status, 'plp' as link, 
             0 as dpp,
             0 as ppn,
             0 as total_dpp_ppn ");
@@ -413,11 +412,11 @@ class M_bukubesarpembantupiutang extends CI_Model
                 CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE pelunasan_piutang_id = app.id))
             ))  as uraian, IFNULL(SUM($total),0) as total_koreksi,  
                         (CASE 
-                            WHEN apps.selisih < 0 THEN abs($total) 
+                            WHEN apps.selisih < 0 THEN  CAST( abs($total) AS DECIMAL(20,2))
                             ELSE 0 
                         END) AS debit,
                         (CASE
-                            WHEN apps.selisih > 0 THEN ($total)
+                            WHEN apps.selisih > 0 THEN CAST( abs($total) AS DECIMAL(20,2))
                             ELSE 0 
                         END) AS credit, app.status, 'plp' as link,
                         0 as dpp,
