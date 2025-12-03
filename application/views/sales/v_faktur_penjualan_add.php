@@ -228,6 +228,7 @@
                         $("#marketing_nama").val(data.data.sales_nama);
                         $("#customer").val(data.data.customer_id);
                         $("#customer_nama").val(data.data.customer);
+                        $("#tanggal").val(data.data.tanggal_dokumen);
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {

@@ -535,14 +535,14 @@ class Returpenjualan extends MY_Controller {
                         $header["grand_total"] = $grandTotal;
                         $header["diskon_ppn"] = $grandDiskonPpn;
                         $header["ppn"] += $header["dpp_lain"] * $taxVal;
-                        $header["final_total"] += $header["grand_total"] + $header["ppn"];
+                        $header["final_total"] = ($header["grand_total"] - $header["diskon"]) + $header["ppn"];
                     } else {
                         $header["diskon"] = round($grandDiskon);
                         $header["grand_total"] = round($grandTotal);
                         $header["diskon_ppn"] = round($grandDiskonPpn);
                         $header["dpp_lain"] = round($header["dpp_lain"]);
                         $header["ppn"] = round($header["dpp_lain"] * $taxVal);
-                        $header["final_total"] = round($header["grand_total"] + $header["ppn"]);
+                        $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"]);
                     }
                     $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
                     $header["piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);

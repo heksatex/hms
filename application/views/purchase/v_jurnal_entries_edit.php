@@ -224,7 +224,7 @@
                                                                     </td>
                                                                     <td>
                                                                         <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
-                                                                               value="0">
+                                                                               value="0.00">
                                                                     </td>
                                                                     <?php
                                                                 } else {
@@ -232,7 +232,7 @@
                                                                     ?>
                                                                     <td>
                                                                         <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
-                                                                               value="0">
+                                                                               value="0.00">
                                                                     </td>
                                                                     <td>
                                                                         <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>

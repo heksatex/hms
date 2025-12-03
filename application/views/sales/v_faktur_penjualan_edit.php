@@ -139,6 +139,20 @@
                                                     <input type="text" class="form-control input-sm marketing_nama clear-tipe" id="marketing_nama" name="marketing_nama" value="<?= $datas->marketing_nama ?>" readonly>
                                                 </div>
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4"><label class="form-label">Jenis Ppn</label></div>
+                                                <div class="col-xs-8 col-md-8">
+                                                    <select class="form-control input-sm select2 tipe edited" name="jenis_ppn" id="jenis_ppn" style="width: 100%" disabled>
+                                                        <?php
+                                                        foreach ($jenisppn as $key => $value) {
+                                                            ?>
+                                                            <option value="<?= $key ?>" <?= ($key === $datas->jenis_ppn) ? "selected" : '' ?>><?= $value ?></option>
+                                                            <?php
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -361,7 +375,7 @@
                                                             <tr>
                                                                 <td colspan="9"></td>
                                                                 <td class="text-right"><strong>DPP Nilai Lain</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->dpp_lain), 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->dpp_lain * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="8"></td>
@@ -838,7 +852,7 @@ if ($datas->status == 'confirm') {
             });
             if (val.length < 2)
                 return;
-            
+
             trIndex.sort((a, b) => b - a);
             confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
                 $.ajax({
@@ -1064,6 +1078,8 @@ if ($datas->status == 'confirm') {
                 $("#marketing_nama").val(data.data.sales_nama);
                 $("#customer").val(data.data.customer_id);
                 $("#customer_nama").val(data.data.customer);
+                $("#tanggal").val(data.data.tanggal_dokumen);
+
             },
             complete: function (jqXHR, textStatus) {
                 unblockUI(function () {

@@ -123,6 +123,14 @@ class Fakturpenjualan extends MY_Controller {
         ["kode" => 120,
             "nama" => "120"],
     ];
+    
+    protected $jenisPPN = [
+        "kbn"=>"KBN",
+        "non_kbn"=>"non KBN",
+        "tunai"=>"Tunai",
+        "ekspor"=>"Ekspor",
+        "sampel"=>"Sampel"
+    ];
 
     public function index() {
         $data['id_dept'] = 'ACCFPJ';
@@ -166,6 +174,7 @@ class Fakturpenjualan extends MY_Controller {
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $data["taxs"] = $model->setTables("tax")->setWheres(["type_inv" => "sale"])->setOrder(["nama" => "asc"])->getData();
             $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
+            $data["jenisppn"] = $this->jenisPPN;
             $this->load->view('sales/v_faktur_penjualan_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -287,7 +296,7 @@ class Fakturpenjualan extends MY_Controller {
                             ->setJoins("mst_sales_group msg", "msg.kode_sales_group = p.sales_kode", "left")
                             ->setJoins("partner pr", "pr.id = p.customer_id", "left")
                             ->setSelects(["customer_id,pr.nama as customer", "p.sales_kode,msg.nama_sales_group as sales_nama"])
-                            ->setSelects(["p.keterangan"])->setWheres(["do.status" => "done", "faktur" => 0, "do.no_sj" => $sj])->getDetail();
+                            ->setSelects(["p.keterangan,date(tanggal_dokumen) as tanggal_dokumen"])->setWheres(["do.status" => "done", "faktur" => 0, "do.no_sj" => $sj])->getDetail();
 
             if (!$data) {
                 throw new \Exception('Data SJ tidak ditemukan', 500);
@@ -531,12 +540,7 @@ class Fakturpenjualan extends MY_Controller {
                 "payment_term" => $this->input->post("payment_term"),
                 "foot_note" => $this->input->post("footnote"),
                 "no_inv_ekspor" => $noInvEks,
-//                "grand_total_rp" => 0,
-//                "final_total_rp" => 0,
-//                "dpp_lain_rp" => 0,
-//                "ppn_rp" => 0,
-//                "diskon_rp" => 0,
-//                "diskon_ppn_rp" => 0
+                "jenis_ppn"=>$this->input->post("jenis_ppn")
             ];
             $ppns = 0;
             $detail = [];
@@ -599,14 +603,14 @@ class Fakturpenjualan extends MY_Controller {
                         $header["grand_total"] = $grandTotal;
                         $header["diskon_ppn"] = $grandDiskonPpn;
                         $header["ppn"] += $header["dpp_lain"] * $taxVal;
-                        $header["final_total"] += $header["grand_total"] + $header["ppn"];
+                        $header["final_total"] = ($header["grand_total"] - $header["diskon"]) + $header["ppn"];
                     } else {
                         $header["diskon"] = round($grandDiskon);
                         $header["grand_total"] = round($grandTotal);
                         $header["diskon_ppn"] = round($grandDiskonPpn);
                         $header["dpp_lain"] = round($header["dpp_lain"]);
                         $header["ppn"] = round($header["dpp_lain"] * $taxVal);
-                        $header["final_total"] = round($header["grand_total"] + $header["ppn"]);
+                        $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"]);
                     }
                     $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
                     $header["piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
@@ -742,105 +746,138 @@ class Fakturpenjualan extends MY_Controller {
                     $detail = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->getData();
                     $jurnalItems = [];
 
-                    $jurnalItems[] = array(
-                        "kode" => $jurnal,
-                        "nama" => "Piutang",
-                        "reff_note" => "",
-                        "partner" => $data->partner_id,
-                        "kode_coa" => $getCoaDefault->value,
-                        "posisi" => "D",
-                        "nominal_curr" => (0 + $data->ppn),
-                        "kurs" => $data->kurs_nominal,
-                        "kode_mua" => $data->nama_kurs,
-                        "nominal" => 0,
-                        "row_order" => 1
-                    );
-
-                    $getCoaDefaultPpnDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_ppn_diskon"])->getDetail();
-                    if ($data->diskon_ppn > 0) {
+                    $sjs = explode("/", $data->no_sj);
+                    if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "PPN Diskon",
-                            "reff_note" => "",
-                            "partner" => $data->partner_id,
-                            "kode_coa" => $getCoaDefaultPpnDisc->value,
-                            "posisi" => "D",
-                            "nominal_curr" => $data->diskon_ppn,
-                            "kurs" => $data->kurs_nominal,
-                            "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon_ppn * $data->kurs_nominal, 2),
-                            "row_order" => (count($jurnalItems) + 1)
-                        );
-                    }
-                    $getCoaDefaultDppDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_dpp_diskon"])->getDetail();
-                    if ($data->diskon > 0) {
-                        $jurnalItems[] = array(
-                            "kode" => $jurnal,
-                            "nama" => "DPP Diskon",
-                            "reff_note" => "",
-                            "partner" => $data->partner_id,
-                            "kode_coa" => $getCoaDefaultDppDisc->value,
-                            "posisi" => "D",
-                            "nominal_curr" => $data->diskon,
-                            "kurs" => $data->kurs_nominal,
-                            "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon * $data->kurs_nominal, 2),
-                            "row_order" => (count($jurnalItems) + 1)
-                        );
-                    }
-                    $allDiskon = $data->diskon_ppn + $data->diskon;
-                    if ($allDiskon > 0) {
-                        $jurnalItems[] = array(
-                            "kode" => $jurnal,
-                            "nama" => "Diskon",
+                            "nama" => "Piutang",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
                             "kode_coa" => $getCoaDefault->value,
-                            "posisi" => "C",
-                            "nominal_curr" => $allDiskon,
+                            "posisi" => "D",
+                            "nominal_curr" => 0,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($allDiskon * $data->kurs_nominal, 2),
-                            "row_order" => (count($jurnalItems) + 1)
+                            "nominal" => 0,
+                            "row_order" => 1
                         );
-                    }
-                    if ($data->ppn > 0) {
+                        foreach ($detail as $key => $value) {
+                            $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                            $jurnalItems[] = array(
+                                "kode" => $jurnal,
+                                "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $value->no_acc,
+                                "posisi" => "C",
+                                "nominal_curr" => 0,
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => 0,
+                                "row_order" => (count($jurnalItems) + 1)
+                            );
+                        }
+                    } else {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "PPN",
+                            "nama" => "Piutang",
                             "reff_note" => "",
                             "partner" => $data->partner_id,
-                            "kode_coa" => $getCoaDefaultPpnDisc->value,
-                            "posisi" => "C",
-                            "nominal_curr" => $data->ppn,
+                            "kode_coa" => $getCoaDefault->value,
+                            "posisi" => "D",
+                            "nominal_curr" => (0 + $data->ppn),
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->ppn * $data->kurs_nominal, 2),
-                            "row_order" => (count($jurnalItems) + 1)
+                            "nominal" => 0,
+                            "row_order" => 1
                         );
+
+                        $getCoaDefaultPpnDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_ppn_diskon"])->getDetail();
+                        if ($data->diskon_ppn > 0) {
+                            $jurnalItems[] = array(
+                                "kode" => $jurnal,
+                                "nama" => "PPN Diskon",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $getCoaDefaultPpnDisc->value,
+                                "posisi" => "D",
+                                "nominal_curr" => $data->diskon_ppn,
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => round($data->diskon_ppn * $data->kurs_nominal, 2),
+                                "row_order" => (count($jurnalItems) + 1)
+                            );
+                        }
+                        $getCoaDefaultDppDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_dpp_diskon"])->getDetail();
+                        if ($data->diskon > 0) {
+                            $jurnalItems[] = array(
+                                "kode" => $jurnal,
+                                "nama" => "DPP Diskon",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $getCoaDefaultDppDisc->value,
+                                "posisi" => "D",
+                                "nominal_curr" => $data->diskon,
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => round($data->diskon * $data->kurs_nominal, 2),
+                                "row_order" => (count($jurnalItems) + 1)
+                            );
+                        }
+                        $allDiskon = $data->diskon_ppn + $data->diskon;
+                        if ($allDiskon > 0) {
+                            $jurnalItems[] = array(
+                                "kode" => $jurnal,
+                                "nama" => "Diskon",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $getCoaDefault->value,
+                                "posisi" => "C",
+                                "nominal_curr" => $allDiskon,
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => round($allDiskon * $data->kurs_nominal, 2),
+                                "row_order" => (count($jurnalItems) + 1)
+                            );
+                        }
+                        if ($data->ppn > 0) {
+                            $jurnalItems[] = array(
+                                "kode" => $jurnal,
+                                "nama" => "PPN",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $getCoaDefaultPpnDisc->value,
+                                "posisi" => "C",
+                                "nominal_curr" => $data->ppn,
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => round($data->ppn * $data->kurs_nominal, 2),
+                                "row_order" => (count($jurnalItems) + 1)
+                            );
+                        }
+                        $totalPiutangCurr = 0;
+                        $totalPiutang = 0;
+                        foreach ($detail as $key => $value) {
+                            $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                            $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
+                            $totalPiutangCurr += $value->jumlah;
+                            $jurnalItems[] = array(
+                                "kode" => $jurnal,
+                                "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $value->no_acc,
+                                "posisi" => "C",
+                                "nominal_curr" => $value->jumlah,
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
+                                "row_order" => (count($jurnalItems) + 1)
+                            );
+                        }
+                        $jurnalItems[0]["nominal_curr"] = ($totalPiutangCurr + $data->ppn);
+                        $jurnalItems[0]["nominal"] = $totalPiutang + ($data->ppn * $data->kurs_nominal);
                     }
-                    $totalPiutangCurr = 0;
-                    $totalPiutang = 0;
-                    foreach ($detail as $key => $value) {
-                        $warna = ($value->warna === "") ? "" : " / {$value->warna}";
-                        $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
-                        $totalPiutangCurr += $value->jumlah;
-                        $jurnalItems[] = array(
-                            "kode" => $jurnal,
-                            "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
-                            "reff_note" => "",
-                            "partner" => $data->partner_id,
-                            "kode_coa" => $value->no_acc,
-                            "posisi" => "C",
-                            "nominal_curr" => $value->jumlah,
-                            "kurs" => $data->kurs_nominal,
-                            "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
-                            "row_order" => (count($jurnalItems) + 1)
-                        );
-                    }
-                    $jurnalItems[0]["nominal_curr"] = ($totalPiutangCurr + $data->ppn);
-                    $jurnalItems[0]["nominal"] = $totalPiutang + ($data->ppn * $data->kurs_nominal);
 
                     if ($data->jurnal !== "") {
                         $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
@@ -857,7 +894,7 @@ class Fakturpenjualan extends MY_Controller {
                     $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                     $this->_module->gen_history_new("jurnal_entries", $jurnal, "{$stt}", $log, $username);
 
-                    if ((double)$data->total_piutang_rp === 0.0000) {
+                    if ((double) $data->total_piutang_rp === 0.0000) {
                         $updateHead = array_merge($updateHead, ["lunas" => 1]);
                     }
                     break;
