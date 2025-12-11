@@ -12,12 +12,14 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  * @author RONI
  */
 require FCPATH . 'vendor/autoload.php';
+require_once APPPATH . '/third_party/vendor/autoload.php';
 
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mpdf\Mpdf;
-use Mike42\Escpos\PrintBuffers\ImagePrintBuffer;
-use Mike42\Escpos\CapabilityProfile;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class Fakturpenjualan extends MY_Controller {
 
@@ -123,18 +125,18 @@ class Fakturpenjualan extends MY_Controller {
         ["kode" => 120,
             "nama" => "120"],
     ];
-    
     protected $jenisPPN = [
-        "kbn"=>"KBN",
-        "non_kbn"=>"non KBN",
-        "tunai"=>"Tunai",
-        "ekspor"=>"Ekspor",
-        "sampel"=>"Sampel"
+        "kbn" => "KBN",
+        "non_kbn" => "non KBN",
+        "tunai" => "Tunai",
+        "ekspor" => "Ekspor",
+        "sampel" => "Sampel"
     ];
 
     public function index() {
         $data['id_dept'] = 'ACCFPJ';
         $model = new $this->m_global;
+        $data["tipe"] = $this->tipe;
         $data["sales"] = $model->setTables("mst_sales_group")->setWheres(["view" => "1"])->setSelects(["kode_sales_group", "nama_sales_group"])
                         ->setOrder(["kode_sales_group"])->getData();
         $this->load->view('sales/v_faktur_penjualan', $data);
@@ -181,16 +183,17 @@ class Fakturpenjualan extends MY_Controller {
         }
     }
 
-    public function list_data() {
+    protected function _listData() {
         try {
-            $data = array();
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_faktur_penjualan.status", "left")
                     ->setOrder(["acc_faktur_penjualan.tanggal" => "desc"])->setSearch(["no_faktur", "no_faktur_pajak", "no_sj", "partner_nama", "no_faktur_internal"])
-                    ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "marketing_nama", "partner_nama"])->setSelects(["acc_faktur_penjualan.*", "nama_status"]);
-            $no = $_POST['start'];
+                    ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "tipe", "marketing_nama", "partner_nama"])
+                    ->setSelects(["acc_faktur_penjualan.*", "nama_status", "if(lunas = 1,'Lunas','Belum Lunas') as lunas"]);
             $tanggal = $this->input->post("tanggal");
             $marketing = $this->input->post("marketing");
+            $tipe = $this->input->post("tipe");
+            $customer = $this->input->post("customer");
             if ($tanggal !== "") {
                 $tanggals = explode(" - ", $tanggal);
                 $model->setWheres(["date(tanggal) >=" => $tanggals[0], "date(tanggal) <=" => $tanggals[1]]);
@@ -198,19 +201,39 @@ class Fakturpenjualan extends MY_Controller {
             if ($marketing !== "") {
                 $model->setWheres(["marketing_kode" => $marketing]);
             }
+            if ($tipe !== "") {
+                $model->setWheres(["tipe" => $tipe]);
+            }
+            if ($customer !== "") {
+                $model->setWheres(["partner_id" => $customer]);
+            }
+            return $model;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function list_data() {
+        try {
+            $data = array();
+            $model = $this->_listData();
+            $no = $_POST['start'];
             foreach ($model->getData() as $key => $value) {
                 $no += 1;
                 $kode_encrypt = encrypt_url($value->no_faktur);
-                $fk = ($value->no_faktur_internal === '') ? $value->no_faktur : $value->no_faktur_internal;
+                $fk = ($value->no_faktur_internal === '') ? 'Belum diisi' : $value->no_faktur_internal;
                 $data [] = [
                     $no,
                     "<a href='" . base_url("sales/fakturpenjualan/edit/{$kode_encrypt}") . "'>{$fk}</a>",
                     $value->no_faktur_pajak,
                     $value->tanggal,
                     $value->no_sj,
+                    $value->tipe,
                     $value->marketing_nama,
                     $value->partner_nama,
-                    $value->nama_status
+                    number_format($value->total_piutang_rp, 2),
+                    $value->lunas,
+                    $value->nama_status,
                 ];
             }
             echo json_encode(array("draw" => $_POST['draw'],
@@ -225,6 +248,79 @@ class Fakturpenjualan extends MY_Controller {
                 "recordsFiltered" => 0,
                 "data" => [],
             ));
+        }
+    }
+
+    public function export() {
+        try {
+            $model = $this->_listData();
+            $data = $model->getData();
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $tanggal = $this->input->post("tanggal");
+            $marketing = $this->input->post("marketing");
+            $tipe = $this->input->post("tipe");
+            $customer = $this->input->post("customer");
+            $filter = "";
+            if (count($data) > 0) {
+                if ($marketing !== "") {
+                    $filter .= "Marketing : {$data[0]->marketing_nama}, ";
+                }
+                if ($tipe !== "") {
+                    $filter .= "Tipe : {$tipe}, ";
+                }
+                if ($customer !== "") {
+                    $filter .= "Customer  : {$data[0]->partner_nama}, ";
+                }
+            }
+            $sheet->setCellValue("A1", 'Periode');
+            $sheet->setCellValue("B1", $tanggal);
+            $sheet->setCellValue("A2", 'Filter : ');
+            $sheet->setCellValue("B2", $filter);
+
+            $row = 4;
+            $sheet->setCellValue("A{$row}", 'No');
+            $sheet->setCellValue("B{$row}", 'No Faktur');
+            $sheet->setCellValue("C{$row}", 'No Faktur Pajak');
+            $sheet->setCellValue("D{$row}", 'Tanggal');
+            $sheet->setCellValue("E{$row}", 'No SJ');
+            $sheet->setCellValue("F{$row}", 'Tipe');
+            $sheet->setCellValue("g{$row}", 'Marketing');
+            $sheet->setCellValue("h{$row}", 'Customer');
+            $sheet->setCellValue("i{$row}", 'Total');
+            $sheet->setCellValue("j{$row}", 'Pelunasan');
+            $no = 0;
+            foreach ($data as $key => $value) {
+                $row++;
+                $no++;
+                $sheet->setCellValue("A{$row}", $no);
+                $sheet->setCellValue("B{$row}", $value->no_faktur_internal);
+                $sheet->setCellValue("C{$row}", $value->no_faktur_pajak);
+                $sheet->setCellValue("D{$row}", $value->tanggal);
+                $sheet->setCellValue("E{$row}", $value->no_sj);
+                $sheet->setCellValue("F{$row}", $value->tipe);
+                $sheet->setCellValue("G{$row}", $value->marketing_nama);
+                $sheet->setCellValue("H{$row}", $value->partner_nama);
+                $sheet->setCellValue("I{$row}", $value->total_piutang_rp);
+                $sheet->setCellValue("j{$row}", $value->nama_status);
+            }
+            $writer = new Xlsx($spreadsheet);
+            $filename = "Faktur Penjualan per tanggal " . date("Y-m-d");
+            $url = "dist/storages/report/fakturpenjualan";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 
@@ -540,7 +636,7 @@ class Fakturpenjualan extends MY_Controller {
                 "payment_term" => $this->input->post("payment_term"),
                 "foot_note" => $this->input->post("footnote"),
                 "no_inv_ekspor" => $noInvEks,
-                "jenis_ppn"=>$this->input->post("jenis_ppn")
+                "jenis_ppn" => $this->input->post("jenis_ppn")
             ];
             $ppns = 0;
             $detail = [];
@@ -574,7 +670,9 @@ class Fakturpenjualan extends MY_Controller {
 
                         $grandDiskonPpn += $ppn_diskon;
                         $totalHarga = (($jumlah - $ddskon) + ($pajak));
+                        $header["ppn"] += $pajak;
                         $header["dpp_lain"] += $dpp;
+                        $header["final_total"] += $totalHarga;
 
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],
@@ -707,6 +805,10 @@ class Fakturpenjualan extends MY_Controller {
             $updateHead = ["status" => $status];
             switch ($status) {
                 case "confirm":
+                    if($data->no_faktur_internal === "") {
+                        throw new \Exception("No Faktur Internal Harus Terisi", 500);
+                    }
+                    
                     if ($data->status !== "draft") {
                         throw new \Exception("Faktur Harus dalam status Draft", 500);
                     }
@@ -747,6 +849,8 @@ class Fakturpenjualan extends MY_Controller {
                     $jurnalItems = [];
 
                     $sjs = explode("/", $data->no_sj);
+                    $totalC = 0;
+                    $totalD = 0;
                     if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
@@ -778,6 +882,8 @@ class Fakturpenjualan extends MY_Controller {
                             );
                         }
                     } else {
+                        $piutang = round($data->final_total * $data->kurs_nominal, 2);
+                        $totalD += $piutang;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "Piutang",
@@ -785,15 +891,16 @@ class Fakturpenjualan extends MY_Controller {
                             "partner" => $data->partner_id,
                             "kode_coa" => $getCoaDefault->value,
                             "posisi" => "D",
-                            "nominal_curr" => (0 + $data->ppn),
+                            "nominal_curr" => ($data->final_total),
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => 0,
+                            "nominal" => $piutang,
                             "row_order" => 1
                         );
 
                         $getCoaDefaultPpnDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_ppn_diskon"])->getDetail();
                         if ($data->diskon_ppn > 0) {
+                            $totalD += round($data->diskon_ppn * $data->kurs_nominal, 2);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "PPN Diskon",
@@ -810,6 +917,7 @@ class Fakturpenjualan extends MY_Controller {
                         }
                         $getCoaDefaultDppDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_dpp_diskon"])->getDetail();
                         if ($data->diskon > 0) {
+                            $totalD += round($data->diskon * $data->kurs_nominal, 2);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "DPP Diskon",
@@ -824,8 +932,9 @@ class Fakturpenjualan extends MY_Controller {
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
-                        $allDiskon = $data->diskon_ppn + $data->diskon;
+                        $allDiskon = $data->diskon + $data->diskon_ppn;
                         if ($allDiskon > 0) {
+                            $totalC += round($allDiskon * $data->kurs_nominal, 2);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "Diskon",
@@ -841,6 +950,7 @@ class Fakturpenjualan extends MY_Controller {
                             );
                         }
                         if ($data->ppn > 0) {
+                            $totalC += round($data->ppn * $data->kurs_nominal, 2);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "PPN",
@@ -855,12 +965,12 @@ class Fakturpenjualan extends MY_Controller {
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
-                        $totalPiutangCurr = 0;
-                        $totalPiutang = 0;
+
                         foreach ($detail as $key => $value) {
                             $warna = ($value->warna === "") ? "" : " / {$value->warna}";
-                            $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
-                            $totalPiutangCurr += $value->jumlah;
+                            $totalC += round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2);
+//                            $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
+//                            $totalPiutangCurr += $value->jumlah;
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
@@ -868,15 +978,32 @@ class Fakturpenjualan extends MY_Controller {
                                 "partner" => $data->partner_id,
                                 "kode_coa" => $value->no_acc,
                                 "posisi" => "C",
-                                "nominal_curr" => $value->jumlah,
+                                "nominal_curr" => $value->jumlah - $value->diskon,
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
+                                "nominal" => round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2),
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
-                        $jurnalItems[0]["nominal_curr"] = ($totalPiutangCurr + $data->ppn);
-                        $jurnalItems[0]["nominal"] = $totalPiutang + ($data->ppn * $data->kurs_nominal);
+                        $hsl = round($totalC - $totalD, 2);
+                        if ($hsl !== (double) 0) {
+                            $coaSelisih = $model->setTables("setting")->setWheres(["setting_name" => "selisih_pembulatan_penjualan"])->getDetail();
+                            $jurnalItems[] = array(
+                                "kode" => $jurnal,
+                                "nama" => "Selisih Pembulatan Penjualan",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $coaSelisih->value,
+                                "posisi" => "D",
+                                "nominal_curr" => round($hsl / $data->kurs_nominal, 4),
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => $hsl,
+                                "row_order" => (count($jurnalItems) + 1)
+                            );
+                        }
+//                        $jurnalItems[0]["nominal_curr"] = ($totalPiutangCurr + $data->ppn);
+//                        $jurnalItems[0]["nominal"] = $totalPiutang + ($data->ppn * $data->kurs_nominal);
                     }
 
                     if ($data->jurnal !== "") {

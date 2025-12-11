@@ -17,7 +17,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Bukupenjualan extends MY_Controller {
+class Bukupenjualan_1 extends MY_Controller {
 
     //put your code here
     public function __construct() {
@@ -49,18 +49,16 @@ class Bukupenjualan extends MY_Controller {
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan fp")
-//                    ->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
-                    ->setJoins("acc_jurnal_entries je","je.kode = fp.jurnal")
-                    ->setJoins("acc_jurnal_entries_items jei","jei.kode = je.kode")
-                    ->setJoins("acc_coa ac","ac.kode_coa = jei.kode_coa","left")
-                    ->setSelects(["fp.no_faktur_internal,no_sj,fp.tanggal","partner_nama","jei.*","ac.nama as coa"])
-                    ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"])
-                    ->setOrder(["jei.kode_coa"=>"asc"]);
+                    ->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
+                    ->setJoins("currency_kurs ck", "ck.id = fp.kurs")
+                    ->setOrder(["fp.tanggal" => "asc"])->setSelects(["no_faktur_internal,no_faktur_pajak,fp.partner_nama,nominal_diskon,tax_value"])
+                    ->setSelects(["fpd.*,concat(fpd.uraian,' ',fpd.warna) as uraian,fp.kurs", "fp.no_sj,fp.tanggal", "ck.currency as nama_curr"])
+                    ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"]);
             if ($uraian !== "") {
-                $model->setWhereRaw("jei.nama LIKE '%{$uraian}%'");
+                $model->setWhereRaw("concat(uraian,' ',warna) LIKE '%{$uraian}%'");
             }
             if (!empty($customer)) {
-                $model->setWheres(["fp.partner_id" => $customer]);
+                $model->setWheres(["partner_id" => $customer]);
             }
             if (!empty($fakturPajak)) {
                 if ($fakturPajak === 'ada') {

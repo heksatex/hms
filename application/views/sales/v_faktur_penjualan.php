@@ -3,6 +3,11 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
         <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
+        <style>
+            .btn-export {
+
+            }
+        </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -50,7 +55,23 @@
                                                                     <input type="text" class="form-control" name="tanggal" id="tanggal">
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-12 col-xs-12">
+                                                                <div class="col-xs-3"><label class="form-label">Tipe Penjualan</label></div>
+                                                                <div class="col-xs-9 col-md-9">
+                                                                    <select class="form-control input-sm select2 tipe" id="tipe" style="width: 100%">
+                                                                        <option value=""></option>
+                                                                        <?php
+                                                                        foreach ($tipe as $key => $value) {
+                                                                            ?>
+                                                                            <option value="<?= $key ?>"><?= $value ?></option>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
                                                         </div>
+
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
@@ -72,7 +93,14 @@
                                                                     </select> 
                                                                 </div>
                                                             </div>
-
+                                                            <div class="col-sm-12 col-md-12">
+                                                                <div class="col-xs-3">
+                                                                    <label>Customer</label>
+                                                                </div>
+                                                                <div class="col-xs-9 col-md-9">
+                                                                    <select class="form-control select2 input-sm" name="customer" id="customer"></select>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
@@ -104,8 +132,11 @@
                                             <th>No Faktur Pajak</th>
                                             <th>Tanggal</th>
                                             <th>No SJ</th>
+                                            <th>Tipe</th>
                                             <th>Marketing</th>
                                             <th>Customer</th>
+                                            <th>Total</th>
+                                            <th>Pelunasan</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -113,6 +144,7 @@
                             </div>
                         </div>
                     </div>
+                    <button type="button" class="hide export-data"></button>
                 </section>
             </div>
         </div>
@@ -140,19 +172,73 @@
                         "data": function (d) {
                             d.tanggal = tanggal;
                             d.marketing = $("#marketing").val();
+                            d.tipe = $("#tipe").val();
+                            d.customer = $("#customer").val();
                         }
                     },
                     columnDefs: [
                         {
-                            "targets": [0,7],
+                            "targets": [0, 8, 9, 10],
                             "orderable": false
                         }
+                    ],
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'pageLength',
+                        {
+                            "text": '<i class="fa fa-print"> <span>Export</span>',
+                            "className": "btn-export btn-sm",
+                            "action": function (e, dt, node, config) {
+                                $(".export-data").trigger("click");
+                            }
+                        },
+                                // Other buttons like 'copy', 'csv', 'excel', 'pdf', 'print'
                     ]
+                });
+                $(".export-data").on("click", function () {
+                    $.ajax({
+                        type: "post",
+                        url: "<?php echo base_url(); ?>sales/fakturpenjualan/export",
+                        data: {
+                            tanggal: tanggal,
+                            marketing: $("#marketing").val(),
+                            tipe: $("#tipe").val(),
+                            customer: $("#customer").val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait((() => {
+
+                            }));
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 200);
+                        },
+                        success: ((data) => {
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        })
+                    });
+                });
+                $(".select2").select2({
+                    placeholder: "Pilih",
+                    allowClear: true
                 });
                 $("#reset").on("click", function (e) {
                     e.preventDefault();
                     tanggal = "";
                     $(".reset").trigger("click");
+                    $(".select2").val('').trigger('change');
                     table.ajax.reload();
                 });
 
@@ -189,11 +275,38 @@
                     }
                 });
 
-
-                $(".select2").select2({
-                    placeholder: "Pilih",
-                    allowClear: true
+                $('#customer').select2({
+                    allowClear: true,
+                    placeholder: "Select Customer",
+                    width: '100%',
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "get",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                        data: function (params) {
+                            return{
+                                search: params.term,
+                                jenis: "customer"
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    id: item.id,
+                                    text: item.nama
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                        }
+                    }
                 });
+
+
             });
         </script>
     </body>

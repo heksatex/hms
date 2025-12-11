@@ -6,7 +6,7 @@ $temp = "";
 $noUrut = 0;
 
 if (count($data) > 0) {
-    $saldos = floatval($saldo->saldo_awal_final);
+    $saldos = ($curr === "") ? floatval($saldo->saldo_awal_final):floatval($saldo->saldo_valas_final);
     ?>
     <tr>
         <td colspan="3"></td>

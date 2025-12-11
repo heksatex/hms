@@ -146,7 +146,7 @@ class M_global extends CI_Model {
         }
 
         foreach ($this->search as $key => $value) {
-            if ($_POST['search']['value']) {
+            if (isset( $_POST['search']['value']) && $_POST['search']['value']) {
                 if ($key === 0) {
                     $this->db->group_start();
                     $this->db->like($value, $_POST['search']['value']);

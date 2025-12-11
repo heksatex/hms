@@ -505,9 +505,9 @@ class Returpenjualan extends MY_Controller {
                         }
                         $grandDiskonPpn += $ppn_diskon;
                         $totalHarga = (($jumlah - $ddskon) + ($pajak));
-//                        $header["ppn"] += $pajak;
+                        $header["ppn"] += $pajak;
                         $header["dpp_lain"] += $dpp;
-//                        $header["final_total"] += $totalHarga;
+                        $header["final_total"] += $totalHarga;
                         
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],

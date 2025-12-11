@@ -94,11 +94,14 @@
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Customer</label>
+                                                    <label class="form-label required">Customer</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <input type="hidden" class="form-control input-sm customer clear-tipe" id="customer" name="customer">
-                                                    <input type="text" class="form-control input-sm customer_nama clear-tipe" id="customer_nama" name="customer_nama" readonly>
+<!--                                                    <input type="hidden" class="form-control input-sm customer clear-tipe" id="customer" name="customer">
+                                                    --><input type="hidden" class="form-control input-sm customer_nama clear-tipe" id="customer_nama" name="customer_nama">
+                                                    <select class="form-control input-sm customer clear-tipe" id="customer" name="customer" required>
+                                                        <option></option>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -152,6 +155,54 @@
                 });
             });
             $(function () {
+
+                $('#customer').select2({
+                    allowClear: true,
+                    placeholder: "Select Customer",
+                    width: '100%',
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "get",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                        data: function (params) {
+                            return{
+                                search: params.term,
+                                jenis: "customer"
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    id: item.id,
+                                    text: item.nama
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            //alert('Error data');
+                            //alert(xhr.responseText);
+                        }
+                    },
+                    formatResult: function (element) {
+                        return element.text + ' (' + element.id + ')';
+                    },
+                    formatSelection: function (element) {
+                        return element.text + ' (' + element.id + ')';
+                    },
+                });
+
+                $(".customer").on("change", function () {
+                    $("#customer_nama").val("");
+                });
+                $(".customer").on("select2:select", function () {
+                    var symbol = $('#customer').find(':selected').text();
+                    $("#customer_nama").val(symbol);
+                });
+
                 $("#tipe").on("change", function () {
                     $(".clear-tipe").val("");
                 });
@@ -226,9 +277,11 @@
                         $("#no_sj").val(nosj);
                         $("#marketing_kode").val(data.data.sales_kode);
                         $("#marketing_nama").val(data.data.sales_nama);
-                        $("#customer").val(data.data.customer_id);
-                        $("#customer_nama").val(data.data.customer);
+//                        $("#customer").val(data.data.customer_id);
                         $("#tanggal").val(data.data.tanggal_dokumen);
+                        var option = new Option(data.data.customer, data.data.customer_id, true, true);
+                        $("#customer").append(option).trigger('change');
+                        $("#customer_nama").val(data.data.customer);
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {

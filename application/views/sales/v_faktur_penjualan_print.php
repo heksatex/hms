@@ -42,6 +42,12 @@
                 <img src="<?= base_url("dist/img/logo_fp.jpg") ?>" alt="alt"/>
                 </br>
                 <div id="row">
+                    <div id="column">
+                        <p id="alamat"><?= $alamat->value ?></p>
+                        <p>NPWP : <?= $npwp->value ?></p>
+                    </div> 
+                </div>
+                <div id="row">
                     <div id="column-news-1">
                         <h2>FAKTUR PENJUALAN</h2>
                     </div>
@@ -98,9 +104,18 @@
                 <?php
                 $dpp = number_format(($head->grand_total - $head->diskon) * 11 / 12, 2, ".", ",");
                 $subtotal = 0;
+                $totalQty = 0;
+                $totalQtyLot = 0;
+                $uomLot = "";
+                $uom = "";
+                
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
                     $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                    $totalQty += $value->qty;
+                    $totalQtyLot += $value->qty_lot;
+                    $uomLot = $value->lot;
+                    $uom = $value->uom;
                     ?>
                     <tr>
                         <td style="text-align: center;">
@@ -109,14 +124,19 @@
                         <td>
                             <?= $value->uraian . $warna ?>
                         </td>
-                        <td style="text-align: center"><?= "{$value->qty_lot} {$value->lot}" ?></td>
-                        <td style="text-align: center"><?= "{$value->qty} {$value->uom}" ?></td>
-                        <td style="text-align: right"><?= number_format($value->harga, 2) ?></td>
-                        <td style="text-align: right"><?= number_format($value->jumlah, 2) ?></td>
+                        <td style="text-align: right"><?= "{$value->qty_lot} {$value->lot}" ?></td>
+                        <td style="text-align: right"><?= "{$value->qty} {$value->uom}" ?></td>
+                        <td style="text-align: right"><?= "Rp. ".number_format($value->harga, 2) ?></td>
+                        <td style="text-align: right"><?= "Rp. ".number_format($value->jumlah, 2) ?></td>
                     </tr>
                     <?php
                 }
                 ?>
+                    <tr>
+                    <td colspan="2" style="text-align: right"> <strong>Total : </strong></td>
+                    <td style="text-align: right"> <?= "{$totalQtyLot} {$uomLot}" ?></td>
+                    <td style="text-align: right"><?= "{$totalQty} {$uom}" ?></td>
+                </tr>
             </tbody>
             <tfoot>
                 <tr>
@@ -127,7 +147,7 @@
                         Subtotal
                     </td>
                     <td style="text-align: right">
-                        <?= number_format(round($head->grand_total), 2) ?>
+                       <?="Rp. ". number_format(round($head->grand_total), 2, ".", ",") ?>
                     </td>
                 </tr>
                 <tr>
@@ -138,7 +158,7 @@
                     $subtotal2 = (round($head->grand_total) - round($head->diskon));
                     ?>
                     <td style="text-align: right">
-                        <?= number_format($head->dpp_lain, 2, ".", ",") ?>
+                        <?= "Rp. ".number_format($head->dpp_lain, 2, ".", ",") ?>
                     </td>
                 </tr>
                 <tr>
@@ -146,7 +166,7 @@
                         Discount
                     </td>
                     <td style="text-align: right">
-                        <?= number_format($head->diskon, 2, ".", ",") ?>
+                        <?= "Rp. ".number_format($head->diskon, 2, ".", ",") ?>
                     </td>
                 </tr>
                 <tr>
@@ -154,7 +174,7 @@
                         <?= $head->nama_tax ?? "Ppn " ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format(round($head->ppn), 2, ".", ","); ?>
+                        <?= "Rp. ".number_format(round($head->ppn), 2, ".", ","); ?>
                     </td>
                 </tr>
                 <tr>
@@ -162,7 +182,7 @@
                         TOTAL
                     </td>
                     <td style="text-align: right">
-                        <?= number_format(($head->final_total), 2, ".", ",") ?>
+                        <?="Rp. ".number_format(($head->final_total), 2, ".", ",") ?>
                     </td>
                 </tr>
             </tfoot>
