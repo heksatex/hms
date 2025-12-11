@@ -18,9 +18,6 @@
         .ws {
             white-space: nowrap;
         }
-        table tbody tr td {
-                padding: 0px 5px 0px 5px !important;
-            }
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini" >
@@ -120,7 +117,7 @@
                                                                 <input type="text" class="form-control" name="uraian" id="uraian">
                                                             </div>
                                                         </div>
-<!--                                                        <div class="col-md-12 col-xs-12">
+                                                        <div class="col-md-12 col-xs-12">
                                                             <div class="col-xs-3">
                                                                 <label class="form-label">Faktur pajak</label>
                                                             </div>
@@ -131,7 +128,7 @@
                                                                 <option value='tidak'>Tidak</option>
                                                             </select>
                                                             </div>
-                                                        </div>-->
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -151,8 +148,14 @@
                                                 <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
                                                 <th class='style bb ws' style="min-width: 150px">Uraian</th>
                                                 <th class='style bb ws'>Customer</th>
-                                                <th class='style bb ws'>COA</th>
-                                                <th class='style bb ws text-right'>Nominal</th>
+                                                <th class='style bb ws text-right'>Qty</th>
+                                                <th class='style bb ws'>Currency</th>
+                                                <th class='style bb ws text-right'>Kurs</th>
+                                                <th class='style bb ws text-right'>Harga</th>
+                                                <th class='style bb ws text-right'>DPP</th>
+                                                <th class='style bb ws text-right'>Diskon</th>
+                                                <th class='style bb ws text-right'>PPN</th>
+                                                <th class='style bb ws'>Faktur Pajak</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tBody">

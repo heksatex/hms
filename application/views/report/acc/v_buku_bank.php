@@ -55,12 +55,13 @@
                                                         <label class="form-label">Bank</label>
                                                     </div>
                                                     <div class="col-xs-9 col-md-9">
+                                                        <input type="hidden" name="curr" id="curr">
                                                         <select class="form-control input-sm select2 no_acc" name="kode_coa" id="kode_coa">
                                                             <option value=""></option>
                                                             <?php
                                                             foreach ($coa as $key => $value) {
                                                                 ?>
-                                                                <option value="<?= $value->kode_coa ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
+                                                                <option value="<?= $value->kode_coa ?>" data-curr="<?= $value->curr ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
                                                                 <?php
                                                             }
                                                             ?>
@@ -136,13 +137,22 @@
                     }
                 });
 
+                $(".no_acc").on("change", function () {
+                    $("#curr").val("");
+                });
+                $(".no_acc").on("select2:select", function () {
+                    var symbol = $('#kode_coa').find(':selected').data().curr;
+                    $("#curr").val(symbol);
+                });
+
                 $("#search").on("click", function () {
                     $.ajax({
                         url: "<?= base_url('report/bukubank/search') ?>",
                         type: "POST",
                         data: {
                             tanggal: $("#tanggal").val(),
-                            kode_coa: $("#kode_coa").val()
+                            kode_coa: $("#kode_coa").val(),
+                            curr: $("#curr").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
