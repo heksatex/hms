@@ -346,7 +346,7 @@
                                                                 <tr>
                                                                     <td colspan="8"></td>
                                                                     <td class="text-right"><strong>Subtotal</strong></td>
-                                                                    <td class="text-right"><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total) ?>"></td>
+                                                                    <td class="text-right"><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total,2) ?>"></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->grand_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
@@ -364,7 +364,7 @@
                                                                         </select>
                                                                     </td>
                                                                     <td class="text-right"><strong>Diskon</strong></td>
-                                                                    <td class="text-right"><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->diskon) ?>"></td>
+                                                                    <td class="text-right"><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->diskon,2) ?>"></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->diskon * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
@@ -1017,8 +1017,13 @@ if ($datas->status == 'confirm') {
             $(".btn-cancel-item").on("click", function (e) {
                 $(this).closest("tr").remove();
                 $(".btn-add-item").show();
+                $("#btn-simpan").show();
+                $(".btn-delete-item").show();
+                $(".btn-split").show();
             });
-
+            $("#btn-simpan").hide();
+            $(".btn-delete-item").hide();
+                $(".btn-split").hide();
             $(".btn-simpan-item").off("click").unbind("click").on("click", function (e) {
                 confirmRequest("Faktur Penjualan", "Simpan Item Baru ? ", function () {
                     $.ajax({
