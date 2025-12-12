@@ -882,7 +882,7 @@ class Fakturpenjualan extends MY_Controller {
                             );
                         }
                     } else {
-                        $piutang = round($data->final_total * $data->kurs_nominal, 2);
+                        $piutang = round($data->final_total * $data->kurs_nominal);
                         $totalD += $piutang;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,

@@ -57,8 +57,6 @@
                         <strong>No Faktur</strong>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= ": {$head->no_faktur_internal}" ?>
                     </div>
-                    <div id="column-news-2" style="text-align: left; width: 40%;">
-                    </div>
                 </div>
                 <div id="row" >
                     <div id="column-news-1">
@@ -69,7 +67,7 @@
             </div>
             <div id="column-news-2">
                 <div style="padding-top: 20px;">
-                    Bandung, <?= date("d-m-Y") ?>
+                    Bandung, <?= $head->tanggal ?>
                 </div>
                 <div id="row">
                     <div id="column" style="padding-top: 20px;">
@@ -134,8 +132,8 @@
                 ?>
                     <tr>
                     <td colspan="2" style="text-align: right"> <strong>Total : </strong></td>
-                    <td style="text-align: right"> <?= "{$totalQtyLot} {$uomLot}" ?></td>
-                    <td style="text-align: right"><?= "{$totalQty} {$uom}" ?></td>
+                    <td style="text-align: right"> <?= number_format($totalQtyLot,2)." {$uomLot}" ?></td>
+                    <td style="text-align: right"><?= number_format($totalQty,2)." {$uom}" ?></td>
                 </tr>
             </tbody>
             <tfoot>
@@ -171,7 +169,7 @@
                 </tr>
                 <tr>
                     <td style="font-weight: bold;">
-                        <?= $head->nama_tax ?? "Ppn " ?>
+                        Ppn
                     </td>
                     <td style="text-align: right">
                         <?= "Rp. ".number_format(round($head->ppn), 2, ".", ","); ?>
