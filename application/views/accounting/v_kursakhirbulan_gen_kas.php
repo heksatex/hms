@@ -25,13 +25,13 @@
             $no = 0;
             foreach ($coa as $k => $value) {
 
-                $selisih = ($value->saldo_valas * $kurs) - $value->saldo_awal;
+                $selisih = ($value->saldo_valas_final * $kurs) - $value->saldo_rp_final;
                 $nominal = abs($selisih);
-                if ($nominal === (double) 0) {
+                if ($value->saldo_valas_final <= 0 || $nominal === (double) 0) {
                     continue;
                 }
                 $no += 1;
-                $nama = "Kurs Akhir Bulan (Saldo : " . number_format($value->saldo_valas, 2) . " {$curr} Kurs : " . number_format($kurs, 2) . ")";
+                $nama = "Kurs Akhir Bulan (Saldo : " . number_format($value->saldo_valas_final, 2) . " {$curr} Kurs : " . number_format($kurs, 2) . ")";
                 ?>
                 <tr>
                     <td>
@@ -40,7 +40,7 @@
                     <td>
                         <?= $nama ?>
                     </td>
-                    <td title="<?= $value->nama ?>">
+                    <td title="<?= $value->nama_coa ?>">
                         <?= $value->kode_coa ?>
                     </td>
 

@@ -32,6 +32,51 @@ class Kursakhirbulan extends MY_Controller {
         $this->load->view('accounting/v_kursakhirbulan_add', $data);
     }
 
+    protected function _getSaldo() {
+        try {
+            $curr = $this->input->post("currency");
+            $bulan = $this->input->post("bulan");
+            $start = "{$bulan}-01";
+            $akhir = date("Y-m-t", strtotime($start));
+            $model = new $this->m_global;
+
+            $saldoDebet = $model->setTables("acc_bank_masuk bm")
+                    ->setJoins("acc_bank_masuk_detail bmd","bm.id = bank_masuk_id")->setGroups(["bm.kode_coa"])
+                    ->setSelects(["bm.kode_coa, SUM(bm.total_rp) as total_debit","sum(bm.total_rp * bmd.kurs) as total_debit_rp"])
+                    ->setWheres(['date(bm.tanggal) >= ' => $start, 'date(bm.tanggal) <= ' => $akhir, 'status' => 'confirm'])
+                    ->getQuery();
+            $saldoKredit = $model->setTables("acc_bank_keluar bk")
+                    ->setJoins("acc_bank_keluar_detail bkd","bk.id = bank_keluar_id")->setGroups(["bk.kode_coa"])
+                    ->setSelects(["bk.kode_coa, SUM(bk.total_rp) as total_credit","sum(bk.total_rp * bkd.kurs) as total_credit_rp"])
+                    ->setWheres(['date(bk.tanggal) >= ' => $start, 'date(bk.tanggal) <= ' => $akhir, 'status' => 'confirm'])
+                    ->getQuery();
+
+            $model->setTables("acc_coa coa")->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
+                    ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
+                    ->setOrder(["coa.kode_coa" => "asc"])->setWheres(["coa.curr" => $curr])
+                    ->setSelects(["coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,coa.saldo_awal,coa.saldo_valas,COALESCE(debit_sbl.total_debit, 0) as total_debit_sbl"])
+                            ->setSelects(["COALESCE(debit_sbl.total_debit_rp, 0) as total_debit_rp_sbl","COALESCE(credit_sbl.total_credit_rp, 0) as total_credit_rp_sbl"])
+                    ->setSelects(["COALESCE(credit_sbl.total_credit, 0) as total_credit_sbl"])
+                    ->setSelects(["CASE 
+                                WHEN coa.saldo_normal = 'D' THEN 
+                                    (coa.saldo_valas + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                                WHEN coa.saldo_normal = 'C' THEN 
+                                    (coa.saldo_valas + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                                ELSE coa.saldo_valas
+                            END AS saldo_valas_final"])
+                            ->setSelects(["CASE 
+                                WHEN coa.saldo_normal = 'D' THEN 
+                                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit_rp, 0) - COALESCE(credit_sbl.total_credit_rp, 0))
+                                WHEN coa.saldo_normal = 'C' THEN 
+                                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit_rp, 0) - COALESCE(debit_sbl.total_debit_rp, 0))
+                                ELSE coa.saldo_awal
+                            END AS saldo_rp_final"]);
+                    return $model->getData();
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
     public function list() {
         try {
             $data = array();
@@ -119,12 +164,13 @@ class Kursakhirbulan extends MY_Controller {
             if ($this->form_validation->run() == FALSE) {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
-//            $bulans = explode("-", $this->input->post("bulan"));
+//            log_message("error",json_encode($this->_getSaldo()));
+            $bulans = explode("-", $this->input->post("bulan"));
             $curr = $this->input->post("currency");
             $symcurr = $this->input->post("symcurr");
             $data["kurs"] = str_replace(",", "", $this->input->post("kurs"));
             $model = new $this->m_global;
-            $data["coa"] = $model->setTables("acc_coa")->setWheres(["curr" => $curr])->getData();
+            $data["coa"] = $this->_getSaldo();
             $data["coa_sk"] = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
             $data["curr"] = $curr;
 

@@ -116,12 +116,14 @@ class Bukukas extends MY_Controller {
                     ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_debit"])
                     ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D"])
                     ->getQuery();
-
+            
+            //Kredit
+            
             $saldoKredit = $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
                     ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit"])
                     ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C"])
                     ->getQuery();
-            //Kredit
+            
             $model->setTables("acc_coa coa")->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$entries}) as jr ", "jr.kode_coa = coa.kode_coa", "left")
