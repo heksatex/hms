@@ -189,7 +189,11 @@ class Fakturpenjualan extends MY_Controller {
             $model->setTables("acc_faktur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_faktur_penjualan.status", "left")
                     ->setOrder(["acc_faktur_penjualan.tanggal" => "desc"])->setSearch(["no_faktur", "no_faktur_pajak", "no_sj", "partner_nama", "no_faktur_internal"])
                     ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "tipe", "marketing_nama", "partner_nama"])
-                    ->setSelects(["acc_faktur_penjualan.*", "nama_status", "if(lunas = 1,'Lunas','Belum Lunas') as lunas"]);
+                    ->setSelects(["acc_faktur_penjualan.*", "nama_status"])
+                    ->setSelects(["CASE When (status <> 'confirm') then 'Belum Lunas' "
+                        . "WHEN (piutang_rp = 0) then 'Lunas' "
+                        . "When (piutang_rp = total_piutang_rp) then 'Belum Lunas' "
+                        . "Else 'Lunas Sebagian' End as lunas"]);
             $tanggal = $this->input->post("tanggal");
             $marketing = $this->input->post("marketing");
             $tipe = $this->input->post("tipe");
@@ -303,7 +307,7 @@ class Fakturpenjualan extends MY_Controller {
                 $sheet->setCellValue("G{$row}", $value->marketing_nama);
                 $sheet->setCellValue("H{$row}", $value->partner_nama);
                 $sheet->setCellValue("I{$row}", $value->total_piutang_rp);
-                $sheet->setCellValue("j{$row}", $value->nama_status);
+                $sheet->setCellValue("j{$row}", $value->lunas);
             }
             $writer = new Xlsx($spreadsheet);
             $filename = "Faktur Penjualan per tanggal " . date("Y-m-d");
