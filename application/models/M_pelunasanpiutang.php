@@ -1088,7 +1088,7 @@ class M_pelunasanpiutang extends CI_Model
             $this->db->join('acc_giro_masuk_detail', 'acc_giro_masuk_detail.giro_masuk_id = acc_giro_masuk.id', 'inner');
             $result = $this->db->get();
         } else if($metode =='retur') {
-            $this->db->select('id, no_retur, total_piutang_rp as total, lunas');
+            $this->db->select('id, no_retur, total_piutang_rp as total_rp, total_piutang_valas as total_valas, lunas');
             $this->db->FROM('acc_retur_penjualan');
             $result = $this->db->get();
         } else if($metode == 'kas') {
