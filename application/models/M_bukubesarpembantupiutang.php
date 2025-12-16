@@ -25,8 +25,8 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_retur_sblm    = $this->get_saldo_sblm($tgldari, 'retur', $currency);
         $subquery_um_sblm       = $this->get_saldo_sblm($tgldari, 'um', $currency);
         $subquery_koreksi_sblm   = $this->get_saldo_sblm($tgldari, 'koreksi', $currency);
-        $subquery_deposit_sblm   = $this->get_saldo_sblm($tgldari, 'deposit', $currency);
-        $subquery_deposit_pel_sblm   = $this->get_saldo_sblm($tgldari, 'deposit_pel', $currency);
+        // $subquery_deposit_sblm   = $this->get_saldo_sblm($tgldari, 'deposit', $currency);
+        // $subquery_deposit_pel_sblm   = $this->get_saldo_sblm($tgldari, 'deposit_pel', $currency);
 
         // // saldo berdasakran periode berjalan
         // $subquery_faktur       = $this->get_saldo_piutang(['tanggal >= ' => $tgldari, 'tanggal <= ' => $tglsampai, 'status' => 'confirm'], 'partner_id', '', $currency);
@@ -68,8 +68,8 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_retur         = $this->get_saldo_retur($where_retur, 'app.partner_id', $currency);
         $subquery_um            = $this->get_saldo_um($where_um, 'app.partner_id', $currency);
         $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'app.partner_id', $currency);
-        $subquery_deposit       = $this->get_saldo_deposit($where_deposit, 'app.partner_id', $currency);
-        $subquery_deposit_pel   = $this->get_saldo_deposit($where_deposit_pel, 'app.partner_id', $currency);
+        // $subquery_deposit       = $this->get_saldo_deposit($where_deposit, 'app.partner_id', $currency);
+        // $subquery_deposit_pel   = $this->get_saldo_deposit($where_deposit_pel, 'app.partner_id', $currency);
 
 
         $cr_condition = ($currency === 'valas') ? 'p.saldo_awal_piutang_valas' : 'p.saldo_awal_piutang';
@@ -83,8 +83,6 @@ class M_bukubesarpembantupiutang extends CI_Model
                         - IFNULL(um_sblm.total_uang_muka, 0) 
                         - IFNULL(diskon_sblm.total_diskon, 0)
                         - IFNULL(koreksi_sblm.total_koreksi, 0)
-                        - IFNULL(depo_sblm.total_deposit, 0)
-                        - IFNULL(depo_pel_sblm.total_deposit, 0)
                     ) <> 0
                     OR
                     (IFNULL(piutang.total_piutang, 0)
@@ -94,8 +92,6 @@ class M_bukubesarpembantupiutang extends CI_Model
                         + IFNULL(um.total_uang_muka, 0)
                         + IFNULL(diskon.total_diskon, 0)
                         + IFNULL(koreksi.total_koreksi, 0)
-                        + IFNULL(depo.total_deposit, 0)
-                        + IFNULL(depo_pel.total_deposit, 0)
                     ) <> 0
                 )
             ", null, false);
@@ -114,7 +110,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         // $this->db->where_in('p.id', array(4195,4435,4494,5132,4210,5166,552));
         $this->db->select("p.id, p.nama, $cr_condition as saldo_awal_piutang,
-                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um,0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon,0)- IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0)) - IFNULL(depo_sblm.total_deposit,0) - IFNULL(depo_pel_sblm.total_deposit,0) ) as saldo_awal_final,
+                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um,0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon,0)- IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0))) as saldo_awal_final,
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(piutang.dpp_piutang,0) as dpp_piutang,
                         IFNULL(piutang.ppn_piutang,0) as ppn_piutang,
@@ -129,9 +125,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         IFNULL(diskon.total_diskon_dpp_ppn,0) as total_diskon_dpp_ppn,
                         IFNULL(um.total_uang_muka,0) as total_uang_muka,
                         IFNULL(koreksi.total_koreksi,0) as total_koreksi, 
-                        IFNULL(kas_um.total_kas_um, 0) as total_kas_um,
-                        IFNULL(depo.total_deposit, 0) as total_deposit,
-                        IFNULL(depo_pel.total_deposit, 0) as total_deposit_pel
+                        IFNULL(kas_um.total_kas_um, 0) as total_kas_um
                         ");
         $this->db->from('partner p');
         $this->db->join("($subquery_faktur_sblm) as piutang_sblm", "piutang_sblm.id_partner = p.id", "left");
@@ -148,10 +142,10 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->join("($subquery_diskon_sblm) as diskon_sblm", "diskon_sblm.id_partner = p.id", "left");
         $this->db->JOIN("($subquery_kas_sblm) as kas_um_sblm", "kas_um_sblm.partner_id = p.id", "LEFT");
         $this->db->JOIN("($subquery_kas) as kas_um", "kas_um.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit_sblm) as depo_sblm", "depo_sblm.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit) as depo", "depo.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit_pel_sblm) as depo_pel_sblm", "depo_pel_sblm.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit_pel) as depo_pel", "depo_pel.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit_sblm) as depo_sblm", "depo_sblm.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit) as depo", "depo.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit_pel_sblm) as depo_pel_sblm", "depo_pel_sblm.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit_pel) as depo_pel", "depo_pel.partner_id = p.id", "LEFT");
         $this->db->order_by('p.nama');
         $query = $this->db->get();
         return $query->result();
@@ -320,9 +314,10 @@ class M_bukubesarpembantupiutang extends CI_Model
             // $this->db->group_by('a.no_faktur_internal');
             $this->db->group_by($group);
         }
-        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2)" : "ROUND(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 0) *a.kurs_nominal, 0)";
+        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*a.kurs_nominal, 0)";
+        // $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2)" : "ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0)"; 
         $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2)" : "ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0)"; 
-        $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2),0) + IFNULL(ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2),0)" : "IFNULL(ROUND(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 0) *a.kurs_nominal, 0),0) + IFNULL(ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0), 0)";
+        $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2),0) + IFNULL(ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2),0)" : "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*a.kurs_nominal, 0),0) + IFNULL(ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0), 0)";
 
         $this->db->SELECT("a.id,a.no_faktur_internal,
                 IFNULL($dpp,0) as dpp_piutang,
@@ -552,7 +547,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         if ($group) {
             $this->db->group_by($group);
         }
-        $total  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", appsk.nominal * -1, appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
+        $total  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
 
         $this->db->where('apps.keterangan <>', 'Uang Muka');
         $this->db->where('app.status', 'done');
@@ -618,6 +613,23 @@ class M_bukubesarpembantupiutang extends CI_Model
         return $this->db->get_compiled_select();
     }
 
+    // function get_saldo_deposit_by_id($tgldari, $tglsampai, $checkhidden)
+    // {
+
+        
+    //     $cr_condition = ($currency === 'valas') ? '<>' : '';
+    //     $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas' => 0];
+
+    //     $union_sql = $this->get_saldo_deposit($where_deposit);
+
+    //     $this->db->SELECT('id_bukti, id_bukti_ecr,  no_bukti, tgl, id_partner, uraian, debit, credit, status, link');
+    //     $this->db->from('(' . $union_sql . ') as sub');
+    //     $this->db->order_by('p.nama');
+    //     $query = $this->db->get();
+    //     return $query->result();
+
+    // }
+
 
     public function get_list_bukubesar_detail($tgldari, $tglsampai, $checkhidden, array $where = [], $currency)
     {
@@ -629,8 +641,8 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_retur_sblm        = $this->get_saldo_sblm($tgldari, 'retur', $currency);
         $subquery_um_sblm           = $this->get_saldo_sblm($tgldari, 'um', $currency);
         $subquery_koreksi_sblm      = $this->get_saldo_sblm($tgldari, 'koreksi', $currency);
-        $subquery_deposit_sblm      = $this->get_saldo_sblm($tgldari, 'deposit', $currency);
-        $subquery_deposit_pel_sblm  = $this->get_saldo_sblm($tgldari, 'deposit_pel', $currency);
+        // $subquery_deposit_sblm      = $this->get_saldo_sblm($tgldari, 'deposit', $currency);
+        // $subquery_deposit_pel_sblm  = $this->get_saldo_sblm($tgldari, 'deposit_pel', $currency);
 
         //table currecny kurs 
         // 1 = IDR
@@ -667,8 +679,8 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_retur         = $this->get_saldo_retur($where_retur, 'app.partner_id', $currency);
         $subquery_um            = $this->get_saldo_um($where_um, 'app.partner_id', $currency);
         $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'app.partner_id', $currency);
-        $subquery_deposit       = $this->get_saldo_deposit($where_deposit, 'app.partner_id', $currency);
-        $subquery_deposit_pel   = $this->get_saldo_deposit($where_deposit_pel, 'app.partner_id', $currency);
+        // $subquery_deposit       = $this->get_saldo_deposit($where_deposit, 'app.partner_id', $currency);
+        // $subquery_deposit_pel   = $this->get_saldo_deposit($where_deposit_pel, 'app.partner_id', $currency);
 
         $cr_condition = ($currency === 'valas') ? 'p.saldo_awal_piutang_valas' : 'p.saldo_awal_piutang';
         if ($checkhidden == 'true') {
@@ -681,8 +693,6 @@ class M_bukubesarpembantupiutang extends CI_Model
                         - IFNULL(um_sblm.total_uang_muka, 0) 
                         - IFNULL(diskon_sblm.total_diskon, 0)
                         - IFNULL(koreksi_sblm.total_koreksi, 0)
-                        - IFNULL(depo_sblm.total_deposit, 0)
-                        - IFNULL(depo_pel_sblm.total_deposit, 0)
                     ) <> 0
                     OR
                     (IFNULL(piutang.total_piutang, 0)
@@ -692,8 +702,6 @@ class M_bukubesarpembantupiutang extends CI_Model
                         + IFNULL(um.total_uang_muka, 0)
                         + IFNULL(diskon.total_diskon, 0)
                         + IFNULL(koreksi.total_koreksi, 0)
-                        + IFNULL(depo.total_deposit, 0)
-                        + IFNULL(depo_pel.total_deposit, 0)
                     ) <> 0
                 )
             ", null, false);
@@ -705,7 +713,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         }
 
         $this->db->select("p.id, p.nama, $cr_condition as saldo_awal_piutang,
-                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um, 0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon, 0) - IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0)) - IFNULL(depo_sblm.total_deposit,0) - IFNULL(depo_pel_sblm.total_deposit,0)  ) as saldo_awal_final,
+                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um, 0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon, 0) - IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0)) ) as saldo_awal_final,
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(pelunasan.total_pelunasan,0) as total_pelunasan,
                         IFNULL(retur.total_retur,0) as total_retur,
@@ -726,10 +734,10 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->join("($subquery_diskon_sblm) as diskon_sblm", "diskon_sblm.id_partner = p.id", "left");
         $this->db->JOIN("($subquery_kas_sblm) as kas_um_sblm", "kas_um_sblm.partner_id = p.id", "LEFT");
         $this->db->JOIN("($subquery_kas) as kas_um", "kas_um.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit_sblm) as depo_sblm", "depo_sblm.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit) as depo", "depo.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit_pel_sblm) as depo_pel_sblm", "depo_pel_sblm.partner_id = p.id", "LEFT");
-        $this->db->JOIN("($subquery_deposit_pel) as depo_pel", "depo_pel.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit_sblm) as depo_sblm", "depo_sblm.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit) as depo", "depo.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit_pel_sblm) as depo_pel_sblm", "depo_pel_sblm.partner_id = p.id", "LEFT");
+        // $this->db->JOIN("($subquery_deposit_pel) as depo_pel", "depo_pel.partner_id = p.id", "LEFT");
         $this->db->order_by('p.nama');
         $query = $this->db->get();
         return $query->result();
@@ -772,14 +780,14 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_retur        = $this->get_saldo_retur($where_retur, 'app.no_pelunasan', $currency);
         $subquery_um           = $this->get_saldo_um($where_um, 'app.no_pelunasan', $currency);
         $subquery_koreksi      = $this->get_saldo_koreksi($where_koreksi, 'app.no_pelunasan', $currency);
-        $subquery_deposit      = $this->get_saldo_deposit($where_deposit, 'app.no_pelunasan', $currency);
-        $subquery_deposit_pel  = $this->get_saldo_deposit($where_deposit_pel, 'app.no_pelunasan', $currency);
+        // $subquery_deposit      = $this->get_saldo_deposit($where_deposit, 'app.no_pelunasan', $currency);
+        // $subquery_deposit_pel  = $this->get_saldo_deposit($where_deposit_pel, 'app.no_pelunasan', $currency);
 
         if (count($where) > 0) {
             $this->db->where($where);
         }
 
-        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi . ' UNION ALL ' . $subquery_diskon . " UNION ALL ".$subquery_kas. " UNION ALL " .$subquery_deposit. " UNION ALL " .$subquery_deposit_pel;
+        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi . ' UNION ALL ' . $subquery_diskon . " UNION ALL ".$subquery_kas;
 
         $this->db->SELECT('id_bukti, id_bukti_ecr,  no_bukti, tgl, id_partner, uraian, debit, credit, status, link');
         $this->db->from('(' . $union_sql . ') as sub');
