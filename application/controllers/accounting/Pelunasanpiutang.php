@@ -122,11 +122,14 @@ class Pelunasanpiutang extends MY_Controller
 
             $get_tinv_re = $this->m_pelunasanpiutang->get_total_faktur_retur_by_partner(['partner_id' => $partner, 'status' => 'confirm', 'lunas' => 0]);
 
+            $get_t_deposit = $this->m_pelunasanpiutang->get_total_deposit_by_partner($partner);
+
             $total = array(
                 'total_invoice' => $get_tinv,
                 'total_kas_bank' => $total_kas_bank,
                 'total_uang_muka' => $total_um,
-                'total_retur' => $get_tinv_re
+                'total_retur' => $get_tinv_re,
+                'total_deposit' => $get_t_deposit
             );
 
             $callback = array("message" => "berhasil", 'total'   => $total);
@@ -142,7 +145,7 @@ class Pelunasanpiutang extends MY_Controller
     function get_list_koreksi_select2()
     {
         $nama  = addslashes($this->input->post('name'));
-        $tipe_currency  = addslashes($this->input->post('tipe_currency'));
+        $tipe_currency  = addslashes($this->input->post('currency'));
         $tipe  =  $this->input->post('tipe');
         $callback = $this->m_pelunasanpiutang->get_list_koreksi($tipe_currency, $nama, $tipe);
         echo json_encode($callback);
@@ -310,6 +313,19 @@ class Pelunasanpiutang extends MY_Controller
         ),
     );
 
+    private $statusLebih = array(
+        array(
+            "id" => "true",
+            "text" => "Ya",
+            "color" => "label label-success"
+        ),
+        array(
+            "id"    => "false",
+            "text"  => "-",
+            "color" => ""
+        )
+    );
+
     private $metodePelunasan = array(
         array(
             "id" => 'um',
@@ -326,6 +342,10 @@ class Pelunasanpiutang extends MY_Controller
         array(
             "id" => 'koreksi',
             "text" => 'Koreksi Kurs Bulan'
+        ),
+        array(
+            "id" => 'depo',
+            "text" => 'Deposit'
         )
     );
 
@@ -374,6 +394,16 @@ class Pelunasanpiutang extends MY_Controller
             "id" => "koreksi",
             "text" => '',
             "check" => 'false'
+        ),
+        array(
+            "id" => "depo",
+            "text" => '',
+            'status' => 'acc_pelunasan_piutang.status',
+            'status_value' => 'done',
+            "no_bukti" => "acc_pelunasan_piutang_summary_koreksi.no_pelunasan",
+            'id_detail' => "acc_pelunasan_piutang_summary_koreksi.id",
+            "table_detail" => 'acc_pelunasan_piutang_summary_koreksi',
+            "check" => 'true',
         )
 
     );
@@ -389,9 +419,51 @@ class Pelunasanpiutang extends MY_Controller
             if ($load == 'resume') {
                 $data = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
                 foreach ($data as &$row) {
-                    $koreksi = strtolower(trim($row->koreksi ?? ''));
+                    $koreksi = '';
                     $row->koreksi_get_coa = '';
                     $row->koreksi_text    = '';
+                    $row->coa_list        = [];
+                    $row->no_faktur       = '';
+                    $row->alat_pelunasan  = '';
+                    foreach ($this->m_pelunasanpiutang->get_list_summary_koreksi_by_id($no_pelunasan, $row->id) as $items) {
+
+                        $koreksi_text = "";
+                        $no_faktur = "";
+                        if ($row->mode == 'normal') {
+                            $koreksi = strtolower(trim($items->koreksi_id ?? ''));
+                            $row->alat_pelunasan = $items->alat_pelunasan;
+                        } else {
+                            foreach ($this->m_pelunasanpiutang->get_list_koreksi() as $gk) {
+                                if ($gk->kode === $items->koreksi_id) {
+                                    $koreksi_text = $gk->nama_koreksi;
+                                }
+                            }
+                        }
+
+                        if ($items->faktur_id != 0) {
+                            foreach ($this->m_pelunasanpiutang->get_data_faktur_by_code($no_pelunasan) as $fak) {
+                                if ($fak->faktur_id === $items->faktur_id) {
+                                    $no_faktur = $fak->no_faktur;
+                                    if ($row->mode === 'normal') {
+                                        $row->no_faktur  = $fak->no_faktur;
+                                    }
+                                }
+                            }
+                        }
+                        $row->coa_list[] = array(
+                            'kode_coa' => $items->kode_coa,
+                            'nama_coa' => $items->nama_coa,
+                            'posisi'   => $items->posisi,
+                            'koreksi'  => $items->koreksi_id,
+                            'head'     => $items->head,
+                            'nominal'  => $items->nominal,
+                            'koreksi_text' => $koreksi_text,
+                            'faktur_id' => $items->faktur_id,
+                            'no_faktur' => $no_faktur,
+                            'alat_pelunasan' => $items->alat_pelunasan
+                        );
+                    }
+
                     foreach ($this->m_pelunasanpiutang->get_list_koreksi() as $gk) {
                         if ($gk->kode === $koreksi) {
                             $row->koreksi_get_coa = $gk->get_coa;
@@ -404,6 +476,7 @@ class Pelunasanpiutang extends MY_Controller
                 $data = $this->m_pelunasanpiutang->get_data_faktur_by_code($no_pelunasan);
                 foreach ($data as &$row) {
                     $status_bayar = strtolower(trim($row->status_bayar ?? ''));
+                    $status_lebih = strtolower(trim($row->lebih_bayar ?? ''));
                     $row->status_text  = '-';
                     $row->status_color = 'label label-default';
 
@@ -413,6 +486,14 @@ class Pelunasanpiutang extends MY_Controller
                             $row->status_text  = $statusItem['text'];
                             $row->status_color = $statusItem['color'];
                             break; // stop loop jika sudah ketemu
+                        }
+                    }
+
+                    foreach ($this->statusLebih as $statusLebih) {
+                        if ($statusLebih["id"] === $status_lebih) {
+                            $row->status_text_lebih  = $statusLebih['text'];
+                            $row->status_color_lebih = $statusLebih['color'];
+                            break;
                         }
                     }
                 }
@@ -567,7 +648,7 @@ class Pelunasanpiutang extends MY_Controller
                             throw new \Exception('Data Faktur <b>' . $dt->no_faktur . '</b> sudah diinput  !', 200);
                         }
 
-                        if(empty($dt->no_faktur) || !isset($dt->no_faktur)){
+                        if (empty($dt->no_faktur) || !isset($dt->no_faktur)) {
                             throw new \Exception('No Faktur tidak boleh kosong  !', 200);
                         }
 
@@ -748,6 +829,12 @@ class Pelunasanpiutang extends MY_Controller
                             throw new \Exception('Summary Gagal di update !', 200);
                         }
 
+                        $result = $this->distribusi_pelunasan_otomatis($no_pelunasan);
+                        if (!empty($result)) {
+                            throw new \Exception('Data Gagal Disimpan2 !', 200);
+                        }
+
+
                         $callback = array('status' => 'success', 'message' => 'Data Berhasil dihapus', 'icon' => 'fa fa-check', 'type' => 'success');
                     }
                 }
@@ -821,7 +908,7 @@ class Pelunasanpiutang extends MY_Controller
     {
         $no_pelunasan = $this->input->post("no_pelunasan");
         $partner      = $this->input->post("partner"); // partner_id
-        $type         = $this->input->post('type'); // kas / uang muka
+        $type         = $this->input->post('type'); // kas / uang muka / depo
         $view = $this->load->view('modal/v_pelunasan_piutang_list_kas_modal', ["partner" => $partner, "no_pelunasan" => $no_pelunasan, "type" => $type], true);
         $this->output->set_status_header(200)
             ->set_content_type('application/json', 'utf-8')
@@ -835,7 +922,15 @@ class Pelunasanpiutang extends MY_Controller
             $type    = $this->input->post("type"); // kas,um, retur=''
 
             if (isset($_POST['start']) && isset($_POST['draw'])) {
-                $list = $this->m_pelunasanpiutang->get_datatables3($partner, $type);
+                if($type === 'depo'){
+                    $list = $this->m_pelunasanpiutang->get_datatables5($partner);
+                    $recordsTotal   =  $this->m_pelunasanpiutang->count_all5($partner);
+                    $recordsFiltered= $this->m_pelunasanpiutang->count_filtered5($partner);
+                } else {
+                    $list           = $this->m_pelunasanpiutang->get_datatables3($partner, $type);
+                    $recordsTotal   = $this->m_pelunasanpiutang->count_all3($partner, $type);
+                    $recordsFiltered= $this->m_pelunasanpiutang->count_filtered3($partner, $type);
+                }
                 $data = array();
                 $no = $_POST['start'];
                 foreach ($list as $field) {
@@ -853,10 +948,12 @@ class Pelunasanpiutang extends MY_Controller
                     $data[] = $row;
                 }
 
+
+
                 $output = array(
                     "draw" => $_POST['draw'],
-                    "recordsTotal" => $this->m_pelunasanpiutang->count_all3($partner, $type),
-                    "recordsFiltered" => $this->m_pelunasanpiutang->count_filtered3($partner, $type),
+                    "recordsTotal" => $recordsTotal,
+                    "recordsFiltered" => $recordsFiltered,
                     "data" => $data,
                 );
                 //output dalam format JSON
@@ -954,7 +1051,7 @@ class Pelunasanpiutang extends MY_Controller
                 $this->_module->startTransaction();
 
                 //lock tabel
-                $this->_module->lock_tabel('acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as  agmd WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_summary WRITE, acc_retur_penjualan as arp WRITE,   acc_pelunasan_piutang_summary_koreksi WRITE, acc_coa READ, currency_kurs as ck1 READ,currency_kurs as ck2 READ,currency_kurs as ck3 READ, currency_kurs as ck READ');
+                $this->_module->lock_tabel('acc_pelunasan_piutang WRITE, acc_pelunasan_piutang_metode WRITE, departemen as d READ, user READ, main_menu_sub READ,log_history WRITE, acc_bank_masuk as abm WRITE, acc_bank_masuk_detail as abmd WRITE, acc_kas_masuk as akm WRITE, acc_kas_masuk_detail as akmd WRITE, acc_giro_masuk as agm WRITE, acc_giro_masuk_detail as  agmd WRITE, acc_pelunasan_piutang_faktur WRITE, acc_pelunasan_piutang_summary WRITE, acc_retur_penjualan as arp WRITE,   acc_pelunasan_piutang_summary_koreksi WRITE, acc_coa READ, currency_kurs as ck1 READ,currency_kurs as ck2 READ,currency_kurs as ck3 READ, currency_kurs as ck READ, acc_pelunasan_piutang as app WRITE, acc_pelunasan_piutang_summary as apps WRITE, acc_pelunasan_piutang_summary_koreksi as appsk WRITE');
 
                 if (empty($no_pelunasan)) {
                     throw new \Exception('No Pelunasan Kosong !', 200);
@@ -997,6 +1094,8 @@ class Pelunasanpiutang extends MY_Controller
                         // get data metode pelunasan 
                         if ($type == 'retur') {
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_retur_by_id($cek->partner_id, ['no_bukti' => $no_bukti_ex]);
+                        } else if ($type === 'depo'){
+                            $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_deposit_by_id($cek->partner_id, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
                         } else {
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_by_id($cek->partner_id, $type, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
                         }
@@ -1041,12 +1140,20 @@ class Pelunasanpiutang extends MY_Controller
                         }
 
 
-                        if ($type == 'um') {
-                            $type_ket = 'Uang Muka';
-                        } else if ($type == 'kas') {
-                            $type_ket = 'Kas Bank';
-                        } else {
-                            $type_ket = 'Retur';
+                        // if ($type == 'um') {
+                        //     $type_ket = 'Uang Muka';
+                        // } else if ($type == 'kas') {
+                        //     $type_ket = 'Kas Bank';
+                        // } else if ($type == 'depo') {
+                        //     $type_ket = 'Deposit';
+                        // } else {
+                        // }
+                        
+                        $type_ket = '';
+                        foreach ($this->metodePelunasan as $metodeItems) {
+                            if ($metodeItems['id'] == $type) {
+                                $type_ket = $metodeItems['text'];
+                            }
                         }
 
                         $jenis_log = "edit";
@@ -1363,7 +1470,7 @@ class Pelunasanpiutang extends MY_Controller
             $where_valas = ["no_pelunasan" => $no_pelunasan, "tipe <> " => "koreksi"];
             $get_total_valas = $this->m_pelunasanpiutang->get_total_pelunasan($where_valas);
 
-            $get_curr   = $this->m_pelunasanpiutang->get_currency_by_pelunasan(['no_pelunasan' => $no_pelunasan, 'currency' => 'IDR']);
+            // $get_curr   = $this->m_pelunasanpiutang->get_currency_by_pelunasan(['no_pelunasan' => $no_pelunasan, 'currency' => 'IDR']);
 
             $get_curr_valas   = $this->m_pelunasanpiutang->get_currency_by_pelunasan(['no_pelunasan' => $no_pelunasan, 'currency <>' => 'IDR']);
 
@@ -1413,9 +1520,9 @@ class Pelunasanpiutang extends MY_Controller
 
             $insert_summary[] = array(
                 'tipe_currency' => 'Rp',
-                'currency_id'   => $get_curr->currency_id ?? 1,
-                'currency'      => $get_curr->currency ?? 'IDR',
-                'kurs'          => $get_curr->kurs ?? 1,
+                'currency_id'   =>  1,
+                'currency'      => 'IDR',
+                'kurs'          =>  1,
                 'no_pelunasan'  => $no_pelunasan,
                 'pelunasan_piutang_id' => $cek->id,
                 'total_piutang' => $total_piutang_rp,
@@ -1505,12 +1612,12 @@ class Pelunasanpiutang extends MY_Controller
             if ($posisi == 'D') {
                 $cek  = $this->m_pelunasanpiutang->get_data_by_code($no_pelunasan);
                 $data_mt = $this->m_pelunasanpiutang->get_data_metode_by_code($no_pelunasan);
-                if($data_mt){
-                    foreach ($data_mt as $mp){
+                if ($data_mt) {
+                    foreach ($data_mt as $mp) {
                         $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_by_id($cek->partner_id, 'um', ['no_bukti' => $mp->no_bukti, 'id' => $mp->id_bukti]);
-                        if($dt){
+                        if ($dt) {
                             $kode_coa = $dt->kode_coa;
-                            $get_nm   = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa'=>$kode_coa]);
+                            $get_nm   = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $kode_coa]);
                             $nama_coa = isset($get_nm->nama) ? $get_nm->nama : '';
                             // $this->coa_um[] =  array('posisi' => 'C', 'kode_coa' => $dt->kode_coa);
                             break;
@@ -1535,22 +1642,87 @@ class Pelunasanpiutang extends MY_Controller
         return array('kode_coa' => $kode_coa,  'nama_coa' => $nama_coa);
     }
 
+    function coaHead($selisih)
+    {
+        // 1163.01 = Piutang Dagang Lokal
+        $kode_coa  = '1163.01';
+        $get_nm   = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $kode_coa]);
+        $nama_coa = isset($get_nm->nama) ? $get_nm->nama : '';
+
+        if ($selisih > 0) {
+            $posisi_head = 'C';
+            $posisi_item = 'D';
+        } else {
+            $posisi_head = 'D';
+            $posisi_item = 'C';
+        }
+
+        return array('kode_coa' => $kode_coa,  'nama_coa' => $nama_coa, 'posisi' => $posisi_head, 'posisi_item' => $posisi_item);
+    }
 
     public function get_view_koreksi()
     {
         $no_pelunasan = $this->input->post("no_pelunasan");
         $id      = $this->input->post("id"); // id_summary
-        $jenis_koreksi = $this->input->post('jenis_koreksi');
+        $tipe_currency = $this->input->post('tipe_currency'); // Rp / Valas
+        $tipe_koreksi = $this->input->post('tipe_koreksi'); // um / koreksi
+
         $get_sum = $this->m_pelunasanpiutang->get_data_summary_by_id($id);
-        $coa_default_debit = $this->get_coa_default($jenis_koreksi, $get_sum, 'D', $no_pelunasan);
-        $coa_default_credit = $this->get_coa_default($jenis_koreksi, $get_sum, 'C', $no_pelunasan);
-        $get_coa_debit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'D', 'koreksi' => $jenis_koreksi])->row();
-        $get_coa_credit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'C',  'koreksi' => $jenis_koreksi])->row();
-        $view = $this->load->view('modal/v_pelunasan_piutang_koreksi_modal', ["id_summary" => $id, "no_pelunasan" => $no_pelunasan, 'jenis_koreksi' => $jenis_koreksi, 'get_sum' => $get_sum, 'get_coa_debit' => $get_coa_debit, 'get_coa_credit' => $get_coa_credit, 'coa_default_debit' => $coa_default_debit, 'coa_default_credit' => $coa_default_credit], true);
+
+        // get Coa Head D/C       
+        $coa_default_head = $this->coaHead($get_sum->selisih);
+
+        // $coa_default_debit = $this->get_coa_default($jenis_koreksi, $get_sum, 'D', $no_pelunasan);
+        // $coa_default_credit = $this->get_coa_default($jenis_koreksi, $get_sum, 'C', $no_pelunasan);
+
+
+        // $get_coa_debit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'D', 'koreksi' => $jenis_koreksi])->row();
+        // $get_coa_credit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'C',  'koreksi' => $jenis_koreksi])->row();
+        $koreksi   = 'normal'; // normal or split
+        $view = $this->load->view('modal/v_pelunasan_piutang_koreksi_modal', ["id_summary" => $id, "no_pelunasan" => $no_pelunasan, 'tipe_koreksi' => $tipe_koreksi, 'get_sum' => $get_sum, 'tipe_currency' => $tipe_currency, 'coa_head' => $coa_default_head, 'koreksi' => $koreksi], true);
         $this->output->set_status_header(200)
             ->set_content_type('application/json', 'utf-8')
             ->set_output(json_encode(['data' => $view]));
     }
+
+    function get_default_coa()
+    {
+
+        $no_pelunasan = $this->input->post("no_pelunasan");
+        $id      = $this->input->post("id_summary"); // id_summary
+        $koreksi = $this->input->post("koreksi");
+        $posisi = $this->input->post("posisi");
+
+        $get_sum = $this->m_pelunasanpiutang->get_data_summary_by_id($id);
+        // $selisih = isset($get_sum->selisih) ? $get_sum->selisih : 0;
+
+        if ($get_sum) {
+            $coa_default = $this->get_coa_default($koreksi, $get_sum, $posisi, $no_pelunasan);
+            echo json_encode([
+                'status' => true,
+                'kode_coa' => $coa_default['kode_coa'],
+                'nama_coa' => $coa_default['nama_coa'],
+            ]);
+        } else {
+            echo json_encode(['status' => false]);
+        }
+    }
+
+    // public function get_view_koreksi()
+    // {
+    //     $no_pelunasan = $this->input->post("no_pelunasan");
+    //     $id      = $this->input->post("id"); // id_summary
+    //     $jenis_koreksi = $this->input->post('jenis_koreksi');
+    //     $get_sum = $this->m_pelunasanpiutang->get_data_summary_by_id($id);
+    //     $coa_default_debit = $this->get_coa_default($jenis_koreksi, $get_sum, 'D', $no_pelunasan);
+    //     $coa_default_credit = $this->get_coa_default($jenis_koreksi, $get_sum, 'C', $no_pelunasan);
+    //     $get_coa_debit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'D', 'koreksi' => $jenis_koreksi])->row();
+    //     $get_coa_credit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'C',  'koreksi' => $jenis_koreksi])->row();
+    //     $view = $this->load->view('modal/v_pelunasan_piutang_koreksi_modal', ["id_summary" => $id, "no_pelunasan" => $no_pelunasan, 'jenis_koreksi' => $jenis_koreksi, 'get_sum' => $get_sum, 'get_coa_debit' => $get_coa_debit, 'get_coa_credit' => $get_coa_credit, 'coa_default_debit' => $coa_default_debit, 'coa_default_credit' => $coa_default_credit], true);
+    //     $this->output->set_status_header(200)
+    //         ->set_content_type('application/json', 'utf-8')
+    //         ->set_output(json_encode(['data' => $view]));
+    // }
 
 
     function save_koreksi()
@@ -1599,9 +1771,8 @@ class Pelunasanpiutang extends MY_Controller
 
                     $no_pelunasan  = $this->input->post('no_pelunasan');
                     $id_summary    = $this->input->post('id_summary');
-                    $jenis_koreksi  = $this->input->post('jenis_koreksi');
-                    $debit          = $this->input->post('debit');
-                    $credit        = $this->input->post('credit');
+                    $mode          = $this->input->post('mode');
+                    $log_edit_items = '';
 
                     // cek status done / cancel
                     $cek  = $this->m_pelunasanpiutang->get_data_by_code($no_pelunasan);
@@ -1615,17 +1786,21 @@ class Pelunasanpiutang extends MY_Controller
                     } else {
 
                         $get_sum = $this->m_pelunasanpiutang->get_data_summary_by_id($id_summary);
-
                         if (empty($get_sum)) {
                             throw new \Exception('Data Info Summary tidak ditemukan ', 200);
                         }
 
+                        if($get_sum->selisih < 0){
+                            $koreksi_tanda = "-";
+                        } else{
+                            $koreksi_tanda = "+";
+                        }
 
                         // update summary by id  
                         $tmp_update = array();
                         $data_update = array(
-                            'id'                    => $id_summary,
-                            'koreksi'               => $jenis_koreksi ?? '',
+                            'id'                 => $id_summary,
+                            'mode'               => $mode ?? '',
                         );
                         array_push($tmp_update, $data_update);
                         $update = $this->m_pelunasanpiutang->update_data_pelunasan_piutang_summary($tmp_update);
@@ -1636,33 +1811,179 @@ class Pelunasanpiutang extends MY_Controller
                         // delete summary coa by id lalu insert
                         $this->m_pelunasanpiutang->delete_pelunasan_piutang_summary_koreksi_by_id(['no_pelunasan' => $no_pelunasan, 'pelunasan_summary_id' => $id_summary]);
 
-                        $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $debit]);
-                        $data[] = array(
-                            'pelunasan_piutang_id'   => $cek->id,
-                            'no_pelunasan'          => $no_pelunasan,
-                            'pelunasan_summary_id'  => $id_summary,
-                            'posisi'                => 'D',
-                            'kode_coa'              => $debit,
-                            'nama_coa'              => $get_coa->nama ?? ''
-                        );
-                        $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $credit]);
-                        $data[] = array(
-                            'pelunasan_piutang_id'   => $cek->id,
-                            'no_pelunasan'          => $no_pelunasan,
-                            'pelunasan_summary_id'  => $id_summary,
-                            'posisi'                => 'C',
-                            'kode_coa'              => $credit,
-                            'nama_coa'              => $get_coa->nama ?? ''
-                        );
 
-                        $insert = $this->m_pelunasanpiutang->insert_data_pelunasan_piutang_summary_koreksi($data);
-                        if (!empty($insert)) {
-                            throw new \Exception('Gagal Menyimpan Koreksi', 500);
+                        if ($mode == "normal") {
+
+                            $koreksi = $this->input->post('koreksi'); // koreksi
+                            $debit   = $this->input->post('debit');
+                            $credit  = $this->input->post('credit');
+                            $faktur  = $this->input->post('faktur');
+                            $alat_pelunasan = $this->input->post('checkox_alat');
+                            $coa     = "";
+                            $alat    = "";
+
+                            $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $koreksi]);
+
+                            if (!$cek_koreksi) {
+                                throw new \Exception('Data Koreksi tidak ditemukan', 200);
+                            }
+
+                            if($get_sum->selisih < 0){
+                                $koreksi_tanda = "-";
+                            } else{
+                                $koreksi_tanda = "+";
+                            }
+
+                            if ($cek_koreksi->get_coa == 'false') {
+                                $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $debit]);
+                                $data[] = array(
+                                    'pelunasan_piutang_id'   => $cek->id,
+                                    'no_pelunasan'          => $no_pelunasan,
+                                    'pelunasan_summary_id'  => $id_summary,
+                                    'posisi'                => '',
+                                    'kode_coa'              => '',
+                                    'nama_coa'              => '',
+                                    'nominal'               => abs($get_sum->selisih),
+                                    'koreksi_id'            => $koreksi,
+                                    'faktur_id'             => $faktur,
+                                    'alat_pelunasan'        => $alat_pelunasan,
+                                    'koreksi_tanda'         => $koreksi_tanda
+                                );
+                                $alat = ($alat_pelunasan === 'true') ? "<br> Alat Pelunasan : Ya" : "";
+                            } else {
+                                // simpan logic normal...
+                                $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $debit]);
+                                $data[] = array(
+                                    'pelunasan_piutang_id'   => $cek->id,
+                                    'no_pelunasan'          => $no_pelunasan,
+                                    'pelunasan_summary_id'  => $id_summary,
+                                    'posisi'                => 'D',
+                                    'kode_coa'              => $debit,
+                                    'nama_coa'              => $get_coa->nama ?? '',
+                                    'nominal'               => abs($get_sum->selisih),
+                                    'koreksi_id'            => $koreksi,
+                                    'koreksi_tanda'         => $koreksi_tanda
+                                );
+                                $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $credit]);
+                                $data[] = array(
+                                    'pelunasan_piutang_id'   => $cek->id,
+                                    'no_pelunasan'          => $no_pelunasan,
+                                    'pelunasan_summary_id'  => $id_summary,
+                                    'posisi'                => 'C',
+                                    'kode_coa'              => $credit,
+                                    'nama_coa'              => $get_coa->nama ?? '',
+                                    'nominal'               => abs($get_sum->selisih),
+                                    'koreksi_id'            => $koreksi,
+                                    'koreksi_tanda'         => $koreksi_tanda
+                                );
+                                $coa = " <br> Debit : " . $debit . " <br> Credit : $credit";
+                            }
+
+
+                            $insert = $this->m_pelunasanpiutang->insert_data_pelunasan_piutang_summary_koreksi($data);
+                            if (!empty($insert)) {
+                                throw new \Exception('Gagal Menyimpan Koreksi', 500);
+                            }
+
+                            // if ($get_sum->tipe_currency == 'Rp') {
+
+                            //     // update k pelunasna Rp
+                            //     if ($koreksi === 'lebih_bayar' && isset($faktur)) {
+
+                            //         $get_fak = $this->m_pelunasanpiutang->get_data_faktur_by_code2(['no_pelunasan' => $no_pelunasan, 'faktur_id'=>$faktur])->row();
+
+                            //         $pel_fak_id = $get_fak->id;
+                            //         $pel_rp     = $get_fak->pelunasan_rp;
+                            //         $pel_rp_update =  (float) $pel_rp + (float) abs($get_sum->selisih);
+                            //         $data_update = array();
+                            //         $tmp_update  = array();
+                            //         $data_update = array(
+                            //             'id' => $pel_fak_id,
+                            //             'pelunasan_rp' => $pel_rp_update,
+                            //             'lebih_bayar' => true,
+
+                            //         );
+                            //         array_push($tmp_update, $data_update);
+                            //         $update = $this->m_pelunasanpiutang->update_pelunasan_faktur_by_kode($tmp_update, $no_pelunasan);
+                            //     };
+                            // }
+
+
+                            $log_edit_items  = 'Koreksi Info ' . $get_sum->tipe_currency . " Mode " . $mode . " <br>  Koreksi " . ($cek_koreksi->nama_koreksi ?? '') . " " . $alat . " " . $coa;
                         }
 
-                        $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $jenis_koreksi]);
+                        if ($mode == "split") {
 
-                        $log_edit_items  = 'Kokresi Info ' . $get_sum->tipe_currency . " = " . ($cek_koreksi->nama_koreksi ?? '');
+                            $coa_head     = $this->input->post("coa_head");
+                            $posisi_head  = $this->input->post("posisi_head");
+                            $nominal_jurnal = $this->input->post("nominal_jurnal");
+                            // $nominal_head = $this->input->post("nominal_head");
+
+                            $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $coa_head]);
+                            $data[] = array(
+                                'pelunasan_piutang_id'  => $cek->id,
+                                'no_pelunasan'          => $no_pelunasan,
+                                'pelunasan_summary_id'  => $id_summary,
+                                'posisi'                => $posisi_head,
+                                'kode_coa'              => $coa_head,
+                                'nama_coa'              => $get_coa->nama ?? '',
+                                'nominal'               => ($nominal_jurnal),
+                                'head'                  => 'true',
+                                'koreksi_id'            => '',
+                                'faktur_id'             => 0,
+                                'alat_pelunasan'        => 'false',
+                                'koreksi_tanda'         => $koreksi_tanda
+                            );
+
+                            $detail = json_decode($this->input->post('detail'), true);
+                            if (!$detail) {
+                                throw new \Exception('Data Item Koreksi kosong !', 200);
+                            }
+
+                            $log_tmp = "";
+                            $alat    = "";
+                            foreach ($detail as $d) {
+                                // insert ke tabel detail...
+                                $coa = $d['coa'] ?? '';
+                                $nama_coa = "";
+
+                                // jika ada COA → ambil nama_coa
+                                if (!empty($coa)) {
+                                    $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $coa]);
+                                    $nama_coa = $get_coa->nama ?? '';
+                                }
+
+                                $data[] = array(
+                                    'pelunasan_piutang_id'  => $cek->id,
+                                    'no_pelunasan'          => $no_pelunasan,
+                                    'pelunasan_summary_id'  => $id_summary,
+                                    'posisi'                => $d['posisi'],
+                                    'kode_coa'              => $d['coa'] ?? '',
+                                    'nama_coa'              => $nama_coa ?? '',
+                                    'nominal'               => $d['nominal'],
+                                    'head'                  => 'false',
+                                    'koreksi_id'            => $d['koreksi'],
+                                    'faktur_id'             => $d['faktur'] ?? 0,
+                                    'alat_pelunasan'        => $d['checkbox_alat'] ?? false,
+                                    'koreksi_tanda'         => $koreksi_tanda
+
+                                );
+                                $alat = ($d['checkbox_alat'] === true) ? " Alat Pelunasan : Ya" : "";
+                                $cek_k = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $d['koreksi']]);
+                                $infoCoa = isset($d['coa']) ? "CoA : " . $d['coa'] : "";
+                                $posisi   = (isset($d['posisi'])) ? " Posisi : " . $d['posisi'] : " ";
+                                $log_tmp .= "<br> " . ($cek_k->nama_koreksi ?? '') . ' ' . $infoCoa . " " . $posisi . " Nominal : " . $d['nominal'] . " " . $alat;
+                            }
+
+                            // var_dump($data);
+
+                            $log_edit_items = 'Koreksi Info ' . $get_sum->tipe_currency . " Mode " . $mode . "  <br> Head <br> CoA : " . $coa_head . " Posisi : " . $posisi_head . " Nominal Jurnal: " . $nominal_jurnal . " <br> Items " . $log_tmp;
+
+                            $insert = $this->m_pelunasanpiutang->insert_data_pelunasan_piutang_summary_koreksi($data);
+                            if (!empty($insert)) {
+                                throw new \Exception('Gagal Menyimpan Koreksi', 500);
+                            }
+                        }
 
                         $jenis_log = "edit";
                         $note_log  = "Edit Koreksi Info " . $no_pelunasan . " <br> " . $log_edit_items;
@@ -1673,7 +1994,6 @@ class Pelunasanpiutang extends MY_Controller
                             'note'      => $note_log
                         );
                         $this->_module->gen_history_ip($sub_menu, $username, $data_history);
-
 
                         $callback = array('status' => 'success', 'message' => 'Data Koreksi Info Berhasil diubah !', 'icon' => 'fa fa-success', 'type' => 'success');
                     }
@@ -1724,7 +2044,7 @@ class Pelunasanpiutang extends MY_Controller
             $this->m_pelunasanpiutang->delete_pelunasan_piutang_summary_koreksi_by_id(['no_pelunasan' => $no_pelunasan, 'pelunasan_summary_id' => $id_summary]);
 
             $tmp_update = array();
-            $data_update = array('id' => $id_summary, 'koreksi' => '');
+            $data_update = array('id' => $id_summary, 'koreksi' => '', 'mode' => '');
             array_push($tmp_update, $data_update);
             $update = $this->m_pelunasanpiutang->update_data_pelunasan_piutang_summary($tmp_update);
 
@@ -1732,7 +2052,7 @@ class Pelunasanpiutang extends MY_Controller
                 throw new \Exception('Gagal menghapus Data', 500);
             }
 
-            $log_edit_items  = 'Kokresi Info ' . $get_sum->tipe_currency;
+            $log_edit_items  = 'Koreksi Info ' . $get_sum->tipe_currency;
 
 
             $jenis_log = "cancel";
@@ -1843,7 +2163,7 @@ class Pelunasanpiutang extends MY_Controller
 
                         $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $jenis_koreksi]);
 
-                        $log_edit_items  = 'Kokresi Info ' . $get_sum->tipe_currency . " = " . ($cek_koreksi->nama_koreksi ?? '');
+                        $log_edit_items  = 'Koreksi Info ' . $get_sum->tipe_currency . " = " . ($cek_koreksi->nama_koreksi ?? '');
 
                         $jenis_log = "edit";
                         $note_log  = "Edit Koreksi Info " . $no_pelunasan . " <br> " . $log_edit_items;
@@ -1884,7 +2204,8 @@ class Pelunasanpiutang extends MY_Controller
         $id           = $this->input->post('id'); // id pelunasan_piutang_faktur
         $get_data     = $this->m_pelunasanpiutang->get_acc_pelunasan_piutang_faktur_id($id);
         $list_status_bayar = $this->statusBayar;
-        $view = $this->load->view('modal/v_pelunasan_piutang_faktur_edit_modal', ["partner" => $partner, "no_pelunasan" => $no_pelunasan, "id_phi" => $id, "get_data" => $get_data, 'statusBayar' => $list_status_bayar], true);
+        $list_bayar_lebih = $this->statusLebih;
+        $view = $this->load->view('modal/v_pelunasan_piutang_faktur_edit_modal', ["partner" => $partner, "no_pelunasan" => $no_pelunasan, "id_phi" => $id, "get_data" => $get_data, 'statusBayar' => $list_status_bayar, 'statusLebih' => $list_bayar_lebih], true);
         $this->output->set_status_header(200)
             ->set_content_type('application/json', 'utf-8')
             ->set_output(json_encode(['data' => $view]));
@@ -1948,6 +2269,7 @@ class Pelunasanpiutang extends MY_Controller
                 $no_pelunasan  = $this->input->post('no_pelunasan');
                 $no_faktur     = $this->input->post('no_faktur');
                 $status_bayar  = $this->input->post('status_bayar');
+                $bayar_lebih   = $this->input->post('bayar_lebih');
                 if (empty($no_pelunasan)) {
                     throw new \Exception('No Pelunasan Kosong !', 200);
                 }
@@ -1981,7 +2303,9 @@ class Pelunasanpiutang extends MY_Controller
                             'id' => $id,
                             'pelunasan_rp' => $pelunasan_rp,
                             'pelunasan_valas' => $pelunasan_valas,
-                            'status_bayar' => $status_bayar
+                            'status_bayar' => $status_bayar,
+                            // 'lebih_bayar' => $bayar_lebih,
+
                         );
 
                         array_push($tmp_update, $data_update);
@@ -2032,8 +2356,8 @@ class Pelunasanpiutang extends MY_Controller
 
                             if ($status_bayar == 'lunas') {
                                 $cek = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
-                                foreach($cek as $ck){
-                                    if($ck->keterangan == 'Uang Muka') {
+                                foreach ($cek as $ck) {
+                                    if ($ck->keterangan == 'Uang Muka') {
                                         throw new \Exception('Status Bayar tidak bisa diubah ke <b>Lunas</b>, Karena Pelunasan memakai <b>Uang Muka</b> !', 200);
                                     }
                                 }
@@ -2367,6 +2691,7 @@ class Pelunasanpiutang extends MY_Controller
             $tmp_update2 =  array();
             $tmp_update3 =  array();
             $tmp_update4 =  array();
+            $tmp_update5 =  array();
             $head_entries =  array();
             $items_entries =  array();
             // $data_update3 =  array();
@@ -2389,7 +2714,7 @@ class Pelunasanpiutang extends MY_Controller
                                 $create_jurnal = true;
                             }
                         } else { // selisih == 0 atau selisih > 0
-                            throw new \Exception('Nominal tidak Valid !', 200);
+                            throw new \Exception('Nominal Uang Muka tidak Valid !', 200);
                         }
                     }
                 }
@@ -2482,27 +2807,237 @@ class Pelunasanpiutang extends MY_Controller
                 $list_coa_koreksi = "";
                 $get_selisih = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
                 $tgl_transaksi = $cek->tanggal_transaksi;
+                $row_items     = 1;
                 foreach ($get_selisih as $gs) {
 
                     if ($gs->selisih > 0 || $gs->selisih < 0) { // rugi / laba
-                        if (empty($gs->koreksi)) {
+
+                        $kode_coa_head  = "";
+                        $posisi_coa_head  = "";
+                        $sum_nominal_head  = 0;
+                        $total_nominal_items = 0;
+                        $nominal_head  = 0;
+                        $total_credit  = 0;
+                        $total_debit   = 0;
+
+                        if(!isset($gs->mode)){
+                            throw new \Exception('Koreksi Masih kosong ' . $gs->tipe_currency . ' ! ', 422);
+                        }
+
+                        $get_koreksi  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'apps.no_pelunasan' => $no_pelunasan])->result();
+                        foreach ($get_koreksi as $gk) {
+
+                            if ($gk->mode === 'split') {
+
+                                if ($gk->head === 'true') {
+
+                                    if ($gs->tipe_currency == 'Rp') {
+                                        if (empty($jurnal)) {
+
+                                            if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl_transaksi)) . '/' . date('m', strtotime($tgl_transaksi)), true)
+                                                ->generate("{$kodeJurnal}/", '/%05d')->get()) {
+                                                throw new \Exception("No jurnal tidak terbuat", 500);
+                                            }
+                                            // $items_entries = array();
+                                            $row_items     = 1;
+                                            $head_entries = array(
+                                                'kode' => $jurnal,
+                                                'tanggal_dibuat' => $tgl_transaksi,
+                                                'tanggal_posting' => $tgl,
+                                                'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                                                'origin'        => $no_pelunasan,
+                                                'status'        => 'posted',
+                                                'tipe'          => $kodeJurnal,
+                                                'reff_note'     => $cek->partner_nama ?? ''
+                                            );
+                                        }
+
+                                        if (!$gk->kode_coa || !$gk->nama_coa) {
+                                            $coaPosisi  = ($gk->posisi === 'D') ? "Debit" : "Credit";
+                                            throw new \Exception('CoA ' . $coaPosisi . ' belum dipilih', 422);
+                                        }
+
+                                        $items_entries[] = array(
+                                            'kode'          => $jurnal,
+                                            'nama'          => 'Koreksi',
+                                            'reff_note'     => 'Pelunasan Piutang',
+                                            'partner'       => $cek->partner_id, // partner_id
+                                            'kode_coa'      => $gk->kode_coa,
+                                            'posisi'        => $gk->posisi,
+                                            'nominal_curr'  => abs($gk->nominal),
+                                            'kurs'          => $gs->kurs,
+                                            'kode_mua'      => $gs->currency,
+                                            'nominal'       => abs($gk->nominal * $gs->kurs),
+                                            'row_order'     => $row_items
+                                        );
+                                        $row_items++;
+                                    }
+                                    ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
+                                    $nominal_head = $nominal_head + abs($gk->nominal);
+                                } else { // false
+
+                                    $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $gk->koreksi_id]);
+                                    if (!$cek_koreksi) {
+                                        throw new \Exception('Koreksi ' . $gs->tipe_currency . ' tidak ditemukan / Kosong  ', 422);
+                                    }
+                                    if (isset($cek_koreksi)) {
+                                        if ($cek_koreksi->get_coa == 'true') {
+                                            if (!$gk->kode_coa || !$gk->nama_coa) {
+                                                $coaPosisi  = ($gk->posisi === 'D') ? "Debit" : "Credit";
+                                                throw new \Exception('CoA ' . $coaPosisi . ' belum dipilih', 422);
+                                            }
+
+                                            if ($gs->tipe_currency == 'Rp') {
+
+                                                if (empty($jurnal)) {
+
+                                                    if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl_transaksi)) . '/' . date('m', strtotime($tgl_transaksi)), true)
+                                                        ->generate("{$kodeJurnal}/", '/%05d')->get()) {
+                                                        throw new \Exception("No jurnal tidak terbuat", 500);
+                                                    }
+                                                    // $items_entries = array();
+                                                    $row_items     = 1;
+                                                    $head_entries = array(
+                                                        'kode' => $jurnal,
+                                                        'tanggal_dibuat' => $tgl_transaksi,
+                                                        'tanggal_posting' => $tgl,
+                                                        'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                                                        'origin'        => $no_pelunasan,
+                                                        'status'        => 'posted',
+                                                        'tipe'          => $kodeJurnal,
+                                                        'reff_note'     => $cek->partner_nama ?? ''
+                                                    );
+                                                }
+
+                                                if (empty($gk->kode_coa)) {
+                                                    throw new \Exception("CoA " . (($gk->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
+                                                }
+
+                                                if ($gk->head == 'false') {
+                                                    $items_entries[] = array(
+                                                        'kode'          => $jurnal,
+                                                        'nama'          => 'Koreksi ' . $cek_koreksi->nama_koreksi ?? '',
+                                                        'reff_note'     => ($gk->koreksi_id <> 'selisih_kurs_akhir_bulan') ? 'Pelunasan Piutang' : '',
+                                                        'partner'       => $cek->partner_id, // partner_id
+                                                        'kode_coa'      => $gk->kode_coa,
+                                                        'posisi'        => $gk->posisi,
+                                                        'nominal_curr'  => abs($gk->nominal),
+                                                        'kurs'          => $gs->kurs,
+                                                        'kode_mua'      => $gs->currency,
+                                                        'nominal'       => abs($gk->nominal * $gs->kurs),
+                                                        'row_order'     => $row_items
+                                                    );
+                                                    $row_items++;
+                                                }
+                                            }
+                                            ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
+                                            $sum_nominal_head = $sum_nominal_head + abs($gk->nominal);
+                                            $total_nominal_items = $total_nominal_items + abs($gk->nominal);
+                                        } else {
+
+                                            $total_nominal_items = $total_nominal_items + abs($gk->nominal);
+                                        }
+                                    }
+                                }
+                            } else if ($gk->mode === 'normal') {
+
+                                if ($gk->head === 'false') {
+
+                                    $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $gk->koreksi_id]);
+                                    if (!$cek_koreksi) {
+                                        throw new \Exception('Koreksi ' . $gs->tipe_currency . ' tidak ditemukan / Kosong  ', 422);
+                                    }
+
+                                    if (isset($cek_koreksi)) {
+                                        if ($cek_koreksi->get_coa == 'true') {
+                                            if (!$gk->kode_coa || !$gk->nama_coa) {
+                                                $coaPosisi  = ($gk->posisi === 'D') ? "Debit" : "Credit";
+                                                throw new \Exception('CoA ' . $coaPosisi . ' belum dipilih', 422);
+                                            }
+
+                                            if ($gs->tipe_currency == 'Rp') {
+
+                                                if (empty($jurnal)) {
+
+                                                    if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl_transaksi)) . '/' . date('m', strtotime($tgl_transaksi)), true)
+                                                        ->generate("{$kodeJurnal}/", '/%05d')->get()) {
+                                                        throw new \Exception("No jurnal tidak terbuat", 500);
+                                                    }
+                                                    // $items_entries = array();
+                                                    $row_items     = 1;
+                                                    $head_entries = array(
+                                                        'kode' => $jurnal,
+                                                        'tanggal_dibuat' => $tgl_transaksi,
+                                                        'tanggal_posting' => $tgl,
+                                                        'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                                                        'origin'        => $no_pelunasan,
+                                                        'status'        => 'posted',
+                                                        'tipe'          => $kodeJurnal,
+                                                        'reff_note'     => $cek->partner_nama ?? ''
+                                                    );
+                                                }
+
+                                                if (empty($gk->kode_coa)) {
+                                                    throw new \Exception("CoA " . (($gk->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
+                                                }
+
+                                                if ($gk->head == 'false') {
+                                                    $items_entries[] = array(
+                                                        'kode'          => $jurnal,
+                                                        'nama'          => 'Koreksi ' . $cek_koreksi->nama_koreksi ?? '',
+                                                        'reff_note'     => ($gk->koreksi_id <> 'selisih_kurs_akhir_bulan') ? 'Pelunasan Piutang' : '',
+                                                        'partner'       => $cek->partner_id, // partner_id
+                                                        'kode_coa'      => $gk->kode_coa,
+                                                        'posisi'        => $gk->posisi,
+                                                        'nominal_curr'  => abs($gk->nominal),
+                                                        'kurs'          => $gs->kurs,
+                                                        'kode_mua'      => $gs->currency,
+                                                        'nominal'       => abs($gk->nominal * $gs->kurs),
+                                                        'row_order'     => $row_items
+                                                    );
+                                                    $row_items++;
+                                                    ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    throw new \Exception('Mode Koreksi Normal Tidak Valid', 422);
+                                }
+                            } else {
+                                throw new \Exception('Mode Koreksi Tidak Valid', 422);
+                            }
+                        }
+
+                        if($gs->mode === "split") {
+                            if ((float) round(abs($gs->selisih), 2) != (float) round($total_nominal_items, 2)) {
+                                throw new \Exception('Nominal Koreksi ' . $gs->tipe_currency . ' tidak sama antara Header dan Item koreksi', 422);
+                            }
+
+                        }
+
+                        if ((float) round($total_credit) != (float) round($total_debit)) {
+                            throw new \Exception('Nominal Debit dan Credit tidak sama di Koreksi ' . $gs->tipe_currency . ' ! ', 422);
+                        }
+
+                        if (empty($get_koreksi)) {
                             throw new \Exception('Koreksi ' . $gs->tipe_currency . ' belum dipilih', 422);
                         }
 
-                        $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $gs->koreksi]);
-                        if (isset($cek_koreksi)) {
-                            if ($cek_koreksi->get_coa == 'true') {
-                                // cek coa koreksi sudah diisi atau belum
-                                $coa_debit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'posisi' => 'D', 'koreksi' => $gs->koreksi])->row();
-                                if (empty($coa_debit)) {
-                                    throw new \Exception('CoA Debit belum dipilih', 422);
-                                }
-                                $get_coa_credit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'posisi' => 'C',  'koreksi' => $gs->koreksi])->row();
-                                if (empty($get_coa_credit)) {
-                                    throw new \Exception('CoA Credits belum dipilih', 422);
-                                }
-                            }
-                        }
+                        // $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $gs->koreksi]);
+                        // if (isset($cek_koreksi)) {
+                        //     if ($cek_koreksi->get_coa == 'true') {
+                        //         // cek coa koreksi sudah diisi atau belum
+                        //         $coa_debit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'posisi' => 'D', 'koreksi' => $gs->koreksi])->row();
+                        //         if (empty($coa_debit)) {
+                        //             throw new \Exception('CoA Debit belum dipilih', 422);
+                        //         }
+                        //         $get_coa_credit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'posisi' => 'C',  'koreksi' => $gs->koreksi])->row();
+                        //         if (empty($get_coa_credit)) {
+                        //             throw new \Exception('CoA Credits belum dipilih', 422);
+                        //         }
+                        //     }
+                        // }
 
                         // cek total_piutang  di summary
                         $result_selisih = (float) $gs->total_piutang - ((float) $gs->total_pelunasan + (float) $gs->total_koreksi);
@@ -2510,65 +3045,65 @@ class Pelunasanpiutang extends MY_Controller
                             throw new \Exception('perhitungan Selisih ' . $gs->tipe_currency . ' tidak Valid !', 422);
                         }
 
-                        if (isset($cek_koreksi)) {
-                            if ($cek_koreksi->get_coa == 'true') { // kebentuk jurnal entries berdasarkan coa yang dipilih 
+                        // if (isset($cek_koreksi)) {
+                        //     if ($cek_koreksi->get_coa == 'true') { // kebentuk jurnal entries berdasarkan coa yang dipilih 
 
-                                if ($gs->tipe_currency == 'Rp') {
+                        //         if ($gs->tipe_currency == 'Rp') {
 
-                                    if (empty($jurnal)) {
+                        //             if (empty($jurnal)) {
 
-                                        if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl_transaksi)) . '/' . date('m', strtotime($tgl_transaksi)), true)
-                                            ->generate("{$kodeJurnal}/", '/%05d')->get()) {
-                                            throw new \Exception("No jurnal tidak terbuat", 500);
-                                        }
-                                        // $items_entries = array();
-                                        $row_items     = 1;
-                                        $head_entries = array(
-                                            'kode' => $jurnal,
-                                            'tanggal_dibuat' => $tgl_transaksi,
-                                            'tanggal_posting' => $tgl,
-                                            'periode'       => date("y/m", strtotime($tgl_transaksi)),
-                                            'origin'        => $no_pelunasan,
-                                            'status'        => 'posted',
-                                            'tipe'          => $kodeJurnal,
-                                            'reff_note'     => $cek->partner_nama ?? ''
-                                        );
-                                    }
+                        //                 if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl_transaksi)) . '/' . date('m', strtotime($tgl_transaksi)), true)
+                        //                     ->generate("{$kodeJurnal}/", '/%05d')->get()) {
+                        //                     throw new \Exception("No jurnal tidak terbuat", 500);
+                        //                 }
+                        //                 // $items_entries = array();
+                        //                 $row_items     = 1;
+                        //                 $head_entries = array(
+                        //                     'kode' => $jurnal,
+                        //                     'tanggal_dibuat' => $tgl_transaksi,
+                        //                     'tanggal_posting' => $tgl,
+                        //                     'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                        //                     'origin'        => $no_pelunasan,
+                        //                     'status'        => 'posted',
+                        //                     'tipe'          => $kodeJurnal,
+                        //                     'reff_note'     => $cek->partner_nama ?? ''
+                        //                 );
+                        //             }
 
-                                    $data_koreksi_coa =  $this->m_pelunasanpiutang->get_coa_summary_id(['appsk.no_pelunasan' => $no_pelunasan, 'appsk.pelunasan_summary_id' => $gs->id])->result();
-                                    if (empty($data_koreksi_coa)) {
-                                        throw new \Exception('CoA Koreksi ' . $gs->tipe_currency . ' Tidak di temukan !', 422);
-                                    }
-                                    // looping coa 
-                                    foreach ($data_koreksi_coa as $cok) {
-                                        if (empty($cok->kode_coa)) {
-                                            throw new \Exception("CoA " . (($cok->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
-                                        }
-                                        $items_entries[] = array(
-                                            'kode'          => $jurnal,
-                                            'nama'          => 'Koreksi ' . $cek_koreksi->nama_koreksi ?? '',
-                                            'reff_note'     => ($cok->koreksi <> 'selisih_kurs_akhir_bulan') ? 'Pelunasan Piutang' : '',
-                                            'partner'       => $cek->partner_id, // partner_id
-                                            'kode_coa'      => $cok->kode_coa,
-                                            'posisi'        => $cok->posisi,
-                                            'nominal_curr'  => abs($gs->selisih),
-                                            'kurs'          => $gs->kurs,
-                                            'kode_mua'      => $gs->currency,
-                                            'nominal'       => abs($gs->selisih * $gs->kurs),
-                                            'row_order'     => $row_items
-                                        );
-                                        $row_items++;
-                                    }
-                                }
-                            }
-                        }
+                        //             $data_koreksi_coa =  $this->m_pelunasanpiutang->get_coa_summary_id(['appsk.no_pelunasan' => $no_pelunasan, 'appsk.pelunasan_summary_id' => $gs->id])->result();
+                        //             if (empty($data_koreksi_coa)) {
+                        //                 throw new \Exception('CoA Koreksi ' . $gs->tipe_currency . ' Tidak di temukan !', 422);
+                        //             }
+                        //             // looping coa 
+                        //             foreach ($data_koreksi_coa as $cok) {
+                        //                 if (empty($cok->kode_coa)) {
+                        //                     throw new \Exception("CoA " . (($cok->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
+                        //                 }
+                        //                 $items_entries[] = array(
+                        //                     'kode'          => $jurnal,
+                        //                     'nama'          => 'Koreksi ' . $cek_koreksi->nama_koreksi ?? '',
+                        //                     'reff_note'     => ($cok->koreksi <> 'selisih_kurs_akhir_bulan') ? 'Pelunasan Piutang' : '',
+                        //                     'partner'       => $cek->partner_id, // partner_id
+                        //                     'kode_coa'      => $cok->kode_coa,
+                        //                     'posisi'        => $cok->posisi,
+                        //                     'nominal_curr'  => abs($gs->selisih),
+                        //                     'kurs'          => $gs->kurs,
+                        //                     'kode_mua'      => $gs->currency,
+                        //                     'nominal'       => abs($gs->selisih * $gs->kurs),
+                        //                     'row_order'     => $row_items
+                        //                 );
+                        //                 $row_items++;
+                        //             }
+                        //         }
+                        //     }
+                        // }
                     }
                 }
             }
 
             // update langsung ke faktur piutang_rp = piutang_rp - pelunasan_rp 
             // get_list_faktur
-            $get_inv = $this->m_pelunasanpiutang->get_data_faktur_by_code2(['no_pelunasan' => $no_pelunasan]);
+            $get_inv = $this->m_pelunasanpiutang->get_data_faktur_by_code2(['no_pelunasan' => $no_pelunasan])->result();
             foreach ($get_inv as $gi) {
                 $getInv = $this->m_pelunasanpiutang->get_faktur_by_kode(['no_faktur_internal' => $gi->no_faktur, 'lunas' => 0, 'faktur.id' => $gi->faktur_id])->row();
                 if ($getInv) {
@@ -2721,8 +3256,25 @@ class Pelunasanpiutang extends MY_Controller
                         if (!isset($cek_mt_koreksi)) {
                             throw new \Exception('Koreksi Kurs Bulan tidak ditemukan !', 200);
                         }
+                    } else if($mt->tipe2 == 'depo'){
+                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('depo', ['acc_pelunasan_piutang.status' => 'done', 'acc_pelunasan_piutang.no_pelunasan' => $mt->no_bukti, 'acc_pelunasan_piutang_summary_koreksi.id' => $mt->id_bukti, 'acc_pelunasan_piutang_summary_koreksi.lunas' => 0]);
+                        if (isset($cek_mt)) {
+                            if ((float) $cek_mt->total_rp == (float) $mt->total_rp && (float) $cek_mt->total_valas == (float) $mt->total_valas) {
+                                $data_update5 = array(
+                                    'id'  => $mt->id_bukti,
+                                    'lunas'   => 1
+                                );
+                                $tmp_update5 =  array();
+                                array_push($tmp_update5, $data_update5);
+                            } else {
+                                throw new \Exception('Nominal Metode Pelunasan Deposit  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                            }
+                        } else {
+                            throw new \Exception('Metode Pelunasan Deposit Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                        }
+                        
                     } else {
-                        throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas/Retur  !', 200);
+                        throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas/Retur/Deposit  !', 200);
                     }
                 }
             } else {
@@ -2764,6 +3316,13 @@ class Pelunasanpiutang extends MY_Controller
 
             if ($tmp_update4) { // update invoice retur
                 $result = $this->m_pelunasanhutang->update_kas_bank_kode($tmp_update4, 'acc_retur_penjualan');
+                if ($result !== "") {
+                    throw new \Exception('Gagal Update Retur, Tidak ada data yang diperbaharui  !', 200);
+                }
+            }
+
+            if ($tmp_update5) { // update deposit di pelunasan
+                $result = $this->m_pelunasanhutang->update_kas_bank_kode($tmp_update5, 'acc_pelunasan_piutang_summary_koreksi');
                 if ($result !== "") {
                     throw new \Exception('Gagal Update Retur, Tidak ada data yang diperbaharui  !', 200);
                 }
@@ -2915,6 +3474,17 @@ class Pelunasanpiutang extends MY_Controller
                                 }
                             }
 
+                            // cek apa pelunasan terdapat koreksi deposit
+                            $data_sum = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
+                            foreach ($data_sum as $row) {
+                                foreach ($this->m_pelunasanpiutang->get_list_summary_koreksi_by_id($no_pelunasan, $row->id) as $items) {
+                                    if($items->koreksi_id === 'deposit' && $items->lunas == 1) {
+                                        throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah terpakai oleh Pelunasan .", 200);
+                                    }
+
+                                }
+                            }
+
                             $list_mt  = $this->m_pelunasanpiutang->get_data_metode_by_code($no_pelunasan);
 
                             foreach ($list_mt as $mt) {
@@ -2949,10 +3519,10 @@ class Pelunasanpiutang extends MY_Controller
                         $this->_module->gen_history_ip($sub_menu, $username, $data_history);
 
 
-                        $result2 = $this->hitung_summary($no_pelunasan);
-                        if (!empty($result2)) {
-                            throw new \Exception('Summary Gagal di update !', 200);
-                        }
+                        // $result2 = $this->hitung_summary($no_pelunasan);
+                        // if (!empty($result2)) {
+                        //     throw new \Exception('Summary Gagal di update !', 200);
+                        // }
 
                         $callback = array('status' => 'success', 'message' => 'Pelunasan Piutang Berhasil dibatalkan', 'icon' => 'fa fa-check', 'type' => 'success');
                     }
@@ -2974,5 +3544,16 @@ class Pelunasanpiutang extends MY_Controller
             // unlock table
             $this->_module->unlock_tabel();
         }
+    }
+
+
+    function get_list_faktur()
+    {
+
+        $name             = $this->input->post('name');
+        $no_pelunasan     = $this->input->post('no_pelunasan');
+
+        $callback = $this->m_pelunasanpiutang->get_list_faktur_by_kode($name, $no_pelunasan);
+        echo json_encode($callback);
     }
 }

@@ -110,7 +110,8 @@
                 pelunasan_rp: pelunasan_rp,
                 pelunasan_valas: pelunasan_valas,
                 no_faktur : no_faktur,
-                status_bayar : $("#status_bayar").val()
+                status_bayar : $("#status_bayar").val(),
+                // bayar_lebih : $("#bayar_lebih").val()
             },
             success: function(data) {
                 if (data.status == 'failed') {

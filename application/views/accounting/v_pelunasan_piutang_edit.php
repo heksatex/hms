@@ -81,11 +81,20 @@
             /* tinggi tetap */
             line-height: 1.2;
             overflow: hidden;
+            margin-top: 3px;
+            padding: 4px;
+            background: #f7f7f7;
+            border-radius: 4px;
             /* jangan biarkan mempengaruhi layout */
         }
 
         .coa-info small {
             display: block;
+        }
+
+        .coa-info small hr {
+            margin: 4px 0;
+            border-top: 1px dashed #ccc;
         }
 
         .warna-piutang {
@@ -203,7 +212,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_invoice"border="1">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_invoice" border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no">No.</th>
@@ -218,7 +227,8 @@
                                                             <th class="style bb text-right">Sisa Piutang (Valas)</th>
                                                             <th class="style bb text-right">Pelunasan (Rp)</th>
                                                             <th class="style bb text-right">Pelunasan (Valas)</th>
-                                                            <th class="style bb " style="max-width:60px;">Status Bayar</th>
+                                                            <th class="style bb " style="max-width:60px;">Status</th>
+                                                            <!-- <th class="style bb " style="max-width:50px;">Lebih</th> -->
                                                             <th class="style bb" style="min-width:70px;">#</th>
                                                         </tr>
                                                     </thead>
@@ -249,6 +259,7 @@
                                                         <div class="col-md-9 col-lg-7">
                                                             <button class="btn btn-sm btn-default <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-kas-bank" name="btn-kas-bank" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-bank' style='color: green'></i> Kas Bank (<span id='tbk'>0</span>)</button>
                                                             <button class="btn btn-sm btn-default  <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-uang-muka" name="btn-uang-muka" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-money' style='color: blue'></i> Uang Muka (<span id='tum'>0</span>)</button>
+                                                            <button class="btn btn-sm btn-default  <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-deposit" name="btn-deposit" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-money' style='color: blue'></i> Deposit (<span id='tdep'>0</span>)</button>
                                                             <button class="btn btn-sm btn-default <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-retur" name="btn-retur" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-exchange' style='color: red'></i> Retur (<span id='tret'>0</span>)</button>
                                                             <button class="btn btn-sm btn-default <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'hidden' : ''; ?>" id="btn-koreksi-valas" name="btn-koreksi-valas" <?php echo ($list->status == 'cancel' || $list->status == 'done') ? 'disabled' : ''; ?>><i class='fa fa-exchange' style='color: purple'></i> Koreksi Kurs Bulan</button>
                                                         </div>
@@ -376,6 +387,18 @@
     <script>
         $(function() {
 
+            $(document).on('focus', '.select2', function(e) {
+                if (e.originalEvent) {
+                    var s2element = $(this).siblings('select');
+                    s2element.select2('open');
+
+                    // Set focus back to select2 element on closing.
+                    s2element.on('select2:closing', function(e) {
+                        s2element.select2('focus');
+                    });
+                }
+            });
+
             get_total_by_partner("<?php echo $list->partner_id; ?>");
 
             $('#tgl_transaksi').datetimepicker({
@@ -412,6 +435,7 @@
                 $('#btn-inv').prop('disabled', true);
                 $('#btn-kas-bank').prop('disabled', true);
                 $('#btn-uang-muka').prop('disabled', true);
+                $('#btn-deposit').prop('disabled', true);
                 $('#btn-retur').prop('disabled', true);
                 $('#btn-koreksi-valas').prop('disabled', true);
 
@@ -448,6 +472,7 @@
                 $('#btn-inv').prop('disabled', false);
                 $('#btn-kas-bank').prop('disabled', false);
                 $('#btn-uang-muka').prop('disabled', false);
+                $('#btn-deposit').prop('disabled', false);
                 $('#btn-retur').prop('disabled', false);
                 $('#btn-koreksi-valas').prop('disabled', false);
 
@@ -475,6 +500,7 @@
                 $("#tinv").html('<li class="fa fa-spinner fa-spin"></i>');
                 $("#tbk").html('<li class="fa fa-spinner fa-spin"></i>');
                 $("#tum").html('<li class="fa fa-spinner fa-spin"></i>');
+                $("#tdep").html('<li class="fa fa-spinner fa-spin"></i>');
                 $("#tret").html('<li class="fa fa-spinner fa-spin"></i>');
 
                 var partner = id;
@@ -491,6 +517,7 @@
                         $("#tinv").html(data.total.total_invoice)
                         $("#tbk").html(data.total.total_kas_bank)
                         $("#tum").html(data.total.total_uang_muka)
+                        $("#tdep").html(data.total.total_deposit)
                         $("#tret").html(data.total.total_retur)
 
                     },
@@ -600,6 +627,7 @@
                         $('#btn-inv').prop('disabled', false);
                         $('#btn-kas-bank').prop('disabled', false);
                         $('#btn-uang-muka').prop('disabled', false);
+                        $('#btn-deposit').prop('disabled', false);
                         $('#btn-retur').prop('disabled', false);
                         $('#btn-koreksi-valas').prop('disabled', false);
 
@@ -623,7 +651,7 @@
                             // window.location.href = baseUrl;
                         } else {
                             alert_notify('fa fa-warning', msg, 'danger', function() {});
-                            console.log(xhr)
+                            // console.log(xhr)
                         }
                     }
                 });
@@ -776,7 +804,7 @@
 
                                     let msg = xhr.responseJSON?.message || 'Terjadi kesalahan tidak diketahui';
                                     alert_notify('fa fa-warning', msg, 'danger', function() {});
-                                    console.error('AJAX Error:', xhr);
+                                    // console.error('AJAX Error:', xhr);
                                 }
                             });
 
@@ -850,6 +878,33 @@
                     no_pelunasan: "<?php echo $list->no_pelunasan; ?>",
                     partner: $("#partner").val(),
                     type: 'um',
+                }, function(data) {
+                    setTimeout(function() {
+                        $(".tambah_data").html(data.data);
+                        $("#btn-tambah").html("Tambahkan");
+                    }, 1000);
+                    // }).done(function(html){
+                    //    $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+                });
+                $('#tambah_data').on('hidden.bs.modal', function() {
+
+                });
+            });
+
+
+            $("#btn-deposit").on("click", function(e) {
+                e.preventDefault();
+                $("#tambah_data").modal({
+                    show: true,
+                    backdrop: 'static'
+                });
+                $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                $('.modal-title').text('List Deposit');
+                $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
+                $.post("<?= base_url('accounting/pelunasanpiutang/get_view_kas_bank') ?>", {
+                    no_pelunasan: "<?php echo $list->no_pelunasan; ?>",
+                    partner: $("#partner").val(),
+                    type: 'depo',
                 }, function(data) {
                     setTimeout(function() {
                         $(".tambah_data").html(data.data);
@@ -1170,11 +1225,16 @@
                         $.each(data.record, function(key, value) {
 
                             empty = false;
+                            if(value.tipe_currency === 'Valas'){
+                                $mu  = (value.currency != '') ? value.tipe_currency +  `<br><div><small>${value.currency} - ${formatNumber(value.kurs)}</small></div>` : value.tipe_currency;
+                            } else {
+                                $mu = value.tipe_currency;
+                            }
 
                             // render cell koreksi (select + small + tombol)
                             let koreksiCell = renderKoreksiCell(value, status);
                             var tr = $("<tr>").append(
-                                $("<td style='font-weight:bold;'>").text(value.tipe_currency),
+                                $("<td style='font-weight:bold;'>").html($mu),
                                 $("<td class='text-right warna-piutang'>").text(formatNumber(value.total_piutang)),
                                 $("<td class='text-right warna-koreksi'>").text(formatNumber(value.total_koreksi)),
                                 $("<td class='text-right warna-pelunasan'>").text(formatNumber(value.total_pelunasan)),
@@ -1197,7 +1257,7 @@
                         $("#table-resume").append(tbody); // append parents
                         $("#example3_processing").css('display', 'none'); // hidden loading
                         // panggil select2 untuk elemen baru
-                        initSelectKoreksi();
+                        // initSelectKoreksi();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         alert(jqXHR.responseText);
@@ -1293,9 +1353,9 @@
 
             }
 
-            function 
-            
-            
+            function
+
+
             loadInvoice() {
 
                 $("#example1_processing").css('display', ''); // show loading
@@ -1335,6 +1395,7 @@
                             }
 
                             let statusHtml = $("<span>").addClass(value.status_color).text(value.status_text);
+                            let statusLebih = $("<span>").addClass(value.status_color_lebih).text(value.status_text_lebih);
 
                             var tr = $("<tr>").append(
                                 $("<td style=''>").text(no),
@@ -1350,6 +1411,7 @@
                                 $("<td class='text-right'>").text(formatNumber(value.pelunasan_rp)),
                                 $("<td class='text-right'>").text(formatNumber(value.pelunasan_valas)),
                                 $("<td class='text-center'>").append(statusHtml),
+                                // $("<td class='text-center'>").append(statusLebih),
                                 $("<td class=''>").html(btn),
                             );
 
@@ -1365,7 +1427,7 @@
                         });
 
                         if (empty == true) {
-                            var tr = $("<tr>").append($("<td colspan='14'>").text('Tidak ada Data'));
+                            var tr = $("<tr>").append($("<td colspan='15'>").text('Tidak ada Data'));
                             tbody.append(tr);
                         } else {
                             var trfoot = $("<tr class='style_total'>").append(
@@ -1376,7 +1438,7 @@
                                 $("<td class='text-right warna-piutang'>").text(formatNumber(sum_sisa_piutang_valas)),
                                 $("<td class='text-right'>").text(formatNumber(sum_pelunasan_rp)),
                                 $("<td class='text-right'>").text(formatNumber(sum_pelunasan_valas)),
-                                $("<td colspan='2'>").html('&nbsp'),
+                                $("<td colspan='3'>").html('&nbsp'),
                             );
 
                         }
@@ -1546,13 +1608,94 @@
 
 
             function renderKoreksiCell(value, status) {
+                let keterangan = value.keterangan;
+                let coaList = value.coa_list || [];
+                let koreksiNama = value.koreksi_text;
+                let mode = value.mode;
+                let tipe = (keterangan == 'Uang Muka') ? 'um' : 'koreksi';
+
+                let $tdButton = $('<td>');
+                let $wrapper = $('<div>');
+                let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
+
+                // ====================== Button Control ===========================
+                function updateCoaButton() {
+                    $tdButton.empty();
+
+                    if (coaList.length > 0) { // Ada COA -> tampilkan edit & hapus
+                        $tdButton.html(`
+                            <button class="btn btn-xs btn-primary btn-koreksi" 
+                                    data-tipe="${tipe}" data-summary="${value.id}" data-currency="${value.tipe_currency}">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button class="btn btn-xs btn-danger btn-hapus-koreksi"
+                                    data-tipe="${tipe}" data-summary="${value.id}">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        `);
+                        $coaInfo.show();
+
+                    } else if (coaList.length == 0 && value.selisih != 0) { // Tidak ada COA tapi ada selisih -> hanya edit
+                        $tdButton.html(`
+                            <button class="btn btn-xs btn-primary btn-koreksi" 
+                                    data-tipe="${tipe}" data-summary="${value.id}" data-currency="${value.tipe_currency}">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        `);
+                        $coaInfo.hide();
+
+                    } else { // tidak ada tindakan
+                        $coaInfo.hide();
+                    }
+                }
+
+                // ====================== Mode NORMAL ===========================
+                if (mode == 'normal') {
+                    if(value.alat_pelunasan === 'true'){
+                        $alat  = " <br> Alat Pelunasan : Ya";
+                        $wrapper.append(koreksiNama).append($alat);
+                    }else {
+                        $wrapper.append(koreksiNama).append($coaInfo);
+                    }
+                    loadCoaInfo(value.id, $coaInfo.find('small')); // ambil text via ajax/func lama
+
+                    // ====================== Mode SPLIT ============================
+                } else if (mode == 'split') {
+
+                    let content = "";
+                    $.each(coaList, function(index, item) {
+                        content += `<b>${item.head == 'true' ? 'Head' : 'Item  : ' +item.koreksi_text}</b><br>
+                        ${item.posisi != '' ? item.posisi : ''}
+                        ${item.faktur_id != 0 ? 'No Faktur :  '+item.no_faktur :  item.kode_coa + ' - '+ item.nama_coa}<br>
+                        Nominal: ${formatNumber(item.nominal)}
+                        ${item.alat_pelunasan ==='true' ? '<br> Alat Pelunasan : Ya ' : ""}<br>
+                        <hr>`;
+                    });
+
+                    $coaInfo.find('small').html(content);
+                    $wrapper.append($coaInfo);
+                }
+
+                if (status == 'draft') {
+                    updateCoaButton();
+                }
+
+               
+                return {
+                    wrapper: $wrapper,
+                    button: $tdButton
+                };
+            }
+
+
+            function renderKoreksiCell1(value, status) {
                 // let gt_nm = getKoreksiOptionById(value.koreksi);
                 let koreksiId = value.koreksi; // nilai default dari database
                 let koreksiNama = value.koreksi_text;
                 let hasCoa = value.koreksi_get_coa;
                 let keterangan = value.keterangan;
 
-                let tipe =  (keterangan == 'Uang Muka')? 'um' : 'koreksi';
+                let tipe = (keterangan == 'Uang Muka') ? 'um' : 'koreksi';
 
                 // bikin select
                 let $select = $('<select>', {
@@ -1560,7 +1703,7 @@
                     class: 'form-control input-sm select-koreksi',
                     name: 'koreksi',
                     style: 'width:100% !important;',
-                    'data-tipe' : tipe,
+                    'data-tipe': tipe,
                     'data-id': value.id,
                     'data-default': koreksiId,
                     'data-currency': value.tipe_currency
@@ -1573,7 +1716,7 @@
                 }
 
                 let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
-                if (keterangan.length === 0 || (keterangan === 'Uang Muka'  && value.tipe_currency == 'Valas')) {
+                if (keterangan.length === 0 || (keterangan === 'Uang Muka' && value.tipe_currency == 'Valas')) {
                     $wrapper = $('<div>').append('').append($coaInfo);
                 } else {
                     // tempat info COA
@@ -1650,11 +1793,7 @@
             }
 
 
-            function loadCoaInfo(koreksiId, summaryId, $target) {
-                if (!koreksiId) {
-                    $target.text("");
-                    return;
-                }
+            function loadCoaInfo(summaryId, $target) {
 
                 $.ajax({
                     url: "<?php echo site_url('accounting/pelunasanpiutang/getCoaByKoreksi') ?>",
@@ -1682,10 +1821,10 @@
 
 
             $(document).on("click", ".btn-koreksi", function(e) {
-                let jenis_koreksi = $(this).attr("data-tipe");
                 let id_summary = $(this).attr("data-summary");;
-                let nama_koreksi = $(this).attr('data-nm-koreksi');
-                koreksi(id_summary, jenis_koreksi, nama_koreksi)
+                let tipe_currency = $(this).attr('data-currency');
+                let tipe_koreksi = $(this).attr('data-tipe');
+                koreksi(id_summary, tipe_currency, tipe_koreksi);
             });
 
             $(document).on("click", ".btn-hapus-koreksi", function(e) {
@@ -1742,25 +1881,27 @@
             });
 
 
-            function koreksi(id_summary, jenis_koreksi, nama_koreksi) {
+            function koreksi(id_summary, tipe_currency, tipe_koreksi) {
 
                 $("#tambah_data").modal({
                     show: true,
                     backdrop: "static"
                 });
 
-                $("#tambah_data").removeClass("modal fade lebar").addClass("modal fade lebar_mode");
+                // $("#tambah_data").removeClass("modal fade lebar").addClass("modal fade lebar_mode");
+                $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
                 $("#tambah_data .modal-dialog .modal-content .modal-body").addClass("add_batch");
 
                 $(".tambah_data").html(
                     '<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>'
                 );
-                $(".modal-title").html("Koreksi <b>" + nama_koreksi + "</b>");
+                $(".modal-title").html("Koreksi <b>" + tipe_currency + "</b>");
 
                 $.post("<?= base_url('accounting/pelunasanpiutang/get_view_koreksi') ?>", {
                     no_pelunasan: "<?= $list->no_pelunasan; ?>",
                     id: id_summary,
-                    jenis_koreksi: jenis_koreksi
+                    tipe_currency: tipe_currency,
+                    tipe_koreksi: tipe_koreksi
                 }, function(data) {
                     setTimeout(function() {
                         $(".tambah_data").html(data.data);
