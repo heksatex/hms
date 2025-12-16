@@ -128,9 +128,9 @@ class Bukubesarpembantupiutang extends MY_Controller
             $total_koreksi   = (float) $datas->total_koreksi;
             $total_diskon  = (float) round($datas->total_diskon_dpp_ppn, 2);
             $total_kas_um  = (float) round($datas->total_kas_um, 2);
-            $total_depo_baru  = (float) round($datas->total_deposit, 2);
-            $total_depo_pelunasan  = (float) round($datas->total_deposit_pel, 2);
-            $saldo_akhir   = round($saldo_awal - $total_kas_um + $total_piutang -  $total_pelunasan - $total_retur - $total_diskon - $total_uang_muka - ($total_koreksi) - $total_depo_baru - $total_depo_pelunasan, 2);
+            $total_depo_baru  = 0;
+            $total_depo_pelunasan  = 0;
+            $saldo_akhir   = round($saldo_awal - $total_kas_um + $total_piutang -  $total_pelunasan - $total_retur - $total_diskon - $total_uang_muka - ($total_koreksi) , 2);
             $tmp_data[] = array(
                 'id_partner'  => $datas->id,
                 'nama_partner' => $datas->nama,
