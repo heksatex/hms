@@ -325,7 +325,6 @@ class Kursakhirbulan extends MY_Controller {
             $model->setTables("acc_jurnal_entries")->save($dataJurnal);
             $noOrder = 1;
             $entriesDetail = [];
-            $updateCoa = [];
             foreach ($coa as $key => $value) {
                 $selisih = ($value->saldo_valas_final * $kurs) - $value->saldo_rp_final;
                 $nominal = abs($selisih);
@@ -346,10 +345,6 @@ class Kursakhirbulan extends MY_Controller {
                     "nominal" => $nominal,
                     "row_order" => $noOrder
                 ];
-                $updateCoa[] = [
-                    "kode_coa" => $value->kode_coa,
-                    "saldo_awal" => ($value->saldo_awal + $selisih)
-                ];
                 $noOrder += 1;
                 $entriesDetail[] = [
                     "nama" => $nama,
@@ -368,9 +363,6 @@ class Kursakhirbulan extends MY_Controller {
             }
             $model->setTables("acc_jurnal_entries_items")->saveBatch($entriesDetail);
             $this->_updatekas();
-            if (count($updateCoa) > 0) {
-                $model->setTables("acc_coa")->updateBatch($updateCoa, "kode_coa");
-            }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }

@@ -283,7 +283,7 @@ class Jurnalentries extends MY_Controller {
             }
             $log = " DATA -> " . logArrayToString("; ", $headUpdate);
             $log .= "\nDetail -> " . logArrayToString("; ", $itemUpdate);
-            $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
+//            $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));

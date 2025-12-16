@@ -46,16 +46,18 @@ class Bukupenjualan extends MY_Controller {
             $customer = $this->input->post("customer");
             $uraian = $this->input->post("uraian");
             $fakturPajak = $this->input->post("faktur");
+            $posisi = $this->input->post("posisi");
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan fp")
 //                    ->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
-                    ->setJoins("acc_jurnal_entries je","je.kode = fp.jurnal")
-                    ->setJoins("acc_jurnal_entries_items jei","jei.kode = je.kode")
-                    ->setJoins("acc_coa ac","ac.kode_coa = jei.kode_coa","left")
-                    ->setSelects(["fp.no_faktur_internal,no_sj,fp.tanggal","partner_nama","jei.*","ac.nama as coa"])
-                    ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"])
-                    ->setOrder(["jei.kode_coa"=>"asc"]);
+                    ->setJoins("acc_jurnal_entries je", "je.kode = fp.jurnal")
+                    ->setJoins("acc_jurnal_entries_items jei", "jei.kode = je.kode")
+                    ->setJoins("acc_coa ac", "ac.kode_coa = jei.kode_coa", "left")
+                    ->setSelects(["fp.no_faktur_internal,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa"])
+                    ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"
+                        , "jei.posisi" => strtoupper($posisi)])
+                    ->setOrder(["jei.kode_coa" => "asc"]);
             if ($uraian !== "") {
                 $model->setWhereRaw("jei.nama LIKE '%{$uraian}%'");
             }
@@ -110,7 +112,7 @@ class Bukupenjualan extends MY_Controller {
                 $filter .= "Uraian : {$uraian}, ";
             }
             if (!empty($customer)) {
-                $filter .= "Customer : ".$data[0]->partner_nama ?? ''.", ";
+                $filter .= "Customer : " . $data[0]->partner_nama ?? '' . ", ";
             }
             if (!empty($fakturPajak)) {
                 $filter .= "Mempunyai Faktur Pajak : {$fakturPajak}";
@@ -128,39 +130,55 @@ class Bukupenjualan extends MY_Controller {
             $sheet->setCellValue("D{$row}", 'Tanggal');
             $sheet->setCellValue("E{$row}", 'Uraian');
             $sheet->setCellValue("F{$row}", 'Customer');
-            $sheet->setCellValue("G{$row}", 'Qty');
-            $sheet->setCellValue("H{$row}", 'Uom');
-            $sheet->setCellValue("I{$row}", 'Currency');
-            $sheet->setCellValue("J{$row}", 'Kurs');
-            $sheet->setCellValue("K{$row}", 'Harga');
-            $sheet->setCellValue("L{$row}", 'DPP');
-            $sheet->setCellValue("M{$row}", 'Diskon');
-            $sheet->setCellValue("N{$row}", 'PPN');
-            $sheet->setCellValue("O{$row}", 'No Faktur Pajak');
+            $sheet->setCellValue("G{$row}", 'Coa');
+            $sheet->setCellValue("H{$row}", 'Nama Coa');
+            $sheet->setCellValue("I{$row}", 'Qty');
+            $sheet->setCellValue("J{$row}", 'Uom');
+            $sheet->setCellValue("K{$row}", 'Total Nominal');
             $no = 0;
+            $grandTotal = 0;
+            $total = 0;
             foreach ($data as $key => $value) {
+                $grandTotal += $value->nominal;
+                $total += $value->nominal;
                 $row++;
                 $no++;
-                $harga = $value->harga * $value->kurs;
-                $dpp = $value->jumlah * $value->kurs;
-                $pajak = $value->pajak * $value->kurs;
-                $diskon = $value->diskon * $value->kurs;
+                $qty = explode("/ ", $value->nama);
+                $q = "";
+                $u = "";
+                if (count($qty) > 1) {
+                    $qtys = trim(end($qty));
+                    $qu = explode(" ", $qtys);
+                    $q = $qu[0] ?? "";
+                    $u = $qu[1] ?? "";
+                }
 
                 $sheet->setCellValue("A{$row}", $no);
                 $sheet->setCellValue("B{$row}", $value->no_faktur_internal);
                 $sheet->setCellValue("C{$row}", $value->no_sj);
                 $sheet->setCellValue("D{$row}", $value->tanggal);
-                $sheet->setCellValue("E{$row}", $value->uraian);
+                $sheet->setCellValue("E{$row}", $value->nama);
                 $sheet->setCellValue("F{$row}", $value->partner_nama);
-                $sheet->setCellValue("G{$row}", $value->qty);
-                $sheet->setCellValue("H{$row}", $value->uom);
-                $sheet->setCellValue("I{$row}", $value->nama_curr);
-                $sheet->setCellValue("J{$row}", $value->kurs);
-                $sheet->setCellValue("K{$row}", $harga);
-                $sheet->setCellValue("L{$row}", $dpp);
-                $sheet->setCellValue("M{$row}", $diskon);
-                $sheet->setCellValue("N{$row}", $pajak);
-                $sheet->setCellValue("O{$row}", $value->no_faktur_pajak);
+                $sheet->setCellValue("G{$row}", $value->kode_coa);
+                $sheet->setCellValue("H{$row}", $value->coa);
+                $sheet->setCellValue("I{$row}", $q);
+                $sheet->setCellValue("J{$row}", $u);
+                $sheet->setCellValue("K{$row}", $value->nominal);
+                if (isset($data[$key + 1])) {
+                    if ($value->kode_coa !== $data[$key + 1]->kode_coa) {
+                        $row += 1;
+                        $sheet->setCellValue("G{$row}", $value->kode_coa);
+                        $sheet->setCellValue("H{$row}", "Total {$value->coa}");
+                        $sheet->setCellValue("K{$row}", $total);
+                        $total = 0;
+                    }
+                } else {
+                    $row += 1;
+                    $sheet->setCellValue("G{$row}", $value->kode_coa);
+                    $sheet->setCellValue("H{$row}", "Total {$value->coa}");
+                    $sheet->setCellValue("K{$row}", $total);
+                    $total = 0;
+                }
             }
             $writer = new Xlsx($spreadsheet);
             $filename = "Buku Penjualan {$tanggal}";

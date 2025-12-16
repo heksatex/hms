@@ -51,8 +51,10 @@ class Bukupenjualan_1 extends MY_Controller {
             $model->setTables("acc_faktur_penjualan fp")
                     ->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
                     ->setJoins("currency_kurs ck", "ck.id = fp.kurs")
+                    ->setJoins("acc_coa coa","fpd.no_acc = coa.kode_coa","left")
                     ->setOrder(["fp.tanggal" => "asc"])->setSelects(["no_faktur_internal,no_faktur_pajak,fp.partner_nama,nominal_diskon,tax_value"])
                     ->setSelects(["fpd.*,concat(fpd.uraian,' ',fpd.warna) as uraian,fp.kurs", "fp.no_sj,fp.tanggal", "ck.currency as nama_curr"])
+                    ->setSelects(["fp.diskon_ppn as total_diskon_ppn", "fp.diskon as dpp_diskon","coa.nama as nama_coa"])
                     ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"]);
             if ($uraian !== "") {
                 $model->setWhereRaw("concat(uraian,' ',warna) LIKE '%{$uraian}%'");
@@ -75,7 +77,7 @@ class Bukupenjualan_1 extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'RBPJ';
-        $this->load->view('report/acc/v_buku_penjulan', $data);
+        $this->load->view('report/acc/v_buku_penjulan_1', $data);
     }
 
     public function search() {
@@ -83,7 +85,12 @@ class Bukupenjualan_1 extends MY_Controller {
             $model = $this->_query();
             $count = $model->getDataCountFiltered();
             $data["data"] = $model->getData();
-            $html = $this->load->view("report/acc/v_buku_penjulan_detail", $data, true);
+            $model = new $this->m_global;
+            $data["coa_ppn_diskon"] = $model->setTables("setting")->setJoins("acc_coa c","c.kode_coa = value","left")->setSelects(["c.nama","value"])
+                    ->setWheres(["setting_name" => "coa_penjualan_ppn_diskon"])->getDetail();
+            $data["coa_dpp_diskon"] = $model->setTables("setting")->setJoins("acc_coa c","c.kode_coa = value","left")->setSelects(["c.nama","value"])
+                    ->setWheres(["setting_name" => "coa_penjualan_dpp_diskon"])->getDetail();
+            $html = $this->load->view("report/acc/v_buku_penjulan_detail_1", $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html, "jumlah" => $count)));
@@ -108,7 +115,7 @@ class Bukupenjualan_1 extends MY_Controller {
                 $filter .= "Uraian : {$uraian}, ";
             }
             if (!empty($customer)) {
-                $filter .= "Customer : ".$data[0]->partner_nama ?? ''.", ";
+                $filter .= "Customer : " . $data[0]->partner_nama ?? '' . ", ";
             }
             if (!empty($fakturPajak)) {
                 $filter .= "Mempunyai Faktur Pajak : {$fakturPajak}";

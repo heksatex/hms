@@ -157,7 +157,7 @@
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <div class="input-group">
                                                         <span class="input-group-addon get-no-sj"><?= $inv->mata_uang ?></span>
-                                                        <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
+                                                        <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 2) ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
                                                     </div>
 
                                                 </div>
