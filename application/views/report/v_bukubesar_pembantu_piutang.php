@@ -27,7 +27,24 @@
             border-top: 2px solid #ddd !important;
             border-bottom: 2px solid #ddd !important;
         }
-        
+
+        .smarttip {
+            cursor: pointer;
+        }
+
+        #globalTooltip {
+            position: fixed;
+            background: #000;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            z-index: 999999;
+            max-width: 220px;
+            white-space: normal;
+            display: none;
+        }
+
         /*
     .btn-setTgl {
       height: 22px;
@@ -98,7 +115,17 @@
                                 <div class="form-group">
                                     <div class="col-md-12">
                                         <div class="col-md-2">
-                                            <label> </label>
+                                            <label>Currency</label>
+                                        </div>
+                                        <div class="col-md-4 currency-radio-wrapper">
+                                            <div class="form-inline">
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="currency" value="valas"> Valas
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="currency" value="rp" checked> Rp
+                                                </label>
+                                            </div>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="checkbox" name="hidden_check" id="hidden_check" checked>
@@ -106,12 +133,15 @@
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                             <div class="col-md-4">
-                                <div class="form-group">
-                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
-                                    <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
-                                    <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
+                                        <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                                        <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -128,30 +158,40 @@
                                                         <th class="style bb no" rowspan="2">No. </th>
                                                         <th class='style bb' style="min-width: 200px" rowspan="2">Customer</th>
                                                         <th class='style bb' style="min-width: 150px" rowspan="2">Saldo Awal</th>
+                                                        <!-- <th class='style bb' style="min-width: 90px; white-space: wrap;" rowspan="2"> Uang Muka (Outstanding)</th> -->
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="3">Piutang</th>
                                                         <th class='style bb' style="min-width: 150px" rowspan="2">Pelunasan</th>
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="3">Retur</th>
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="3">Diskon</th>
-                                                        <th class='style bb' style="min-width: 150px" rowspan="2">Uang Muka</th>
+                                                        <th class='style bb text-center' style="min-width: 150px" colspan="2">Uang Muka</th>
                                                         <th class='style bb' style="min-width: 100px" rowspan="2">Koreksi</th>
-                                                        <th class='style bb' style="min-width: 150px" rowspan="2" 
-                                                            title="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi"> &#x2757; Saldo Akhir</th>
+                                                        <th class='style bb text-center' style="min-width: 150px" colspan="2">Deposit </th>
+                                                        <th class='style bb' style="min-width: 150px" rowspan="2">
+                                                            <span class="smarttip"
+                                                                data-tip="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi - Deposit">
+                                                                &#x2757; Saldo Akhir
+                                                            </span>
+                                                        </th>
                                                     </tr>
                                                     <tr>
-                                                        <th class='style bb' style="min-width: 50px" >DPP</th>
-                                                        <th class='style bb' style="min-width: 50px" >PPN</th>
-                                                        <th class='style bb' style="min-width: 50px" >Total</th>
-                                                        <th class='style bb' style="min-width: 50px" >DPP</th>
-                                                        <th class='style bb' style="min-width: 50px" >PPN</th>
-                                                        <th class='style bb' style="min-width: 50px" >Total</th>
-                                                        <th class='style bb' style="min-width: 50px" >DPP</th>
-                                                        <th class='style bb' style="min-width: 50px" >PPN</th>
-                                                        <th class='style bb' style="min-width: 50px" >Total</th>
+                                                        <th class='style bb' style="min-width: 50px">DPP</th>
+                                                        <th class='style bb' style="min-width: 50px">PPN</th>
+                                                        <th class='style bb' style="min-width: 50px">Total</th>
+                                                        <th class='style bb' style="min-width: 50px">DPP</th>
+                                                        <th class='style bb' style="min-width: 50px">PPN</th>
+                                                        <th class='style bb' style="min-width: 50px">Total</th>
+                                                        <th class='style bb' style="min-width: 50px">DPP</th>
+                                                        <th class='style bb' style="min-width: 50px">PPN</th>
+                                                        <th class='style bb' style="min-width: 50px">Total</th>
+                                                        <th class='style bb' style="min-width: 50px">Baru </th>
+                                                        <th class='style bb' style="min-width: 50px">Pelunasan</th>
+                                                        <th class='style bb' style="min-width: 50px">Baru </th>
+                                                        <th class='style bb' style="min-width: 50px">Pelunasan</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="16">Tidak ada Data</td>
+                                                        <td colspan="19">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -180,7 +220,7 @@
     <?php $this->load->view("admin/_partials/js.php"); ?>
 
     <script type="text/javascript">
-        $(function () {
+        $(function() {
             $('[data-toggle="tooltip"]').tooltip()
         })
         // set date tgldari
@@ -211,15 +251,21 @@
         var arr_filter = [];
 
 
-         // btn generate
+        // btn generate
         $("#btn-generate").on('click', function() {
 
             const tgldari = $('#tgldari').val();
             const tglsampai = $('#tglsampai').val();
             const this_btn = $(this);
+            const selectedCurrency = $('input[name="currency"]:checked').val();
 
             if (!tgldari || !tglsampai) {
                 alert_modal_warning('Periode Tanggal Harus diisi !');
+                return;
+            }
+
+            if (!selectedCurrency) {
+                alert_modal_warning('Currency Harus dipilih !');
                 return;
             }
 
@@ -251,9 +297,10 @@
             var tgldari = $('#tgldari').val();
             var tglsampai = $('#tglsampai').val();
             var check_hidden = $("#hidden_check").is(':checked');
+            var selectedCurrency = $('input[name="currency"]:checked').val();
 
             let slowProcessWarning = setTimeout(function() {
-                please_wait(function(){});
+                please_wait(function() {});
             }, 5000); // 5 detik
 
             $("#example1_processing").css('display', ''); // show loading
@@ -265,11 +312,12 @@
                 data: {
                     tgldari: tgldari,
                     tglsampai: tglsampai,
-                    checkhidden: check_hidden
+                    checkhidden: check_hidden,
+                    currency: selectedCurrency
                 },
                 success: function(data) {
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
 
                     if (data.status == 'failed') {
                         unblockUI(function() {
@@ -283,6 +331,10 @@
                         let no = 1;
                         let empty = true;
                         let s_awal = 0;
+                        let um_baru = 0;
+                        let um_pelunasan = 0;
+                        let depo_baru = 0;
+                        let depo_pelunasan = 0;
                         let piutang_dpp = 0;
                         let piutang_ppn = 0;
                         let piutang_total = 0;
@@ -302,7 +354,7 @@
                             tgldari: tgldari,
                             tglsampai: tglsampai,
                             checkhidden: check_hidden,
-                            currency:'rp'
+                            currency: selectedCurrency
                         });
 
                         $.each(data.record, function(key, value) {
@@ -310,12 +362,16 @@
                             empty = false;
 
                             var tr = $("<tr>").append(
-                                $("<td colspan='16' class='text-left'>").html('<b> ' + value.gol_nama + '</b>'),
+                                $("<td colspan='19' class='text-left'>").html('<b> ' + value.gol_nama + '</b>'),
                             );
                             tbody.append(tr);
 
                             no = 1;
                             s_awal = 0;
+                            um_baru = 0;
+                            um_pelunasan = 0;
+                            depo_baru = 0;
+                            depo_pelunasan = 0;
                             piutang_dpp = 0;
                             piutang_ppn = 0;
                             piutang_total = 0;
@@ -347,31 +403,38 @@
                                     $("<td align='right'>").text(formatNumber(value.dpp_diskon.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.ppn_diskon.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.total_diskon_dpp_ppn.toFixed(2))),
-                                    $("<td align='right'>").text(formatNumber(value.uang_muka.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.um_baru.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.um_pelunasan.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.koreksi.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.depo_baru.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.depo_pelunasan.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.saldo_akhir.toFixed(2))),
                                 );
 
                                 tbody.append(tr2);
                                 no++;
                                 s_awal = s_awal + value.saldo_awal;
-                                piutang_dpp  = piutang_dpp + value.dpp_piutang;
-                                piutang_ppn  = piutang_ppn + value.ppn_piutang;
-                                piutang_total  = piutang_total + value.total_piutang_dpp_ppn;
-                                pelunasan   = pelunasan + value.pelunasan;
-                                retur_dpp  = retur_dpp + value.dpp_retur;
-                                retur_ppn  = retur_ppn + value.ppn_retur;
-                                retur_total  = retur_total + value.total_retur_dpp_ppn;
-                                uang_muka   = uang_muka + value.uang_muka;
-                                diskon_dpp  = diskon_dpp + value.dpp_diskon;
-                                diskon_ppn  = diskon_ppn + value.ppn_diskon;
-                                diskon_total  = diskon_total + value.total_diskon_dpp_ppn;
-                                koreksi   = koreksi + value.koreksi;
+                                um_baru = um_baru + value.um_baru;
+                                um_pelunasan = um_pelunasan + value.um_pelunasan;
+                                depo_baru = depo_baru + value.depo_baru;
+                                depo_pelunasan = depo_pelunasan + value.depo_pelunasan;
+                                piutang_dpp = piutang_dpp + value.dpp_piutang;
+                                piutang_ppn = piutang_ppn + value.ppn_piutang;
+                                piutang_total = piutang_total + value.total_piutang_dpp_ppn;
+                                pelunasan = pelunasan + value.pelunasan;
+                                retur_dpp = retur_dpp + value.dpp_retur;
+                                retur_ppn = retur_ppn + value.ppn_retur;
+                                retur_total = retur_total + value.total_retur_dpp_ppn;
+                                uang_muka = uang_muka + value.uang_muka;
+                                diskon_dpp = diskon_dpp + value.dpp_diskon;
+                                diskon_ppn = diskon_ppn + value.ppn_diskon;
+                                diskon_total = diskon_total + value.total_diskon_dpp_ppn;
+                                koreksi = koreksi + value.koreksi;
                                 s_akhir = s_akhir + value.saldo_akhir;
                             });
 
                             tr3 = $("<tr>").append(
-                                $("<td class='style_space text-right' colspan='2'>").html('<b>Total '+value.gol_nama+':<b>'),
+                                $("<td class='style_space text-right' colspan='2'>").html('<b>Total ' + value.gol_nama + ':<b>'),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(s_awal.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_dpp.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_ppn.toFixed(2))),
@@ -383,12 +446,15 @@
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(diskon_dpp.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(diskon_ppn.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(diskon_total.toFixed(2))),
-                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(uang_muka.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(um_baru.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(um_pelunasan.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(koreksi.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(depo_baru.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(depo_pelunasan.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(s_akhir.toFixed(2))),
                             );
                             tbody.append(tr3);
-                            tbody.append("<tr><td colspan='16'>&nbsp</td></tr>");
+                            tbody.append("<tr><td colspan='19'>&nbsp</td></tr>");
 
                         });
 
@@ -396,7 +462,7 @@
                             var tr = $("<tr>").append($("<td colspan='9'>").text('Tidak ada Data'));
                             tbody.append(tr);
                         } else {
-                          
+
                         }
 
                         $("#example1").append(tbody); // append parents
@@ -409,7 +475,7 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }
@@ -425,7 +491,7 @@
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
                 var url = '<?php echo base_url() ?>report/bukubesarpembantupiutangdetail';
-                window.open(url + '?partner='+ partner +'&&params=' + arrStr, '_blank');
+                window.open(url + '?partner=' + partner + '&&params=' + arrStr, '_blank');
             }
         }
 
@@ -478,6 +544,50 @@
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 
+        });
+        if ($("#globalTooltip").length === 0) {
+            $("body").append('<div id="globalTooltip"></div>');
+        }
+
+        $(document).on("mouseenter touchstart", ".smarttip", function() {
+            var tip = $(this).data("tip");
+            var rect = this.getBoundingClientRect();
+            var tt = $("#globalTooltip");
+
+            tt.text(tip).show();
+
+            // hitung posisi awal (top centered)
+            var tooltipWidth = tt.outerWidth();
+            var left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+            var top = rect.top - tt.outerHeight() - 10; // muncul di atas elemen
+
+            // auto adjust jika mepet kanan
+            if (left + tooltipWidth > window.innerWidth - 10) {
+                left = window.innerWidth - tooltipWidth - 10;
+            }
+            // auto adjust jika mepet kiri
+            if (left < 10) left = 10;
+
+            // jika tidak muat di atas, pindah ke bawah
+            if (top < 10) {
+                top = rect.bottom + 10;
+            }
+
+            tt.css({
+                left: left + "px",
+                top: top + "px"
+            });
+        });
+
+        // hide
+        $(document).on("mouseleave", ".smarttip", function() {
+            $("#globalTooltip").hide();
+        });
+
+        $(document).on("touchstart click", function(e) {
+            if (!$(e.target).closest(".smarttip").length) {
+                $("#globalTooltip").hide();
+            }
         });
     </script>
 

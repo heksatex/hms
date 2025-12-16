@@ -20,6 +20,25 @@
             padding: 0px 5px 0px 5px !important;
         }
 
+        .smarttip {
+            cursor: pointer;
+        }
+
+        #globalTooltip {
+            position: fixed;
+            background: #000;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            z-index: 999999;
+            max-width: 220px;
+            white-space: normal;
+            display: none;
+        }
+
+
+
         /*
     .btn-setTgl {
       height: 22px;
@@ -125,7 +144,12 @@
                                                         <th class='style bb' style="min-width: 150px">Retur</th>
                                                         <th class='style bb' style="min-width: 150px">Uang Muka</th>
                                                         <th class='style bb' style="min-width: 100px">Koreksi</th>
-                                                        <th class='style bb' style="min-width: 150px"  title="Saldo Akhir = Saldo Awal + Utang - Pelunasan - Retur - Uang Muka + Koreksi"> &#x2757; Saldo Akhir</th>
+                                                        <th class='style bb' style="min-width: 150px">
+                                                            <span class="smarttip"
+                                                                data-tip="Saldo Akhir = Saldo Awal + Utang - Pelunasan - Retur - Uang Muka + Koreksi">
+                                                                &#x2757; Saldo Akhir
+                                                            </span>
+                                                        </th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -223,7 +247,7 @@
             var check_hidden = $("#hidden_check").is(':checked');
 
             let slowProcessWarning = setTimeout(function() {
-                please_wait(function(){});
+                please_wait(function() {});
             }, 5000); // 5 detik
 
             $("#example1_processing").css('display', ''); // show loading
@@ -239,7 +263,7 @@
                 },
                 success: function(data) {
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
 
                     if (data.status == 'failed') {
                         unblockUI(function() {
@@ -265,7 +289,7 @@
                             tgldari: tgldari,
                             tglsampai: tglsampai,
                             checkhidden: check_hidden,
-                            currency:'rp'
+                            currency: 'rp'
                         });
 
                         $.each(data.record, function(key, value) {
@@ -288,11 +312,11 @@
                             tbody.append(tr);
                             no++;
                             s_awal = s_awal + value.saldo_awal;
-                            utang  = utang + value.utang;
-                            pelunasan   = pelunasan + value.pelunasan;
-                            retur       = retur + value.retur;
-                            uang_muka   = uang_muka + value.uang_muka;
-                            koreksi   = koreksi + value.koreksi;
+                            utang = utang + value.utang;
+                            pelunasan = pelunasan + value.pelunasan;
+                            retur = retur + value.retur;
+                            uang_muka = uang_muka + value.uang_muka;
+                            koreksi = koreksi + value.koreksi;
                             s_akhir = s_akhir + value.saldo_akhir;
                         });
 
@@ -315,6 +339,7 @@
                         }
 
                         $("#example1").append(tbody); // append parents
+                        // initTooltip();
 
                         this_btn.button('reset');
                     }
@@ -324,7 +349,7 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }
@@ -340,7 +365,7 @@
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
                 var url = '<?php echo base_url() ?>report/bukubesarpembantuutangdetail';
-                window.open(url + '?partner='+ partner +'&&params=' + arrStr, '_blank');
+                window.open(url + '?partner=' + partner + '&&params=' + arrStr, '_blank');
             }
         }
 
@@ -393,6 +418,68 @@
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 
+        });
+
+        // function initTooltip() {
+        //     $('[data-toggle="tooltip"]').tooltip('destroy').tooltip({
+        //         container: 'body'
+        //     });
+        // }
+
+        // $('#example1').on('draw.dt', function() {
+        //     initTooltip();
+        // });
+
+
+        // $('[data-toggle="tooltip"]').tooltip({
+        //     container: 'body'
+        // });
+
+        // buat tooltip global 1x
+        // Buat 1 tooltip global
+        if ($("#globalTooltip").length === 0) {
+            $("body").append('<div id="globalTooltip"></div>');
+        }
+
+        $(document).on("mouseenter touchstart", ".smarttip", function() {
+            var tip = $(this).data("tip");
+            var rect = this.getBoundingClientRect();
+            var tt = $("#globalTooltip");
+
+            tt.text(tip).show();
+
+            // hitung posisi awal (top centered)
+            var tooltipWidth = tt.outerWidth();
+            var left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+            var top = rect.top - tt.outerHeight() - 10; // muncul di atas elemen
+
+            // auto adjust jika mepet kanan
+            if (left + tooltipWidth > window.innerWidth - 10) {
+                left = window.innerWidth - tooltipWidth - 10;
+            }
+            // auto adjust jika mepet kiri
+            if (left < 10) left = 10;
+
+            // jika tidak muat di atas, pindah ke bawah
+            if (top < 10) {
+                top = rect.bottom + 10;
+            }
+
+            tt.css({
+                left: left + "px",
+                top: top + "px"
+            });
+        });
+
+        // hide
+        $(document).on("mouseleave", ".smarttip", function() {
+            $("#globalTooltip").hide();
+        });
+
+        $(document).on("touchstart click", function(e) {
+            if (!$(e.target).closest(".smarttip").length) {
+                $("#globalTooltip").hide();
+            }
         });
     </script>
 

@@ -54,8 +54,8 @@
             height: 100%;
         }
 
-        table th,
-        table td {
+        #example1 th,
+        #example1 td {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
