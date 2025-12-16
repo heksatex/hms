@@ -6,6 +6,8 @@ foreach ($data as $key => $value) {
     $grandTotal += $value->nominal;
     $total += $value->nominal;
     $no++;
+    $qty = explode("/ ", $value->nama);
+    $qtys = (count($qty) > 1) ? end($qty) : "";
     ?>
     <tr>
         <td><?= $no ?></td>
@@ -15,6 +17,7 @@ foreach ($data as $key => $value) {
         <td><?= $value->nama ?></td>
         <td><?= $value->partner_nama ?></td>
         <td><?= "{$value->kode_coa} - {$value->coa}" ?></td>
+        <td style="text-align: right;"><?= $qtys ?></td>
         <td style="text-align: right;"><?= number_format($value->nominal, 2) ?></td>
 
     </tr>
@@ -30,11 +33,13 @@ foreach ($data as $key => $value) {
                 <td></td>
                 <td></td>
                 <td class="text-bold"><?= "Total  {$value->coa}" ?></td>
+                <td></td>
                 <td class="text-bold" style="text-align: right;"><?= number_format($total, 2) ?></td>
 
             </tr>
             <tr>
                 <td>&nbsp;</td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -56,6 +61,7 @@ foreach ($data as $key => $value) {
             <td></td>
             <td></td>
             <td class="text-bold"><?= "Total  {$value->coa}" ?></td>
+            <td></td>
             <td class="text-bold" style="text-align: right;"><?= number_format($total, 2) ?></td>
 
         </tr>
@@ -63,7 +69,7 @@ foreach ($data as $key => $value) {
     }
 }
 
-if($grandTotal > 0){
+if ($grandTotal > 0) {
     ?>
     <tr>
         <td>&nbsp;</td>
@@ -71,6 +77,7 @@ if($grandTotal > 0){
         <td></td>
         <td></td>
         <td class="text-right"></td>
+        <td></td>
         <td></td>
         <td></td>
         <td class="text-right"></td>
@@ -83,6 +90,7 @@ if($grandTotal > 0){
         <td></td>
         <td></td>
         <td class="text-bold">Grand Total</td>
+        <td></td>
         <td class="text-right text-bold"><?= number_format($grandTotal, 2) ?></td>
     </tr>
     <?php

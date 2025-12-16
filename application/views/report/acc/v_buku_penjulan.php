@@ -49,12 +49,23 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="form-group">
-                                                <div class="col-md-8 col-xs-12">
+                                                <div class="col-md-6 col-xs-12">
                                                     <div class="col-xs-4">
                                                         <label class="form-label">Tanggal</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
                                                         <input type="text" class="form-control" name="tanggal" id="tanggal">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">Posisi</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <select class="form-control input-sm select2" name="posisi" id="posisi">
+                                                            <option value="d">Debet</option>
+                                                            <option value="c">Kredit</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
@@ -152,7 +163,8 @@
                                                 <th class='style bb ws' style="min-width: 150px">Uraian</th>
                                                 <th class='style bb ws'>Customer</th>
                                                 <th class='style bb ws'>COA</th>
-                                                <th class='style bb ws text-right'>Nominal</th>
+                                                <th class='style bb ws text-right'>Qty</th>
+                                                <th class='style bb ws text-right'>Total Nominal</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tBody">
@@ -272,7 +284,8 @@
                             tanggal: $("#tanggal").val(),
                             customer: $("#customer").val(),
                             uraian: $("#uraian").val(),
-                            faktur: $("#faktur").val()
+                            faktur: $("#faktur").val(),
+                            posisi:$("#posisi").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {

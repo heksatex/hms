@@ -41,7 +41,7 @@
                             <h3 class="box-title"><b>Buku Penjualan</b></h3>
                         </div>
                         <div class="box-body">
-                            <form id="form-search" name="form-search" class="form-horizontal form-search" action="<?= base_url('report/bukupenjualan/export') ?>" method="post">
+                            <form id="form-search" name="form-search" class="form-horizontal form-search" action="<?= base_url('report/bukupenjualan_1/export') ?>" method="post">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
@@ -148,13 +148,14 @@
                                                 <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
                                                 <th class='style bb ws' style="min-width: 150px">Uraian</th>
                                                 <th class='style bb ws'>Customer</th>
+                                                <th class='style bb ws' style="min-width: 100px">Coa</th>
                                                 <th class='style bb ws text-right'>Qty</th>
                                                 <th class='style bb ws'>Currency</th>
                                                 <th class='style bb ws text-right'>Kurs</th>
                                                 <th class='style bb ws text-right'>Harga</th>
                                                 <th class='style bb ws text-right'>DPP</th>
                                                 <th class='style bb ws text-right'>Diskon</th>
-                                                <th class='style bb ws text-right'>PPN</th>
+                                                <th class='style bb ws text-right'>Pajak</th>
                                                 <th class='style bb ws'>Faktur Pajak</th>
                                             </tr>
                                         </thead>
@@ -269,7 +270,7 @@
                 
                 $("#search").on("click", function () {
                     $.ajax({
-                        url: "<?= base_url('report/bukupenjualan/search') ?>",
+                        url: "<?= base_url('report/bukupenjualan_1/search') ?>",
                         type: "POST",
                         data: {
                             tanggal: $("#tanggal").val(),
