@@ -363,7 +363,7 @@ class M_pelunasanpiutang extends CI_Model
     function query_get_faktur()
     {
         $this->db->order_by('row_order', 'asc');
-        $this->db->select('id, pelunasan_piutang_id, no_pelunasan, faktur_id,no_faktur, no_sj, DATE(tanggal_faktur) as tanggal_faktur, currency_id, currency, kurs, total_piutang_valas, total_piutang_rp, sisa_piutang_rp, sisa_piutang_valas, pelunasan_rp, pelunasan_valas, row_order, status_bayar');
+        $this->db->select('id, pelunasan_piutang_id, no_pelunasan, faktur_id,no_faktur, no_sj, DATE(tanggal_faktur) as tanggal_faktur, currency_id, currency, kurs, total_piutang_valas, total_piutang_rp, sisa_piutang_rp, sisa_piutang_valas, pelunasan_rp, pelunasan_valas, row_order, status_bayar, lebih_bayar');
         $this->db->from('acc_pelunasan_piutang_faktur');
 
     }
@@ -546,7 +546,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("abmd.id,(abm.no_bm) as no_bukti, abmd.tanggal, abmd.currency_id, ck1.currency, abmd.kurs, IF(ck1.currency='IDR', abmd.nominal, IFNULL(abmd.nominal*abmd.kurs,0)) as total_rp, IF(ck1.currency != 'IDR', abmd.nominal, 0) as total_valas, 'bank' as tipe2, abmd.uraian, abmd.kode_coa");
+        $this->db->select("abmd.id,(abm.no_bm) as no_bukti, abmd.tanggal, abmd.currency_id, ck1.currency,(CASE WHEN abmd.kurs_akhir IS NOT NULL AND abmd.kurs_akhir > 0  THEN abmd.kurs_akhir ELSE abmd.kurs END) as kurs, IF(ck1.currency='IDR', abmd.nominal, IFNULL(abmd.nominal*( CASE WHEN abmd.kurs_akhir IS NOT NULL AND abmd.kurs_akhir > 0  THEN abmd.kurs_akhir ELSE abmd.kurs END),0)) as total_rp, IF(ck1.currency != 'IDR', abmd.nominal, 0) as total_valas, 'bank' as tipe2, abmd.uraian, abmd.kode_coa");
         $this->db->from("acc_bank_masuk abm");
         $this->db->join("acc_bank_masuk_detail abmd ", "abm.id = abmd.bank_masuk_id", "left");
         $this->db->join("currency_kurs ck1 ", "abmd.currency_id = ck1.id", "left");
@@ -564,7 +564,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("akmd.id,(akm.no_km) as no_bukti , akmd.tanggal, akmd.currency_id, ck2.currency, akmd.kurs, IF(ck2.currency='IDR', akmd.nominal, IFNULL(akmd.nominal*akmd.kurs,0) ) as total_rp, IF(ck2.currency != 'IDR', akmd.nominal, 0) as total_valas, 'kas' as tipe2, akmd.uraian, akmd.kode_coa");
+        $this->db->select("akmd.id,(akm.no_km) as no_bukti , akmd.tanggal, akmd.currency_id, ck2.currency, (CASE WHEN akmd.kurs_akhir IS NOT NULL AND akmd.kurs_akhir > 0  THEN akmd.kurs_akhir ELSE akmd.kurs END) as kurs, IF(ck2.currency='IDR', akmd.nominal, IFNULL(akmd.nominal*(CASE WHEN akmd.kurs_akhir IS NOT NULL AND akmd.kurs_akhir > 0  THEN akmd.kurs_akhir ELSE akmd.kurs END),0) ) as total_rp, IF(ck2.currency != 'IDR', akmd.nominal, 0) as total_valas, 'kas' as tipe2, akmd.uraian, akmd.kode_coa");
         $this->db->from("acc_kas_masuk akm");
         $this->db->join("acc_kas_masuk_detail akmd ", "akm.id = akmd.kas_masuk_id", "left");
         $this->db->join("currency_kurs ck2 ", "akmd.currency_id = ck2.id", "left");
@@ -582,7 +582,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("agmd.id,(agm.no_gm) as no_bukti, agmd.tanggal, agmd.currency_id, ck3.currency, agmd.kurs, IF(ck3.currency='IDR', agmd.nominal, IFNULL(agmd.nominal*agmd.kurs,0)) as total_rp, IF(ck3.currency != 'IDR', agmd.nominal, 0) as total_valas, 'giro' as tipe2, iF(agm.transinfo !='', agm.transinfo, agm.lain2 ) as uraian, agmd.kode_coa");
+        $this->db->select("agmd.id,(agm.no_gm) as no_bukti, agmd.tanggal, agmd.currency_id, ck3.currency, (CASE WHEN agmd.kurs_akhir IS NOT NULL AND agmd.kurs_akhir > 0  THEN agmd.kurs_akhir ELSE agmd.kurs END) as kurs, IF(ck3.currency='IDR', agmd.nominal, IFNULL(agmd.nominal*(CASE WHEN agmd.kurs_akhir IS NOT NULL AND agmd.kurs_akhir > 0  THEN agmd.kurs_akhir ELSE agmd.kurs END),0)) as total_rp, IF(ck3.currency != 'IDR', agmd.nominal, 0) as total_valas, 'giro' as tipe2, iF(agm.transinfo !='', agm.transinfo, agm.lain2 ) as uraian, agmd.kode_coa");
         $this->db->from("acc_giro_masuk agm");
         $this->db->join("acc_giro_masuk_detail agmd ", "agm.id = agmd.giro_masuk_id", "left");
         $this->db->join("currency_kurs ck3 ", "agmd.currency_id = ck3.id", "left");
@@ -854,12 +854,12 @@ class M_pelunasanpiutang extends CI_Model
     public function get_currency_by_pelunasan($where)
     {
         // Query pertama
-        $this->db->select('no_pelunasan, currency_id, currency, kurs');
-        $this->db->from('acc_pelunasan_piutang_faktur');
-        if(count($where) > 0){
-            $this->db->where($where);
-        }
-        $query1 = $this->db->get_compiled_select();
+        // $this->db->select('no_pelunasan, currency_id, currency, kurs');
+        // $this->db->from('acc_pelunasan_piutang_faktur');
+        // if(count($where) > 0){
+        //     $this->db->where($where);
+        // }
+        // $query1 = $this->db->get_compiled_select();
 
         // Query kedua
         $this->db->select('no_pelunasan, currency_id, currency, kurs');
@@ -873,8 +873,7 @@ class M_pelunasanpiutang extends CI_Model
         $final_query = "
             SELECT *
             FROM (
-                ($query1)
-                UNION ALL
+               
                 ($query2)
             ) AS pm
             GROUP BY currency_id
@@ -973,7 +972,7 @@ class M_pelunasanpiutang extends CI_Model
         if(count($where) > 0){
             $this->db->where($where);
         }
-        $this->db->select('appsk.posisi, appsk.kode_coa, appsk.nama_coa, apps.koreksi');
+        $this->db->select('appsk.posisi, appsk.kode_coa, appsk.nama_coa, apps.koreksi, appsk.posisi, appsk.nominal, appsk.koreksi_id, appsk.head, appsk.faktur_id, appsk.alat_pelunasan, appsk.lunas, apps.mode');
         $this->db->order_by('appsk.id');
         $this->db->from('acc_pelunasan_piutang_summary_koreksi appsk');
         $this->db->join('acc_pelunasan_piutang_summary apps', 'apps.id = appsk.pelunasan_summary_id', 'inner');
@@ -1049,7 +1048,7 @@ class M_pelunasanpiutang extends CI_Model
         }
         $this->query_get_faktur();
         $query = $this->db->get();
-        return $query->result();
+        return $query;
     }
 
 
@@ -1092,12 +1091,24 @@ class M_pelunasanpiutang extends CI_Model
             $this->db->select('id, no_retur, total_piutang_rp as total, lunas');
             $this->db->FROM('acc_retur_penjualan');
             $result = $this->db->get();
-        } else {
+        } else if($metode == 'kas') {
             $this->db->select('acc_kas_masuk.no_km, acc_kas_masuk_detail.id, acc_kas_masuk_detail.nominal');
             $this->db->FROM('acc_kas_masuk');
             $this->db->join('acc_kas_masuk_detail', 'acc_kas_masuk_detail.kas_masuk_id = acc_kas_masuk.id', 'inner');
             $result = $this->db->get();
-        }
+        } else {
+            $this->db->select('acc_pelunasan_piutang.no_pelunasan, acc_kas_masuk_detail.id, acc_kas_masuk_detail.nominal');
+            $this->db->FROM('acc_kas_masuk');
+            $this->db->join('acc_kas_masuk_detail', 'acc_kas_masuk_detail.kas_masuk_id = acc_kas_masuk.id', 'inner');
+
+            $this->db->select("acc_pelunasan_piutang_summary_koreksi.id, acc_pelunasan_piutang.no_pelunasan,
+                                IF(acc_pelunasan_piutang_summary.currency = 'IDR', acc_pelunasan_piutang_summary_koreksi.nominal, acc_pelunasan_piutang_summary_koreksi.nominal * acc_pelunasan_piutang_summary.kurs)  as total_rp, 
+                                IF(acc_pelunasan_piutang_summary.currency != 'IDR', acc_pelunasan_piutang_summary_koreksi.nominal, 0) as total_valas, 'depo' as tipe2, 'Deposit' as uraian");
+            $this->db->from("acc_pelunasan_piutang ");
+            $this->db->join("acc_pelunasan_piutang_summary ", "acc_pelunasan_piutang_summary.pelunasan_piutang_id = acc_pelunasan_piutang.id", "INNER");
+            $this->db->join("acc_pelunasan_piutang_summary_koreksi ", "acc_pelunasan_piutang_summary.id = acc_pelunasan_piutang_summary_koreksi.pelunasan_summary_id", "INNER");
+            $result = $this->db->get();
+        } 
 
         return $result->row();
     }
@@ -1133,4 +1144,134 @@ class M_pelunasanpiutang extends CI_Model
             return $ex->getMessage();
         }
     }
+
+
+    function get_list_summary_koreksi_by_id($no_pelunasan, $sum_id)
+    {
+        $this->db->where('no_pelunasan', $no_pelunasan);
+        $this->db->where('pelunasan_summary_id', $sum_id);
+        $this->db->order_by('id','asc');
+        $result = $this->db->get('acc_pelunasan_piutang_summary_koreksi');
+        return $result->result();
+    }
+
+    function get_list_faktur_by_kode($params, $no_pelunasan)
+    {
+        $this->db->order_by('id','asc');
+        $this->db->where('no_pelunasan', $no_pelunasan);
+        $this->db->like('no_faktur', $params);
+        $this->query_get_faktur();
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    var $column_order5  = array(null, null, 'no_bukti', 'tanggal','uraian','currency', 'kurs', 'total_rp', 'total_valas');
+    var $column_search5 = array('no_bukti', 'tanggal', 'currency','uraian', 'kurs', 'total_rp', 'total_valas');
+    var $order5         = array('tanggal' => 'asc');
+
+    function query5($partner)
+    {
+        $where = ["app.partner_id" => $partner, "appsk.alat_pelunasan" => 'true', "appsk.lunas" => 0, "app.status" => "done"];
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        $this->db->select("appsk.id, app.no_pelunasan as no_bukti, app.partner_id, app.partner_nama, app.tanggal_transaksi as tanggal, apps.currency_id, apps.currency, apps.kurs, 
+                            IF(apps.currency = 'IDR', appsk.nominal, appsk.nominal * apps.kurs)  as total_rp, 
+                            IF(apps.currency != 'IDR', appsk.nominal, 0) as total_valas, 'depo' as tipe2, 'Deposit' as uraian");
+        $this->db->from("acc_pelunasan_piutang app");
+        $this->db->join("acc_pelunasan_piutang_summary apps ", "apps.pelunasan_piutang_id = app.id", "INNER");
+        $this->db->join("acc_pelunasan_piutang_summary_koreksi appsk ", "apps.id = appsk.pelunasan_summary_id", "INNER");
+        return $query1_sql = $this->db->get_compiled_select();
+    }
+    
+    
+    private function _get_datatables_query5($partner)
+    {
+        $union_sql = $this->query5($partner);
+
+        $this->db->SELECT('*');
+        $this->db->from('(' . $union_sql . ') as sub');
+
+        $i = 0;
+
+        foreach ($this->column_search5 as $item) // loop column 
+        {
+            if ($_POST['search']['value']) // if datatable send POST for search
+            {
+
+                if ($i === 0) // first loop
+                {
+                    $this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+
+                if (count($this->column_search5) - 1 == $i) //last loop
+                    $this->db->group_end(); //close bracket
+            }
+            $i++;
+        }
+
+        if (isset($_POST['order'])) // here order processing
+        {
+            $this->db->order_by($this->column_order5[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order3)) {
+            $order = $this->order3;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+    }
+
+
+
+
+    function get_datatables5($partner)
+    {
+        $this->_get_datatables_query5($partner);
+        if (isset($_POST["length"]) && $_POST["length"] != -1)
+            $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function count_filtered5($partner)
+    {
+        $this->_get_datatables_query5($partner);
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function count_all5($partner)
+    {
+        $union_sql = $this->query5($partner);
+        $this->db->SELECT('*');
+        $this->db->from('(' . $union_sql . ') as sub');
+        return $this->db->count_all_results();
+    }
+
+    function get_data_metode_pelunasan_deposit_by_id($partner,array $where = [])
+    {
+        $union_sql = $this->query5($partner);
+
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        $this->db->SELECT('*');
+        $this->db->from('(' . $union_sql . ') as sub');
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+
+    
+    function get_total_deposit_by_partner($partner)
+    {
+        $union_sql = $this->query5($partner);
+
+        $this->db->SELECT('count(*) as total');
+        $this->db->from('(' . $union_sql . ') as sub');
+        $query = $this->db->get()->row();
+        return $query->total ?? 0;
+    }
+
 }

@@ -4,64 +4,77 @@ function formatNumber(value, maxDecimals, locale = "en-US", prefix = "") {
     const formatter = new Intl.NumberFormat(locale);
     const decimalSeparator = (1.1).toLocaleString(locale).substring(1, 2);
 
-    // hanya izinkan angka & decimal
+    // hanya angka / decimal
     let regex = new RegExp(`[^0-9${decimalSeparator}-]`, "g");
-    let cleanValue = value.replace(regex, "");
+    let clean = value.replace(regex, "");
 
-    // ganti decimal separator ke titik (.) untuk parsing
+    // ubah separator sesuai locale
     if (decimalSeparator !== ".") {
-        cleanValue = cleanValue.replace(decimalSeparator, ".");
+        clean = clean.replace(decimalSeparator, ".");
     }
 
-    // hilangkan lebih dari 1 titik desimal
-    let firstDot = cleanValue.indexOf(".");
+    // hilangkan titik lebih dari satu
+    let firstDot = clean.indexOf(".");
     if (firstDot !== -1) {
-        cleanValue =
-        cleanValue.substring(0, firstDot + 1) +
-        cleanValue.substring(firstDot + 1).replace(/\./g, "");
+        clean =
+            clean.substring(0, firstDot + 1) +
+            clean.substring(firstDot + 1).replace(/\./g, "");
     }
 
-    // kalau baru ketik titik di akhir
-    if (cleanValue.endsWith(".")) {
-        let parts = cleanValue.split(".");
-        let intPart = parts[0] || "0";
-        return prefix + formatter.format(parseInt(intPart, 10)) + decimalSeparator;
+    // jika user baru ketik titik (contoh "12.")
+    if (clean.endsWith(".")) {
+        let intPart = clean.slice(0, -1) || "0";
+        return prefix + formatter.format(intPart) + decimalSeparator;
     }
 
-    // 🔥 PROSES ROUNDING DI SINI
-    let numberValue = parseFloat(cleanValue);
-    if (!isNaN(numberValue) && maxDecimals >= 0) {
-        numberValue = Number(numberValue.toFixed(maxDecimals));
-    }
+    let numberValue = parseFloat(clean);
+    if (isNaN(numberValue)) return prefix;
 
-    // sekarang format kembali ke locale
-    let [intPart, decPart] = numberValue.toString().split(".");
+    // pisahkan decimal tanpa rounding dulu
+    let parts = clean.split(".");
+    let intPart = parts[0];
+    let decPart = parts[1];
 
-    intPart = formatter.format(intPart);
+    intPart = formatter.format(parseInt(intPart || 0));
 
-    if (decPart && maxDecimals > 0) {
-        // pastikan trailing zero tetap tampil sesuai maxDecimals
-        decPart = decPart.padEnd(maxDecimals, "0");
+    // jika ada desimal → batasi jumlah sesuai maxDecimals
+    if (decPart !== undefined) {
+        decPart = decPart.substring(0, maxDecimals);
         return prefix + intPart + decimalSeparator + decPart;
     }
 
+    // belum ada desimal saat input
     return prefix + intPart;
 }
 
 
+// ===============================================================
+//             BIND INPUT FORMAT ANGKA
+// ===============================================================
 function bindFormatAngka(context = document) {
+
     context.querySelectorAll(".formatAngka").forEach(input => {
-        const maxDecimals = parseInt(input.dataset.decimal || 0);
+
+        const maxDecimals = parseInt(input.dataset.decimal || 2);
         const locale = input.dataset.locale || "en-US";
         const prefix = input.dataset.prefix && input.dataset.prefix !== "false"
             ? input.dataset.prefix + " "
             : "";
 
-        // 🔹 Format nilai awal jika sudah ada value
+        // format awal jika sudah ada value
         if (input.value) {
             input.value = formatNumber(input.value, maxDecimals, locale, prefix);
+
+            // 🔥 khusus input readonly → langsung paksa tampil decimal lengkap
+            if (input.readOnly) {
+                let num = parseFloat(unformatNumber(input.value));
+                if (!isNaN(num)) {
+                    input.value = formatNumber(num.toFixed(maxDecimals), maxDecimals, locale, prefix);
+                }
+            }
         }
 
+        // realtime format saat mengetik
         input.addEventListener("input", function () {
             let start = this.selectionStart;
             let oldLength = this.value.length;
@@ -69,37 +82,36 @@ function bindFormatAngka(context = document) {
             this.value = formatNumber(this.value, maxDecimals, locale, prefix);
 
             let newLength = this.value.length;
-            let diff = newLength - oldLength;
-
-            this.setSelectionRange(start + diff, start + diff);
+            this.setSelectionRange(start + (newLength - oldLength), start + (newLength - oldLength));
         });
 
+        // jika paste angka
         input.addEventListener("paste", function (e) {
             e.preventDefault();
-            let pastedText = (e.clipboardData || window.clipboardData).getData("text");
-            this.value = formatNumber(pastedText, maxDecimals, locale, prefix);
+            let pasted = (e.clipboardData || window.clipboardData).getData("text");
+            this.value = formatNumber(pasted, maxDecimals, locale, prefix);
         });
 
+        // 🔥 saat blur baru dipaksa 2 decimal
         input.addEventListener("blur", function () {
-            if (this.value.endsWith(".") || this.value.endsWith(",")) {
-                this.value = this.value.slice(0, -1);
-            }
+
+            let raw = unformatNumber(this.value);
+            let num = parseFloat(raw);
+
+            if (isNaN(num)) return;
+
+            this.value = parseFloat(num).toFixed(maxDecimals); // paksa trailing zero
+            this.value = formatNumber(this.value, maxDecimals, locale, prefix);
         });
     });
 }
 
-// auto-bind di awal
-document.addEventListener("DOMContentLoaded", () => {
-    bindFormatAngka();
-});
-
-// auto-bind kalau modal muncul
-document.addEventListener("shown.bs.modal", function (event) {
-    bindFormatAngka(event.target);
-});
+// ===============================================================
+document.addEventListener("DOMContentLoaded", () => bindFormatAngka());
+document.addEventListener("shown.bs.modal", e => bindFormatAngka(e.target));
+// ===============================================================
 
 function unformatNumber(value) {
     if (!value) return "";
     return value.replace(/[^0-9.-]/g, "");
 }
-

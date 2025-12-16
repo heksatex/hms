@@ -62,6 +62,7 @@
             border: 1px solid #000;
         }
 
+        /* 
         th:nth-child(1) {
             width: 15px;
         }
@@ -71,7 +72,7 @@
         }
 
         th:nth-child(3),
-        th:nth-child(16) {
+        th:nth-child(17) {
             width: 70px;
         }
 
@@ -86,9 +87,10 @@
         th:nth-child(12),
         th:nth-child(13),
         th:nth-child(14),
-        th:nth-child(15) {
+        th:nth-child(15),
+        th:nth-child(16) {
             width: 60px;
-        }
+        } */
 
 
         .text-right {
@@ -117,6 +119,62 @@ function limit_text($text, $max = 15)
 }
 ?>
 
+<?php
+$headers = [
+    ['label' => 'No',          'rowspan' => 2],
+    ['label' => 'Customer',    'rowspan' => 2],
+    ['label' => 'Saldo Awal',  'rowspan' => 2],
+
+    ['label' => 'Piutang',   'colspan' => 3],
+    ['label' => 'Pelunasan', 'rowspan' => 2],
+
+    ['label' => 'Retur',     'colspan' => 3],
+    ['label' => 'Diskon',    'colspan' => 3],
+
+    ['label' => 'Uang Muka', 'colspan' => 2],
+    ['label' => 'Koreksi',   'rowspan' => 2],
+
+    ['label' => 'Deposit',   'colspan' => 2],
+    ['label' => 'Saldo Akhir', 'rowspan' => 2],
+];
+
+$subHeaders = [
+    'Piutang'   => ['DPP', 'PPN', 'Total'],
+    'Retur'     => ['DPP', 'PPN', 'Total'],
+    'Diskon'    => ['DPP', 'PPN', 'Total'],
+    'Uang Muka' => ['Baru', 'Pelunasan'],
+    'Deposit'   => ['Baru', 'Pelunasan'],
+];
+?>
+
+<?php
+$bodyMap = [
+    'no',
+    'nama_partner',
+    'saldo_awal',
+
+    ['dpp_piutang', 'ppn_piutang', 'total_piutang_dpp_ppn'],
+    'pelunasan',
+
+    ['dpp_retur', 'ppn_retur', 'total_retur_dpp_ppn'],
+    ['dpp_diskon', 'ppn_diskon', 'total_diskon_dpp_ppn'],
+
+    ['um_baru', 'um_pelunasan'],
+    'koreksi',
+
+    ['depo_baru', 'depo_pelunasan'],
+    'saldo_akhir',
+];
+
+// hitung total kolom (buat colspan golongan)
+$totalCols = 0;
+foreach ($bodyMap as $m) {
+    $totalCols += is_array($m) ? count($m) : 1;
+}
+?>
+
+
+
 <body>
     <div class="header">
         <b>PT. HEKSATEX INDAH</b><br>
@@ -127,108 +185,142 @@ function limit_text($text, $max = 15)
     </div>
     <table>
         <thead>
-            <tr>
-                <th>No. </th>
-                <th>Customer</th>
-                <th>Saldo Awal</th>
-                <th>Piutang DPP</th>
-                <th>Piutang PPN</th>
-                <th>Piutang Total</th>
-                <th>Pelunasan</th>
-                <th>Retur DPP</th>
-                <th>Retur PPN</th>
-                <th>Retur Total</th>
-                <th>Diskon DPP</th>
-                <th>Diskon PPN</th>
-                <th>Diskon Total</th>
-                <th>Uang Muka</th>
-                <th>Koreksi</th>
-                <th>Saldo Akhir</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            foreach ($list as $head) {
-            ?>
-                <tr>
-                    <td colspan="16" class="bold"><?php echo $head['gol_nama'] ?></td>
-                </tr>
-                <?php
+            <colgroup>
+                <col style="width:3%">
+                <col style="width:14%">
+                <col style="width:7%">
 
-                $no = 1;
-                $piutang_dpp      = 0;
-                $piutang_ppn      = 0;
-                $piutang_total    = 0;
-                $pelunasan  = 0;
-                $retur_dpp      = 0;
-                $retur_ppn      = 0;
-                $retur_total    = 0;
-                $diskon_dpp      = 0;
-                $diskon_ppn      = 0;
-                $diskon_total    = 0;
-                $uang_muka  = 0;
-                $koreksi    = 0;
-                $s_awal     = 0;
-                $s_akhir   = 0;
-                foreach ($head['tmp_data'] as $items) {
-                ?>
-                    <tr>
-                        <td><?php echo $no++; ?></td>
-                        <td><?php echo htmlspecialchars(limit_text($items['nama_partner'], 17));  ?></td>
-                        <td class='text-right'><?php echo number_format($items['saldo_awal'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['dpp_piutang'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['ppn_piutang'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['total_piutang_dpp_ppn'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['pelunasan'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['dpp_retur'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['ppn_retur'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['total_retur_dpp_ppn'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['dpp_diskon'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['ppn_diskon'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['total_diskon_dpp_ppn'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['uang_muka'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['koreksi'], 2); ?></td>
-                        <td class='text-right'><?php echo number_format($items['saldo_akhir'], 2); ?></td>
-                    </tr>
+                <col style="width:7%">
+                <col style="width:6%">
+                <col style="width:6%">
+                <col style="width:6%">
+
+                <col style="width:6%">
+
+                <col style="width:6%">
+                <col style="width:6%">
+                <col style="width:6%">
+
+                <col style="width:6%">
+                <col style="width:6%">
+                <col style="width:6%">
+
+                <col style="width:6%">
+                <col style="width:6%">
+                <col style="width:7%">
+            </colgroup>
+            <tr>
+                <?php foreach ($headers as $h): ?>
+                    <th
+                        <?php if (!empty($h['rowspan'])): ?>rowspan="<?= $h['rowspan'] ?>" <?php endif; ?>
+                        <?php if (!empty($h['colspan'])): ?>colspan="<?= $h['colspan'] ?>" <?php endif; ?>
+                        style="text-align:center">
+                        <?= $h['label'] ?>
+                    </th>
+                <?php endforeach; ?>
+            </tr>
+
+            <tr>
                 <?php
-                    $s_awal  = $s_awal + $items['saldo_awal'];
-                    $piutang_dpp = $piutang_dpp + $items['dpp_piutang'];
-                    $piutang_ppn = $piutang_ppn + $items['ppn_piutang'];
-                    $piutang_total = $piutang_total + $items['total_piutang_dpp_ppn'];
-                    $pelunasan   = $pelunasan + $items['pelunasan'];
-                    $retur_dpp = $retur_dpp + $items['dpp_retur'];
-                    $retur_ppn = $retur_ppn + $items['ppn_retur'];
-                    $retur_total = $retur_total + $items['total_retur_dpp_ppn'];
-                    $diskon_dpp = $diskon_dpp + $items['dpp_diskon'];
-                    $diskon_ppn = $diskon_ppn + $items['ppn_diskon'];
-                    $diskon_total = $diskon_total + $items['total_diskon_dpp_ppn'];
-                    $uang_muka   = $uang_muka + $items['uang_muka'];
-                    $koreksi   = $koreksi + $items['koreksi'];
-                    $s_akhir   = $s_akhir + $items['saldo_akhir'];
+                foreach ($headers as $h) {
+                    if (!empty($h['colspan'])) {
+                        foreach ($subHeaders[$h['label']] as $sub) {
+                            echo "<th style='text-align:center'>{$sub}</th>";
+                        }
+                    }
                 }
                 ?>
-                <tr>
-                    <td class="bold text-right" colspan="2">Total <?php echo $head['gol_nama'] . ' :'; ?></td>
-                    <td class='bold text-right'><?php echo number_format($s_awal, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($piutang_dpp, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($piutang_ppn, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($piutang_total, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($pelunasan, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($retur_dpp, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($retur_ppn, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($retur_total, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($diskon_dpp, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($diskon_ppn, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($diskon_total, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($uang_muka, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($koreksi, 2); ?></td>
-                    <td class='bold text-right'><?php echo number_format($s_akhir, 2); ?></td>
-                </tr>
-            <?php
+            </tr>
+        </thead>
 
-            }
-            ?>
+        <tbody>
+            <?php foreach ($list as $head): ?>
+
+                <tr>
+                    <td colspan="<?= $totalCols ?>" class="bold">
+                        <?= htmlspecialchars($head['gol_nama']) ?>
+                    </td>
+                </tr>
+
+                <?php
+                $no = 1;
+                $totals = [];
+                ?>
+
+                <?php foreach ($head['tmp_data'] as $row): ?>
+                    <tr>
+                        <?php
+                        foreach ($bodyMap as $map) {
+
+                            // === KOLOM TUNGGAL ===
+                            if (is_string($map)) {
+
+                                if ($map === 'no') {
+                                    echo "<td>{$no}</td>";
+                                    continue;
+                                }
+
+                                if ($map === 'nama_partner') {
+                                    echo "<td>" . htmlspecialchars($row[$map]) . "</td>";
+                                    continue;
+                                }
+
+                                $value = $row[$map] ?? 0;
+                                echo "<td class='text-right'>" . number_format($value, 2) . "</td>";
+
+                                $totals[$map] = ($totals[$map] ?? 0) + (float)$value;
+                                continue;
+                            }
+
+                            // === KOLOM GROUP (ARRAY) ===
+                            if (is_array($map)) {
+                                foreach ($map as $field) {
+                                    $value = $row[$field] ?? 0;
+
+                                    echo "<td class='text-right'>" . number_format($value, 2) . "</td>";
+
+                                    $totals[$field] = ($totals[$field] ?? 0) + (float)$value;
+                                }
+                            }
+                        }
+                        ?>
+                    </tr>
+                <?php $no++;
+                endforeach; ?>
+
+
+                <!-- TOTAL PER GOLONGAN -->
+                <tr class="bold">
+                    <?php
+                    foreach ($bodyMap as $map) {
+
+                        if ($map === 'no') {
+                            echo "<td colspan='2' class='text-right'>Total {$head['gol_nama']} :</td>";
+                            continue;
+                        }
+
+                        if ($map === 'nama_partner') {
+                            continue;
+                        }
+
+                        if (is_string($map)) {
+                            echo "<td class='text-right'>" . number_format($totals[$map] ?? 0, 2) . "</td>";
+                            continue;
+                        }
+
+                        if (is_array($map)) {
+                            foreach ($map as $field) {
+                                echo "<td class='text-right'>" . number_format($totals[$field] ?? 0, 2) . "</td>";
+                            }
+                        }
+                    }
+                    ?>
+                </tr>
+
+
+            <?php endforeach; ?>
         </tbody>
+
     </table>
 
     </html>

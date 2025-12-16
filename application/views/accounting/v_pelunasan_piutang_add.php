@@ -183,6 +183,7 @@
                                                         <div class="col-md-10 col-lg-9">
                                                             <button class="btn btn-default btn-sm" id="btn-kas-bank" name="btn-kas-bank"><i class='fa fa-bank' style='color: green'></i> Kas Bank (<span id='tbk'>0</span>)</button>
                                                             <button class="btn btn-default btn-sm" id="btn-uang-muka" name="btn-uang-muka"><i class='fa fa-money' style='color: blue'></i> Uang Muka (<span id='tum'>0</span>)</button>
+                                                            <button class="btn btn-default btn-sm" id="btn-deposit" name="btn-deposit"><i class='fa fa-money' style='color: blue'></i> Deposit (<span id='tdep'>0</span>)</button>
                                                             <button class="btn btn-default btn-sm" id="btn-retur" name="btn-retur"><i class='fa fa-exchange' style='color: red'></i> Retur (<span id='tret'>0</span>)</button>
                                                             <button class="btn btn-default btn-sm" id="btn-koreksi-valas" name="btn-koreksi-valas"><i class='fa fa-exchange' style='color: purple'></i> Koreksi Kurs Bulan </button>
                                                         </div>
@@ -306,6 +307,7 @@
                 $("#tinv").html('<li class="fa fa-spinner fa-spin"></i>');
                 $("#tbk").html('<li class="fa fa-spinner fa-spin"></i>');
                 $("#tum").html('<li class="fa fa-spinner fa-spin"></i>');
+                $("#tdep").html('<li class="fa fa-spinner fa-spin"></i>');
                 $("#tret").html('<li class="fa fa-spinner fa-spin"></i>');
 
                 $.ajax({
@@ -321,6 +323,7 @@
                         $("#tbk").html(data.total.total_kas_bank)
                         $("#tum").html(data.total.total_uang_muka)
                         $("#tret").html(data.total.total_retur)
+                        $("#tdep").html(data.total.total_deposit)
 
                     },
                     error: function(xhr, ajaxOptions, thrownError) {

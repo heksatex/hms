@@ -55,8 +55,9 @@ class Bukubesarpembantupiutang extends MY_Controller
                 $tgldari    = $this->input->post('tgldari');
                 $tglsampai  = $this->input->post('tglsampai');
                 $checkhidden = $this->input->post('checkhidden');
+                $currency    = $this->input->post('currency'); //  valas, rp
 
-                $data = $this->proses_data($tgldari, $tglsampai, $checkhidden);
+                $data = $this->proses_data($tgldari, $tglsampai, $checkhidden, $currency);
                 $callback = array('status' => 'success', 'message' => 'berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'record' => $data);
             }
 
@@ -72,7 +73,7 @@ class Bukubesarpembantupiutang extends MY_Controller
 
 
 
-    function proses_data($tgldari, $tglsampai, $checkhidden)
+    function proses_data($tgldari, $tglsampai, $checkhidden, $currency)
     {
 
         $tgl_dari   = date('Y-m-d 00:00:00', strtotime($tgldari));
@@ -83,7 +84,7 @@ class Bukubesarpembantupiutang extends MY_Controller
         foreach ($list_gol as $gol) {
 
             $where      = ['p.customer' => 1, 'p.gol' => $gol->id];
-            $result = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where);
+            $result = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, [], $currency);
             if ($result) {
                 $tmp_gol[] = array(
                     'gol_id' => $gol->id,
@@ -97,7 +98,7 @@ class Bukubesarpembantupiutang extends MY_Controller
 
         $where          = ['p.customer' => 1,];
         $where_not_in   = ['p.gol' => $tmp_list_gol];
-        $result2 = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, $where_not_in);
+        $result2 = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, $where_not_in, $currency);
         if ($result2) {
             $tmp_gol[] = array(
                 'gol_id' => 0,
@@ -109,9 +110,9 @@ class Bukubesarpembantupiutang extends MY_Controller
         return $tmp_gol;
     }
 
-    function proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, $not_in = [])
+    function proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, $not_in = [], $currency)
     {
-        $data       = $this->m_bukubesarpembantupiutang->get_list_bukubesar($tgl_dari, $tgl_sampai, $checkhidden, $where, $not_in);
+        $data       = $this->m_bukubesarpembantupiutang->get_list_bukubesar($tgl_dari, $tgl_sampai, $checkhidden, $where, $not_in, $currency);
         $tmp_data = array();
         $debit    = 0;
         $credit   = 0;
@@ -126,7 +127,10 @@ class Bukubesarpembantupiutang extends MY_Controller
             $total_uang_muka   = (float) $datas->total_uang_muka;
             $total_koreksi   = (float) $datas->total_koreksi;
             $total_diskon  = (float) round($datas->total_diskon_dpp_ppn, 2);
-            $saldo_akhir   = round($saldo_awal + $total_piutang -  $total_pelunasan - $total_retur - $total_diskon - $total_uang_muka - ($total_koreksi), 2);
+            $total_kas_um  = (float) round($datas->total_kas_um, 2);
+            $total_depo_baru  = (float) round($datas->total_deposit, 2);
+            $total_depo_pelunasan  = (float) round($datas->total_deposit_pel, 2);
+            $saldo_akhir   = round($saldo_awal - $total_kas_um + $total_piutang -  $total_pelunasan - $total_retur - $total_diskon - $total_uang_muka - ($total_koreksi) - $total_depo_baru - $total_depo_pelunasan, 2);
             $tmp_data[] = array(
                 'id_partner'  => $datas->id,
                 'nama_partner' => $datas->nama,
@@ -134,7 +138,7 @@ class Bukubesarpembantupiutang extends MY_Controller
                 'piutang'     => $total_piutang,
                 'dpp_piutang' => (float) round($datas->dpp_piutang, 2),
                 'ppn_piutang' => (float) round($datas->ppn_piutang, 2),
-                'total_piutang_dpp_ppn' => (float) round($datas->total_piutang_dpp_ppn),
+                'total_piutang_dpp_ppn' => (float) round($datas->total_piutang_dpp_ppn, 2),
                 'pelunasan'   => $total_pelunasan,
                 'retur'       => $total_retur,
                 'dpp_retur' => (float) round($datas->dpp_retur, 2),
@@ -143,9 +147,12 @@ class Bukubesarpembantupiutang extends MY_Controller
                 'dpp_diskon' => (float) round($datas->dpp_diskon, 2),
                 'ppn_diskon' => (float) round($datas->ppn_diskon, 2),
                 'total_diskon_dpp_ppn' => $total_diskon,
-                'uang_muka'   => $total_uang_muka,
                 'koreksi'     => $total_koreksi,
-                'saldo_akhir' => $saldo_akhir
+                'saldo_akhir' => $saldo_akhir,
+                'um_baru'   => $total_kas_um,
+                'um_pelunasan' => $total_uang_muka,
+                'depo_baru'   => $total_depo_baru,
+                'depo_pelunasan' => $total_depo_pelunasan,
 
             );
             $debit    = 0;
@@ -169,6 +176,7 @@ class Bukubesarpembantupiutang extends MY_Controller
             $tgl_dari   = $arr_filter[0]['tgldari'] ?? '';
             $tgl_sampai = $arr_filter[0]['tglsampai'] ?? '';
             $checkhidden = $arr_filter[0]['checkhidden'] ?? '';
+            $currency    = $arr_filter[0]['currency'] ?? '';
             $tgl_dari   = date('Y-m-d H:i:s', strtotime($tgl_dari));
             $tgl_sampai = date('Y-m-d 23:59:59', strtotime($tgl_sampai));
 
@@ -228,147 +236,404 @@ class Bukubesarpembantupiutang extends MY_Controller
                 // )
             );
 
-            $table_head_columns  = array('No', 'Customer', 'Saldo Awal', 'Piutang DPP', 'Piutang PPN', 'Piutang Total', 'Pelunasan', 'Retur DPP', 'Retur PPN', 'Retur Total', 'Diskon DPP', 'Diskon PPN', 'Diskon Total', 'Uang Muka', 'Koreksi', 'Saldo Akhir');
-            $column = 0;
-            foreach ($table_head_columns as $field) {
-                $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);
-                $column++;
-            }
+            // $table_head_columns  = array('No', 'Customer', 'Saldo Awal', 'Uang Mukas (Outstanding)', 'Piutang DPP', 'Piutang PPN', 'Piutang Total', 'Pelunasan', 'Retur DPP', 'Retur PPN', 'Retur Total', 'Diskon DPP', 'Diskon PPN', 'Diskon Total', 'Uang Muka', 'Koreksi', 'Saldo Akhir');
+            // $column = 0;
+            // foreach ($table_head_columns as $field) {
+            //     $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);
+            //     $column++;
+            // }
 
-            // set width and border
-            $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P');
-            $loop = 0;
-            foreach ($index_header as $val) {
+            // // set width and border
+            // $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q');
+            // $loop = 0;
+            // foreach ($index_header as $val) {
 
-                $object->getActiveSheet()->getStyle($val . '5')->applyFromArray($styleArrayColor);
+            //     $object->getActiveSheet()->getStyle($val . '5')->applyFromArray($styleArrayColor);
 
-                if ($loop == 0) {
-                    $object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A
-                } else if ($loop ==  1) {
-                    $object->getSheet(0)->getColumnDimension($val)->setWidth(35); // index B
-                } else if ($loop > 1) {
-                    $object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index C -> I
+            //     if ($loop == 0) {
+            //         $object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A
+            //     } else if ($loop ==  1) {
+            //         $object->getSheet(0)->getColumnDimension($val)->setWidth(35); // index B
+            //     } else if ($loop > 1) {
+            //         $object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index C -> I
+            //     }
+            //     $loop++;
+            // }
+
+
+
+
+
+            // $data = $this->proses_data($tgl_dari, $tgl_sampai, $checkhidden, $currency);
+            // $rowCount = $rowCount + 3;
+            // foreach ($data as $head) {
+
+            //     // nama golongan
+            //     $object->getActiveSheet()->SetCellValue('A' . $rowCount, ''.$head['gol_nama']);
+            //     $object->getActiveSheet()->mergeCells('A' . $rowCount . ':P' . $rowCount);
+            //     $object->getActiveSheet()->getStyle("A" . $rowCount . ":P" . $rowCount)->getFont()->setBold(true);
+            //     $rowCount++;
+
+
+            //     $s_awal = 0;
+            //     $kas_um = 0;
+            //     $piutang_ppn = 0;
+            //     $piutang_dpp = 0;
+            //     $piutang_total = 0;
+            //     $pelunasan = 0;
+            //     $retur_ppn = 0;
+            //     $retur_dpp = 0;
+            //     $retur_total = 0;
+            //     $diskon_ppn = 0;
+            //     $diskon_dpp = 0;
+            //     $diskon_total = 0;
+            //     $uang_muka = 0;
+            //     $koreksi = 0;
+            //     $saldo_akhir = 0;
+            //     $num  = 1;
+            //     foreach ($head['tmp_data'] as $row) {
+            //         $object->getActiveSheet()->SetCellValue('A' . $rowCount, ($num++));
+            //         $object->getActiveSheet()->SetCellValue('B' . $rowCount, $row['nama_partner']);
+            //         $object->getActiveSheet()->SetCellValue('C' . $rowCount, $row['saldo_awal']);
+            //         $object->getActiveSheet()->SetCellValue('D' . $rowCount, $row['total_kas_um']);
+            //         $object->getActiveSheet()->SetCellValue('E' . $rowCount, $row['dpp_piutang']);
+            //         $object->getActiveSheet()->SetCellValue('F' . $rowCount, $row['ppn_piutang']);
+            //         $object->getActiveSheet()->SetCellValue('G' . $rowCount, $row['total_piutang_dpp_ppn']);
+            //         $object->getActiveSheet()->SetCellValue('H' . $rowCount, $row['pelunasan']);
+            //         $object->getActiveSheet()->SetCellValue('I' . $rowCount, $row['dpp_retur']);
+            //         $object->getActiveSheet()->SetCellValue('J' . $rowCount, $row['ppn_retur']);
+            //         $object->getActiveSheet()->SetCellValue('K' . $rowCount, $row['total_retur_dpp_ppn']);
+            //         $object->getActiveSheet()->SetCellValue('L' . $rowCount, $row['dpp_diskon']);
+            //         $object->getActiveSheet()->SetCellValue('M' . $rowCount, $row['ppn_diskon']);
+            //         $object->getActiveSheet()->SetCellValue('N' . $rowCount, $row['total_diskon_dpp_ppn']);
+            //         $object->getActiveSheet()->SetCellValue('O' . $rowCount, $row['uang_muka']);
+            //         $object->getActiveSheet()->SetCellValue('P' . $rowCount, $row['koreksi']);
+            //         $object->getActiveSheet()->SetCellValue('Q' . $rowCount, $row['saldo_akhir']);
+
+            //         $object->getActiveSheet()->getStyle('C' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('E' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('F' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('G' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('I' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('K' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('L' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('M' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('O' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('P' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //         $object->getActiveSheet()->getStyle('Q' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+
+
+            //         $s_awal = $s_awal + $row['saldo_awal'];
+            //         $kas_um = $kas_um + $row['total_kas_um'];
+            //         $piutang_ppn = $piutang_ppn + $row['ppn_piutang'];
+            //         $piutang_dpp = $piutang_dpp + $row['dpp_piutang'];
+            //         $piutang_total = $piutang_total + $row['total_piutang_dpp_ppn'];
+            //         $pelunasan = $pelunasan + $row['pelunasan'];
+            //         $retur_ppn = $retur_ppn + $row['ppn_retur'];
+            //         $retur_dpp = $retur_dpp + $row['dpp_retur'];
+            //         $retur_total = $retur_total + $row['total_retur_dpp_ppn'];
+            //         $diskon_ppn = $diskon_ppn + $row['ppn_diskon'];
+            //         $diskon_dpp = $diskon_dpp + $row['dpp_diskon'];
+            //         $diskon_total = $diskon_total + $row['total_diskon_dpp_ppn'];
+            //         $uang_muka = $uang_muka + $row['uang_muka'];
+            //         $koreksi = $koreksi + $row['koreksi'];
+            //         $saldo_akhir =  $saldo_akhir + $row['saldo_akhir'];
+            //         $rowCount++;
+            //     }
+
+            //     $object->getActiveSheet()->SetCellValue('A' . $rowCount, 'Total : '.$head['gol_nama']);
+            //     $sheet->getStyle("A" . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+            //     $sheet->mergeCells('A' . $rowCount . ':B' . $rowCount);
+            //     // $object->getActiveSheet()->SetCellValue('E'.$rowCount, $s_awal);
+            //     $object->getActiveSheet()->SetCellValue('c' . $rowCount, $s_awal);
+            //     $object->getActiveSheet()->SetCellValue('D' . $rowCount, $kas_um);
+            //     $object->getActiveSheet()->SetCellValue('E' . $rowCount, $piutang_dpp);
+            //     $object->getActiveSheet()->SetCellValue('F' . $rowCount, $piutang_ppn);
+            //     $object->getActiveSheet()->SetCellValue('G' . $rowCount, $piutang_total);
+            //     $object->getActiveSheet()->SetCellValue('H' . $rowCount, $pelunasan);
+            //     $object->getActiveSheet()->SetCellValue('I' . $rowCount, $retur_dpp);
+            //     $object->getActiveSheet()->SetCellValue('J' . $rowCount, $retur_ppn);
+            //     $object->getActiveSheet()->SetCellValue('K' . $rowCount, $retur_total);
+            //     $object->getActiveSheet()->SetCellValue('L' . $rowCount, $diskon_dpp);
+            //     $object->getActiveSheet()->SetCellValue('M' . $rowCount, $diskon_ppn);
+            //     $object->getActiveSheet()->SetCellValue('N' . $rowCount, $diskon_total);
+            //     $object->getActiveSheet()->SetCellValue('O' . $rowCount, $uang_muka);
+            //     $object->getActiveSheet()->SetCellValue('P' . $rowCount, $koreksi);
+            //     $object->getActiveSheet()->SetCellValue('Q' . $rowCount, $saldo_akhir);
+
+            //     // $object->getActiveSheet()->getStyle('E'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('C' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('E' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('F' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('G' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('I' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('K' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('L' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('M' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('O' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('P' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle('Q' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            //     $object->getActiveSheet()->getStyle("A" . $rowCount . ":Q" . $rowCount)->getFont()->setBold(true);
+            //     $rowCount++;
+            // }
+
+            $headerRow1 = 5;
+            $headerRow2 = 6;
+
+            $headers = [
+                ['label'=>'No',          'rowspan'=>2, 'width'=>'auto'],
+                ['label'=>'Customer',    'rowspan'=>2, 'width'=>35],
+                ['label'=>'Saldo Awal',  'rowspan'=>2, 'width'=>20],
+
+                ['label'=>'Piutang',     'colspan'=>3, 'sub'=>['DPP','PPN','Total'], 'width'=>15],
+                ['label'=>'Pelunasan',   'rowspan'=>2, 'width'=>20],
+
+                ['label'=>'Retur',       'colspan'=>3, 'sub'=>['DPP','PPN','Total'], 'width'=>15],
+                ['label'=>'Diskon',      'colspan'=>3, 'sub'=>['DPP','PPN','Total'], 'width'=>15],
+
+                ['label'=>'Uang Muka',   'colspan'=>2, 'sub'=>['Baru','Pelunasan'], 'width'=>15],
+                ['label'=>'Koreksi',     'rowspan'=>2, 'width'=>20],
+
+                ['label'=>'Deposit',     'colspan'=>2, 'sub'=>['Baru','Pelunasan'], 'width'=>15],
+                ['label'=>'Saldo Akhir', 'rowspan'=>2, 'width'=>20],
+            ];
+
+
+            $colIndex = 0;
+
+            foreach ($headers as $h) {
+
+                $startCol = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+
+                if (isset($h['colspan'])) {
+                    $endCol = PHPExcel_Cell::stringFromColumnIndex($colIndex + $h['colspan'] - 1);
+                    $sheet->mergeCells("$startCol$headerRow1:$endCol$headerRow1");
+                    $colIndex += $h['colspan'];
+                } else {
+                    // rowspan = 2
+                    $sheet->mergeCells("$startCol$headerRow1:$startCol$headerRow2");
+                    $colIndex++;
                 }
-                $loop++;
+
+                $sheet->setCellValue("$startCol$headerRow1", $h['label']);
+            }
+
+            $colIndex = 0;
+
+            foreach ($headers as $h) {
+
+                // Kolom rowspan (No, Customer, Pelunasan, Koreksi, Saldo Akhir)
+                if (isset($h['rowspan'])) {
+                    $colIndex++;        // ❗ kolom tetap TERPAKAI
+                    continue;           // ❗ tapi tidak boleh ditulis sub-header
+                }
+
+                // Kolom yang punya sub header
+                foreach ($h['sub'] as $subLabel) {
+                    $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                    $sheet->setCellValue($col.$headerRow2, $subLabel);
+                    $colIndex++;
+                }
+            }
+
+            $colIndex = 0;
+
+            foreach ($headers as $h) {
+
+                // HEADER ROWSPAN (1 kolom)
+                if (isset($h['rowspan'])) {
+
+                    $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+
+                    if ($h['width'] === 'auto') {
+                        $sheet->getColumnDimension($col)->setAutoSize(true);
+                    } else {
+                        $sheet->getColumnDimension($col)->setWidth($h['width']);
+                    }
+
+                    $colIndex++;
+                    continue;
+                }
+
+                // HEADER COLSPAN (banyak sub kolom)
+                foreach ($h['sub'] as $_) {
+
+                    $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+
+                    $sheet->getColumnDimension($col)->setWidth($h['width']);
+
+                    $colIndex++;
+                }
             }
 
 
-            $data = $this->proses_data($tgl_dari, $tgl_sampai, $checkhidden);
-            $rowCount = $rowCount + 3;
+            $sheet->getStyle("A5:" . PHPExcel_Cell::stringFromColumnIndex($colIndex - 1) . "6")
+                ->applyFromArray($styleArrayColor);
+
+            $sheet->getStyle("A5:" . PHPExcel_Cell::stringFromColumnIndex($colIndex - 1) . "6")
+                ->getAlignment()
+                ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER)
+                ->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+            $rowCount = 7;
+
+            $bodyMap = [
+                'no',
+                'nama_partner',
+                'saldo_awal',
+
+                ['dpp_piutang','ppn_piutang','total_piutang_dpp_ppn'],
+                'pelunasan',
+
+                ['dpp_retur','ppn_retur','total_retur_dpp_ppn'],
+                ['dpp_diskon','ppn_diskon','total_diskon_dpp_ppn'],
+
+                ['um_baru','um_pelunasan'],
+                'koreksi',
+
+                ['depo_baru','depo_pelunasan'],
+                'saldo_akhir',
+            ];
+
+            $totalCols = 0;
+            foreach ($bodyMap as $m) {
+                $totalCols += is_array($m) ? count($m) : 1;
+            }
+            $lastCol = PHPExcel_Cell::stringFromColumnIndex($totalCols - 1);
+
+
+            $data = $this->proses_data($tgl_dari, $tgl_sampai, $checkhidden, $currency);
+
             foreach ($data as $head) {
 
-                // nama golongan
-                $object->getActiveSheet()->SetCellValue('A' . $rowCount, ''.$head['gol_nama']);
-                $object->getActiveSheet()->mergeCells('A' . $rowCount . ':P' . $rowCount);
-                $object->getActiveSheet()->getStyle("A" . $rowCount . ":P" . $rowCount)->getFont()->setBold(true);
+                /* ===============================
+                * BARIS GOLONGAN
+                * =============================== */
+                $sheet->setCellValue('A'.$rowCount, $head['gol_nama']);
+                $sheet->mergeCells("A{$rowCount}:{$lastCol}{$rowCount}");
+                $sheet->getStyle("A{$rowCount}:{$lastCol}{$rowCount}")
+                    ->getFont()->setBold(true);
                 $rowCount++;
 
+                /* ===============================
+                * INIT TOTAL
+                * =============================== */
+                $totals = [];
+                $num = 1;
 
-                $s_awal = 0;
-                $piutang_ppn = 0;
-                $piutang_dpp = 0;
-                $piutang_total = 0;
-                $pelunasan = 0;
-                $retur_ppn = 0;
-                $retur_dpp = 0;
-                $retur_total = 0;
-                $diskon_ppn = 0;
-                $diskon_dpp = 0;
-                $diskon_total = 0;
-                $uang_muka = 0;
-                $koreksi = 0;
-                $saldo_akhir = 0;
-                $num  = 1;
+                /* ===============================
+                * BODY DATA
+                * =============================== */
                 foreach ($head['tmp_data'] as $row) {
-                    $object->getActiveSheet()->SetCellValue('A' . $rowCount, ($num++));
-                    $object->getActiveSheet()->SetCellValue('B' . $rowCount, $row['nama_partner']);
-                    $object->getActiveSheet()->SetCellValue('C' . $rowCount, $row['saldo_awal']);
-                    $object->getActiveSheet()->SetCellValue('D' . $rowCount, $row['dpp_piutang']);
-                    $object->getActiveSheet()->SetCellValue('E' . $rowCount, $row['ppn_piutang']);
-                    $object->getActiveSheet()->SetCellValue('F' . $rowCount, $row['total_piutang_dpp_ppn']);
-                    $object->getActiveSheet()->SetCellValue('G' . $rowCount, $row['pelunasan']);
-                    $object->getActiveSheet()->SetCellValue('H' . $rowCount, $row['dpp_retur']);
-                    $object->getActiveSheet()->SetCellValue('I' . $rowCount, $row['ppn_retur']);
-                    $object->getActiveSheet()->SetCellValue('J' . $rowCount, $row['total_retur_dpp_ppn']);
-                    $object->getActiveSheet()->SetCellValue('K' . $rowCount, $row['dpp_diskon']);
-                    $object->getActiveSheet()->SetCellValue('L' . $rowCount, $row['ppn_diskon']);
-                    $object->getActiveSheet()->SetCellValue('M' . $rowCount, $row['total_diskon_dpp_ppn']);
-                    $object->getActiveSheet()->SetCellValue('N' . $rowCount, $row['uang_muka']);
-                    $object->getActiveSheet()->SetCellValue('O' . $rowCount, $row['koreksi']);
-                    $object->getActiveSheet()->SetCellValue('P' . $rowCount, $row['saldo_akhir']);
 
-                    $object->getActiveSheet()->getStyle('C' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('E' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('F' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('G' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('I' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('K' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('L' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('M' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('O' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                    $object->getActiveSheet()->getStyle('P' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                    $colIndex = 0;
 
+                    foreach ($bodyMap as $map) {
 
-                    $s_awal = $s_awal + $row['saldo_awal'];
-                    $piutang_ppn = $piutang_ppn + $row['ppn_piutang'];
-                    $piutang_dpp = $piutang_dpp + $row['dpp_piutang'];
-                    $piutang_total = $piutang_total + $row['total_piutang_dpp_ppn'];
-                    $pelunasan = $pelunasan + $row['pelunasan'];
-                    $retur_ppn = $retur_ppn + $row['ppn_retur'];
-                    $retur_dpp = $retur_dpp + $row['dpp_retur'];
-                    $retur_total = $retur_total + $row['total_retur_dpp_ppn'];
-                    $diskon_ppn = $diskon_ppn + $row['ppn_diskon'];
-                    $diskon_dpp = $diskon_dpp + $row['dpp_diskon'];
-                    $diskon_total = $diskon_total + $row['total_diskon_dpp_ppn'];
-                    $uang_muka = $uang_muka + $row['uang_muka'];
-                    $koreksi = $koreksi + $row['koreksi'];
-                    $saldo_akhir =  $saldo_akhir + $row['saldo_akhir'];
+                        // FIELD TUNGGAL
+                        if (is_string($map)) {
+
+                            $value = ($map === 'no') ? $num : ($row[$map] ?? 0);
+
+                            $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                            $sheet->setCellValue($col.$rowCount, $value);
+
+                            if ($map !== 'no' && $map !== 'nama_partner') {
+                                $sheet->getStyle($col.$rowCount)
+                                    ->getNumberFormat()
+                                    ->setFormatCode('#,##0.00');
+                            }
+
+                            if ($map !== 'no' && $map !== 'nama_partner') {
+                                $totals[$map] = ($totals[$map] ?? 0) + (float)$value;
+                            }
+
+                            $colIndex++;
+                            continue;
+                        }
+
+                        // FIELD GROUP
+                        foreach ($map as $field) {
+
+                            $value = $row[$field] ?? 0;
+                            $col   = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+
+                            $sheet->setCellValue($col.$rowCount, $value);
+                            $sheet->getStyle($col.$rowCount)
+                                ->getNumberFormat()
+                                ->setFormatCode('#,##0.00');
+
+                            $totals[$field] = ($totals[$field] ?? 0) + (float)$value;
+
+                            $colIndex++;
+                        }
+                    }
+
+                    $num++;
                     $rowCount++;
                 }
 
-                $object->getActiveSheet()->SetCellValue('A' . $rowCount, 'Total : '.$head['gol_nama']);
-                $sheet->getStyle("A" . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-                $sheet->mergeCells('A' . $rowCount . ':B' . $rowCount);
-                // $object->getActiveSheet()->SetCellValue('E'.$rowCount, $s_awal);
-                $object->getActiveSheet()->SetCellValue('c' . $rowCount, $s_awal);
-                $object->getActiveSheet()->SetCellValue('D' . $rowCount, $piutang_dpp);
-                $object->getActiveSheet()->SetCellValue('E' . $rowCount, $piutang_ppn);
-                $object->getActiveSheet()->SetCellValue('F' . $rowCount, $piutang_total);
-                $object->getActiveSheet()->SetCellValue('G' . $rowCount, $pelunasan);
-                $object->getActiveSheet()->SetCellValue('H' . $rowCount, $retur_dpp);
-                $object->getActiveSheet()->SetCellValue('I' . $rowCount, $retur_ppn);
-                $object->getActiveSheet()->SetCellValue('J' . $rowCount, $retur_total);
-                $object->getActiveSheet()->SetCellValue('K' . $rowCount, $diskon_dpp);
-                $object->getActiveSheet()->SetCellValue('L' . $rowCount, $diskon_ppn);
-                $object->getActiveSheet()->SetCellValue('M' . $rowCount, $diskon_total);
-                $object->getActiveSheet()->SetCellValue('N' . $rowCount, $uang_muka);
-                $object->getActiveSheet()->SetCellValue('O' . $rowCount, $koreksi);
-                $object->getActiveSheet()->SetCellValue('P' . $rowCount, $saldo_akhir);
+                /* ===============================
+                * TOTAL PER GOLONGAN
+                * =============================== */
+                $sheet->setCellValue("A{$rowCount}", 'Total : '.$head['gol_nama']);
+                $sheet->mergeCells("A{$rowCount}:B{$rowCount}");
+                $sheet->getStyle("A{$rowCount}")
+                    ->getAlignment()
+                    ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
-                // $object->getActiveSheet()->getStyle('E'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('C' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('E' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('F' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('G' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('I' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('K' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('L' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('M' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('N' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('O' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('P' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle("A" . $rowCount . ":P" . $rowCount)->getFont()->setBold(true);
+                $colIndex = 2; // mulai dari Saldo Awal
+
+                foreach ($bodyMap as $map) {
+
+                    if ($map === 'no' || $map === 'nama_partner') {
+                        continue;
+                    }
+
+                    if (is_string($map)) {
+                        $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                        $sheet->setCellValue($col.$rowCount, $totals[$map] ?? 0);
+                        $sheet->getStyle($col.$rowCount)
+                            ->getNumberFormat()
+                            ->setFormatCode('#,##0.00');
+                        $colIndex++;
+                        continue;
+                    }
+
+                    foreach ($map as $field) {
+                        $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                        $sheet->setCellValue($col.$rowCount, $totals[$field] ?? 0);
+                        $sheet->getStyle($col.$rowCount)
+                            ->getNumberFormat()
+                            ->setFormatCode('#,##0.00');
+                        $colIndex++;
+                    }
+                }
+
+                $sheet->getStyle("A{$rowCount}:{$lastCol}{$rowCount}")
+                    ->getFont()->setBold(true);
+
                 $rowCount++;
             }
 
-            
+
+
+
+
+
+            $sheet->freezePane('A7');
+
+
+
+
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');
             $object->save('php://output');
 
@@ -400,13 +665,15 @@ class Bukubesarpembantupiutang extends MY_Controller
         $tgl_dari   = '';
         $tgl_sampai = '';
         $checkhidden = '';
+        $currency = '';
         foreach ($data_arr as $rows) {
             $tgl_dari = $rows['tgldari'];
             $tgl_sampai = $rows['tglsampai'];
             $checkhidden = $rows['checkhidden'];
+            $currency = $rows['currency'];
         }
 
-        $data = $this->proses_data($tgl_dari, $tgl_sampai, $checkhidden);
+        $data = $this->proses_data($tgl_dari, $tgl_sampai, $checkhidden, $currency);
 
         $data['list'] = $data;
         $data['tgl_dari']   = tgl_indo(date('d-m-Y', strtotime($tgl_dari)));
