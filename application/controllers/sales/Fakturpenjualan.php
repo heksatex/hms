@@ -804,15 +804,14 @@ class Fakturpenjualan extends MY_Controller {
             $this->_module->startTransaction();
             $lock = "main_menu_sub READ, log_history WRITE,delivery_order do WRITE,delivery_order WRITE,acc_faktur_penjualan WRITE,"
                     . "acc_faktur_penjualan_detail WRITE,token_increment WRITE,acc_jurnal_entries_items WRITE,acc_jurnal_entries WRITE,"
-                    . "setting READ";
+                    . "setting READ,faktur_jurnal WRITE";
             $this->_module->lock_tabel($lock);
             $updateHead = ["status" => $status];
             switch ($status) {
                 case "confirm":
-                    if($data->no_faktur_internal === "") {
+                    if ($data->no_faktur_internal === "") {
                         throw new \Exception("No Faktur Internal Harus Terisi", 500);
                     }
-                    
                     if ($data->status !== "draft") {
                         throw new \Exception("Faktur Harus dalam status Draft", 500);
                     }
@@ -851,7 +850,7 @@ class Fakturpenjualan extends MY_Controller {
 
                     $detail = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->getData();
                     $jurnalItems = [];
-
+                    $fakturJurnal = [];
                     $sjs = explode("/", $data->no_sj);
                     $totalC = 0;
                     $totalD = 0;
@@ -975,6 +974,7 @@ class Fakturpenjualan extends MY_Controller {
                             $totalC += round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2);
 //                            $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
 //                            $totalPiutangCurr += $value->jumlah;
+                            $rowOrder = (count($jurnalItems) + 1);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
@@ -986,7 +986,13 @@ class Fakturpenjualan extends MY_Controller {
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
                                 "nominal" => round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2),
-                                "row_order" => (count($jurnalItems) + 1)
+                                "row_order" => $rowOrder
+                            );
+                            $fakturJurnal[] = array(
+                                "no_faktur" => $value->faktur_no,
+                                "faktur_detail_id" => $value->id,
+                                "jurnal_kode" => $jurnal,
+                                "jurnal_order" => $rowOrder
                             );
                         }
                         $hsl = round($totalC - $totalD, 2);
@@ -1013,6 +1019,7 @@ class Fakturpenjualan extends MY_Controller {
                     if ($data->jurnal !== "") {
                         $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
                         $model->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();
+                        $model->setTables("faktur_jurnal")->setWheres(["jurnal_kode" => $jurnal])->delete();
                     } else {
                         $model->setTables("acc_jurnal_entries")->save($jurnalData);
                         $model->setTables("acc_faktur_penjualan")->setWheres(["id" => $data->id])->update(["jurnal" => $jurnal]);
@@ -1021,6 +1028,7 @@ class Fakturpenjualan extends MY_Controller {
 
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 1]);
                     $model->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
+                    $model->setTables("faktur_jurnal")->saveBatch($fakturJurnal);
                     $log = "Header -> " . logArrayToString("; ", $jurnalData);
                     $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                     $this->_module->gen_history_new("jurnal_entries", $jurnal, "{$stt}", $log, $username);

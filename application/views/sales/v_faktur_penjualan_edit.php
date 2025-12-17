@@ -401,8 +401,8 @@
 
                                                                     </td>
                                                                     <td class="text-right"><strong>Ppn</strong></td>
-                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn * $datas->kurs_nominal, 2, ".", ",") ?>"></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn, 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn * $datas->kurs_nominal, 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>Foot Note</td>
