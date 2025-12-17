@@ -64,7 +64,7 @@
                                                     <div class="col-xs-8 col-md-8">
                                                         <select class="form-control input-sm select2" name="posisi" id="posisi">
                                                             <option value="d">Debet</option>
-                                                            <option value="c">Kredit</option>
+                                                            <option value="c" selected>Kredit</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -163,10 +163,9 @@
                                                 <th class='style bb ws' style="min-width: 150px">Uraian</th>
                                                 <th class='style bb ws'>Customer</th>
                                                 <th class='style bb ws'>COA</th>
-                                                <th class='style bb ws'>Curr</th>
-                                                <th class='style bb ws'>Kurs</th>
                                                 <th class='style bb ws text-right'>Qty</th>
-                                                <th class='style bb ws text-right'>Total Nominal</th>
+                                                <th class='style bb ws text-right'>Harga</th>
+                                                <th class='style bb ws text-right'>Total</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tBody">
