@@ -314,8 +314,8 @@ class M_bukubesarpembantupiutang extends CI_Model
             // $this->db->group_by('a.no_faktur_internal');
             $this->db->group_by($group);
         }
-        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*a.kurs_nominal, 0)";
         // $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2)" : "ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0)"; 
+        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*a.kurs_nominal, 0)";
         $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2)" : "ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0)"; 
         $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2),0) + IFNULL(ROUND(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4))), 2)*11/12, 2) *a.tax_value, 2),0)" : "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*a.kurs_nominal, 0),0) + IFNULL(ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0), 0)";
 
@@ -562,11 +562,11 @@ class M_bukubesarpembantupiutang extends CI_Model
                 CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id))
             ))  as uraian, IFNULL(SUM($total),0) as total_koreksi,  
                         (CASE 
-                            WHEN apps.selisih < 0 THEN  CAST( SUM($total) AS DECIMAL(20,2))
+                            WHEN apps.selisih < 0 THEN  CAST( SUM(abs($total)) AS DECIMAL(20,2))
                             ELSE 0 
                         END) AS debit,
                         (CASE
-                            WHEN apps.selisih > 0 THEN CAST( SUM($total) AS DECIMAL(20,2))
+                            WHEN apps.selisih > 0 THEN CAST( SUM(abs($total)) AS DECIMAL(20,2))
                             ELSE 0 
                         END) AS credit, app.status, 'plp' as link,
                         0 as dpp,
