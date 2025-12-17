@@ -152,7 +152,7 @@
                         <td style="text-align: center"><?= "{$value->qty} {$value->uom}" ?></td>
                         <td style="text-align: right"><?= number_format($value->harga, 4) ?></td>
                         <td style="text-align: right"><?= number_format($value->harga * $head->kurs_nominal, 2) ?></td>
-                        <td style="text-align: right"><?= number_format($value->jumlah, 4) ?></td>
+                        <td style="text-align: right"><?= number_format($value->jumlah, 2) ?></td>
                         <td style="text-align: right"><?= number_format($value->jumlah * $head->kurs_nominal, 2) ?></td>
                     </tr>
                     <?php
