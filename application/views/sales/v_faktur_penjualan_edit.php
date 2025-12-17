@@ -373,13 +373,13 @@
                                                                     <?php
                                                                     $subtotal2 = (round($datas->grand_total * $datas->kurs_nominal) - round($datas->diskon * $datas->kurs_nominal));
                                                                     ?>
-                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->grand_total,2) - round($datas->diskon,2), 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total - $datas->diskon, 2, ".", ",") ?>"></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subtotal2, 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td colspan="8"></td>
                                                                     <td class="text-right"><strong>DPP Nilai Lain</strong></td>
-                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->dpp_lain), 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->dpp_lain,2), 2, ".", ",") ?>"></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->dpp_lain * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
@@ -402,7 +402,7 @@
                                                                     </td>
                                                                     <td class="text-right"><strong>Ppn</strong></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn,2), 2, ".", ",") ?>"></td>
-                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn * $datas->kurs_nominal, 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>Foot Note</td>

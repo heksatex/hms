@@ -490,25 +490,25 @@ class Returpenjualan extends MY_Controller {
                     $dppSet = $model->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
                     foreach ($noAcc as $key => $value) {
                         $hrg = str_replace(",", "", $harga[$key]);
-                        $jumlah = round($qty[$key] * $hrg, 4);
+                        $jumlah = round($qty[$key] * $hrg, 2);
                         $grandTotal += $jumlah;
-                        $ddskon = ($tipediskon === "%") ? ($jumlah * ($nominalDiskon / 100)) : $nominalDiskon;
+                        $ddskon = round(($tipediskon === "%") ? ($jumlah * ($nominalDiskon / 100)) : $nominalDiskon, 2);
                         $grandDiskon += $ddskon;
-                        $dpp = ($jumlah - $ddskon) * 11 / 12;
+                        $dpp = round(($jumlah - $ddskon) * 11 / 12, 2);
                         if (!$dppSet) {
-                            $pajak = ($jumlah) * $taxVal;
-                            $ppn_diskon = ($ddskon) * $taxVal;
+                            $pajak = round(($jumlah) * $taxVal, 2);
+                            $ppn_diskon = round(($ddskon) * $taxVal, 2);
                         } else {
-                            $pajak = $dpp * $taxVal;
-                            $dppDikson = ($ddskon * 11) / 12;
-                            $ppn_diskon = $dppDikson * $taxVal;
+                            $pajak = round($dpp * $taxVal, 2);
+                            $dppDikson = round(($ddskon * 11) / 12, 2);
+                            $ppn_diskon = round($dppDikson * $taxVal, 2);
                         }
                         $grandDiskonPpn += $ppn_diskon;
-                        $totalHarga = (($jumlah - $ddskon) + ($pajak));
+                        $totalHarga = round(($jumlah - $ddskon) + ($pajak), 2);
                         $header["ppn"] += $pajak;
                         $header["dpp_lain"] += $dpp;
                         $header["final_total"] += $totalHarga;
-                        
+
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],
                             "warna" => $this->input->post("warna")[$key],
@@ -531,11 +531,11 @@ class Returpenjualan extends MY_Controller {
                     if ($header["kurs_nominal"] > 1) {
                         $header["total_piutang_valas"] = round($header["final_total"], 2);
                         $header["piutang_valas"] = round($header["final_total"], 2);
-                        $header["diskon"] = $grandDiskon;
-                        $header["grand_total"] = $grandTotal;
-                        $header["diskon_ppn"] = $grandDiskonPpn;
-                        $header["ppn"] += $header["dpp_lain"] * $taxVal;
-                        $header["final_total"] = ($header["grand_total"] - $header["diskon"]) + $header["ppn"];
+                        $header["diskon"] = round($grandDiskon, 2);
+                        $header["grand_total"] = round($grandTotal, 2);
+                        $header["diskon_ppn"] = round($grandDiskonPpn, 2);
+                        $header["ppn"] += round($header["dpp_lain"] * $taxVal, 2);
+                        $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"], 2);
                     } else {
                         $header["diskon"] = round($grandDiskon);
                         $header["grand_total"] = round($grandTotal);
@@ -676,7 +676,10 @@ class Returpenjualan extends MY_Controller {
 
                     $detail = $model->setTables("acc_retur_penjualan_detail")->setWheres(["retur_no" => $kode])->getData();
                     $jurnalItems = [];
-
+                    $totalC = 0;
+                    $totalD = 0;
+                    $piutang = round($data->final_total * $data->kurs_nominal);
+                    $totalC += $piutang;
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
                         "nama" => "Piutang (Retur)",
@@ -684,15 +687,16 @@ class Returpenjualan extends MY_Controller {
                         "partner" => $data->partner_id,
                         "kode_coa" => $getCoaDefault->value,
                         "posisi" => "C",
-                        "nominal_curr" => ($data->grand_total + $data->ppn),
+                        "nominal_curr" => $data->final_total,
                         "kurs" => $data->kurs_nominal,
                         "kode_mua" => $data->nama_kurs,
-                        "nominal" => round(($data->grand_total + $data->ppn) * $data->kurs_nominal),
+                        "nominal" => $piutang,
                         "row_order" => 1
                     );
 
                     $getCoaDefaultPpnDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_ppn_diskon"])->getDetail();
                     if ($data->diskon_ppn > 0) {
+                        $totalC += round($data->diskon_ppn * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "PPN Diskon (Retur)",
@@ -703,12 +707,13 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $data->diskon_ppn,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon_ppn * $data->kurs_nominal,2),
+                            "nominal" => round($data->diskon_ppn * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
                     $getCoaDefaultDppDisc = $model->setTables("setting")->setWheres(["setting_name" => "coa_penjualan_dpp_diskon"])->getDetail();
                     if ($data->diskon > 0) {
+                        $totalC += round($data->diskon * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "DPP Diskon (Retur)",
@@ -719,12 +724,13 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $data->diskon,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->diskon * $data->kurs_nominal,2),
+                            "nominal" => round($data->diskon * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
                     $allDiskon = $data->diskon_ppn + $data->diskon;
                     if ($allDiskon > 0) {
+                        $totalD += round($allDiskon * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "Diskon (Retur)",
@@ -735,11 +741,12 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $allDiskon,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($allDiskon * $data->kurs_nominal,2),
+                            "nominal" => round($allDiskon * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
                     if ($data->ppn > 0) {
+                        $totalD += round($data->ppn * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "PPN (Retur)",
@@ -750,16 +757,17 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $data->ppn,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($data->ppn * $data->kurs_nominal,2),
+                            "nominal" => round($data->ppn * $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
                     $totalPiutangCurr = 0;
                     $totalPiutang = 0;
+                    $fakturJurnal = [];
                     foreach ($detail as $key => $value) {
-                        $totalPiutang += round($value->jumlah * $data->kurs_nominal,2);
-                        $totalPiutangCurr += $value->jumlah;
                         $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                        $rowOrder = (count($jurnalItems) + 1);
+                        $totalD += round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom} (Retur)",
@@ -770,12 +778,36 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => $value->jumlah,
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($value->jumlah * $data->kurs_nominal,2),
+                            "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
+                            "row_order" => $rowOrder
+                        );
+
+                        $fakturJurnal[] = array(
+                            "no_faktur" => $value->retur_no,
+                            "faktur_detail_id" => $value->id,
+                            "jurnal_kode" => $jurnal,
+                            "jurnal_order" => $rowOrder
+                        );
+                    }
+                    $hsl = round($totalD - $totalC, 2);
+                    if ($hsl !== (double) 0) {
+                        $coaSelisih = $model->setTables("setting")->setWheres(["setting_name" => "selisih_pembulatan_penjualan"])->getDetail();
+                        $jurnalItems[] = array(
+                            "kode" => $jurnal,
+                            "nama" => "Selisih Pembulatan Penjualan",
+                            "reff_note" => "",
+                            "partner" => $data->partner_id,
+                            "kode_coa" => $coaSelisih->value,
+                            "posisi" => ($hsl > 0) ? "C" : "D",
+                            "nominal_curr" => round(abs($hsl) / $data->kurs_nominal, 4),
+                            "kurs" => $data->kurs_nominal,
+                            "kode_mua" => $data->nama_kurs,
+                            "nominal" => abs($hsl),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
-                    $jurnalItems[0]["nominal_curr"] = ($totalPiutangCurr + $data->ppn);
-                    $jurnalItems[0]["nominal"] = $totalPiutang + ($data->ppn * $data->kurs_nominal);
+//                    $jurnalItems[0]["nominal_curr"] = ($totalPiutangCurr + $data->ppn);
+//                    $jurnalItems[0]["nominal"] = $totalPiutang + ($data->ppn * $data->kurs_nominal);
 
                     if ($data->jurnal !== "") {
                         $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
@@ -791,11 +823,11 @@ class Returpenjualan extends MY_Controller {
                     $log = "Header -> " . logArrayToString("; ", $jurnalData);
                     $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                     $this->_module->gen_history_new("jurnal_entries", $jurnal, "{$stt}", $log, $username);
-                    
-                    if ((double)$data->total_piutang_rp === 0.0000) {
+
+                    if ((double) $data->total_piutang_rp === 0.0000) {
                         $updateHead = array_merge($updateHead, ["lunas" => 1]);
                     }
-                    
+
                     break;
 
                 case "draft":
@@ -847,7 +879,7 @@ class Returpenjualan extends MY_Controller {
                 throw new \Exception('Data Item tidak ditemukan', 500);
             }
             $uom = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
-            $html = $this->load->view('sales/modal/v_split_item_fp', ["data" => $detail, "id" => $id, "uomLot" => $this->uomLot,"uom"=>$uom], true);
+            $html = $this->load->view('sales/modal/v_split_item_fp', ["data" => $detail, "id" => $id, "uomLot" => $this->uomLot, "uom" => $uom], true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
@@ -916,7 +948,7 @@ class Returpenjualan extends MY_Controller {
             }
             $dppSet = $model->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
 
-            $jumlah = round($hasilKurang * $getDetail->harga,4);
+            $jumlah = round($hasilKurang * $getDetail->harga, 4);
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
             $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
@@ -939,7 +971,7 @@ class Returpenjualan extends MY_Controller {
                 "dpp_lain" => $dpp,
             ];
 
-            $jumlah = round($qty * $getDetail->harga,4);
+            $jumlah = round($qty * $getDetail->harga, 4);
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
             $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
@@ -972,12 +1004,12 @@ class Returpenjualan extends MY_Controller {
             ];
             $idnew = $model->setTables("acc_retur_penjualan_detail")->save($split);
             $model->setWheres(["id" => $ids])->update($updateSpilit);
-            
+
             $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
             $data["uomLot"] = $this->uomLot;
             $data["data"] = $model->setTables("acc_retur_penjualan_detail")->setWhereIn("id", [$idnew, $ids])->getData();
             $html = $this->load->view('sales/modal/v_split_join_tr', $data, true);
-            
+
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
@@ -1059,12 +1091,11 @@ class Returpenjualan extends MY_Controller {
 
                 $log .= "Join Item Data : " . logArrayToString("; ", (array) $datas);
                 $log .= "\nhasil split " . logArrayToString("; ", $data);
-                
+
                 $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
                 $data["uomLot"] = $this->uomLot;
                 $data["data"] = $model->setTables("acc_retur_penjualan_detail")->setWhereIn("id", [$ids])->getData();
                 $html = $this->load->view('sales/modal/v_split_join_tr', $data, true);
-                
             }
 
             if (!$this->_module->finishTransaction()) {

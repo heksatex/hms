@@ -146,7 +146,7 @@
                         <td style="text-align: right"><?= "{$value->qty} {$value->uom}" ?></td>
                         <td style="text-align: right"><?= "{$curr->symbol} ".number_format($value->harga, 4) ?></td>
                         <td style="text-align: right"><?= "Rp. ".number_format($value->harga * $head->kurs_nominal, 2) ?></td>
-                        <td style="text-align: right"><?= "{$curr->symbol} ".number_format($value->jumlah, 4) ?></td>
+                        <td style="text-align: right"><?= "{$curr->symbol} ".number_format($value->jumlah, 2) ?></td>
                         <td style="text-align: right"><?= "Rp. ".number_format($value->jumlah * $head->kurs_nominal, 2) ?></td>
                     </tr>
                     <?php
