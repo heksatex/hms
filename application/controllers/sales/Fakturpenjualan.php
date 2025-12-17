@@ -1004,11 +1004,11 @@ class Fakturpenjualan extends MY_Controller {
                                 "reff_note" => "",
                                 "partner" => $data->partner_id,
                                 "kode_coa" => $coaSelisih->value,
-                                "posisi" => "D",
-                                "nominal_curr" => round($hsl / $data->kurs_nominal, 4),
+                                "posisi" => ($hsl > 0) ? "D" : "C",
+                                "nominal_curr" => round(abs($hsl) / $data->kurs_nominal, 4),
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => $hsl,
+                                "nominal" => abs($hsl),
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
@@ -1044,13 +1044,13 @@ class Fakturpenjualan extends MY_Controller {
                     }
                     break;
                 default:
-//                    if ($data->lunas == 1) {
-//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
-//                    }
-//                    $fin = $data->final_total * $data->kurs_nominal;
-//                    if ((double) round($fin) !== (double) $data->piutang_rp) {
-//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
-//                    }
+                    if ($data->lunas == 1) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
+                    }
+                    $fin = $data->final_total * $data->kurs_nominal;
+                    if ((double) round($fin) !== (double) $data->piutang_rp) {
+                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
+                    }
 
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
@@ -1185,7 +1185,7 @@ class Fakturpenjualan extends MY_Controller {
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
             $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
-                $pajak = $jumlah * $getDetail->tax_value;
+                $pajak = ($jumlah - $ddskon) * $getDetail->tax_value;
                 $ppn_diskon = $ddskon * $getDetail->tax_value;
             } else {
                 $pajak = $dpp * $getDetail->tax_value;
@@ -1208,7 +1208,7 @@ class Fakturpenjualan extends MY_Controller {
             $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
             $dpp = (($jumlah - $ddskon) * 11) / 12;
             if (!$dppSet) {
-                $pajak = $jumlah * $getDetail->tax_value;
+                $pajak = ($jumlah - $ddskon) * $getDetail->tax_value;
                 $ppn_diskon = $ddskon * $getDetail->tax_value;
             } else {
                 $pajak = $dpp * $getDetail->tax_value;
@@ -1521,7 +1521,7 @@ class Fakturpenjualan extends MY_Controller {
             $ddskon = ($check->tipe_diskon === "%") ? ($jumlah * ($check->nominal_diskon / 100)) : $check->nominal_diskon;
             $dpp = ($jumlah - $ddskon) * 11 / 12;
             if (!$dppSet) {
-                $pajak = $jumlah * $check->tax_value;
+                $pajak = ($jumlah - $ddskon) * $check->tax_value;
                 $ppn_diskon = $ddskon * $check->tax_value;
             } else {
                 $pajak = $dpp * $check->tax_value;

@@ -373,7 +373,7 @@
                                                                     <?php
                                                                     $subtotal2 = (round($datas->grand_total * $datas->kurs_nominal) - round($datas->diskon * $datas->kurs_nominal));
                                                                     ?>
-                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total - $datas->diskon, 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->grand_total,2) - round($datas->diskon,2), 2, ".", ",") ?>"></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subtotal2, 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
@@ -401,7 +401,7 @@
 
                                                                     </td>
                                                                     <td class="text-right"><strong>Ppn</strong></td>
-                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn, 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn,2), 2, ".", ",") ?>"></td>
                                                                     <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->ppn * $datas->kurs_nominal, 2, ".", ",") ?>"></td>
                                                                 </tr>
                                                                 <tr>
@@ -972,6 +972,8 @@ if ($datas->status == 'confirm') {
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {}, 200);
+                        setCoaItem();
+                        setPterm();
                     }
                 });
 
