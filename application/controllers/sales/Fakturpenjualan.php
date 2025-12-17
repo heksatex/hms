@@ -664,7 +664,7 @@ class Fakturpenjualan extends MY_Controller {
                         $grandDiskon += $ddskon;
                         $dpp = ($jumlah - $ddskon) * 11 / 12;
                         if (!$dppSet) {
-                            $pajak = ($jumlah) * $taxVal;
+                            $pajak = ($jumlah - $ddskon) * $taxVal;
                             $ppn_diskon = ($ddskon) * $taxVal;
                         } else {
                             $pajak = $dpp * $taxVal;
@@ -704,7 +704,7 @@ class Fakturpenjualan extends MY_Controller {
                         $header["diskon"] = $grandDiskon;
                         $header["grand_total"] = $grandTotal;
                         $header["diskon_ppn"] = $grandDiskonPpn;
-                        $header["ppn"] += $header["dpp_lain"] * $taxVal;
+                        $header["ppn"] = $header["dpp_lain"] * $taxVal;
                         $header["final_total"] = ($header["grand_total"] - $header["diskon"]) + $header["ppn"];
                     } else {
                         $header["diskon"] = round($grandDiskon);
@@ -1044,13 +1044,13 @@ class Fakturpenjualan extends MY_Controller {
                     }
                     break;
                 default:
-                    if ($data->lunas == 1) {
-                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
-                    }
-                    $fin = $data->final_total * $data->kurs_nominal;
-                    if ((double) round($fin) !== (double) $data->piutang_rp) {
-                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
-                    }
+//                    if ($data->lunas == 1) {
+//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
+//                    }
+//                    $fin = $data->final_total * $data->kurs_nominal;
+//                    if ((double) round($fin) !== (double) $data->piutang_rp) {
+//                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
+//                    }
 
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
