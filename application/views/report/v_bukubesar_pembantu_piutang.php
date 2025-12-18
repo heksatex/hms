@@ -45,6 +45,10 @@
             display: none;
         }
 
+        .depo {
+            background: #729fe9ff;
+        }
+
         /*
     .btn-setTgl {
       height: 22px;
@@ -165,13 +169,14 @@
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="3">Diskon</th>
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="2">Uang Muka</th>
                                                         <th class='style bb' style="min-width: 100px" rowspan="2">Koreksi</th>
-                                                        <th class='style bb text-center' style="min-width: 150px" colspan="2">Deposit </th>
+                                                        <th class='style bb' style="min-width: 100px" rowspan="2">Refund</th>
                                                         <th class='style bb' style="min-width: 150px" rowspan="2">
                                                             <span class="smarttip"
-                                                                data-tip="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi - Deposit">
-                                                                &#x2757; Saldo Akhir
-                                                            </span>
+                                                            data-tip="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi + Refund">
+                                                            &#x2757; Saldo Akhir
+                                                        </span>
                                                         </th>
+                                                        <th class='depo bb text-center ' style="min-width: 150px" colspan="2">Deposit </th>
                                                     </tr>
                                                     <tr>
                                                         <th class='style bb' style="min-width: 50px">DPP</th>
@@ -185,13 +190,13 @@
                                                         <th class='style bb' style="min-width: 50px">Total</th>
                                                         <th class='style bb' style="min-width: 50px">Baru </th>
                                                         <th class='style bb' style="min-width: 50px">Pelunasan</th>
-                                                        <th class='style bb' style="min-width: 50px">Baru </th>
-                                                        <th class='style bb' style="min-width: 50px">Pelunasan</th>
+                                                        <th class=' bb depo' style="min-width: 50px">Baru </th>
+                                                        <th class=' bb depo' style="min-width: 50px">Pelunasan</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="19">Tidak ada Data</td>
+                                                        <td colspan="20">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -347,6 +352,7 @@
                         let diskon_total = 0;
                         let uang_muka = 0;
                         let koreksi = 0;
+                        let refund = 0;
                         let s_akhir = 0;
                         let tbody = $("<tbody />");
 
@@ -362,7 +368,7 @@
                             empty = false;
 
                             var tr = $("<tr>").append(
-                                $("<td colspan='19' class='text-left'>").html('<b> ' + value.gol_nama + '</b>'),
+                                $("<td colspan='20' class='text-left'>").html('<b> ' + value.gol_nama + '</b>'),
                             );
                             tbody.append(tr);
 
@@ -384,6 +390,7 @@
                             diskon_total = 0;
                             uang_muka = 0;
                             koreksi = 0;
+                            refund = 0;
                             s_akhir = 0;
 
                             $.each(value.tmp_data, function(key, value) {
@@ -406,9 +413,10 @@
                                     $("<td align='right'>").text(formatNumber(value.um_baru.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.um_pelunasan.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.koreksi.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.refund.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value.saldo_akhir.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.depo_baru.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value.depo_pelunasan.toFixed(2))),
-                                    $("<td align='right'>").text(formatNumber(value.saldo_akhir.toFixed(2))),
                                 );
 
                                 tbody.append(tr2);
@@ -430,6 +438,7 @@
                                 diskon_ppn = diskon_ppn + value.ppn_diskon;
                                 diskon_total = diskon_total + value.total_diskon_dpp_ppn;
                                 koreksi = koreksi + value.koreksi;
+                                refund = refund + value.refund;
                                 s_akhir = s_akhir + value.saldo_akhir;
                             });
 
@@ -449,9 +458,10 @@
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(um_baru.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(um_pelunasan.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(koreksi.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(refund.toFixed(2))),
+                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(s_akhir.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(depo_baru.toFixed(2))),
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(depo_pelunasan.toFixed(2))),
-                                $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(s_akhir.toFixed(2))),
                             );
                             tbody.append(tr3);
                             tbody.append("<tr><td colspan='19'>&nbsp</td></tr>");

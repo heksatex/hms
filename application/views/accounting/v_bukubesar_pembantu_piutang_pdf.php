@@ -133,9 +133,10 @@ $headers = [
 
     ['label' => 'Uang Muka', 'colspan' => 2],
     ['label' => 'Koreksi',   'rowspan' => 2],
+    ['label' => 'Refund',   'rowspan' => 2],
 
-    ['label' => 'Deposit',   'colspan' => 2],
     ['label' => 'Saldo Akhir', 'rowspan' => 2],
+    ['label' => 'Deposit',   'colspan' => 2],
 ];
 
 $subHeaders = [
@@ -161,6 +162,7 @@ $bodyMap = [
 
     ['um_baru', 'um_pelunasan'],
     'koreksi',
+    'refund',
 
     ['depo_baru', 'depo_pelunasan'],
     'saldo_akhir',
@@ -201,6 +203,9 @@ foreach ($bodyMap as $m) {
                 <col style="width:6%">
                 <col style="width:6%">
 
+                <col style="width:6%">
+                <col style="width:6%">
+                <col style="width:6%">
                 <col style="width:6%">
                 <col style="width:6%">
                 <col style="width:6%">

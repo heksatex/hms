@@ -73,7 +73,7 @@
         <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">Pilih</label>
             <div class="col-lg-4 col-md-8 col-12">
-                <label><input type="radio" name="mode_koreksi" value="normal"> Normal</label>
+                <label><input type="radio" name="mode_koreksi" value="normal" checked> Normal</label>
                 &nbsp;&nbsp;
                 <label><input type="radio" name="mode_koreksi" value="split"> Split</label>
             </div>
@@ -82,7 +82,7 @@
     </div>
 
     <!-- === NORMAL MODE === -->
-    <div id="row-normal" class="container-fluid" style="display:none">
+    <div id="row-normal" class="container-fluid">
         <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">Koreksi</label>
             <div class="col-lg-4 col-md-8 col-12">

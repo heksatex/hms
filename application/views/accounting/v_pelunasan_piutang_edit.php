@@ -153,11 +153,8 @@
                                     <div class="col-md-12 col-xs-12">
                                         <div class="col-xs-4"><label>Tanggal Transaksi</label></div>
                                         <div class="col-xs-8 col-md-8">
-                                            <div class='input-group date' id='tgl_transaksi'>
+                                            <div id='tgl_transaksi'>
                                                 <input type='text' class="form-control input-sm" name="tanggal_transaksi" id="tanggal_transaksi" value="<?php echo date("Y-m-d", strtotime($list->tanggal_transaksi)); ?>" disabled />
-                                                <span class="input-group-addon">
-                                                    <span class="fa fa-calendar" disabled="true"></span>
-                                                </span>
                                             </div>
                                         </div>
                                     </div>

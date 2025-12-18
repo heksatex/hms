@@ -1098,6 +1098,18 @@ class Pelunasanpiutang extends MY_Controller
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_deposit_by_id($cek->partner_id, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
                         } else {
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_by_id($cek->partner_id, $type, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
+                            
+                            $data_update = [
+                                'no_pelunasan'      => $no_pelunasan,
+                                'tanggal_transaksi' => $dt->tanggal,
+                            ];
+
+                            $update = $this->m_pelunasanpiutang->update_data_pelunasan_piutang([$data_update]);
+                            // if (!$update['status']) {
+                            //     throw new \Exception('Gagal memperbarui data Pelunasan: ' . $update['message'], 500);
+                            // }
+
+                            $data_update = [];
                         }
 
                         if (empty($dt)) {
@@ -1790,6 +1802,8 @@ class Pelunasanpiutang extends MY_Controller
                             throw new \Exception('Data Info Summary tidak ditemukan ', 200);
                         }
 
+                        
+
                         if($get_sum->selisih < 0){
                             $koreksi_tanda = "-";
                         } else{
@@ -1821,6 +1835,14 @@ class Pelunasanpiutang extends MY_Controller
                             $alat_pelunasan = $this->input->post('checkox_alat');
                             $coa     = "";
                             $alat    = "";
+
+                            if($alat_pelunasan == "true"){
+                                // getsummary except id
+                                $get_sum_k = $this->m_pelunasanpiutang->get_list_summary_koreksi_by_id2(["no_pelunasan" => $no_pelunasan, "pelunasan_summary_id <> "=> $id_summary, "alat_pelunasan" => "true"])->row();
+                                if(isset($get_sum_k)){
+                                    throw new \Exception('Alat Pelunasan Deposit sudah ada pada Pelunasan ini  ', 200);
+                                }
+                            }
 
                             $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $koreksi]);
 
@@ -1951,6 +1973,14 @@ class Pelunasanpiutang extends MY_Controller
                                 if (!empty($coa)) {
                                     $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $coa]);
                                     $nama_coa = $get_coa->nama ?? '';
+                                }
+
+                                if($d['checkbox_alat'] === 'true'){
+                                    // getsummary except id
+                                    $get_sum_k = $this->m_pelunasanpiutang->get_list_summary_koreksi_by_id2(["no_pelunasan" => $no_pelunasan, "pelunasan_summary_id <> "=> $id_summary, "alat_pelunasan" => "true"])->row();
+                                    if(isset($get_sum_k)){
+                                        throw new \Exception('Alat Pelunasan Deposit sudah ada pada Pelunasan ini  ', 200);
+                                    }
                                 }
 
                                 $data[] = array(
@@ -3480,6 +3510,9 @@ class Pelunasanpiutang extends MY_Controller
                                 foreach ($this->m_pelunasanpiutang->get_list_summary_koreksi_by_id($no_pelunasan, $row->id) as $items) {
                                     if($items->koreksi_id === 'deposit' && $items->lunas == 1) {
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah terpakai oleh Pelunasan .", 200);
+                                    }
+                                    if($items->koreksi_id === 'deposit' && $items->lunas == 0) {
+                                        throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah di Nonaktifkan / Refund .", 200);
                                     }
 
                                 }
