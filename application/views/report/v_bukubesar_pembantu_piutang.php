@@ -464,7 +464,7 @@
                                 $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(depo_pelunasan.toFixed(2))),
                             );
                             tbody.append(tr3);
-                            tbody.append("<tr><td colspan='19'>&nbsp</td></tr>");
+                            tbody.append("<tr><td colspan='20'>&nbsp</td></tr>");
 
                         });
 

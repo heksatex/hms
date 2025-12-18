@@ -59,7 +59,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         }
         
         $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done',  'appsk.lunas' => 0];
-        $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done',  'appsk.lunas' => 1];
+        $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done',  'appsk.lunas <> ' => 0];
         // saldo berdasakran periode berjalan
         $where_kas_um = ['tanggal >= ' => $tgldari, 'tanggal <= ' => $tglsampai];
         $subquery_kas           = $this->get_saldo_kas_um($where_kas_um, 'partner_id', $currency);
@@ -222,7 +222,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             // }
             $subquery  = $this->get_saldo_deposit($tmp_where, 'app.partner_id', $currency);
         } else if ($tipe == 'deposit_pel') {
-            $tmp_where = ['app.tanggal_transaksi >= ' => $tgl_dari, 'app.tanggal_transaksi <= ' => $tgl_sampai, 'app.status' => 'done',  'appsk.lunas'=> 1];
+            $tmp_where = ['app.tanggal_transaksi >= ' => $tgl_dari, 'app.tanggal_transaksi <= ' => $tgl_sampai, 'app.status' => 'done',  'appsk.lunas <> '=> 0];
             // if ($currency === 'valas') {
             //     $cr_condition = ($currency === 'valas') ? '<>' : '';
                 // $tmp_where = array_merge($tmp_where, ['apps.tipe_currency ' . $cr_condition => 'Rp']);
@@ -751,7 +751,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
             $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas'=>1];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas <>'=>0];
         } else {
             $cr_condition = ($currency === 'valas') ? '<>' : '';
 
@@ -762,7 +762,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
             $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>1];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>'=>0];
         }
 
         // saldo berdasakran periode berjalan
@@ -858,7 +858,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
             $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas'=>1];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas <>'=>0];
         } else {
             $cr_condition = ($currency === 'valas') ? '<>' : '';
 
@@ -869,7 +869,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
             $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>1];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>'=>0];
         }
 
         $where_kas_um           = ['tanggal >= ' => $tgldari, 'tanggal <= ' => $tglsampai];
