@@ -546,7 +546,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("abmd.id,(abm.no_bm) as no_bukti, abmd.tanggal, abmd.currency_id, ck1.currency,(CASE WHEN abmd.kurs_akhir IS NOT NULL AND abmd.kurs_akhir > 0  THEN abmd.kurs_akhir ELSE abmd.kurs END) as kurs, IF(ck1.currency='IDR', abmd.nominal, IFNULL(abmd.nominal*( CASE WHEN abmd.kurs_akhir IS NOT NULL AND abmd.kurs_akhir > 0  THEN abmd.kurs_akhir ELSE abmd.kurs END),0)) as total_rp, IF(ck1.currency != 'IDR', abmd.nominal, 0) as total_valas, 'bank' as tipe2, abmd.uraian, abmd.kode_coa");
+        $this->db->select("abmd.id,(abm.no_bm) as no_bukti, abm.tanggal, abmd.currency_id, ck1.currency,(CASE WHEN abmd.kurs_akhir IS NOT NULL AND abmd.kurs_akhir > 0  THEN abmd.kurs_akhir ELSE abmd.kurs END) as kurs, IF(ck1.currency='IDR', abmd.nominal, IFNULL(abmd.nominal*( CASE WHEN abmd.kurs_akhir IS NOT NULL AND abmd.kurs_akhir > 0  THEN abmd.kurs_akhir ELSE abmd.kurs END),0)) as total_rp, IF(ck1.currency != 'IDR', abmd.nominal, 0) as total_valas, 'bank' as tipe2, abmd.uraian, abmd.kode_coa");
         $this->db->from("acc_bank_masuk abm");
         $this->db->join("acc_bank_masuk_detail abmd ", "abm.id = abmd.bank_masuk_id", "left");
         $this->db->join("currency_kurs ck1 ", "abmd.currency_id = ck1.id", "left");
@@ -564,7 +564,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("akmd.id,(akm.no_km) as no_bukti , akmd.tanggal, akmd.currency_id, ck2.currency, (CASE WHEN akmd.kurs_akhir IS NOT NULL AND akmd.kurs_akhir > 0  THEN akmd.kurs_akhir ELSE akmd.kurs END) as kurs, IF(ck2.currency='IDR', akmd.nominal, IFNULL(akmd.nominal*(CASE WHEN akmd.kurs_akhir IS NOT NULL AND akmd.kurs_akhir > 0  THEN akmd.kurs_akhir ELSE akmd.kurs END),0) ) as total_rp, IF(ck2.currency != 'IDR', akmd.nominal, 0) as total_valas, 'kas' as tipe2, akmd.uraian, akmd.kode_coa");
+        $this->db->select("akmd.id,(akm.no_km) as no_bukti , akm.tanggal, akmd.currency_id, ck2.currency, (CASE WHEN akmd.kurs_akhir IS NOT NULL AND akmd.kurs_akhir > 0  THEN akmd.kurs_akhir ELSE akmd.kurs END) as kurs, IF(ck2.currency='IDR', akmd.nominal, IFNULL(akmd.nominal*(CASE WHEN akmd.kurs_akhir IS NOT NULL AND akmd.kurs_akhir > 0  THEN akmd.kurs_akhir ELSE akmd.kurs END),0) ) as total_rp, IF(ck2.currency != 'IDR', akmd.nominal, 0) as total_valas, 'kas' as tipe2, akmd.uraian, akmd.kode_coa");
         $this->db->from("acc_kas_masuk akm");
         $this->db->join("acc_kas_masuk_detail akmd ", "akm.id = akmd.kas_masuk_id", "left");
         $this->db->join("currency_kurs ck2 ", "akmd.currency_id = ck2.id", "left");
@@ -582,7 +582,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("agmd.id,(agm.no_gm) as no_bukti, agmd.tanggal, agmd.currency_id, ck3.currency, (CASE WHEN agmd.kurs_akhir IS NOT NULL AND agmd.kurs_akhir > 0  THEN agmd.kurs_akhir ELSE agmd.kurs END) as kurs, IF(ck3.currency='IDR', agmd.nominal, IFNULL(agmd.nominal*(CASE WHEN agmd.kurs_akhir IS NOT NULL AND agmd.kurs_akhir > 0  THEN agmd.kurs_akhir ELSE agmd.kurs END),0)) as total_rp, IF(ck3.currency != 'IDR', agmd.nominal, 0) as total_valas, 'giro' as tipe2, iF(agm.transinfo !='', agm.transinfo, agm.lain2 ) as uraian, agmd.kode_coa");
+        $this->db->select("agmd.id,(agm.no_gm) as no_bukti, agm.tanggal, agmd.currency_id, ck3.currency, (CASE WHEN agmd.kurs_akhir IS NOT NULL AND agmd.kurs_akhir > 0  THEN agmd.kurs_akhir ELSE agmd.kurs END) as kurs, IF(ck3.currency='IDR', agmd.nominal, IFNULL(agmd.nominal*(CASE WHEN agmd.kurs_akhir IS NOT NULL AND agmd.kurs_akhir > 0  THEN agmd.kurs_akhir ELSE agmd.kurs END),0)) as total_rp, IF(ck3.currency != 'IDR', agmd.nominal, 0) as total_valas, 'giro' as tipe2, iF(agm.transinfo !='', agm.transinfo, agm.lain2 ) as uraian, agmd.kode_coa");
         $this->db->from("acc_giro_masuk agm");
         $this->db->join("acc_giro_masuk_detail agmd ", "agm.id = agmd.giro_masuk_id", "left");
         $this->db->join("currency_kurs ck3 ", "agmd.currency_id = ck3.id", "left");
@@ -1097,10 +1097,6 @@ class M_pelunasanpiutang extends CI_Model
             $this->db->join('acc_kas_masuk_detail', 'acc_kas_masuk_detail.kas_masuk_id = acc_kas_masuk.id', 'inner');
             $result = $this->db->get();
         } else {
-            $this->db->select('acc_pelunasan_piutang.no_pelunasan, acc_kas_masuk_detail.id, acc_kas_masuk_detail.nominal');
-            $this->db->FROM('acc_kas_masuk');
-            $this->db->join('acc_kas_masuk_detail', 'acc_kas_masuk_detail.kas_masuk_id = acc_kas_masuk.id', 'inner');
-
             $this->db->select("acc_pelunasan_piutang_summary_koreksi.id, acc_pelunasan_piutang.no_pelunasan,
                                 IF(acc_pelunasan_piutang_summary.currency = 'IDR', acc_pelunasan_piutang_summary_koreksi.nominal, acc_pelunasan_piutang_summary_koreksi.nominal * acc_pelunasan_piutang_summary.kurs)  as total_rp, 
                                 IF(acc_pelunasan_piutang_summary.currency != 'IDR', acc_pelunasan_piutang_summary_koreksi.nominal, 0) as total_valas, 'depo' as tipe2, 'Deposit' as uraian");
@@ -1153,6 +1149,16 @@ class M_pelunasanpiutang extends CI_Model
         $this->db->order_by('id','asc');
         $result = $this->db->get('acc_pelunasan_piutang_summary_koreksi');
         return $result->result();
+    }
+
+    function get_list_summary_koreksi_by_id2($where)
+    {
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        $this->db->order_by('id','asc');
+        $result = $this->db->get('acc_pelunasan_piutang_summary_koreksi');
+        return $result;
     }
 
     function get_list_faktur_by_kode($params, $no_pelunasan)

@@ -128,9 +128,10 @@ class Bukubesarpembantupiutang extends MY_Controller
             $total_koreksi   = (float) $datas->total_koreksi;
             $total_diskon  = (float) round($datas->total_diskon_dpp_ppn, 2);
             $total_kas_um  = (float) round($datas->total_kas_um, 2);
-            $total_depo_baru  = 0;
-            $total_depo_pelunasan  = 0;
-            $saldo_akhir   = round($saldo_awal - $total_kas_um + $total_piutang -  $total_pelunasan - $total_retur - $total_diskon - $total_uang_muka - ($total_koreksi) , 2);
+            $total_depo_baru  = (float) round($datas->total_deposit, 2);
+            $total_depo_pelunasan  = (float) round($datas->total_deposit_pel, 2);
+            $total_refund   = (float) round($datas->total_refund, 2);
+            $saldo_akhir   = round($saldo_awal - $total_kas_um + $total_piutang -  $total_pelunasan - $total_retur - $total_diskon - $total_uang_muka - ($total_koreksi) +   $total_refund, 2);
             $tmp_data[] = array(
                 'id_partner'  => $datas->id,
                 'nama_partner' => $datas->nama,
@@ -153,7 +154,7 @@ class Bukubesarpembantupiutang extends MY_Controller
                 'um_pelunasan' => $total_uang_muka,
                 'depo_baru'   => $total_depo_baru,
                 'depo_pelunasan' => $total_depo_pelunasan,
-
+                'refund' => $total_refund
             );
             $debit    = 0;
             $credit   = 0;
@@ -401,9 +402,10 @@ class Bukubesarpembantupiutang extends MY_Controller
 
                 ['label'=>'Uang Muka',   'colspan'=>2, 'sub'=>['Baru','Pelunasan'], 'width'=>15],
                 ['label'=>'Koreksi',     'rowspan'=>2, 'width'=>20],
+                ['label'=>'Refund',      'rowspan'=>2, 'width'=>20],
 
-                ['label'=>'Deposit',     'colspan'=>2, 'sub'=>['Baru','Pelunasan'], 'width'=>15],
                 ['label'=>'Saldo Akhir', 'rowspan'=>2, 'width'=>20],
+                ['label'=>'Deposit',     'colspan'=>2, 'sub'=>['Baru','Pelunasan'], 'width'=>15],
             ];
 
 
@@ -498,9 +500,10 @@ class Bukubesarpembantupiutang extends MY_Controller
 
                 ['um_baru','um_pelunasan'],
                 'koreksi',
+                'refund',
 
-                ['depo_baru','depo_pelunasan'],
                 'saldo_akhir',
+                ['depo_baru','depo_pelunasan'],
             ];
 
             $totalCols = 0;
@@ -623,16 +626,7 @@ class Bukubesarpembantupiutang extends MY_Controller
 
                 $rowCount++;
             }
-
-
-
-
-
-
             $sheet->freezePane('A7');
-
-
-
 
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');
             $object->save('php://output');

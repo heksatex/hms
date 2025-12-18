@@ -108,6 +108,7 @@
                             $('#btn-tambah').button('reset');
                         } else {
                             // $("#tab_1").load(location.href + " #tab_1");
+                            $("#tgl_transaksi").load(location.href + " #tgl_transaksi");
                             $("#status_bar").load(location.href + " #status_bar");
                             // $("#foot").load(location.href + " #foot");
                             $('#tambah_data').modal('hide');
