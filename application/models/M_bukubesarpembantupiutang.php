@@ -652,11 +652,15 @@ class M_bukubesarpembantupiutang extends CI_Model
         return array_map('strval', $list_coa);
     }
 
-    function query4()
+    function query4($currency)
     {
        
         $this->db->where_in('b.kode_coa', $this->get_list_coa_by_transaksi());
         $where = ["a.status" => 'confirm', "b.lunas" => 0];
+        $cr_condition = ($currency === 'valas') ? '<>' : '';
+        if(!empty($cr_condition)){
+            $where = array_merge($where, ['c.currency ' . $cr_condition => 'IDR']);
+        }
         if (count($where) > 0) {
             $this->db->where($where);
         }
@@ -667,10 +671,14 @@ class M_bukubesarpembantupiutang extends CI_Model
         return $query1_sql = $this->db->get_compiled_select();
     }
 
-    function query5()
+    function query5($currency)
     {
         $this->db->where_in('e.kode_coa', $this->get_list_coa_by_transaksi());
         $where = ["h.status" => 'confirm', 'e.lunas' => 0];
+        $cr_condition = ($currency === 'valas') ? '<>' : '';
+        if(!empty($cr_condition)){
+            $where = array_merge($where, ['i.currency ' . $cr_condition => 'IDR']);
+        }
         if (count($where) > 0) {
             $this->db->where($where);
         }
@@ -681,11 +689,15 @@ class M_bukubesarpembantupiutang extends CI_Model
         return  $query2_sql = $this->db->get_compiled_select();
     }
 
-    function query6()
+    function query6($currency)
     {
        
         $this->db->where_in('g.kode_coa', $this->get_list_coa_by_transaksi());
         $where = ["f.status" => 'confirm', 'g.lunas' => 0];
+        $cr_condition = ($currency === 'valas') ? '<>' : '';
+        if(!empty($cr_condition)){
+            $where = array_merge($where, ['j.currency ' . $cr_condition => 'IDR']);
+        }
         if (count($where) > 0) {
             $this->db->where($where);
         }
@@ -698,7 +710,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
     function get_saldo_refund(array $where = [], string $group = '', string $currency = '') 
     {
-        $union_sql  = $this->query4() . " UNION ALL ". $this->query5() . " UNION ALL " . $this->query6();
+        $union_sql  = $this->query4($currency) . " UNION ALL ". $this->query5($currency) . " UNION ALL " . $this->query6($currency);
         if(count($where) > 0) {
             $this->db->where($where);
         }
