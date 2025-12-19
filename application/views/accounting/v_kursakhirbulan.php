@@ -31,6 +31,7 @@
                                             <th>Kurs</th>
                                             <th>Currency</th>
                                             <th>No Jurnal</th>
+                                            <th>Status</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -62,7 +63,7 @@
                     },
                     columnDefs: [
                         {
-                            "targets": [0],
+                            "targets": [0,6],
                             "orderable": false
                         },
                         {

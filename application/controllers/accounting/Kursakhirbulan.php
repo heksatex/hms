@@ -20,6 +20,7 @@ class Kursakhirbulan extends MY_Controller {
         $this->load->model("_module");
         $this->load->model("m_global");
         $this->load->library("token");
+        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {
@@ -32,6 +33,23 @@ class Kursakhirbulan extends MY_Controller {
         $this->load->view('accounting/v_kursakhirbulan_add', $data);
     }
 
+    public function edit($id) {
+        try {
+            $data["user"] = (object) $this->session->userdata('nama');
+            $data["id"] = $id;
+            $data['id_dept'] = 'ACCKAB';
+            $kode = decrypt_url($id);
+            $model = new $this->m_global;
+            $data["datas"] = $model->setTables("acc_kurs_akhir_bulan")->setWheres(["no" => $kode])->getDetail();
+            if (!$data["datas"]) {
+                throw new \Exception();
+            }
+            $this->load->view('accounting/v_kursakhirbulan_edit', $data);
+        } catch (Exception $ex) {
+            show_404();
+        }
+    }
+
     protected function _getSaldo() {
         try {
             $curr = $this->input->post("currency");
@@ -39,7 +57,7 @@ class Kursakhirbulan extends MY_Controller {
             $start = "{$bulan}-01";
             $akhir = date("Y-m-t", strtotime($start));
             $model = new $this->m_global;
-
+            // 
             $saldoDebet = $model->setTables("acc_bank_masuk bm")
                     ->setJoins("acc_bank_masuk_detail bmd", "bm.id = bank_masuk_id")->setGroups(["bm.kode_coa"])
                     ->setSelects(["bm.kode_coa, SUM(bm.total_rp) as total_debit", "sum(bm.total_rp * bmd.kurs) as total_debit_rp"])
@@ -82,19 +100,23 @@ class Kursakhirbulan extends MY_Controller {
             $data = array();
             $list = new $this->m_global;
             $list->setTables("acc_kurs_akhir_bulan")->setOrder(["created_at" => "desc"])
+                    ->setJoins("mst_status ms", "ms.kode = status", "left")
                     ->setOrders([null, "no", "bulan", "curr", "kurs", "no_jurnal"])
-                    ->setSearch(["no", "bulan", "kurs", "curr", "no_jurnal"]);
+                    ->setSearch(["no", "bulan", "kurs", "curr", "no_jurnal"])
+                    ->setSelects(["acc_kurs_akhir_bulan.*", "nama_status"]);
             $no = $_POST['start'];
             foreach ($list->getData() as $field) {
                 $no++;
+                $kode_encrypt = encrypt_url($field->no);
                 $link = base_url("accounting/jurnalentries/edit/" . encrypt_url($field->no_jurnal));
                 $data[] = [
                     $no,
-                    $field->no,
+                    "<a href='" . base_url("accounting/kursakhirbulan/edit/{$kode_encrypt}") . "'>{$field->no}</a>",
                     $field->bulan,
                     number_format($field->kurs, 2),
                     $field->curr,
-                    "<a href='{$link}' target='_blank'>{$field->no_jurnal}</a>"
+                    "<a href='{$link}' target='_blank'>{$field->no_jurnal}</a>",
+                    $field->nama_status
                 ];
             }
             echo json_encode(array("draw" => $_POST['draw'],
@@ -249,6 +271,171 @@ class Kursakhirbulan extends MY_Controller {
         }
     }
 
+    public function update($id) {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $val = [
+                [
+                    'field' => 'currency',
+                    'label' => 'Currency',
+                    'rules' => ['trim', 'required'],
+                    'errors' => [
+                        'required' => '{field} Pada Item harus diisi'
+                    ]
+                ],
+                [
+                    'field' => 'bulan',
+                    'label' => 'Bulan',
+                    'rules' => ['trim', 'required'],
+                    'errors' => [
+                        'required' => '{field} Pada Item harus diisi'
+                    ]
+                ],
+                [
+                    'field' => 'kurs',
+                    'label' => 'Kurs',
+                    'rules' => ['required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
+                    'errors' => [
+                        'required' => '{field} Pada Item harus diisi',
+                        "regex_match" => "{field} harus berupa number / desimal"
+                    ]
+                ]
+            ];
+            $this->form_validation->set_rules($val);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+            $kode = decrypt_url($id);
+            $curr = $this->input->post("currency");
+            $bulan = $this->input->post("bulan");
+            $kurs = $this->input->post("kurs");
+            $model = new $this->m_global;
+            $check = $model->setTables("acc_kurs_akhir_bulan")->setWheres(["no" => $kode])->getDetail();
+            if (!$check) {
+                throw new \Exception("No Kurs Akhir Bulan {$kode} tidak ditemukan", 500);
+            }
+            if ($check->status === "confirm") {
+                throw new \Exception("harus dalam status draft", 500);
+            }
+            $updates = ["bulan" => $bulan, "kurs" => str_replace(",", "", $kurs), "curr" => $curr];
+            $model->update($updates);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Menyimpan Data', 500);
+            }
+            $this->_module->gen_history_new($sub_menu, $kode, 'edit', "DATA -> " . logArrayToString("; ", $updates), $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
+        }
+    }
+
+    public function confirm($id) {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $this->_module->startTransaction();
+            $model = new $this->m_global;
+            $kode = decrypt_url($id);
+            $check = $model->setTables("acc_kurs_akhir_bulan")->setWheres(["no" => $kode])->getDetail();
+            if (!$check) {
+                throw new \Exception("No Kurs Akhir Bulan {$kode} tidak ditemukan", 500);
+            }
+            if ($check->status === "confirm") {
+                throw new \Exception("harus dalam status draft", 500);
+            }
+            $_POST["currency"] = $check->curr;
+            $_POST["bulan"] = $check->bulan;
+            $_POST["kurs"] = $check->kurs;
+            $tanggal = date("Y-m-t H:i:s", strtotime("{$check->bulan}-01"));
+            $lock = "token_increment WRITE,main_menu_sub READ, log_history WRITE,acc_kurs_akhir_bulan WRITE,acc_jurnal_entries WRITE,picklist_detail WRITE,acc_jurnal_entries_items WRITE,"
+                     . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
+                     . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ";
+            $this->_module->lock_tabel($lock);
+            $coa = $this->_getSaldo();
+            $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
+
+            if (!$noJurnal = $this->token->noUrut('jurnal_selisih_kurs', date('ym', strtotime($tanggal)), true)->generate('SK', '/%03d')->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . date('m', strtotime($tanggal)))->get()) {
+                throw new \Exception("No Jurnal tidak terbuat", 500);
+            }
+            $dataJurnal = [
+                "kode" => $noJurnal,
+                "origin" => $kode,
+                "tanggal_dibuat" => $tanggal,
+                "tanggal_posting" => $tanggal,
+                "periode" => date("Y-m"),
+                "tipe" => "SK",
+                "status" => "posted",
+                "reff_note" => ""
+            ];
+
+            $model->setTables("acc_kurs_akhir_bulan")->setWheres(["no" => $kode])->update(["no_jurnal" => $noJurnal, "status" => "confirm"]);
+            $model->setTables("acc_jurnal_entries")->save($dataJurnal);
+            $noOrder = 1;
+            $entriesDetail = [];
+            foreach ($coa as $key => $value) {
+                $selisih = ($value->saldo_valas_final * $check->kurs) - $value->saldo_rp_final;
+                $nominal = abs($selisih);
+                if ($value->saldo_valas_final <= 0 || $nominal === (double) 0) {
+                    continue;
+                }
+                $nama = "Kurs Akhir Bulan (Saldo : " . number_format($value->saldo_valas_final, 2) . " {$check->curr} Kurs : " . number_format($check->kurs, 2) . ")";
+                $entriesDetail[] = [
+                    "nama" => $nama,
+                    "kode" => $noJurnal,
+                    "reff_note" => "",
+                    "partner" => "",
+                    "kode_coa" => $value->kode_coa,
+                    "kurs" => 1,
+                    "kode_mua" => "IDR",
+                    "posisi" => ($selisih > 0) ? "D" : "C",
+                    "nominal_curr" => $nominal,
+                    "nominal" => $nominal,
+                    "row_order" => $noOrder
+                ];
+                $noOrder += 1;
+                $entriesDetail[] = [
+                    "nama" => $nama,
+                    "kode" => $noJurnal,
+                    "reff_note" => "",
+                    "partner" => "",
+                    "kode_coa" => $coask->value,
+                    "kurs" => 1,
+                    "kode_mua" => "IDR",
+                    "posisi" => ($selisih < 0) ? "D" : "C",
+                    "nominal_curr" => $nominal,
+                    "nominal" => $nominal,
+                    "row_order" => $noOrder
+                ];
+                $noOrder += 1;
+            }
+            $model->setTables("acc_jurnal_entries_items")->saveBatch($entriesDetail);
+            $this->_updatekas();
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Menyimpan Data', 500);
+            }
+            $this->_module->gen_history_new($sub_menu, $kode, 'edit', "Confirm Data \n no Jurnal {$noJurnal}", $username);
+            $this->_module->gen_history_new('jurnalentries', $noJurnal, 'create', "DATA -> " . logArrayToString("; ", $dataJurnal) . "\n Detail -> " . logArrayToString("; ", $entriesDetail), $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "url" => base_url("accounting/kursakhirbulan"))));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
+        }
+    }
+
     public function simpan() {
         try {
             $val = [
@@ -293,81 +480,22 @@ class Kursakhirbulan extends MY_Controller {
                 throw new \Exception("No Kurs tidak terbuat", 500);
             }
             $curr = $this->input->post("currency");
-            $symcurr = $this->input->post("symcurr");
             $kurs = str_replace(",", "", $this->input->post("kurs"));
             $model = new $this->m_global;
-
-            $coa = $this->_getSaldo();
-            $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
 
             $head = [
                 "no" => $no,
                 "bulan" => $this->input->post("bulan"),
                 "kurs" => $kurs,
                 "curr" => $curr,
-                "created_at" => $tanggal
+                "created_at" => date("Y-m-d H:i:s")
             ];
-
-            if (!$noJurnal = $this->token->noUrut('jurnal_selisih_kurs', date('ym', strtotime($tanggal)), true)->generate('SK', '/%03d')->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . date('m', strtotime($tanggal)))->get()) {
-                throw new \Exception("No Jurnal tidak terbuat", 500);
-            }
-            $dataJurnal = [
-                "kode" => $noJurnal,
-                "origin" => $no,
-                "tanggal_dibuat" => $tanggal,
-                "tanggal_posting" => $tanggal,
-                "periode" => date("Y-m"),
-                "tipe" => "SK",
-                "status" => "posted"
-            ];
-            $head["no_jurnal"] = $noJurnal;
             $model->setTables("acc_kurs_akhir_bulan")->save($head);
-            $model->setTables("acc_jurnal_entries")->save($dataJurnal);
-            $noOrder = 1;
-            $entriesDetail = [];
-            foreach ($coa as $key => $value) {
-                $selisih = ($value->saldo_valas_final * $kurs) - $value->saldo_rp_final;
-                $nominal = abs($selisih);
-                if ($value->saldo_valas_final <= 0 || $nominal === (double) 0) {
-                    continue;
-                }
-                $nama = "Kurs Akhir Bulan (Saldo : " . number_format($value->saldo_valas_final, 2) . " {$curr} Kurs : " . number_format($kurs, 2) . ")";
-                $entriesDetail[] = [
-                    "nama" => $nama,
-                    "kode" => $noJurnal,
-                    "reff_note" => "",
-                    "partner" => "",
-                    "kode_coa" => $value->kode_coa,
-                    "kurs" => 1,
-                    "kode_mua" => "IDR",
-                    "posisi" => ($selisih > 0) ? "D" : "C",
-                    "nominal_curr" => $nominal,
-                    "nominal" => $nominal,
-                    "row_order" => $noOrder
-                ];
-                $noOrder += 1;
-                $entriesDetail[] = [
-                    "nama" => $nama,
-                    "kode" => $noJurnal,
-                    "reff_note" => "",
-                    "partner" => "",
-                    "kode_coa" => $coask->value,
-                    "kurs" => 1,
-                    "kode_mua" => "IDR",
-                    "posisi" => ($selisih < 0) ? "D" : "C",
-                    "nominal_curr" => $nominal,
-                    "nominal" => $nominal,
-                    "row_order" => $noOrder
-                ];
-                $noOrder += 1;
-            }
-            $model->setTables("acc_jurnal_entries_items")->saveBatch($entriesDetail);
-            $this->_updatekas();
+
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $no, 'create', "DATA -> " . logArrayToString("; ", $head), $username);
-            $this->_module->gen_history_new('jurnalentries', $noJurnal, 'create', "DATA -> " . logArrayToString("; ", $dataJurnal) . "\n Detail -> " . logArrayToString("; ", $entriesDetail), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "url" => base_url("accounting/kursakhirbulan"))));
