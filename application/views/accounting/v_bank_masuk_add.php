@@ -451,6 +451,7 @@
                     $(".uraian" + no).focus();
                     $(".nourut" + no).html(no);
                     setNominalCurrency();
+                    $(".tglcair"+no).val(tglHeader);
                 });
                 $("#bankmasuk-detail").on("click", ".btn-rmv-item", function () {
                     $(this).closest("tr").remove();
