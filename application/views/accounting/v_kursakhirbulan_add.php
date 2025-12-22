@@ -3,7 +3,7 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
         <style>
-            #btn-simpan{
+            #btn-confirm{
                 display: none;
             }
         </style>
@@ -67,7 +67,7 @@
 
                                                 </div>
                                                 <div class="col-xs-4">
-                                                    <button type="button" class="btn btn-sm btn-success btn-generate">Generate</button>
+                                                    <!--<button type="button" class="btn btn-sm btn-success btn-generate">Generate</button>-->
                                                     <button type="submit" class="btn-simpan" style="display: none;"></button>
                                                 </div>
                                             </div>
@@ -115,7 +115,7 @@
                             $.each(data.data, function (index, item) {
                                 results.push({
                                     id: item.nama,
-                                    text: item.nama + " (" + item.symbol + ") ",
+                                    text: item.nama,
                                     symbol: item.symbol
                                 });
                             });
@@ -167,7 +167,6 @@
                         },
                         complete: function (jqXHR, textStatus) {
                             unblockUI(function () {});
-
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             alert_notify("fa fa-warning", jqXHR?.responseJSON?.message, "danger", function () {}, 500);
