@@ -93,6 +93,7 @@ class M_mutasipenjualan extends CI_Model
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(piutang.dpp_piutang,0) as dpp_piutang,
                         IFNULL(piutang.ppn_piutang,0) as ppn_piutang,
+                        pelunasan.no_pelunasan as no_pelunasan,
                         pelunasan.tgl as tanggal_pelunasan,
                         pelunasan.no_bukti as no_bukti_pelunasan,
                         IFNULL(pelunasan.total_pelunasan_rp, 0) as total_pelunasan, 

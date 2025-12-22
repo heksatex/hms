@@ -53,6 +53,7 @@ class Mutasipenjualan extends MY_Controller
             'no_faktur'  => !empty($post['no_faktur'])  ? $post['no_faktur']  : null,
             'no_sj'      => !empty($post['no_sj'])      ? $post['no_sj']      : null,
             'tipe'       => !empty($post['tipe'])       ? $post['tipe']       : null,
+            'lunas'      => !empty($post['status_lunas'])       ? $post['status_lunas']       : 0,
         ];
     }
 
@@ -73,7 +74,7 @@ class Mutasipenjualan extends MY_Controller
         // =========================
         $where = [
             'fak.status' => 'confirm',
-            'fak.lunas'  => 0
+            // 'fak.lunas'  => 0
         ];
 
         // =========================
@@ -81,6 +82,10 @@ class Mutasipenjualan extends MY_Controller
         // =========================
         if ($filter['tipe'] != 'all') {
             $where['fak.tipe'] = $filter['tipe'];
+        }
+
+        if ($filter['lunas'] != 'all') {
+            $where['fak.lunas'] = $filter['lunas'];
         }
 
         // =========================
@@ -142,6 +147,7 @@ class Mutasipenjualan extends MY_Controller
                     'dpp_piutang'        => (float) $d->dpp_piutang,
                     'ppn_piutang'        => (float) $d->ppn_piutang,
                     'total_piutang'      => (float) $d->total_piutang,
+                    'no_pelunasan'       => $d->no_pelunasan,
                     'tgl_pelunasan'      => $d->tanggal_pelunasan,
                     'no_bukti_pelunasan' => $d->no_bukti_pelunasan,
                     'total_pelunasan'    => (float) $d->total_pelunasan,
@@ -150,10 +156,10 @@ class Mutasipenjualan extends MY_Controller
                     'dpp_retur'          => (float) $d->dpp_retur,
                     'ppn_retur'          => (float) $d->ppn_retur,
                     'total_retur'        => (float) $d->total_retur,
-                    'dpp_diskon'          => (float) $d->dpp_diskon,
-                    'ppn_diskon'          => (float) $d->ppn_diskon,
-                    'total_diskon'        => (float) $d->total_diskon,
-                    'sisa'              => $sisa
+                    'dpp_diskon'         => (float) $d->dpp_diskon,
+                    'ppn_diskon'         => (float) $d->ppn_diskon,
+                    'total_diskon'       => (float) $d->total_diskon,
+                    'sisa'               => $sisa
                     
                 ];
             }
