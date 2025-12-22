@@ -200,7 +200,18 @@
                                                             </select>
                                                         </div>
                                                     </div>
-
+                                                    <div class="form-group">
+                                                        <div class="col-md-5">
+                                                            <label>Status Lunas </label>
+                                                        </div>
+                                                        <div class="col-md-7">
+                                                            <select type="text" class="form-control input-sm" name="status_lunas" id="status_lunas">
+                                                                <option value='all'>All</option>
+                                                                <option value="1">Lunas</option>
+                                                                <option value="0">Belum Lunas</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -224,8 +235,8 @@
                                                         <th class='style bb' style="min-width: 100px" rowspan="2">NO SJ</th>
                                                         <th class='style bb' style="min-width: 50px" rowspan="2">Tipe</th>
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="3">Penjualan</th>
-                                                        <th class='style bb text-center' style="min-width: 150px" colspan="3">Pelunasan</th>
-                                                        <th class='style bb text-center' style="min-width: 150px" colspan="5">Retur</th>
+                                                        <th class='style bb text-center' style="min-width: 150px" colspan="4">Pelunasan</th>
+                                                        <th class='style bb text-center' style="min-width: 250px" colspan="5">Retur</th>
                                                         <th class='style bb text-center' style="min-width: 150px" colspan="3">Diskon</th>
                                                         <!-- <th class='style bb' style="min-width: 100px" rowspan="2">Koreksi</th> -->
                                                         <th class='style bb' style="min-width: 120px" rowspan="2">
@@ -240,6 +251,7 @@
                                                         <th class='style bb' style="min-width: 50px">Total</th>
 
                                                         <th class='style bb' style="max-width: 50px;">Tgl</th>
+                                                        <th class='style bb' style="min-width: 50px">No.Pelunasan</th>
                                                         <th class='style bb' style="min-width: 50px">No.Bukti</th>
                                                         <th class='style bb' style="min-width: 50px">Total</th>
 
@@ -256,7 +268,7 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="21">Tidak ada Data</td>
+                                                        <td colspan="22">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -429,10 +441,12 @@
             let no_faktur = $('#no_faktur').val();
             let no_sj = $('#no_sj').val();
             let tipe = $('#tipe').val();
+            let status_lunas = $('#status_lunas').val();
 
             if (no_faktur) filter.no_faktur = no_faktur;
             if (no_sj) filter.no_sj = no_sj;
             if (tipe) filter.tipe = tipe;
+            if (status_lunas) filter.status_lunas = status_lunas;
 
             return filter;
         }
@@ -509,7 +523,7 @@
                     $("#example1_processing").hide();
                     clearTimeout(slowProcessWarning);
                     unblockUI(function() {});
-                    $("#example1_processing").css('display', 'none'); // hidden loading
+                    $("#example1_processing").hide();
                     this_btn.button('reset');
                     alert(xhr.responseText);
                 }
@@ -571,6 +585,7 @@
                         $("<td align='right'>").text(formatNumber(value.ppn_piutang.toFixed(2))),
                         $("<td align='right'>").text(formatNumber(value.total_piutang.toFixed(2))),
                         $("<td style='max-width:80px;'>").text(value.tgl_pelunasan),
+                        $("<td style='max-width:100px;'>").text(value.no_pelunasan),
                         $("<td style='max-width:100px;'>").text(value.no_bukti_pelunasan),
                         $("<td align='right'>").text(formatNumber(value.total_pelunasan.toFixed(2))),
                         $("<td style='max-width:80px;'>").text(value.tgl_retur),
@@ -610,6 +625,7 @@
                     $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_dpp.toFixed(2))),
                     $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_ppn.toFixed(2))),
                     $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(piutang_total.toFixed(2))),
+                    $("<td class='style_space text-right' >").text(''),
                     $("<td class='style_space text-right' >").text(''),
                     $("<td class='style_space text-right' >").text(''),
                     $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(pelunasan.toFixed(2))),
