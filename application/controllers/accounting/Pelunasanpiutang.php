@@ -384,7 +384,7 @@ class Pelunasanpiutang extends MY_Controller
             "id" => "retur",
             "text" => '',
             'status' => 'status',
-            'status_value' => 'done',
+            'status_value' => 'confirm',
             "no_bukti" => "no_retur",
             'id_detail' => "id",
             "table_detail" => 'acc_retur_penjualan',
