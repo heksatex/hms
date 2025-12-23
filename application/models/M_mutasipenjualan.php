@@ -127,9 +127,9 @@ class M_mutasipenjualan extends CI_Model
         if ($group) {
             $this->db->group_by($group);
         }
-        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*fak.kurs_nominal, 0)";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4)))*11/12, 2) *fak.tax_value, 2)" : "ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* fak.tax_value, 0)* fak.kurs_nominal, 0)"; 
-        $total  = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2),0) + IFNULL(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4)))*11/12, 2) *fak.tax_value, 2),0)" : "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*fak.kurs_nominal, 0),0) + IFNULL(ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* fak.tax_value, 0)* fak.kurs_nominal, 0), 0)";
+        $dpp    = ($currency === 'valas') ? "SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))" : "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( fak.kurs_nominal as DECIMAL(20, 4)), 0) ";
+        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0)"; 
+        $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( fak.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
 
         $this->db->SELECT("fak.id, fak.tanggal, fak.no_faktur_internal, fak.no_sj, fak.tipe, fak.partner_id,
                 IFNULL($dpp,0) as dpp_piutang,
@@ -153,9 +153,9 @@ class M_mutasipenjualan extends CI_Model
             $this->db->group_by($group);
         }
        
-        $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100),2)" : "ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100) * a.kurs_nominal,0)";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 2) * 11/12, 2) * a.tax_value, 2),2)" : "ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 0) * 11/12, 0) * a.tax_value, 0) * a.kurs_nominal,0)";
-        $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100),2),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 2) * 11/12, 2) * a.tax_value, 2),2), 0)" : "IFNULL(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100) * a.kurs_nominal,0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 0) * 11/12, 0) * a.tax_value, 0) * a.kurs_nominal,0),0)";
+        $dpp    = ($currency === 'valas') ? "" : "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0)";
+        $ppn    = ($currency === 'valas') ? "" : "ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
+        $total = ($currency === 'valas') ? "" : "IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0),0)";
 
         $this->db->SELECT("a.id, a.tanggal, a.no_faktur_internal, a.no_sj, a.tipe,
                 IFNULL($dpp,0) as dpp_diskon,
@@ -202,20 +202,35 @@ class M_mutasipenjualan extends CI_Model
             $this->db->group_by($group);
         }
 
-        $dpp_retur = ($currency === 'valas') ? "ROUND(sum(CAST(retd.qty*retd.harga AS DECIMAL(20,4))),2)" : "ROUND(sum(CAST(retd.qty*retd.harga AS DECIMAL(20,4))) *ret.kurs_nominal,0) ";
-        $ppn_retur = ($currency === 'valas') ? "ROUND(ROUND(SUM(CAST(retd.qty*retd.harga  AS DECIMAL(20,4)))*11/12, 2) *ret.tax_value, 2)" : " ROUND(ROUND(ROUND(ROUND(SUM(CAST(retd.qty * retd.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* ret.tax_value, 0)* ret.kurs_nominal, 0)";
-        $total_retur = ($currency === 'valas') ?  "ROUND(sum(CAST(retd.qty*retd.harga AS DECIMAL(20,4))),2) + ROUND(ROUND(SUM(CAST(retd.qty*retd.harga  AS DECIMAL(20,4)))*11/12, 2) *ret.tax_value, 2)" : "ROUND(sum(CAST(retd.qty*retd.harga AS DECIMAL(20,4))) *ret.kurs_nominal,0) + ROUND(ROUND(ROUND(ROUND(SUM(CAST(retd.qty * retd.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* ret.tax_value, 0)* ret.kurs_nominal, 0)";
+        $dpp_retur = ($currency === 'valas') ? "" : "sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) ";
+        // $ppn_retur = ($currency === 'valas') ? "" : "ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * 11 / 12,0) *  CAST(ret.tax_value as DECIMAL(20,4)), 0) * CAST(ret.kurs_nominal as DECIMAL(20,4)) ,0)" ;
+        $ppn_retur = ($currency === 'valas') ? "" : "ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * 11 / 12,2) * CAST(ret.tax_value as DECIMAL(20,4)), 2)" ;
+        $total_retur = ($currency === 'valas') ?  "" : "IFNULL(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)), 0) + IFNULL(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * 11 / 12,2) * CAST(ret.tax_value as DECIMAL(20,4)), 2), 0)";
+
+
+        $dpp_retur_diskon = ($currency === 'valas') ? "" : "ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) ";
+        // $ppn_retur_diskon = ($currency === 'valas') ? "" : "ROUND(ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),0) * 11 / 12,0) *  CAST(ret.tax_value as DECIMAL(20,4)), 0) * CAST(ret.kurs_nominal as DECIMAL(20,4)) ,0)" ;
+        $ppn_retur_diskon = ($currency === 'valas') ? "" : "ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) * 11 / 12,2) *  CAST(ret.tax_value as DECIMAL(20,4)), 2) " ;
+        $total_retur_diskon = ($currency === 'valas') ? "" : "IFNULL(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) ,0) + IFNULL(ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) * 11 / 12,2) *  CAST(ret.tax_value as DECIMAL(20,4)), 2)  ,0)";
+
+        
+        $total_dpp_retur = ($currency === 'valas') ? "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2)" : "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0)";
+        $total_ppn_retur = ($currency === 'valas') ? "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2)" : "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0)";
+        $total_all       = ($currency === 'valas') ? "ROUND(ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2) + ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2),2)" : "ROUND(ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0) + ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0),0) ";
 
         $this->db->where('app.status', 'done');
         $this->db->where('appm.tipe', 'retur');
-        $this->db->SELECT("GROUP_CONCAT(app.no_pelunasan) as no_pelunasan,  GROUP_CONCAT(DATE_FORMAT(app.tanggal_transaksi, '%Y-%m-%d')) as tgl,app.partner_id as id_partner, GROUP_CONCAT(appm.no_bukti) as no_bukti,appf.faktur_id, appf.no_faktur, arp.dpp_retur, arp.ppn_retur, (arp.total_retur) as total_retur,app.status ");
+        $this->db->SELECT("GROUP_CONCAT(app.no_pelunasan) as no_pelunasan,  GROUP_CONCAT(DATE_FORMAT(app.tanggal_transaksi, '%Y-%m-%d')) as tgl,app.partner_id as id_partner, GROUP_CONCAT(appm.no_bukti) as no_bukti,appf.faktur_id, appf.no_faktur, ($total_dpp_retur) as dpp_retur, ($total_ppn_retur) as ppn_retur, ($total_all) as total_retur,app.status ");
         $this->db->FROM('acc_pelunasan_piutang app');
         $this->db->jOIN("acc_pelunasan_piutang_metode appm", "app.id = appm.pelunasan_piutang_id", "INNER");
         $this->db->jOIN("acc_pelunasan_piutang_faktur appf", "app.id = appf.pelunasan_piutang_id", "INNER");
         $this->db->JOIN("( SELECT ret.id , 
                 ($dpp_retur) as dpp_retur,
                 ($ppn_retur) as ppn_retur,
-                ($total_retur) as total_retur                
+                ($total_retur) as total_retur,
+                ($dpp_retur_diskon) as dpp_retur_diskon,
+                ($ppn_retur_diskon) as ppn_retur_diskon,
+                ($total_retur_diskon) as total_retur_diskon
                 FROM acc_retur_penjualan ret
                 INNER JOIN acc_retur_penjualan_detail retd ON ret.id = retd.retur_id
                 WHERE ret.status = 'confirm' and lunas = 1
