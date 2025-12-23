@@ -505,9 +505,9 @@ class Returpenjualan extends MY_Controller {
                         }
                         $grandDiskonPpn += $ppn_diskon;
                         $totalHarga = round(($jumlah - $ddskon) + ($pajak), 2);
-                        $header["ppn"] += $pajak;
-                        $header["dpp_lain"] += $dpp;
-                        $header["final_total"] += $totalHarga;
+//                        $header["ppn"] += $pajak;
+//                        $header["dpp_lain"] += $dpp;
+//                        $header["final_total"] += $totalHarga;
 
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],
@@ -529,19 +529,41 @@ class Returpenjualan extends MY_Controller {
                         ];
                     }
                     if ($header["kurs_nominal"] > 1) {
+
                         $header["total_piutang_valas"] = round($header["final_total"], 2);
                         $header["piutang_valas"] = round($header["final_total"], 2);
-                        $header["diskon"] = round($grandDiskon, 2);
                         $header["grand_total"] = round($grandTotal, 2);
-                        $header["diskon_ppn"] = round($grandDiskonPpn, 2);
-                        $header["ppn"] += round($header["dpp_lain"] * $taxVal, 2);
+                        $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon, 2);
+                        $header["diskon"] = $alldiskon;
+                        $dpp = round(($header["grand_total"] - $header["diskon"]) * 11 / 12, 2);
+                        if (!$dppSet) {
+                            $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal, 2);
+                            $ppn_diskon = round(($header["diskon"]) * $taxVal, 2);
+                        } else {
+                            $pajak = round($dpp * $taxVal, 2);
+                            $dppDikson = round(($header["diskon"] * 11) / 12, 2);
+                            $ppn_diskon = round($dppDikson * $taxVal, 2);
+                        }
+                        $header["dpp_lain"] = $dpp;
+                        $header["diskon_ppn"] = round($ppn_diskon, 2);
+                        $header["ppn"] = round($pajak, 2);
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"], 2);
                     } else {
-                        $header["diskon"] = round($grandDiskon);
                         $header["grand_total"] = round($grandTotal);
-                        $header["diskon_ppn"] = round($grandDiskonPpn);
-                        $header["dpp_lain"] = round($header["dpp_lain"]);
-                        $header["ppn"] = round($header["dpp_lain"] * $taxVal);
+                        $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon);
+                        $header["diskon"] = $alldiskon;
+                        $dpp = round(($header["grand_total"] - $header["diskon"]) * 11 / 12);
+                        if (!$dppSet) {
+                            $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal);
+                            $ppn_diskon = round(($header["diskon"]) * $taxVal);
+                        } else {
+                            $pajak = round($dpp * $taxVal);
+                            $dppDikson = round(($header["diskon"] * 11) / 12);
+                            $ppn_diskon = round($dppDikson * $taxVal);
+                        }
+                        $header["diskon_ppn"] = $ppn_diskon;
+                        $header["dpp_lain"] = $dpp;
+                        $header["ppn"] = $pajak;
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"]);
                     }
                     $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
@@ -769,17 +791,17 @@ class Returpenjualan extends MY_Controller {
                         $rowOrder = (count($jurnalItems) + 1);
                         $totalD += round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
-                            "kode" => $jurnal,
-                            "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom} (Retur)",
-                            "reff_note" => "",
-                            "partner" => $data->partner_id,
-                            "kode_coa" => $value->no_acc,
-                            "posisi" => "D",
-                            "nominal_curr" => $value->jumlah,
-                            "kurs" => $data->kurs_nominal,
-                            "kode_mua" => $data->nama_kurs,
-                            "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
-                            "row_order" => $rowOrder
+                           "kode" => $jurnal,
+                                "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
+                                "reff_note" => "",
+                                "partner" => $data->partner_id,
+                                "kode_coa" => $value->no_acc,
+                                "posisi" => "D",
+                                "nominal_curr" => $value->jumlah - $value->diskon,
+                                "kurs" => $data->kurs_nominal,
+                                "kode_mua" => $data->nama_kurs,
+                                "nominal" => round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2),
+                                "row_order" => $rowOrder
                         );
 
                         $fakturJurnal[] = array(
@@ -799,10 +821,10 @@ class Returpenjualan extends MY_Controller {
                             "partner" => $data->partner_id,
                             "kode_coa" => $coaSelisih->value,
                             "posisi" => ($hsl > 0) ? "C" : "D",
-                            "nominal_curr" => round(abs($hsl) / $data->kurs_nominal, 4),
+                            "nominal_curr" => abs($hsl),
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => abs($hsl),
+                            "nominal" => round(abs($hsl) / $data->kurs_nominal, 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
