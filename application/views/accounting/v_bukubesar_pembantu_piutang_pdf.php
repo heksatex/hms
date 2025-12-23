@@ -164,8 +164,8 @@ $bodyMap = [
     'koreksi',
     'refund',
 
-    ['depo_baru', 'depo_pelunasan'],
     'saldo_akhir',
+    ['depo_baru', 'depo_pelunasan'],
 ];
 
 // hitung total kolom (buat colspan golongan)
