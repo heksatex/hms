@@ -727,7 +727,7 @@ class Fakturpenjualan extends MY_Controller {
                             $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal);
                             $ppn_diskon = round(($header["diskon"]) * $taxVal);
                         } else {
-                            $pajak = round($dpp * $taxVal, 2);
+                            $pajak = round($dpp * $taxVal);
                             $dppDikson = round(($header["diskon"] * 11) / 12);
                             $ppn_diskon = round($dppDikson * $taxVal);
                         }
