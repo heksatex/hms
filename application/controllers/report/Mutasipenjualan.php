@@ -133,10 +133,10 @@ class Mutasipenjualan extends MY_Controller
         $sisa   = 0;
         foreach ($head as $row) {
 
-            $detail = $this->m_mutasipenjualan->get_detail_by_partner($date_filter,$row->partner_id,$where,$like);
+            $detail = $this->m_mutasipenjualan->get_detail_by_partner($date_filter, $row->partner_id, $where, $like);
             $items = [];
             $sisa   = 0;
-            
+
             foreach ($detail as $d) {
                 $sisa   = (float) $d->total_piutang - (float) $d->total_pelunasan -  (float) $d->total_retur - (float) $d->total_diskon;
                 $items[] = [
@@ -160,7 +160,7 @@ class Mutasipenjualan extends MY_Controller
                     'ppn_diskon'         => (float) $d->ppn_diskon,
                     'total_diskon'       => (float) $d->total_diskon,
                     'sisa'               => $sisa
-                    
+
                 ];
             }
 
@@ -173,4 +173,248 @@ class Mutasipenjualan extends MY_Controller
 
         return $result;
     }
+
+
+    function export_excel()
+{
+    try {
+
+        $this->load->library('excel');
+        ob_start();
+
+        $excel = new PHPExcel();
+        $sheet = $excel->setActiveSheetIndex(0);
+        $sheet->setTitle('Mutasi Penjualan');
+
+        /* =======================
+         * JUDUL
+         * ======================= */
+        $sheet->setCellValue('A1', 'PT. HEKSATEX INDAH');
+        $sheet->mergeCells('A1:U1');
+        $sheet->getStyle('A1')->getFont()->setBold(true);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+
+        $sheet->setCellValue('A2', 'MUTASI PENJUALAN');
+        $sheet->mergeCells('A2:U2');
+        $sheet->getStyle('A2')->getFont()->setBold(true);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+
+        /* =======================
+         * STYLE HEADER
+         * ======================= */
+        $styleHeader = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'type'  => PHPExcel_Style_Fill::FILL_SOLID,
+                'color' => ['rgb' => 'D3D3D3']
+            ],
+            'alignment' => [
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER
+            ],
+            'borders' => [
+                'allborders' => ['style' => PHPExcel_Style_Border::BORDER_THIN]
+            ]
+        ];
+
+        /* =======================
+         * HEADER CONFIG
+         * ======================= */
+        $headerRow1 = 5;
+        $headerRow2 = 6;
+
+        $headers = [
+            ['label' => 'No',         'rowspan' => 2, 'width' => 5],
+            ['label' => 'Tgl Faktur', 'rowspan' => 2, 'width' => 15],
+            ['label' => 'No Faktur',  'rowspan' => 2, 'width' => 20],
+            ['label' => 'No SJ',      'rowspan' => 2, 'width' => 20],
+            ['label' => 'Tipe',       'rowspan' => 2, 'width' => 10],
+
+            ['label' => 'Penjualan', 'colspan' => 3, 'sub' => ['DPP', 'PPN', 'Total']],
+            ['label' => 'Pelunasan', 'colspan' => 4, 'sub' => ['Tgl', 'No Pelunasan', 'No Bukti', 'Total']],
+            ['label' => 'Retur',     'colspan' => 5, 'sub' => ['Tgl', 'No Bukti', 'DPP', 'PPN', 'Total']],
+            ['label' => 'Diskon',    'colspan' => 3, 'sub' => ['DPP', 'PPN', 'Total']],
+
+            ['label' => 'Sisa Piutang', 'rowspan' => 2, 'width' => 18],
+        ];
+
+        /* =======================
+         * DRAW HEADER
+         * ======================= */
+        $colIndex = 0;
+        foreach ($headers as $h) {
+            $startCol = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+            if (isset($h['colspan'])) {
+                $endCol = PHPExcel_Cell::stringFromColumnIndex($colIndex + $h['colspan'] - 1);
+                $sheet->mergeCells("$startCol$headerRow1:$endCol$headerRow1");
+                $colIndex += $h['colspan'];
+            } else {
+                $sheet->mergeCells("$startCol$headerRow1:$startCol$headerRow2");
+                $colIndex++;
+            }
+            $sheet->setCellValue("$startCol$headerRow1", $h['label']);
+        }
+
+        $colIndex = 0;
+        foreach ($headers as $h) {
+            if (isset($h['rowspan'])) {
+                $colIndex++;
+                continue;
+            }
+            foreach ($h['sub'] as $sub) {
+                $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                $sheet->setCellValue($col . $headerRow2, $sub);
+                $colIndex++;
+            }
+        }
+
+        $lastCol = PHPExcel_Cell::stringFromColumnIndex($colIndex - 1);
+        $sheet->getStyle("A{$headerRow1}:{$lastCol}{$headerRow2}")
+            ->applyFromArray($styleHeader);
+
+        /* =======================
+         * BODY MAP
+         * ======================= */
+        $bodyMap = [
+            'no',
+            'tgl_faktur',
+            'no_faktur',
+            'no_sj',
+            'tipe',
+            ['dpp_piutang', 'ppn_piutang', 'total_piutang'],
+            ['tgl_pelunasan', 'no_pelunasan', 'no_bukti_pelunasan', 'total_pelunasan'],
+            ['tgl_retur', 'no_bukti_retur', 'dpp_retur', 'ppn_retur', 'total_retur'],
+            ['dpp_diskon', 'ppn_diskon', 'total_diskon'],
+            'sisa'
+        ];
+
+        /* =======================
+         * DATA
+         * ======================= */
+        $rowCount = 7;
+        $data = $this->proses_data();
+
+        foreach ($data as $head) {
+
+            // JUDUL PARTNER
+            $sheet->setCellValue("A{$rowCount}", $head['nama_partner']);
+            $sheet->mergeCells("A{$rowCount}:{$lastCol}{$rowCount}");
+            $sheet->getStyle("A{$rowCount}")->getFont()->setBold(true);
+            $rowCount++;
+
+            $no = 1;
+
+            // INIT TOTAL PARTNER
+            $sum = [
+                'dpp_piutang' => 0, 'ppn_piutang' => 0, 'total_piutang' => 0,
+                'total_pelunasan' => 0,
+                'dpp_retur' => 0, 'ppn_retur' => 0, 'total_retur' => 0,
+                'dpp_diskon' => 0, 'ppn_diskon' => 0, 'total_diskon' => 0,
+                'sisa' => 0
+            ];
+
+            foreach ($head['tmp_data_items'] as $row) {
+
+                $colIndex = 0;
+
+                foreach ($bodyMap as $map) {
+
+                    if (is_string($map)) {
+
+                        $value = ($map === 'no') ? $no : ($row[$map] ?? '');
+                        $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                        $sheet->setCellValue($col . $rowCount, $value);
+
+                        // FORMAT ANGKA (KECUALI NO)
+                        if (is_numeric($value) && $map !== 'no') {
+                            $sheet->getStyle($col . $rowCount)
+                                ->getNumberFormat()
+                                ->setFormatCode('#,##0.00');
+                        }
+
+                        $colIndex++;
+                        continue;
+                    }
+
+                    foreach ($map as $field) {
+                        $value = $row[$field] ?? '';
+                        $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                        $sheet->setCellValue($col . $rowCount, $value);
+
+                        if (is_numeric($value)) {
+                            $sheet->getStyle($col . $rowCount)
+                                ->getNumberFormat()
+                                ->setFormatCode('#,##0.00');
+                        }
+
+                        // HITUNG TOTAL
+                        if (isset($sum[$field])) {
+                            $sum[$field] += (float)$value;
+                        }
+
+                        $colIndex++;
+                    }
+                }
+
+                $no++;
+                $rowCount++;
+            }
+
+            /* =======================
+             * TOTAL PER PARTNER
+             * ======================= */
+            $sheet->setCellValue("A{$rowCount}", 'TOTAL ' . strtoupper($head['nama_partner']));
+            $sheet->mergeCells("A{$rowCount}:E{$rowCount}");
+            $sheet->getStyle("A{$rowCount}")->getFont()->setBold(true);
+
+            $totalCols = [
+                'dpp_piutang', 'ppn_piutang', 'total_piutang',
+                null, null, null, 'total_pelunasan',
+                null, null, 'dpp_retur', 'ppn_retur', 'total_retur',
+                'dpp_diskon', 'ppn_diskon', 'total_diskon',
+                'sisa'
+            ];
+
+            $colIndex = 5;
+            foreach ($totalCols as $key) {
+                $col = PHPExcel_Cell::stringFromColumnIndex($colIndex);
+                if ($key && isset($sum[$key])) {
+                    $sheet->setCellValue($col . $rowCount, $sum[$key]);
+                    $sheet->getStyle($col . $rowCount)
+                        ->getNumberFormat()
+                        ->setFormatCode('#,##0.00');
+                    $sheet->getStyle($col . $rowCount)->getFont()->setBold(true);
+                }
+                $colIndex++;
+            }
+
+            $rowCount += 2;
+        }
+
+        $sheet->freezePane('A7');
+
+        /* =======================
+         * OUTPUT
+         * ======================= */
+        $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+        $writer->save('php://output');
+
+        $xlsData = ob_get_contents();
+        ob_end_clean();
+
+        echo json_encode([
+            'op'       => 'ok',
+            'file'     => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData),
+            'filename' => 'Mutasi Penjualan.xlsx'
+        ]);
+        exit;
+
+    } catch (Exception $e) {
+        echo json_encode([
+            'op' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
 }

@@ -106,7 +106,7 @@
                                         <div class="col-md-12">
                                             <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
                                             <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
-                                            <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button>
+                                            <!-- <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button> -->
                                         </div>
                                     </div>
                                 </div>
@@ -671,55 +671,53 @@
         // }
 
 
-        // // klik btn excel
-        // $('#btn-excel').click(function() {
+        // klik btn excel
+        $('#btn-excel').click(function() {
 
-        //     if (arr_filter.length == 0) {
-        //         alert_modal_warning('Generate Data terlebih dahulu !');
-        //     } else {
-
-        //         $.ajax({
-        //             "type": 'POST',
-        //             "url": "<?php echo site_url('report/bukubesarpembantupiutang/export_excel') ?>",
-        //             "data": {
-        //                 arr_filter: arr_filter
-        //             },
-        //             "dataType": 'json',
-        //             beforeSend: function() {
-        //                 $('#btn-excel').button('loading');
-        //             },
-        //             error: function() {
-        //                 alert('Error Export Excel');
-        //                 $('#btn-excel').button('reset');
-        //             }
-        //         }).done(function(data) {
-        //             if (data.status == "failed") {
-        //                 alert_notify(data.icon, data.message, data.type, function() {});
-        //             } else {
-        //                 var $a = $("<a>");
-        //                 $a.attr("href", data.file);
-        //                 $("body").append($a);
-        //                 $a.attr("download", data.filename);
-        //                 $a[0].click();
-        //                 $a.remove();
-        //             }
-        //             $('#btn-excel').button('reset');
-        //         });
-        //     }
-        // });
-
-        // klik btn print  pdf
-        $(document).on('click', "#btn-pdf", function(e) {
-
-            var arrStr = encodeURIComponent(JSON.stringify(arr_filter));
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/bukubesarpembantupiutang/export_pdf';
-                window.open(url + '?params=' + arrStr, '_blank');
-            }
 
+                $.ajax({
+                    "type": 'POST',
+                    "url": "<?php echo site_url('report/mutasipenjualan/export_excel') ?>",
+                    "data": arr_filter, 
+                    "dataType": 'json',
+                    beforeSend: function() {
+                        $('#btn-excel').button('loading');
+                    },
+                    error: function() {
+                        alert('Error Export Excel');
+                        $('#btn-excel').button('reset');
+                    }
+                }).done(function(data) {
+                    if (data.status == "failed") {
+                        alert_notify(data.icon, data.message, data.type, function() {});
+                    } else {
+                        var $a = $("<a>");
+                        $a.attr("href", data.file);
+                        $("body").append($a);
+                        $a.attr("download", data.filename);
+                        $a[0].click();
+                        $a.remove();
+                    }
+                    $('#btn-excel').button('reset');
+                });
+            }
         });
+
+        // // klik btn print  pdf
+        // $(document).on('click', "#btn-pdf", function(e) {
+
+        //     var arrStr = encodeURIComponent(JSON.stringify(arr_filter));
+        //     if (arr_filter.length == 0) {
+        //         alert_modal_warning('Generate Data terlebih dahulu !');
+        //     } else {
+        //         var url = '<?php echo base_url() ?>report/bukubesarpembantupiutang/export_pdf';
+        //         window.open(url + '?params=' + arrStr, '_blank');
+        //     }
+
+        // });
         if ($("#globalTooltip").length === 0) {
             $("body").append('<div id="globalTooltip"></div>');
         }
