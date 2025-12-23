@@ -127,7 +127,7 @@ class Partner extends MY_Controller {
             $delivery_state = addslashes($this->input->post('delivery_state'));
             $delivery_country = addslashes($this->input->post('delivery_country'));
             $delivery_zip = addslashes($this->input->post('delivery_zip'));
-            $saldo_awal_utang = addslashes($this->input->post('saldo_awal_utang'));
+            // $saldo_awal_utang = addslashes($this->input->post('saldo_awal_utang'));
 
             $check_customer = $this->input->post('customer');
             $check_supplier = $this->input->post('supplier');
@@ -156,7 +156,7 @@ class Partner extends MY_Controller {
                 "email" => $email,
                 "customer" => $check_customer,
                 "supplier" => $check_supplier,
-                "saldo_awal_utang" => $saldo_awal_utang
+                // "saldo_awal_utang" => $saldo_awal_utang
             ];
             $jenis_log = "create";
             $id_encrypt = "";

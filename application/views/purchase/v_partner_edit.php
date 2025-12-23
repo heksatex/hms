@@ -230,7 +230,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                     <div class="col-md-12 col-xs-12">
                                         <div class="col-xs-4">
                                             <label class="form-label">Saldo Awal Utang</label>
@@ -241,7 +241,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
 
                     </div>
