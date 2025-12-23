@@ -3511,7 +3511,7 @@ class Pelunasanpiutang extends MY_Controller
                                     if($items->koreksi_id === 'deposit' && $items->lunas == 1) {
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah terpakai oleh Pelunasan .", 200);
                                     }
-                                    if($items->koreksi_id === 'deposit' && $items->lunas == 0) {
+                                    if($items->koreksi_id === 'deposit' && $items->lunas == 3) {
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah di Nonaktifkan / Refund .", 200);
                                     }
 
