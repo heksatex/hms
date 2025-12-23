@@ -727,7 +727,7 @@ class Fakturpenjualan extends MY_Controller {
                             $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal);
                             $ppn_diskon = round(($header["diskon"]) * $taxVal);
                         } else {
-                            $pajak = round($dpp * $taxVal, 2);
+                            $pajak = round($dpp * $taxVal);
                             $dppDikson = round(($header["diskon"] * 11) / 12);
                             $ppn_diskon = round($dppDikson * $taxVal);
                         }
@@ -1027,10 +1027,10 @@ class Fakturpenjualan extends MY_Controller {
                                 "partner" => $data->partner_id,
                                 "kode_coa" => $coaSelisih->value,
                                 "posisi" => ($hsl > 0) ? "D" : "C",
-                                "nominal_curr" => round(abs($hsl) / $data->kurs_nominal, 4),
+                                "nominal_curr" => abs($hsl),
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => abs($hsl),
+                                "nominal" => round(abs($hsl) / $data->kurs_nominal, 2),
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
