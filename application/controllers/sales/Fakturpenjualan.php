@@ -674,9 +674,9 @@ class Fakturpenjualan extends MY_Controller {
 
                         $grandDiskonPpn += $ppn_diskon;
                         $totalHarga = round(($jumlah - $ddskon) + $pajak, 2);
-                        $header["ppn"] += $pajak;
-                        $header["dpp_lain"] += $dpp;
-                        $header["final_total"] += $totalHarga;
+//                        $header["ppn"] += $pajak;
+//                        $header["dpp_lain"] += $dpp;
+//                        $header["final_total"] += $totalHarga;
 
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],
@@ -699,19 +699,41 @@ class Fakturpenjualan extends MY_Controller {
                     }
 
                     if ($header["kurs_nominal"] > 1) {
+
                         $header["total_piutang_valas"] = round($header["final_total"], 2);
                         $header["piutang_valas"] = round($header["final_total"], 2);
-                        $header["diskon"] = round($grandDiskon,2);
-                        $header["grand_total"] = round($grandTotal,2);
-                        $header["diskon_ppn"] = round($grandDiskonPpn,2);
-                        $header["ppn"] = round($header["dpp_lain"] * $taxVal,2);
-                        $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"],2);
+                        $header["grand_total"] = round($grandTotal, 2);
+                        $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon, 2);
+                        $header["diskon"] = $alldiskon;
+                        $dpp = round(($header["grand_total"] - $header["diskon"]) * 11 / 12, 2);
+                        if (!$dppSet) {
+                            $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal, 2);
+                            $ppn_diskon = round(($header["diskon"]) * $taxVal, 2);
+                        } else {
+                            $pajak = round($dpp * $taxVal, 2);
+                            $dppDikson = round(($header["diskon"] * 11) / 12, 2);
+                            $ppn_diskon = round($dppDikson * $taxVal, 2);
+                        }
+                        $header["dpp_lain"] = $dpp;
+                        $header["diskon_ppn"] = round($ppn_diskon, 2);
+                        $header["ppn"] = round($pajak, 2);
+                        $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"], 2);
                     } else {
-                        $header["diskon"] = round($grandDiskon);
                         $header["grand_total"] = round($grandTotal);
-                        $header["diskon_ppn"] = round($grandDiskonPpn);
-                        $header["dpp_lain"] = round($header["dpp_lain"]);
-                        $header["ppn"] = round($header["dpp_lain"] * $taxVal);
+                        $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon);
+                        $header["diskon"] = $alldiskon;
+                        $dpp = round(($header["grand_total"] - $header["diskon"]) * 11 / 12);
+                        if (!$dppSet) {
+                            $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal);
+                            $ppn_diskon = round(($header["diskon"]) * $taxVal);
+                        } else {
+                            $pajak = round($dpp * $taxVal, 2);
+                            $dppDikson = round(($header["diskon"] * 11) / 12);
+                            $ppn_diskon = round($dppDikson * $taxVal);
+                        }
+                        $header["diskon_ppn"] = $ppn_diskon;
+                        $header["dpp_lain"] = $dpp;
+                        $header["ppn"] = $pajak;
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"]);
                     }
                     $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
@@ -1181,18 +1203,18 @@ class Fakturpenjualan extends MY_Controller {
             }
             $dppSet = $model->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
 
-            $jumlah = round($hasilKurang * $getDetail->harga,2);
-            $ddskon = round(($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon,2);
-            $dpp = round((($jumlah - $ddskon) * 11) / 12,2);
+            $jumlah = round($hasilKurang * $getDetail->harga, 2);
+            $ddskon = round(($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon, 2);
+            $dpp = round((($jumlah - $ddskon) * 11) / 12, 2);
             if (!$dppSet) {
-                $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value,2);
-                $ppn_diskon = round($ddskon * $getDetail->tax_value,2);
+                $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value, 2);
+                $ppn_diskon = round($ddskon * $getDetail->tax_value, 2);
             } else {
-                $pajak = round($dpp * $getDetail->tax_value,2);
-                $dppDis = round($dpp = (($ddskon) * 11) / 12,2);
-                $ppn_diskon = round($dppDis * $getDetail->tax_value,2);
+                $pajak = round($dpp * $getDetail->tax_value, 2);
+                $dppDis = round($dpp = (($ddskon) * 11) / 12, 2);
+                $ppn_diskon = round($dppDis * $getDetail->tax_value, 2);
             }
-            $totalHarga = round(($jumlah - $ddskon) + ($pajak),2);
+            $totalHarga = round(($jumlah - $ddskon) + ($pajak), 2);
             $updateSpilit = [
                 "qty_lot" => $hasilKurangLot,
                 "qty" => $hasilKurang,
@@ -1204,18 +1226,18 @@ class Fakturpenjualan extends MY_Controller {
                 "dpp_lain" => $dpp,
             ];
 
-            $jumlah = round($qty * $getDetail->harga,2);
-            $ddskon = round(($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon,2);
-            $dpp = round((($jumlah - $ddskon) * 11) / 12,2);
+            $jumlah = round($qty * $getDetail->harga, 2);
+            $ddskon = round(($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon, 2);
+            $dpp = round((($jumlah - $ddskon) * 11) / 12, 2);
             if (!$dppSet) {
-                $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value,2);
-                $ppn_diskon = round($ddskon * $getDetail->tax_value,2);
+                $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value, 2);
+                $ppn_diskon = round($ddskon * $getDetail->tax_value, 2);
             } else {
-                $pajak = round($dpp * $getDetail->tax_value,2);
-                $dppDis  = round((($ddskon) * 11) / 12,2);
-                $ppn_diskon = round($dppDis * $getDetail->tax_value,2);
+                $pajak = round($dpp * $getDetail->tax_value, 2);
+                $dppDis = round((($ddskon) * 11) / 12, 2);
+                $ppn_diskon = round($dppDis * $getDetail->tax_value, 2);
             }
-            $totalHarga = round(($jumlah - $ddskon) + ($pajak),2);
+            $totalHarga = round(($jumlah - $ddskon) + ($pajak), 2);
             $split = [
                 "faktur_id" => $getDetail->faktur_id,
                 "faktur_no" => $getDetail->faktur_no,
@@ -1517,16 +1539,16 @@ class Fakturpenjualan extends MY_Controller {
 
             $harga = $nom = str_replace(",", "", $this->input->post("harga"));
             $qty = $this->input->post("qty");
-            $jumlah = round($harga * $qty,2);
-            $ddskon = round(($check->tipe_diskon === "%") ? ($jumlah * ($check->nominal_diskon / 100)) : $check->nominal_diskon,2);
-            $dpp = round(($jumlah - $ddskon) * 11 / 12,2);
+            $jumlah = round($harga * $qty, 2);
+            $ddskon = round(($check->tipe_diskon === "%") ? ($jumlah * ($check->nominal_diskon / 100)) : $check->nominal_diskon, 2);
+            $dpp = round(($jumlah - $ddskon) * 11 / 12, 2);
             if (!$dppSet) {
-                $pajak = round(($jumlah - $ddskon) * $check->tax_value,2);
-                $ppn_diskon = round($ddskon * $check->tax_value,2);
+                $pajak = round(($jumlah - $ddskon) * $check->tax_value, 2);
+                $ppn_diskon = round($ddskon * $check->tax_value, 2);
             } else {
-                $pajak = round($dpp * $check->tax_value,2);
-                $dppDiskon = round(($ddskon * 11) / 12,2);
-                $ppn_diskon = round($dppDiskon * $check->tax_value,2);
+                $pajak = round($dpp * $check->tax_value, 2);
+                $dppDiskon = round(($ddskon * 11) / 12, 2);
+                $ppn_diskon = round($dppDiskon * $check->tax_value, 2);
             }
             $totalHarga = (($jumlah - $ddskon) + $pajak);
 
