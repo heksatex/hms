@@ -248,9 +248,10 @@
                                                         <!-- <th class='style bb' style="min-width: 100px" rowspan="2">Koreksi</th> -->
                                                         <th class='style bb' style="min-width: 120px" rowspan="2">
                                                             <span class="smarttip"
-                                                                data-tip="Sisa Piutang = Penjualan  - Pelunasan Total - Retur Total - Diskon Total ">
-                                                                &#x2757; Sisa Piutang
-                                                            </span>
+                                                            data-tip="Sisa Piutang = Penjualan  - Pelunasan Total - Retur Total - Diskon Total ">
+                                                            &#x2757; Sisa Piutang
+                                                        </span>
+                                                        <th class='style bb' style="min-width: 90px" rowspan="2">Status</th>
                                                     </tr>
                                                     <tr>
                                                         <th class='style bb' style="min-width: 50px">DPP</th>
@@ -275,7 +276,7 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="22">Tidak ada Data</td>
+                                                        <td colspan="23">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -399,30 +400,6 @@
         $(function() {
             $('[data-toggle="tooltip"]').tooltip()
         })
-        // set date tgldari
-        // $('#tgldari').datetimepicker({
-        //     // defaultDate: new Date().toLocaleString('en-US', {
-        //     //     timeZone: 'Asia/Jakarta'
-        //     // }),
-        //     defaultDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // ⬅️ tanggal 1 bulan ini
-        //     format: 'D-MMMM-YYYY',
-        //     ignoreReadonly: true,
-        //     // maxDate: new Date()
-        // });
-
-        // // set date tglsampai
-        // $('#tglsampai').datetimepicker({
-        //     defaultDate: new Date().toLocaleString('en-US', {
-        //         timeZone: 'Asia/Jakarta'
-        //     }),
-        //     format: 'D-MMMM-YYYY',
-        //     ignoreReadonly: true,
-        //     // maxDate: new Date(),
-        //     //minDate : 
-        //     //maxDate: new Date(),
-        //     //startDate: StartDate,
-        // });
-
 
 
         function collectFilter() {
@@ -459,7 +436,7 @@
         }
 
 
-
+        let arr_filter = [];
         // btn generate
         $("#btn-generate").on('click', function() {
 
@@ -561,7 +538,7 @@
                 empty = false;
 
                 var tr = $("<tr>").append(
-                    $("<td colspan='21' class='text-left'>").html('<b> ' + value.nama_partner + '</b>'),
+                    $("<td colspan='22' class='text-left'>").html('<b> ' + value.nama_partner + '</b>'),
                 );
                 tbody.append(tr);
 
@@ -603,10 +580,8 @@
                         $("<td align='right'>").text(formatNumber(value.dpp_diskon.toFixed(2))),
                         $("<td align='right'>").text(formatNumber(value.ppn_diskon.toFixed(2))),
                         $("<td align='right'>").text(formatNumber(value.total_diskon.toFixed(2))),
-
-                        // $("<td align='right'>").text(0),
-
                         $("<td align='right'>").text(formatNumber(value.sisa.toFixed(2))),
+                        $("<td style='max-width:150px;'>").text(value.lunas),
 
 
                     );
@@ -647,14 +622,15 @@
                     $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(diskon_total.toFixed(2))),
                     // $("<td class='style_space text-right'> ").text(''),
                     $("<td class='style_space text-right' style='font-weight:bold;'>").text(formatNumber(sisa.toFixed(2))),
+                    $("<td class='style_space text-right' >").text(''),
                 );
                 tbody.append(tr3);
-                tbody.append("<tr><td colspan='21'>&nbsp</td></tr>");
+                tbody.append("<tr><td colspan='22'>&nbsp</td></tr>");
 
             });
 
             if (empty == true) {
-                var tr = $("<tr>").append($("<td colspan='21'>").text('Tidak ada Data'));
+                var tr = $("<tr>").append($("<td colspan='22'>").text('Tidak ada Data'));
                 tbody.append(tr);
             } else {
 

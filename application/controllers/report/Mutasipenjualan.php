@@ -138,7 +138,11 @@ class Mutasipenjualan extends MY_Controller
             $sisa   = 0;
 
             foreach ($detail as $d) {
-                $sisa   = (float) $d->total_piutang - (float) $d->total_pelunasan -  (float) $d->total_retur - (float) $d->total_diskon;
+                if($d->lunas == 1 || $d->lunas == '1'){
+                    $sisa = 0;
+                } else {
+                    $sisa   = (float) $d->total_piutang - (float) $d->total_pelunasan -  (float) $d->total_retur - (float) $d->total_diskon;
+                }
                 $items[] = [
                     'tgl_faktur'         => date('Y-m-d', strtotime($d->tanggal)),
                     'no_faktur'          => $d->no_faktur,
@@ -159,7 +163,9 @@ class Mutasipenjualan extends MY_Controller
                     'dpp_diskon'         => (float) $d->dpp_diskon,
                     'ppn_diskon'         => (float) $d->ppn_diskon,
                     'total_diskon'       => (float) $d->total_diskon,
-                    'sisa'               => $sisa
+                    'sisa'               => $sisa,
+                    'lunas'              => ($d->lunas === "1" || $d->lunas === 0) ? "Lunas" : "Belum Lunas"
+
 
                 ];
             }
@@ -236,6 +242,8 @@ class Mutasipenjualan extends MY_Controller
             ['label' => 'Diskon',    'colspan' => 3, 'sub' => ['DPP', 'PPN', 'Total']],
 
             ['label' => 'Sisa Piutang', 'rowspan' => 2, 'width' => 18],
+            ['label' => 'Status',       'rowspan' => 2, 'width' => 10],
+
         ];
 
         /* =======================
@@ -285,7 +293,8 @@ class Mutasipenjualan extends MY_Controller
             ['tgl_pelunasan', 'no_pelunasan', 'no_bukti_pelunasan', 'total_pelunasan'],
             ['tgl_retur', 'no_bukti_retur', 'dpp_retur', 'ppn_retur', 'total_retur'],
             ['dpp_diskon', 'ppn_diskon', 'total_diskon'],
-            'sisa'
+            'sisa',
+            'lunas'
         ];
 
         /* =======================

@@ -44,7 +44,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_pelunasan = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
-            $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency' => 'Rp'];
         } else {
             $cr_condition = ($currency === 'valas') ? '<>' : '';
             
@@ -53,7 +53,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_pelunasan = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
-            $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency ' . $cr_condition => 'Rp'];
             // $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas' => 0];
             // $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas' => 1];
         }
@@ -68,7 +68,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_pelunasan     = $this->get_saldo_pelunasan($where_pelunasan, 'app.partner_id', $currency);
         $subquery_retur         = $this->get_saldo_retur($where_retur, 'app.partner_id', $currency);
         $subquery_um            = $this->get_saldo_um($where_um, 'app.partner_id', $currency);
-        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'app.partner_id', $currency);
+        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'id_partner', $currency);
         $subquery_deposit       = $this->get_saldo_deposit($where_deposit, 'app.partner_id', $currency);
         $subquery_deposit_pel   = $this->get_saldo_deposit($where_deposit_pel, 'app.partner_id', $currency);
         $subquery_refund        = $this->get_saldo_refund($where_kas_um, 'partner_id', $currency);
@@ -230,12 +230,12 @@ class M_bukubesarpembantupiutang extends CI_Model
             $subquery  = $this->get_saldo_deposit($tmp_where, 'app.partner_id', $currency);
         } else { // koreksi
             // $tmp_where = ['app.tanggal_transaksi >= ' => $tgl_dari, 'app.tanggal_transaksi <= ' => $tgl_sampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
-            $tmp_where = ['app.tanggal_transaksi >= ' => $tgl_dari, 'app.tanggal_transaksi <= ' => $tgl_sampai, 'status' => 'done'];
+            $tmp_where = ['tanggal_transaksi >= ' => $tgl_dari, 'tanggal_transaksi <= ' => $tgl_sampai, 'status' => 'done'];
             // if ($currency === 'valas') {
             // }
             $cr_condition = ($currency === 'valas') ? '<>' : '';
-            $tmp_where = array_merge($tmp_where, ['apps.tipe_currency ' . $cr_condition => 'Rp']);
-            $subquery  = $this->get_saldo_koreksi($tmp_where, 'app.partner_id', $currency);
+            $tmp_where = array_merge($tmp_where, ['tipe_currency ' . $cr_condition => 'Rp']);
+            $subquery  = $this->get_saldo_koreksi($tmp_where, 'id_partner', $currency);
         }
         return $subquery;
     }
@@ -589,8 +589,74 @@ class M_bukubesarpembantupiutang extends CI_Model
         return $this->db->get_compiled_select();
     }
 
-    function get_saldo_koreksi(array $where = [], string $group = '',  string $currency = '')
+    // function get_saldo_koreksi(array $where = [], string $group = '',  string $currency = '')
+    // {
+    //     if (count($where) > 0) {
+    //         $this->db->where($where);
+    //     }
+    //     if ($group) {
+    //         $this->db->group_by($group);
+    //     }
+    //     $total_m_normal   = ($currency === 'valas') ? 'apps.selisih' : 'apps.selisih * apps.kurs';
+    //     $total_m_koreksi  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
+
+
+    //     $this->db->where('apps.keterangan <>', 'Uang Muka');
+    //     $this->db->where('app.status', 'done');
+    //     $this->db->where('appsk.head', 'false');
+    //     $this->db->where('appsk.alat_pelunasan', 'false');
+    //     // $this->db->where('appsk.head', 'false');
+    //     // $this->db->where('appsk.koreksi_id <>','deposit');
+    //     // $this->db->where('apps.tipe_currency', 'Rp');
+    //     $this->db->where('ack.koreksi_bb', 'true');
+    //     $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan as no_bukti, app.tanggal_transaksi as tgl, app.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, 
+    //         COALESCE((SELECT GROUP_CONCAT(CONCAT(' - Curr : ' ,currency,' - Kurs : ',kurs, ' - Valas : ', total_valas)) FROM acc_pelunasan_piutang_metode appm Where appm.pelunasan_piutang_id = app.id AND appm.tipe = 'koreksi') , ''),
+    //         IF('$currency' = 'valas', 
+    //             CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', apps.kurs), 
+    //             CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id))
+    //         ))  as uraian,
+    //                     CASE 
+    //                         WHEN apps.mode = 'normal' THEN
+    //                             ($total_m_normal)
+    //                         ELSE
+    //                             SUM($total_m_koreksi)
+    //                     END AS total_koreksi,
+    //                     (CASE 
+    //                         WHEN apps.mode = 'normal' AND apps.selisih < 0 THEN
+    //                              ABS($total_m_normal)
+    //                         WHEN apps.mode <> 'normal' AND apps.selisih < 0 THEN 
+    //                         CAST(
+    //                             SUM(
+    //                                 ABS($total_m_koreksi)
+    //                             ) AS DECIMAL(20,2)
+    //                         )
+    //                         ELSE 0 
+    //                     END) AS debit,
+    //                     (CASE
+    //                         WHEN apps.mode = 'normal' AND apps.selisih > 0 THEN
+    //                             ABS($total_m_normal)
+    //                         WHEN apps.mode <> 'normal' AND  apps.selisih > 0 THEN
+    //                          CAST(
+    //                             SUM(
+    //                                 ABS($total_m_koreksi)
+    //                             ) AS DECIMAL(20,2)
+    //                         )
+    //                         ELSE 0 
+    //                     END) AS credit, app.status, 'plp' as link,
+    //                     0 as dpp,
+    //                     0 as ppn,
+    //                     0 as total_dpp_ppn");
+    //     $this->db->FROM('acc_pelunasan_piutang app');
+    //     $this->db->jOIN("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id", "INNER");
+    //     $this->db->jOIN("acc_pelunasan_piutang_summary_koreksi appsk", "apps.id = appsk.pelunasan_summary_id", "INNER");
+    //     $this->db->JOIN("acc_pelunasan_koreksi_piutang ack", "appsk.koreksi_id = ack.kode", "left");
+    //     return $this->db->get_compiled_select();
+    // }
+
+
+    function get_saldo_koreksi_normal(array $where = [], string $group = '',  string $currency = '')
     {
+
         if (count($where) > 0) {
             $this->db->where($where);
         }
@@ -598,60 +664,117 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
         $total_m_normal   = ($currency === 'valas') ? 'apps.selisih' : 'apps.selisih * apps.kurs';
+
+
+        $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  
+            CONCAT('Koreksi : ', 
+            (SELECT GROUP_CONCAT(DISTINCT nama_koreksi)
+             FROM acc_pelunasan_piutang_summary_koreksi appsk
+						 LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode
+             WHERE appsk.pelunasan_summary_id = apps.id), 
+            ' - ',
+            COALESCE((SELECT GROUP_CONCAT(CONCAT(' - Curr : ' ,currency,' - Kurs : ',kurs, ' - Valas : ', total_valas)) FROM acc_pelunasan_piutang_metode appm Where appm.pelunasan_piutang_id = app.id AND appm.tipe = 'koreksi') , ''),
+            IF('$currency' = 'valas', 
+                CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', apps.kurs, (SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id)), 
+                CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id))
+            ))  as uraian,($total_m_normal) AS total_koreksi,
+                        CASE 
+                            WHEN apps.selisih < 0 THEN ABS($total_m_normal)
+                            ELSE 0
+                        END AS debit,
+                        CASE 
+                            WHEN apps.selisih > 0 THEN ABS($total_m_normal)
+                            ELSE 0
+                        END AS credit,
+                        app.status, 'plp' as link,
+                        0 as dpp,
+                        0 as ppn,
+                        0 as total_dpp_ppn,
+                        apps.tipe_currency");
+        $this->db->FROM('acc_pelunasan_piutang app');
+        $this->db->jOIN("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id", "INNER");
+        return $this->db->get_compiled_select();
+    }
+
+    function get_saldo_koreksi_split(array $where = [], string $group = '',  string $currency = '')
+    {
+
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        if ($group) {
+            $this->db->group_by($group);
+        }
+
         $total_m_koreksi  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
 
-
-        $this->db->where('apps.keterangan <>', 'Uang Muka');
-        $this->db->where('app.status', 'done');
-        $this->db->where('appsk.head', 'false');
-        $this->db->where('appsk.alat_pelunasan', 'false');
-        // $this->db->where('appsk.head', 'false');
-        // $this->db->where('appsk.koreksi_id <>','deposit');
-        // $this->db->where('apps.tipe_currency', 'Rp');
-        $this->db->where('ack.koreksi_bb', 'true');
-        $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan as no_bukti, app.tanggal_transaksi as tgl, app.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, 
+      
+        $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, 
             COALESCE((SELECT GROUP_CONCAT(CONCAT(' - Curr : ' ,currency,' - Kurs : ',kurs, ' - Valas : ', total_valas)) FROM acc_pelunasan_piutang_metode appm Where appm.pelunasan_piutang_id = app.id AND appm.tipe = 'koreksi') , ''),
             IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', apps.kurs), 
                 CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id))
-            ))  as uraian,
-                        CASE 
-                            WHEN apps.mode = 'normal' THEN
-                                ($total_m_normal)
-                            ELSE
-                                SUM($total_m_koreksi)
-                        END AS total_koreksi,
+            ))  as uraian,($total_m_koreksi) AS total_koreksi,
                         (CASE 
-                            WHEN apps.mode = 'normal' AND apps.selisih < 0 THEN
-                                 ABS($total_m_normal)
-                            WHEN apps.mode <> 'normal' AND apps.selisih < 0 THEN 
-                            CAST(
-                                SUM(
-                                    ABS($total_m_koreksi)
-                                ) AS DECIMAL(20,2)
-                            )
+                            WHEN apps.selisih < 0 THEN
+                                 ABS($total_m_koreksi)
                             ELSE 0 
                         END) AS debit,
-                        (CASE
-                            WHEN apps.mode = 'normal' AND apps.selisih > 0 THEN
-                                ABS($total_m_normal)
-                            WHEN apps.mode <> 'normal' AND  apps.selisih > 0 THEN
-                             CAST(
-                                SUM(
-                                    ABS($total_m_koreksi)
-                                ) AS DECIMAL(20,2)
-                            )
+                        (CASE 
+                            WHEN apps.selisih > 0 THEN
+                                 ABS($total_m_koreksi)
                             ELSE 0 
-                        END) AS credit, app.status, 'plp' as link,
+                        END) AS credit,
+                        app.status, 'plp' as link,
                         0 as dpp,
                         0 as ppn,
-                        0 as total_dpp_ppn");
+                        0 as total_dpp_ppn,
+                        apps.tipe_currency");
         $this->db->FROM('acc_pelunasan_piutang app');
         $this->db->jOIN("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id", "INNER");
         $this->db->jOIN("acc_pelunasan_piutang_summary_koreksi appsk", "apps.id = appsk.pelunasan_summary_id", "INNER");
         $this->db->JOIN("acc_pelunasan_koreksi_piutang ack", "appsk.koreksi_id = ack.kode", "left");
         return $this->db->get_compiled_select();
     }
+
+
+    function get_saldo_koreksi(array $where = [], string $group = '',  string $currency = '')
+    {
+        $where_tipe_cur = ($currency === 'valas') ? 'Valas' : 'Rp';
+        $where_normal = ['apps.mode' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency'=> $where_tipe_cur ];
+        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal,'', $currency);
+        $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency'=> $where_tipe_cur,  'appsk.head'=> 'false', 'appsk.alat_pelunasan'=> 'false'];
+        $sub_query_split  = $this->get_saldo_koreksi_split($where_split,'', $currency);
+
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        if ($group) {
+            $this->db->group_by($group);
+        }
+
+        $this->db->select("
+                        (id_bukti)        AS id_bukti,
+                        (id_bukti_ecr)    AS id_bukti_ecr,
+                        (no_pelunasan)        AS no_bukti,
+                        (tanggal_transaksi) AS tgl,
+                        (id_partner)      AS id_partner,
+                        (uraian)          AS uraian,
+                        SUM(total_koreksi)   AS total_koreksi,
+                        SUM(debit)           AS debit,
+                        SUM(credit)          AS credit,
+                        (status)          AS status,
+                        (link)            AS link,
+                        (dpp)             AS dpp,
+                        (ppn)             AS ppn,
+                        (total_dpp_ppn)   AS total_dpp_ppn
+                        
+                        ");
+        $this->db->FROM("(".$sub_query_normal." UNION ALL ".$sub_query_split.") as t ");
+        return $this->db->get_compiled_select();
+    }
+
+
 
 
     function get_saldo_deposit(array $where = [], string $group = '',  string $currency = '')
@@ -813,7 +936,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_pelunasan = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
-            $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency' => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas'=>0];
             $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas <>'=>0];
         } else {
@@ -824,7 +947,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_pelunasan = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
-            $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency ' . $cr_condition => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>0];
             $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>'=>0];
         }
@@ -837,7 +960,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_pelunasan     = $this->get_saldo_pelunasan($where_pelunasan, 'app.partner_id', $currency);
         $subquery_retur         = $this->get_saldo_retur($where_retur, 'app.partner_id', $currency);
         $subquery_um            = $this->get_saldo_um($where_um, 'app.partner_id', $currency);
-        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'app.partner_id', $currency);
+        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'id_partner', $currency);
         $subquery_refund        = $this->get_saldo_refund($where_kas_um, 'partner_id', $currency);
         // $subquery_deposit       = $this->get_saldo_deposit($where_deposit, 'app.partner_id', $currency);
         // $subquery_deposit_pel   = $this->get_saldo_deposit($where_deposit_pel, 'app.partner_id', $currency);
@@ -920,7 +1043,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_pelunasan = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
-            $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency' => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas'=>0];
             $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas <>'=>0];
         } else {
@@ -931,7 +1054,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_pelunasan = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
-            $where_koreksi = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency ' . $cr_condition => 'Rp'];
             $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>0];
             $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>'=>0];
         }
@@ -943,7 +1066,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_pelunasan    = $this->get_saldo_pelunasan($where_pelunasan, 'app.no_pelunasan', $currency);
         $subquery_retur        = $this->get_saldo_retur($where_retur, 'app.no_pelunasan', $currency);
         $subquery_um           = $this->get_saldo_um($where_um, 'app.no_pelunasan', $currency);
-        $subquery_koreksi      = $this->get_saldo_koreksi($where_koreksi, 'app.no_pelunasan', $currency);
+        $subquery_koreksi      = $this->get_saldo_koreksi($where_koreksi, 'no_pelunasan', $currency);
         $subquery_refund       = $this->get_saldo_refund($where_kas_um, 'partner_id', $currency);
         // $subquery_deposit      = $this->get_saldo_deposit($where_deposit, 'app.no_pelunasan', $currency);
         // $subquery_deposit_pel  = $this->get_saldo_deposit($where_deposit_pel, 'app.no_pelunasan', $currency);
