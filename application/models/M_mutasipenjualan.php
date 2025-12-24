@@ -104,7 +104,8 @@ class M_mutasipenjualan extends CI_Model
                         IFNULL(retur.total_retur,0) as total_retur,
                         IFNULL(diskon.dpp_diskon,0) as dpp_diskon,
                         IFNULL(diskon.ppn_diskon,0) as ppn_diskon,
-                        IFNULL(diskon.total_diskon,0) as total_diskon
+                        IFNULL(diskon.total_diskon,0) as total_diskon,
+                        piutang.lunas 
                         ");
         $this->db->from('partner p');
         $this->db->join("($subquery_faktur) as piutang", "piutang.partner_id = p.id", "INNER");
@@ -131,7 +132,7 @@ class M_mutasipenjualan extends CI_Model
         $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0)"; 
         $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( fak.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
 
-        $this->db->SELECT("fak.id, fak.tanggal, fak.no_faktur_internal, fak.no_sj, fak.tipe, fak.partner_id,
+        $this->db->SELECT("fak.id, fak.tanggal, fak.no_faktur_internal, fak.no_sj, fak.tipe, fak.partner_id, fak.lunas,
                 IFNULL($dpp,0) as dpp_piutang,
                 IFNULL($ppn,0) as ppn_piutang,
                 ($total) as total_piutang  ");
