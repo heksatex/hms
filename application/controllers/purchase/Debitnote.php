@@ -158,6 +158,9 @@ class Debitnote extends MY_Controller {
             $tanggal_sj = $this->input->post("tanggal_sj");
             $tax_lain = $this->input->post("tax_lain_id");
             $periode = $this->input->post("periode");
+            $no_fp = $this->input->post("no_fp");
+            $nota_retur = $this->input->post("nota_retur");
+            $tanggal_fp = $this->input->post("tanggal_fp");
 
             $item = [];
             $totals = 0.00;
@@ -175,7 +178,7 @@ class Debitnote extends MY_Controller {
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 $taxe = 0;
-                if ($dpplain === "1" && $tax_lain[$key] === "1") {
+                if ($dpplain === "1") {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                 } else {
                     $taxe += ($total - $diskon) * $amount_tax[$key];
@@ -196,12 +199,35 @@ class Debitnote extends MY_Controller {
                 $nilaiDppLain = (($totals - $diskons) * 11) / 12;
             }
             $grandTotal = ($totals - $diskons) + $taxes;
+            if ($matauang > 1) {
+                $hutangrp = $grandTotal * $matauang;
+                $hutangvalas = $grandTotal;
+                $totalrp = $grandTotal * $matauang;
+                $dpprp = $nilaiDppLain * $matauang;
+                $dppvalas = $nilaiDppLain;
+                $totalValas = $grandTotal;
+            } else {
+                $hutangrp = $grandTotal;
+                $hutangvalas = 0;
+                $totalrp = $grandTotal;
+                $dpprp = $nilaiDppLain;
+                $dppvalas = 0;
+                $totalValas = 0;
+            }
+
             $head = new $this->m_global;
             $bd = clone $head;
-            $dataUpdate = ["no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain,
-                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode];
-            $head->setTables('invoice_retur')->setWheres(["no_inv_retur" => $kode_decrypt])
-                    ->update($dataUpdate);
+            $dataUpdate = [
+                "no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain, "tanggal_fp" => $tanggal_fp,
+                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode, "no_fp" => $no_fp, "nota_retur" => $nota_retur,
+                "dpp_lain_valas" => $dppvalas,
+                "dpp_lain_rp" => round($nilaiDppLain),
+                "total_rp" => round($hutangrp),
+                "hutang_valas" => $hutangvalas,
+                "hutang_rp" => round($hutangrp),
+                "total_valas" => $grandTotal
+            ];
+            $head->setTables('invoice_retur')->setWheres(["no_inv_retur" => $kode_decrypt])->update($dataUpdate);
             $bd->setTables("invoice_retur_detail")->updateBatch($item, 'id');
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $dataUpdate), $username);
             $this->output->set_status_header(200)
@@ -275,7 +301,7 @@ class Debitnote extends MY_Controller {
                                 ->setSelects(["invoice_retur_detail.*", "invoice_retur.id_supplier,invoice_retur.journal as jurnal,dpp_lain,nilai_matauang",
                                     "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,tax.ket", "invoice_retur.created_at as invoice_retur_create"])
+                                    "partner.nama as nama_supp,tax.ket", "invoice_retur.created_at as invoice_retur_create,invoice_retur.total as total_invoice"])
                                 ->setOrder(["invoice_retur_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
@@ -288,6 +314,16 @@ class Debitnote extends MY_Controller {
                 $jurnalItems = [];
                 $tax = 0;
                 $totalNominal = 0;
+                if (count($dataItems) > 0) {
+                    $updateInv["hutang_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
+                    $updateInv["total_rp"] = $dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang;
+                    $updateInv["dpp_lain_rp"] = $dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang;
+                    if ($dataItems[0]->nilai_matauang > 1) {
+                        $updateInv["total_valas"] = $dataItems[0]->total_invoice; //
+                        $updateInv["hutang_valas"] = $updateInv["total_valas"];
+                        $updateInv["dpp_lain_valas"] = $dataItems[0]->dpp_lain;
+                    }
+                }
                 foreach ($dataItems as $key => $value) {
                     if ($value->account === null) {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
@@ -423,11 +459,11 @@ class Debitnote extends MY_Controller {
                 );
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
-                
+
                 $log = "Header -> " . logArrayToString("; ", $jurnalData);
                 $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                 $this->_module->gen_history("debitnote", $jurnal, 'create', $log, $username);
-                $updateInv = array_merge($updateInv,["jurnal_retur" => $jurnal]);
+                $updateInv = array_merge($updateInv, ["jurnal_retur" => $jurnal]);
             }
             $head->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update($updateInv);
             if (!$this->_module->finishTransaction()) {
@@ -444,6 +480,33 @@ class Debitnote extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
+        }
+    }
+
+    public function update_faktur($id) {
+        try {
+            $kode_decrypt = decrypt_url($id);
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username'));
+            $model = new $this->m_global;
+            $dt = $this->input->post("tanggal_fp");
+            $update = [
+                "tanggal_fp" => $dt,
+                "nota_retur" => $this->input->post("nota_retur"),
+                "no_fp" => $this->input->post("no_fp"),
+            ];
+            $model->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update($update);
+            $log = "Update " . logArrayToString("; ", $update);
+
+            $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 }

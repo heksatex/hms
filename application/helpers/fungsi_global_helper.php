@@ -100,7 +100,7 @@ function logArrayToString(string $seperator, array $data, string $indikatorVal =
     foreach ($data as $key => $value) {
         if (is_array($value)) {
 
-            $hasil .= " " .($key + 1) . " " . logArrayToString($seperator, $value, $indikatorVal);
+            $hasil .= " " . ($key + 1) . " " . logArrayToString($seperator, $value, $indikatorVal);
         } else {
             $hasil = implode($seperator, array_map(
                             function ($v, $k) use ($indikatorVal) {
@@ -230,6 +230,42 @@ function searchOnArray(array $data, string $keySearch, string $valueSearch) {
         }
     }
     return $hasil;
+}
+
+function Kwitansi($x) {
+    $bilangan = array("", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas");
+    if ($x < 12) {
+        return " " . $bilangan[$x];
+    } elseif ($x < 20) {
+        return Kwitansi($x - 10) . " Belas";
+    } elseif ($x < 100) {
+        return Kwitansi($x / 10) . " Puluh" . Kwitansi($x % 10);
+    } elseif ($x < 200) {
+        return " Seratus" . Kwitansi($x - 100);
+    } elseif ($x < 1000) {
+        return Kwitansi($x / 100) . " Ratus" . Kwitansi($x % 100);
+    } elseif ($x < 2000) {
+        return " Seribu" . Kwitansi($x - 1000);
+    } elseif ($x < 1000000) {
+        return Kwitansi($x / 1000) . " Ribu" . Kwitansi($x % 1000);
+    } elseif ($x < 1000000000) {
+        return Kwitansi($x / 1000000) . " Juta" . Kwitansi($x % 1000000);
+    }
+}
+
+function KwitansiDesimal($x) {
+    $rst = "";
+    $bilangan = array("Nol", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan");
+    $char = str_split($x);
+    if(end($char) === "0"){
+        unset($char[count($char) - 1]);
+        return KwitansiDesimal(join("", $char));
+    }
+    foreach ($char as $value) {
+        $rst .= " {$bilangan[$value]}";
+    }
+    
+    return $rst;
 }
 
 ?>

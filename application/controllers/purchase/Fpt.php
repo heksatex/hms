@@ -60,14 +60,31 @@ class Fpt extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $nextPage = $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "FPT", "po.supplier" => $data["po"]->supplier], true)
-                            ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            $prd = ($_GET["produk"] ?? "");
+            $stt = ($_GET["stt"] ?? '');
+            $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "FPT"], true)
+                            ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
+            if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
+            }
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
+            $nextPage = $model1->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/fpt/edit/" . encrypt_url($nextPage->no_po));
+                $data["next_page"] = base_url("purchase/fpt/edit/" . encrypt_url($nextPage->no_po). "?produk={$prd}&stt={$stt}");
             }
 
-            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "FPT", "po.supplier" => $data["po"]->supplier], true)
-                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "FPT"], true)
+                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
+            if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
+            }
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
+            
+            $prevPage = $model1->getDetail();
             if ($prevPage) {
                 $data["prev_page"] = base_url("purchase/fpt/edit/" . encrypt_url($prevPage->no_po));
             }

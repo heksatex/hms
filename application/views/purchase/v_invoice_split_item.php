@@ -1,6 +1,6 @@
 <tr style="background-color:#FFA500">
     <td>
-        <button type="button" data-toggle="tooltip" data-placement="top" title="Cancel" class="cancel-split btn-sm" onclick="cancelSplit(this)"><i style="color: black;" class="fa fa-trash"></ibuttona>
+        <button type="button" data-toggle="tooltip" data-placement="top" title="Cancel" class="cancel-split btn-sm" onclick="cancelSplit(this)"><i style="color: black;" class="fa fa-trash"></i></button>
                 </td>
                 <td>
                     <button type="button" data-toggle="tooltip" data-placement="top" title="Save" class="save-split btn btn-success btn-sm" onclick="saveSplit()"><i style="color: black;" class="fa fa-save"></i></button> 

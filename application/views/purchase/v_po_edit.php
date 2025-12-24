@@ -11,7 +11,7 @@
             .totalan {
                 font-size: 14px;
             }
-            #btn-approve {
+            #btn-approve,#btn-simpan {
                 display: none;
             }
             .prio-urgent {
@@ -153,6 +153,8 @@
                 <section class="content-header" >
                     <div id ="status_bar">
                         <?php
+                        $prd = $_GET["produk"] ?? "";
+                        $stt = $_GET["stt"] ?? "";
                         $data['jen_status'] = $po->status;
                         $data["navigation_page"]=true;
                         $data["next_page"]=$next_page ?? "";

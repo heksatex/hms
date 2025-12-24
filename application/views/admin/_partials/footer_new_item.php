@@ -8,7 +8,7 @@ foreach ($list as $row) {
                 <?= $row->nama_user; ?>  <?= "| " . $row->jenis_log; ?>  
                 <span class="text-muted pull-right"><?= date("d M Y H:i:s", strtotime($row->datelog)); ?></span>
             </span>
-            <?= $row->note; ?>
+            <?= nl2br($row->note); ?>
         </div>
     </div>
     <?php

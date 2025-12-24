@@ -22,6 +22,7 @@ if ($picklist->status === 'cancel') {
     <ul class="nav nav-tabs " >
         <li class="active"><a href="#tab_1" data-toggle="tab">Picklist Item</a></li>
         <li><a href="#tab_2" data-toggle="tab">Delivery Order</a></li>
+        <li><a href="#tab_3" data-toggle="tab">Status Item</a></li>
     </ul>
     <div class="tab-content over"><br>
         <div class="tab-pane active" id="tab_1">
@@ -117,9 +118,65 @@ if ($picklist->status === 'cancel') {
                 </div>
             </div>
         </div>
+        <div class="tab-pane active" id="tab_3">
+            <div class="col-md-12 table-responsive over">
+                <table class="table table-condesed table-hover rlstable  over" width="100%" id="tbl_status" >
+                    <thead>
+                    <th class="style" width="10px">No</th>
+                    <th class="style">Corak Remark</th>
+                    <th class="style">Warna Remark</th>
+                    <th class="style" style="width:80px;" >Qty 1</th>
+                    <th class="style" width="80px">Qty 2</th>
+                    <th class="style">Lebar Jadi</th>
+                    <th class="style">Draft</th>
+                    <th class="style">Realisasi</th>
+                    <th class="style">Validasi</th>
+                    <th class="style">Done</th>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $no = 0;
+                        foreach ($status_item as $key => $value) {
+                            $no++;
+                            ?>
+                            <tr>
+                                <td>
+                                    <?= $no ?>
+                                </td>
+                                <td>
+                                    <?= $value["corak"] ?>
+                                </td>
+                                <td>
+                                    <?= $value["warna"] ?>
+                                </td>
+                                <td>
+                                    <?= $value["qty"] ?>
+                                </td>
+                                <td>
+                                    <?= $value["qty2"] ?>
+                                </td>
+                                <td>
+                                    <?= $value["lebar_jadi"] ?>
+                                </td>
+                                <?php foreach ($value["status"] as $k => $val) {
+                                    ?>
+                                    <td class="text-right">
+                                        <?= $val ?>
+                                    </td>
+                                    <?php }
+                                ?>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 <script>
+    $("#tbl_status").DataTable();
     const table = $("#item_picklist").DataTable({
         "iDisplayLength": 25,
         "processing": true,
@@ -147,7 +204,7 @@ if ($picklist->status === 'cancel') {
         },
         "columnDefs": [
             {
-                "targets": [0, 7, 8, 9,10],
+                "targets": [0, 7, 8, 9, 10],
                 "orderable": false
             }
         ],

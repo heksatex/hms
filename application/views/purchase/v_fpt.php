@@ -62,8 +62,7 @@
                                                             <label class="form-label">Status</label>
                                                         </div>
                                                         <div class="col-xs-8 col-md-8">
-                                                            <select name="status" class="form-control select2" id="status" style="width: 100%">
-                                                                <option></option>
+                                                            <select name="status" class="form-control select2" multiple id="status" style="width: 100%">
                                                                 <option value="draft">draft</option>
                                                                 <option value="purchase_confirmed">Purchase Confirmed</option>
                                                                 <option value="done">Done</option>
@@ -134,7 +133,7 @@
                     "ordering": true,
                     "info": true,
                     "autoWidth": false,
-                    "stateSave": true,
+                    "stateSave":true,
                     "ajax": {
                         "url": "<?php echo site_url('purchase/requestforquotation/list_data') ?>",
                         "type": "POST",

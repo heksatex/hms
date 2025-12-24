@@ -142,7 +142,7 @@ if (strtolower($level) === 'direksi') {
                         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
                         "processing": true,
                         "serverSide": true,
-                        "stateSave": false,
+                        "stateSave": true,
                         "scrollX": true,
                         "scrollY": "calc(85vh - 250px)",
                         "paging": true,

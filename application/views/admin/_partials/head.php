@@ -163,6 +163,19 @@ date_default_timezone_set('Asia/Jakarta'); //default waktu jakarta
     }
 
 
+
+    .tgl-format-def::-webkit-datetime-edit, .tgl-format-def::-webkit-inner-spin-button, .tgl-format-def::-webkit-clear-button {
+        display: none;
+    }
+
+    .tgl-format-def::-webkit-calendar-picker-indicator {
+        position: absolute;
+        top: 3px;
+        right: 0;
+        color: black;
+        opacity: 1;
+    }
+
     @media (max-width: 575.98px) {
         .tooltip,
         .bs-tooltip-top,
@@ -172,7 +185,6 @@ date_default_timezone_set('Asia/Jakarta'); //default waktu jakarta
             display: none !important;
         }
     }
-
 
 </style>
 <div id="printed" style="display: none">
