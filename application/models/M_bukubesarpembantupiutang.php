@@ -597,7 +597,9 @@ class M_bukubesarpembantupiutang extends CI_Model
         if ($group) {
             $this->db->group_by($group);
         }
-        $total  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
+        $total_m_normal   = ($currency === 'valas') ? 'apps.selisih' : 'apps.selisih * apps.kurs';
+        $total_m_koreksi  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
+
 
         $this->db->where('apps.keterangan <>', 'Uang Muka');
         $this->db->where('app.status', 'done');
@@ -612,13 +614,33 @@ class M_bukubesarpembantupiutang extends CI_Model
             IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', apps.kurs), 
                 CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id))
-            ))  as uraian, IFNULL(SUM($total),0) as total_koreksi,  
+            ))  as uraian,
+                        CASE 
+                            WHEN apps.mode = 'normal' THEN
+                                ($total_m_normal)
+                            ELSE
+                                SUM($total_m_koreksi)
+                        END AS total_koreksi,
                         (CASE 
-                            WHEN apps.selisih < 0 THEN  CAST( SUM(abs($total)) AS DECIMAL(20,2))
+                            WHEN apps.mode = 'normal' AND apps.selisih < 0 THEN
+                                 ABS($total_m_normal)
+                            WHEN apps.mode <> 'normal' AND apps.selisih < 0 THEN 
+                            CAST(
+                                SUM(
+                                    ABS($total_m_koreksi)
+                                ) AS DECIMAL(20,2)
+                            )
                             ELSE 0 
                         END) AS debit,
                         (CASE
-                            WHEN apps.selisih > 0 THEN CAST( SUM(abs($total)) AS DECIMAL(20,2))
+                            WHEN apps.mode = 'normal' AND apps.selisih > 0 THEN
+                                ABS($total_m_normal)
+                            WHEN apps.mode <> 'normal' AND  apps.selisih > 0 THEN
+                             CAST(
+                                SUM(
+                                    ABS($total_m_koreksi)
+                                ) AS DECIMAL(20,2)
+                            )
                             ELSE 0 
                         END) AS credit, app.status, 'plp' as link,
                         0 as dpp,
