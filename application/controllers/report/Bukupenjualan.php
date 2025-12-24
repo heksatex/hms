@@ -189,7 +189,7 @@ class Bukupenjualan extends MY_Controller {
                     $totalHarga = 0;
                 }
             }
-            $writer = new Xlsx($spreadsheet);
+//            $writer = new Xlsx($spreadsheet);
             $filename = "Buku Penjualan {$tanggal}";
             $url = "dist/storages/report/acc";
             if (!is_dir(FCPATH . $url)) {
