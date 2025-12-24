@@ -88,42 +88,49 @@
                     <div class="box-body">
 
                         <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="col-sm-12 col-md-12">
-                                        <div class="col-md-2">
-                                            <label>Customer</label>
-                                        </div>
-                                        <div class="col-sm-* col-md-8 col-lg-8">
-                                            <select class="form-control input-sm" name="partner" id="partner"></select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <div class="col-md-12">
-                                        <div class="col-md-12">
-                                            <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
-                                            <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
-                                            <!-- <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button> -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="col-sm-12 col-md-12">
-                                        <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
-                                            <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
-                                                <label style="cursor:pointer;">
-                                                    <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
-                                                    Advanced
-                                                </label>
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <div class="col-sm-12 col-md-12">
+                                                <div class="col-md-2">
+                                                    <label>Customer</label>
+                                                </div>
+                                                <div class="col-sm-* col-md-8 col-lg-8">
+                                                    <select class="form-control input-sm" name="partner" id="partner"></select>
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="col-md-12">
+                                                <div class="col-md-12">
+                                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
+                                                    <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                                                    <!-- <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="btn-pdf" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-pdf-o" style="color:red"></i> PDF</button> -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <div class="col-sm-12 col-md-12">
+                                                <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                                                    <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                                                        <label style="cursor:pointer;">
+                                                            <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                                                            Advanced
+                                                        </label>
+                                                    </div>
+                                                </div>
 
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -419,7 +426,7 @@
 
 
         function collectFilter() {
-    
+
             let filter = {};
 
             // customer
@@ -429,10 +436,10 @@
             let check_tgl = $('#checkTgl').is(':checked');
             filter.check_tgl = check_tgl ? 'true' : 'false';
             if (check_tgl) {
-                filter.tgldari   = $('#tgldari').val();
+                filter.tgldari = $('#tgldari').val();
                 filter.tglsampai = $('#tglsampai').val();
             } else {
-                filter.tgldari   = null;
+                filter.tgldari = null;
                 filter.tglsampai = null;
             }
 
@@ -681,7 +688,7 @@
                 $.ajax({
                     "type": 'POST',
                     "url": "<?php echo site_url('report/mutasipenjualan/export_excel') ?>",
-                    "data": arr_filter, 
+                    "data": arr_filter,
                     "dataType": 'json',
                     beforeSend: function() {
                         $('#btn-excel').button('loading');
