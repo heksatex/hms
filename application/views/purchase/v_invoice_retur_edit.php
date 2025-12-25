@@ -93,7 +93,15 @@ if ($inv->status === "done") {
                         <div class="box-header with-border">
                             <h3 class="box-title"><strong> <?= $inv->no_inv_retur ?? "" ?> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
-
+                                <?php
+                                if ($inv->status === "done") {
+                                    ?>
+                                    <button class="btn btn-default btn-sm" type="button" id="btn-update-fp" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        </i>&nbsp;Update Faktur Retur
+                                    </button>
+                                    <?php
+                                }
+                                ?> 
                             </div>
                         </div>
                         <form  class="form-horizontal" method="POST" name="form-invr" id="form-invr" action="<?= base_url('purchase/debitnote/update/' . $id) ?>">
@@ -114,7 +122,7 @@ if ($inv->status === "done") {
                                                     <label class="form-label">Origin</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                  <input class="form-control" value="<?= $inv->origin ?>" disabled>
+                                                    <input class="form-control" value="<?= $inv->origin ?>" disabled>
                                                     <input type="hidden" class="form-control pull-right input-sm" name="origin" value="<?= $inv->origin ?>" readonly> 
                                                 </div>
                                             </div>
@@ -142,7 +150,7 @@ if ($inv->status === "done") {
                                                     <?php
                                                     if ($inv->status !== "draft") {
                                                         ?>
-                                                        <span><?= $inv->periode ?></span>
+                                                        <input class="form-control input-sm" type="text" disabled value="<?= $inv->periode ?>">
                                                         <?php
                                                     } else {
                                                         ?>
@@ -165,7 +173,18 @@ if ($inv->status === "done") {
 
                                                 </div>
                                             </div>
-                                            
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label required">Kurs</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon get-no-sj"><?= $inv->mata_uang ?></span>
+                                                        <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
+                                                    </div>
+
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -183,7 +202,10 @@ if ($inv->status === "done") {
                                                     <label class="form-label">Tgl Invoice Supplier</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="datetime-local" class="form-control pull-right input-sm" name="tanggal_invoice_supp" value="<?= $inv->tanggal_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                    <div class="input-group tgl-def-format">
+                                                        <input type="text" class="form-control pull-right input-sm" id="tanggal_invoice_supp" name="tanggal_invoice_supp" value="<?= $inv->tanggal_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
+                                                    </div>
                                                 </div>
                                                 <button type="submit" id="form-inv-submit" style="display: none"></button>
                                             </div>
@@ -200,23 +222,37 @@ if ($inv->status === "done") {
                                                     <label class="form-label">Tgl SJ</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="datetime-local" class="form-control pull-right input-sm" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                    <div class="input-group tgl-def-format">
+                                                        <input type="text" class="form-control pull-right input-sm" id="tanggal_sj" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label required">Kurs</label>
+                                                    <label class="form-label">Nota Retur</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
+                                                    <input type="text" class="form-control pull-right input-sm" id="nota_retur" name="nota_retur" value="<?= $inv->nota_retur ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Mata Uang</label>
+                                                    <label class="form-label">No Faktur</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $inv->mata_uang ?></span>
+                                                    <input type="text" class="form-control pull-right input-sm" id="no_fp" name="no_fp" value="<?= $inv->no_fp ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Tgl Faktur</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <div class="input-group tgl-def-format">
+                                                        <input type="text" class="form-control pull-right input-sm" id="tanggal_fp" name="tanggal_fp" value="<?= $inv->tanggal_fp ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -630,6 +666,32 @@ if ($inv->status === "done") {
                                 });
                             });
 
+                            $("#btn-update-fp").unbind("click").off("click").on("click", function () {
+                                $.ajax({
+                                    url: "<?= base_url('purchase/debitnote/update_faktur/' . $id) ?>",
+                                    type: "POST",
+                                    data: {
+                                        nota_retur: $("#nota_retur").val(),
+                                        no_fp: $("#no_fp").val(),
+                                        tanggal_fp: $("#tanggal_fp").val()
+                                    },
+                                    beforeSend: function (xhr) {
+                                        please_wait(function () {});
+                                    },
+                                    error: function (req, error) {
+                                        unblockUI(function () {
+                                            setTimeout(function () {
+                                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                            }, 500);
+                                        });
+                                    },
+                                    complete: function (jqXHR, textStatus) {
+                                        unblockUI(function () {}, 200);
+                                    }, success: function (data) {
+                                        location.reload();
+                                    }
+                                });
+                            });
 
                         });
                     </script>

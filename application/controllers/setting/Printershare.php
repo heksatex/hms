@@ -131,6 +131,15 @@ class Printershare extends MY_Controller {
     public function set() {
         try {
             $data = $this->input->post("data");
+            $username = $this->session->userdata('username');
+            $model = new $this->m_global;
+            $check = $model->setTables("share_printer_user")->setWheres(["username"=>$username])->getDetail();
+            if($check) {
+                $model->update(["printer"=>$data]);
+            }
+            else {
+                $model->save(["username"=>$username,"printer"=>$data]);
+            }
             $this->session->set_userdata(["printer" => $data]);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

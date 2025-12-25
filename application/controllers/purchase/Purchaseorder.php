@@ -73,17 +73,35 @@ class Purchaseorder extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $nextPage = $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
-                            ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
-                            ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
-            if ($nextPage) {
-                $data["next_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($nextPage->no_po));
+            $prd = ($_GET["produk"] ?? "");
+            $stt = ($_GET["stt"] ?? '');
+            $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)//, "po.supplier" => $data["po"]->supplier
+                    ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
+                    ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
+            
+            if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
             }
-            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
-                            ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
-                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
+            $nextPage = $model1->getDetail();
+            if ($nextPage) {
+                $data["next_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($nextPage->no_po) . "?produk={$prd}&stt={$stt}");
+            }
+            $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true) //, "po.supplier" => $data["po"]->supplier
+                    ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
+                    ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
+            if($prd !== "") {
+                $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
+            }
+            if($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",",$stt));
+            }
+            
+            $prevPage = $model1->getDetail();
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po));
+                $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}");
             }
 
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
@@ -129,12 +147,14 @@ class Purchaseorder extends MY_Controller {
             $list->setWhereRaw("jenis <>'FPT'");
 
             $no = $_POST['start'];
-
+            $statuss = "";
             if (gettype($status) === 'string')
                 $list->setWhereRaw("po.status in ('done','cancel','purchase_confirmed','exception')");
             else
-            if (count($status) > 0)
+            if (count($status) > 0) {
                 $list->setWhereIn("po.status", $status);
+                $statuss = implode(",", $status);
+            }
 
             if ($nama_produk !== "")
                 $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
@@ -148,7 +168,7 @@ class Purchaseorder extends MY_Controller {
                 }
                 $data [] = [
                     $no,
-                    '<a href="' . base_url('purchase/purchaseorder/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
+                    '<a href="' . base_url('purchase/purchaseorder/edit/' . encrypt_url($field->no_po)) . '?produk=' . $nama_produk . '&stt=' . $statuss . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->order_date,
                     $field->create_date,
@@ -274,7 +294,32 @@ class Purchaseorder extends MY_Controller {
                                 if ($cekUpdateIn !== "") {
                                     throw new \Exception("Update pada data invoice gagal.", 500);
                                 }
-                                $modelInv->update(["total" => $data->total, "dpp_lain" => $data->dpp_lain]);
+
+                                if ($data->nilai_currency > 1) {
+                                    $hutangrp = $data->total * $data->nilai_currency;
+                                    $hutangvalas = $data->total;
+                                    $totalrp = $data->total * $data->nilai_currency;
+                                    $dpprp = $data->dpp_lain * $data->nilai_currency;
+                                    $dppvalas = $data->dpp_lain;
+                                    $totalValas = $data->total;
+                                } else {
+                                    $hutangrp = $data->total;
+                                    $hutangvalas = 0;
+                                    $totalrp = $data->total;
+                                    $dpprp = $data->dpp_lain;
+                                    $dppvalas = 0;
+                                    $totalValas = 0;
+                                }
+                                $modelInv->update([
+                                    "total" => $data->total,
+                                    "dpp_lain" => $data->dpp_lain,
+                                    "hutang_rp" => round($hutangrp),
+                                    "hutang_valas" => round($hutangvalas),
+                                    "total_valas" => round($totalValas),
+                                    "total_rp" => round($totalrp),
+                                    "dpp_lain_rp" => round($dpprp),
+                                    "dpp_lain_valas" => round($dppvalas)
+                                ]);
                                 $this->_module->gen_history("invoice", $cekInv->id, 'edit',
                                         "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
                                         $username);
@@ -436,7 +481,7 @@ class Purchaseorder extends MY_Controller {
                                         "nominal" => $nttmax,
                                         "kode" => $cekJurnal->kode,
                                         "nama" => "",
-                                        "reff_note" => "",
+                                        "reff_note" => "Retur Pembelian",
                                         "partner" => $dataItems[0]->id_supplier,
                                         "kode_coa" => ($defaultPpn->value ?? 0),
                                         "posisi" => "C",
@@ -451,8 +496,10 @@ class Purchaseorder extends MY_Controller {
 //                                    if ($cekUpdateIn !== "") {
 //                                        throw new \Exception(json_encode($cekUpdateIn), 500);
 //                                    }
-                                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
-                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""]);
+//                                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+//                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""]);
+                                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
                                 }
                             }
                         }
@@ -461,8 +508,10 @@ class Purchaseorder extends MY_Controller {
                     $model = new $this->m_global;
                     $model->setTables("purchase_order_edited")->setWheres(["po_id" => $kode_decrypt])
                             ->setWhereRaw("status not in('cancel','retur','done')")->update(["status" => $status_]);
-                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
-                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""]);
+//                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
+//                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""]);
+//                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
+//                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""];
                     break;
             }
             $po = new $this->m_po;
@@ -544,7 +593,7 @@ class Purchaseorder extends MY_Controller {
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 $taxe = 0;
-                if ($dpplain === "1" && $dppTax[$key] === "1") {
+                if ($dpplain === "1") {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                     $nilaiDppLain += (($total - $diskon) * 11) / 12;
                 } else {
@@ -611,6 +660,11 @@ class Purchaseorder extends MY_Controller {
             $this->_module->startTransaction();
             $model = new $this->m_global;
             $model2 = clone $model;
+            $checkInvoice = $model2->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "invoice.status <>" => "cancel"])->getDetail();
+            if ($checkInvoice) {
+                if ($checkInvoice->lunas == "1")
+                    throw new \Exception('Data PO sudah ada pelunasan.', 500);
+            }
             $whereStatus = "'done','cancel'";
             $cek = $model->setTables("purchase_order_edited")
                     ->setJoins("mst_status", "mst_status.kode = status", "LEFT")
@@ -618,6 +672,7 @@ class Purchaseorder extends MY_Controller {
                     ->setWheres(["po_id" => $kode_decrypt])->setWhereRaw("status not in ({$whereStatus})")
                     ->getDetail();
             if ($cek !== null) {
+
                 $update = false;
                 switch ($status) {
                     case "cancel":
@@ -861,7 +916,6 @@ class Purchaseorder extends MY_Controller {
                         . "stock_move WRITE, stock_move_produk WRITE, departemen d WRITE,"
                         . "pengiriman_barang WRITE, pengiriman_barang_items WRITE, departemen WRITE, mst_produk WRITE";
                 $this->_module->lock_tabel($locktabel);
-                $now = date("Y-m-d H:i:s");
                 $invRetur = [
                     "no_inv_retur" => $noDeb,
                     "id_supplier" => $checkInv->id_supplier,
@@ -877,7 +931,7 @@ class Purchaseorder extends MY_Controller {
                     "total" => 0,
                     "dpp_lain" => 0,
                     "created_at" => $now,
-                    "periode"=>date("Y/m", strtotime(now)),
+                    "periode" => date("Y/m", strtotime($now)),
                     "tanggal_sj" => $checkInv->tanggal_sj,
                     "status" => "draft"
                 ];
@@ -920,7 +974,7 @@ class Purchaseorder extends MY_Controller {
                     $totals += $total;
                     $diskon = ($value->diskon ?? 0);
                     $diskons += $diskon;
-                    if ($checkInv->dpp_lain > 0 && $value->dpp_tax === "1") {
+                    if ($checkInv->dpp_lain > 0) {
                         $taxe = ((($total - $diskon) * 11) / 12) * $value->tax_amount;
                         $dpp += ((($total - $diskon) * 11) / 12);
                     } else {

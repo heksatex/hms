@@ -27,14 +27,28 @@ class M_global extends CI_Model {
     ];
     protected $whereIn = [];
     protected $wheresRaw = [];
-    
     protected $db_debug;
-    
+
     public function __construct() {
         $this->db_debug = $this->db->db_debug;
         $this->db->db_debug = FALSE;
     }
-    
+
+    protected function clear() {
+        $this->orders = [];
+        $this->search = [];
+        $this->order = [];
+        $this->group = [];
+        $this->wheres = [];
+        $this->selects = [];
+        $this->joins = ["table" => [],
+            "kondisi" => [],
+            "posisi" => []
+        ];
+        $this->whereIn = [];
+        $this->wheresRaw = [];
+    }
+
     public function setOrders(array $orders) {
         $this->orders = $orders;
         return $this;
@@ -45,7 +59,10 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setOrder(array $order) {
+    public function setOrder(array $order, $clearBefore = false) {
+        if ($clearBefore) {
+            $this->order = [];
+        }
         $this->order = $order;
         return $this;
     }
@@ -74,18 +91,25 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setSelects(array $selects) {
+    public function setSelects(array $selects,$clearBefore = false) {
+        if ($clearBefore) {
+            $this->selects = [];
+        }
         $this->selects = array_merge($this->selects, $selects);
         return $this;
     }
 
-    public function setGroups(array $groups) {
+    public function setGroups(array $groups, $clearBefore = false) {
+        if ($clearBefore) {
+            $this->group = [];
+        }
         $this->group = array_merge($this->group, $groups);
         return $this;
     }
 
     public function setTables(string $table) {
         $this->table = $table;
+        $this->clear();
         return $this;
     }
 
@@ -122,7 +146,7 @@ class M_global extends CI_Model {
         }
 
         foreach ($this->search as $key => $value) {
-            if ($_POST['search']['value']) {
+            if (isset( $_POST['search']['value']) && $_POST['search']['value']) {
                 if ($key === 0) {
                     $this->db->group_start();
                     $this->db->like($value, $_POST['search']['value']);
@@ -158,13 +182,19 @@ class M_global extends CI_Model {
         return $query->result();
     }
 
+    public function getQuery() {
+        $this->_get_datatables_query();
+        return $this->db->get_compiled_select();
+    }
+
     public function getDataCountFiltered() {
         $this->_get_datatables_query();
         $query = $this->db->get();
         return $query->num_rows();
     }
 
-    public function getDataCountAll() {
+    public function getDataCountAll($select = "*") {
+        $this->db->select($select);
         $this->db->from($this->table);
         foreach ($this->joins["table"] as $key => $value) {
             $this->db->join($value, $this->joins["kondisi"][$key], $this->joins["posisi"][$key]);
@@ -219,7 +249,6 @@ class M_global extends CI_Model {
                 }
             }
         }
-
         $result = $this->db->select(implode(",", $this->selects))->get();
         return $result->row();
     }
@@ -309,19 +338,23 @@ class M_global extends CI_Model {
         $this->table = $new_table . " " . ($tbl[1] ?? "");
         return $this;
     }
-    public function copyExt(string $from,string $new_table) {
+
+    public function copyExt(string $from, string $new_table) {
         $this->db->query("CREATE TEMPORARY TABLE {$new_table} LIKE {$from};");
         $this->db->query("insert into {$new_table} SELECT * FROM {$from};");
     }
-    
+
     public function excQuery(string $query) {
-       if(!$this->db->query($query)) {
-           return  $this->db->error();
-       }
-       return null;
-       
+        if (!$this->db->query($query)) {
+            return $this->db->error();
+        }
+        return null;
     }
-    
+
+    public function excQueryWResult(string $query) {
+        return $this->db->query($query);
+    }
+
     public function __destruct() {
         $this->db->db_debug = $this->db_debug;
     }
