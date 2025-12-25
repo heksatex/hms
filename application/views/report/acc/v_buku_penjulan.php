@@ -163,6 +163,8 @@
                                                 <th class='style bb ws' style="min-width: 150px">Uraian</th>
                                                 <th class='style bb ws'>Customer</th>
                                                 <th class='style bb ws'>COA</th>
+                                                <th class='style bb ws'>Curr</th>
+                                                <th class='style bb ws text-right'>Kurs</th>
                                                 <th class='style bb ws text-right'>Qty</th>
                                                 <th class='style bb ws text-right'>Harga</th>
                                                 <th class='style bb ws text-right'>Total</th>
