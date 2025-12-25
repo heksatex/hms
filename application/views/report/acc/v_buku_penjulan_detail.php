@@ -23,7 +23,7 @@ foreach ($data as $key => $value) {
         <td><?= $value->partner_nama ?></td>
         <td><?= "{$value->kode_coa} - {$value->coa}" ?></td>
         <td><?= $value->kode_mua ?></td>
-        <td><?= number_format($value->kurs,2) ?></td>
+        <td class="text-right"><?= number_format($value->kurs,2) ?></td>
         <td style="text-align: right;"><?= ($value->qty) ? number_format($value->qty, 2) . " {$value->uom}" : $qtys ?></td>
         <td style="text-align: right;"><?= ($value->harga > 0) ? number_format($value->harga, 2) : $totalanItem ?></td>
         <td style="text-align: right;"><?= $totalanItem ?></td>
