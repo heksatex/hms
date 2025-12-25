@@ -134,10 +134,12 @@ class Bukupenjualan extends MY_Controller {
             $sheet->setCellValue("F{$row}", 'Customer');
             $sheet->setCellValue("G{$row}", 'Coa');
             $sheet->setCellValue("H{$row}", 'Nama Coa');
-            $sheet->setCellValue("I{$row}", 'Qty');
-            $sheet->setCellValue("J{$row}", 'Uom');
-            $sheet->setCellValue("K{$row}", 'Harga');
-            $sheet->setCellValue("L{$row}", 'Total Harga');
+            $sheet->setCellValue("I{$row}", 'Curr');
+            $sheet->setCellValue("j{$row}", 'Kurs');
+            $sheet->setCellValue("k{$row}", 'Qty');
+            $sheet->setCellValue("k{$row}", 'Uom');
+            $sheet->setCellValue("m{$row}", 'Harga');
+            $sheet->setCellValue("n{$row}", 'Total Harga');
             $no = 0;
             $grandTotal = 0;
             $total = 0;
@@ -167,16 +169,18 @@ class Bukupenjualan extends MY_Controller {
                 $sheet->setCellValue("F{$row}", $value->partner_nama);
                 $sheet->setCellValue("G{$row}", $value->kode_coa);
                 $sheet->setCellValue("H{$row}", $value->coa);
-                $sheet->setCellValue("I{$row}", ($value->qty) ? $value->qty : $q);
-                $sheet->setCellValue("J{$row}", ($value->qty) ? $value->uom : $u);
-                $sheet->setCellValue("L{$row}", $value->harga);
-                $sheet->setCellValue("L{$row}", ($value->qty) ? $harga : $value->nominal);
+                $sheet->setCellValue("i{$row}", $value->kode_mua);
+                $sheet->setCellValue("j{$row}", $value->kurs);
+                $sheet->setCellValue("k{$row}", ($value->qty) ? $value->qty : $q);
+                $sheet->setCellValue("l{$row}", ($value->qty) ? $value->uom : $u);
+                $sheet->setCellValue("m{$row}", $value->harga);
+                $sheet->setCellValue("n{$row}", ($value->qty) ? $harga : $value->nominal);
                 if (isset($data[$key + 1])) {
                     if ($value->kode_coa !== $data[$key + 1]->kode_coa) {
                         $row += 1;
                         $sheet->setCellValue("G{$row}", $value->kode_coa);
                         $sheet->setCellValue("H{$row}", "Total {$value->coa}");
-                        $sheet->setCellValue("L{$row}", ($value->qty) ? $totalHarga:$total);
+                        $sheet->setCellValue("n{$row}", ($value->qty) ? $totalHarga:$total);
                         $total = 0;
                         $totalHarga = 0;
                     }
@@ -184,7 +188,7 @@ class Bukupenjualan extends MY_Controller {
                     $row += 1;
                     $sheet->setCellValue("G{$row}", $value->kode_coa);
                     $sheet->setCellValue("H{$row}", "Total {$value->coa}");
-                    $sheet->setCellValue("L{$row}", ($value->qty) ? $totalHarga:$total);
+                    $sheet->setCellValue("n{$row}", ($value->qty) ? $totalHarga:$total);
                     $total = 0;
                     $totalHarga = 0;
                 }
