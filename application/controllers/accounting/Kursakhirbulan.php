@@ -69,8 +69,22 @@ class Kursakhirbulan extends MY_Controller {
                     ->setWheres(['date(bk.tanggal) >= ' => $start, 'date(bk.tanggal) <= ' => $akhir, 'status' => 'confirm'])
                     ->getQuery();
 
+//            $saldoDebet = $model->setTables('acc_jurnal_entries je')->setWheres(['date(je.tanggal_dibuat) >= ' => $start, 'date(je.tanggal_dibuat) <= ' => $akhir, 'je.status' => 'posted', 'jei.posisi' => "D"])
+//                            ->setJoins("acc_jurnal_entries_items jei", "jei.kode = je.kode")
+//                            ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_debit_rp, SUM(jei.nominal_curr) as total_debit"])
+//                            ->setGroups(['jei.kode_coa'])->getQuery();
+//            $saldoKredit = $model->setTables('acc_jurnal_entries je')->setWheres(['date(je.tanggal_dibuat) >= ' => $start, 'date(je.tanggal_dibuat) <= ' => $akhir, 'je.status' => 'posted', 'jei.posisi' => "C"])
+//                            ->setJoins("acc_jurnal_entries_items jei", "jei.kode = je.kode")
+//                            ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit_rp, SUM(jei.nominal_curr) as total_credit"])
+//                            ->setGroups(['jei.kode_coa'])->getQuery();
+            $entries = $model->setTables('acc_jurnal_entries je')->setWheres(['date(je.tanggal_dibuat) >= ' => $start, 'date(je.tanggal_dibuat) <= ' => $akhir, 'je.status' => 'posted'])
+                            ->setJoins("acc_jurnal_entries_items jei", "jei.kode = je.kode")
+                            ->setSelects(["jei.posisi, jei.kode_coa"])
+                            ->setSelects(["IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit_rp,   IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit_rp"])
+                            ->setGroups(['jei.kode_coa'])->getQuery();
             $model->setTables("acc_coa coa")->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
+                    ->setJoins("({$entries}) as jr", "jr.kode_coa = coa.kode_coa", "left")
                     ->setOrder(["coa.kode_coa" => "asc"])->setWheres(["coa.curr" => $curr])
                     ->setSelects(["coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,coa.saldo_awal,coa.saldo_valas,COALESCE(debit_sbl.total_debit, 0) as total_debit_sbl"])
                     ->setSelects(["COALESCE(debit_sbl.total_debit_rp, 0) as total_debit_rp_sbl", "COALESCE(credit_sbl.total_credit_rp, 0) as total_credit_rp_sbl"])
@@ -84,11 +98,18 @@ class Kursakhirbulan extends MY_Controller {
                             END AS saldo_valas_final"])
                     ->setSelects(["CASE 
                                 WHEN coa.saldo_normal = 'D' THEN 
-                                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit_rp, 0) - COALESCE(credit_sbl.total_credit_rp, 0))
+                                    (coa.saldo_awal + COALESCE(jr.total_debit_rp, 0) - COALESCE(jr.total_credit_rp, 0))
                                 WHEN coa.saldo_normal = 'C' THEN 
-                                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit_rp, 0) - COALESCE(debit_sbl.total_debit_rp, 0))
+                                    (coa.saldo_awal + COALESCE(jr.total_credit_rp, 0) - COALESCE(jr.total_debit_rp, 0))
                                 ELSE coa.saldo_awal
                             END AS saldo_rp_final"]);
+//                    ->setSelects(["CASE 
+//                                WHEN coa.saldo_normal = 'D' THEN 
+//                                    (coa.saldo_awal + COALESCE(jr.total_debit_rp, 0) - COALESCE(jr.total_credit_rp, 0))
+//                                WHEN coa.saldo_normal = 'C' THEN 
+//                                    (coa.saldo_awal + COALESCE(jr.total_credit_rp, 0) - COALESCE(jr.total_debit_rp, 0))
+//                                ELSE coa.saldo_awal
+//                            END AS saldo_akhir"]);
             return $model->getData();
         } catch (Exception $ex) {
             throw $ex;
@@ -356,8 +377,8 @@ class Kursakhirbulan extends MY_Controller {
             $_POST["kurs"] = $check->kurs;
             $tanggal = date("Y-m-t H:i:s", strtotime("{$check->bulan}-01"));
             $lock = "token_increment WRITE,main_menu_sub READ, log_history WRITE,acc_kurs_akhir_bulan WRITE,acc_jurnal_entries WRITE,picklist_detail WRITE,acc_jurnal_entries_items WRITE,"
-                     . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
-                     . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ";
+                    . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
+                    . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ";
             $this->_module->lock_tabel($lock);
             $coa = $this->_getSaldo();
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
