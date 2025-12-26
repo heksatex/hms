@@ -170,7 +170,7 @@ class Invoice extends MY_Controller {
             [
                 'field' => 'nilai_matauang',
                 'label' => 'Kurs',
-                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                'rules' => ['required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
                 'errors' => [
                     'required' => '{field} Harus dipilih',
                     "regex_match" => "{field} harus berupa number / desimal"
@@ -208,7 +208,7 @@ class Invoice extends MY_Controller {
             $dpplain = $this->input->post("dpplain");
             $qty_beli = $this->input->post("qty_beli");
             $dsk = $this->input->post("diskon");
-            $matauang = $this->input->post("nilai_matauang");
+            $matauang = str_replace(",", "", $this->input->post("nilai_matauang"));
             $tanggal_sj = $this->input->post("tanggal_sj");
             $tax_lain = $this->input->post("tax_lain_id");
             $periode = $this->input->post("periode");
@@ -225,31 +225,31 @@ class Invoice extends MY_Controller {
             $model->setTables("tax");
             foreach ($harga as $key => $value) {
                 $item[] = ["id" => $key, "harga_satuan" => $value, "account" => $coa[$key], "tax_id" => $tax[$key], 'amount_tax' => $amount_tax[$key], "diskon" => $dsk[$key]];
-                $total = ($qty_beli[$key] * $value);
+                $total = round($qty_beli[$key] * $value,2);
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 $taxe = 0;
                 if ($dpplain === "1") {
-                    $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                    $taxe += round(((($total - $diskon) * 11) / 12) * $amount_tax[$key],2);
                 } else {
-                    $taxe += ($total - $diskon) * $amount_tax[$key];
+                    $taxe += round(($total - $diskon) * $amount_tax[$key],2);
                 }
 
                 if ($tax_lain[$key] !== "0") {
                     $dataTax = $model->setWhereIn("id", explode(",", $tax_lain[$key]), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
                     foreach ($dataTax as $kkk => $datas) {
                         if ($dpplain === "1" && $datas->dpp === "1") {
-                            $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
+                            $taxe += round(((($total - $diskon) * 11) / 12) * $datas->amount,2);
                         } else {
-                            $taxe += ($total - $diskon) * $datas->amount;
+                            $taxe += round(($total - $diskon) * $datas->amount,2);
                         }
                     }
                 }
                 $taxes += $taxe;
             }
             if ($dpplain === "1") {
-                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
+                $nilaiDppLain = round((($totals - $diskons) * 11) / 12,2);
             }
             $grandTotal = ($totals - $diskons) + $taxes;
             if ($matauang > 1) {
@@ -393,20 +393,20 @@ class Invoice extends MY_Controller {
                 $pajakLain = [];
                 $checkDpp = $dataItems[0]->dpp_lain > 0;
                 if (count($dataItems) > 0) {
-                    $updateInv["hutang_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang);
-                    $updateInv["total_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang);
-                    $updateInv["dpp_lain_rp"] = round($dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang);
+                    $updateInv["hutang_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang,2);
+                    $updateInv["total_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang,2);
+                    $updateInv["dpp_lain_rp"] = round($dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang,2);
                     if ($dataItems[0]->nilai_matauang > 1) {
-                        $updateInv["total_valas"] = round($dataItems[0]->total_invoice); //
-                        $updateInv["hutang_valas"] = round($updateInv["total_valas"]);
-                        $updateInv["dpp_lain_valas"] = round($dataItems[0]->dpp_lain);
+                        $updateInv["total_valas"] = round($dataItems[0]->total_invoice,2); //
+                        $updateInv["hutang_valas"] = round($updateInv["total_valas"],2);
+                        $updateInv["dpp_lain_valas"] = round($dataItems[0]->dpp_lain,2);
                     }
                 }
                 foreach ($dataItems as $key => $value) {
                     if ($value->account === null || $value->account === "") {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
                     }
-                    $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
+                    $nominal = (round($value->harga_satuan * $value->qty_beli,2) - $value->diskon);
                     $item = array(
                         "kode" => $jurnal,
                         "nama" => "[{$value->kode_produk}] {$value->nama_produk} (" . number_format($value->qty_beli, 2) . " {$value->uom_beli})",
@@ -451,13 +451,13 @@ class Invoice extends MY_Controller {
                         $taxx = 0;
                         $base = 0;
                         if ($checkDpp && $value->dpp_tax === "1") {
-                            $base = (($value->nominal * 11) / 12);
-                            $taxx = $base * $value->amount;
+                            $base = round(($value->nominal * 11) / 12,2);
+                            $taxx = round($base * $value->amount,2);
                         } else {
-                            $base = $value->nominal;
-                            $taxx = $base * $value->amount;
+                            $base = round($value->nominal,2);
+                            $taxx = round($base * $value->amount,2);
                         }
-                        $taxNominal = ($taxx * $dataItems[0]->nilai_matauang);
+                        $taxNominal = round($taxx * $dataItems[0]->nilai_matauang,2);
                         $taxName = explode(",", $value->tax_nama);
                         if (isset($dataPajak[$value->ket_tax])) {
                             $dataPajak[$value->ket_tax]["nominal_curr"] += $taxx;
@@ -486,14 +486,14 @@ class Invoice extends MY_Controller {
                                 $taxx = 0;
                                 $base = 0;
                                 if ($checkDpp && $datass->dpp === "1") {
-                                    $base = (($value->nominal * 11) / 12);
-                                    $taxx = $base * $datass->amount;
+                                    $base = round(($value->nominal * 11) / 12,2);
+                                    $taxx = round($base * $datass->amount,2);
                                 } else {
-                                    $base = $value->nominal;
-                                    $taxx = $base * $datass->amount;
+                                    $base = round($value->nominal,2);
+                                    $taxx = round($base * $datass->amount,2);
                                 }
 
-                                $taxNominal = ($taxx * $dataItems[0]->nilai_matauang);
+                                $taxNominal = round(($taxx * $dataItems[0]->nilai_matauang),2);
                                 if (isset($dataPajak[$datass->ket])) {
                                     $dataPajak[$datass->ket]["nominal_curr"] += $taxx;
                                     $dataPajak[$datass->ket]["nominal"] += $taxNominal;

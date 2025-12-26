@@ -63,9 +63,9 @@
                                                         </div>
                                                         <div class="col-xs-8 col-md-8">
                                                             <select name="status" class="form-control select2" multiple id="status" style="width: 100%">
-                                                                <option value="draft">draft</option>
-                                                                <option value="purchase_confirmed">Purchase Confirmed</option>
-                                                                <option value="done">Done</option>
+                                                                <option value="draft" selected>draft</option>
+                                                                <option value="purchase_confirmed" selected>Purchase Confirmed</option>
+                                                                <option value="done" selected>Done</option>
                                                                 <option value="cancel">Cancel</option>
                                                             </select>
                                                         </div>
