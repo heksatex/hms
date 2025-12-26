@@ -300,7 +300,7 @@
                                                             foreach ($invDetail as $key => $value) {
                                                                 $taxe = 0;
                                                                 $base = 0;
-                                                                $jumlah = $value->harga_satuan * $value->qty_beli;
+                                                                $jumlah = round($value->harga_satuan * $value->qty_beli,2);
                                                                 $subtotal1 += $jumlah;
                                                                 $totalDiskon += $value->diskon;
                                                                 if ($setting !== null && $value->dpp_tax === "1") {
@@ -476,10 +476,10 @@
 
                                                                                 </td>
                                                                                 <td>
-                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $v->base : round($v->base), 4) ?>
+                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($v->base,2) : round($v->base,2), 4) ?>
                                                                                 </td>
                                                                                 <td>
-                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $v->nominal : round($v->nominal), 4) ?>
+                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($v->nominal,2) : round($v->nominal,2), 4) ?>
                                                                                 </td>
                                                                             </tr>
                                                                             <?php
@@ -496,15 +496,15 @@
                                                         <table class="table table-condesed table-hover rlstable  over">
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 1</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $subtotal1 : round($subtotal1), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($subtotal1,2) : round($subtotal1,2), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right">Diskon</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $totalDiskon : round($totalDiskon), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($totalDiskon,2) : round($totalDiskon,2), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $subtotal2 : round($subtotal2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($subtotal2,2) : round($subtotal2,2), 4) ?></td>
                                                             </tr>
                                                             <?php if ($setting !== null) {
                                                                 ?>
@@ -512,7 +512,7 @@
                                                                     <td class="style text-right">DPP Nilai Lain</td>
                                                                     <td class="style totalan"> 
                                                                         <input name="dpplain" type="hidden" value="1">
-                                                                        <strong><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? (($subtotal1 - $totalDiskon) * 11) / 12 : round((($subtotal1 - $totalDiskon) * 11) / 12), 4) ?>
+                                                                        <strong><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round((($subtotal1 - $totalDiskon) * 11) / 12,2) : round((($subtotal1 - $totalDiskon) * 11) / 12,2), 4) ?>
                                                                         </strong>
                                                                     </td>
                                                                 </tr>
@@ -520,11 +520,11 @@
                                                             ?>
                                                             <tr>
                                                                 <td class="text-right">Tax</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? $totalTax : round($totalTax), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($totalTax,2) : round($totalTax,2), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? ($subtotal2 + $totalTax) : round($subtotal2 + $totalTax), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round(($subtotal2 + $totalTax),2) : round($subtotal2 + $totalTax,2), 4) ?></td>
                                                             </tr>
                                                         </table>
                                                     </div>

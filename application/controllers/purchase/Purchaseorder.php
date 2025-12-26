@@ -78,12 +78,12 @@ class Purchaseorder extends MY_Controller {
             $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)//, "po.supplier" => $data["po"]->supplier
                     ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
                     ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
-            
-            if($prd !== "") {
+
+            if ($prd !== "") {
                 $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
             }
-            if($stt !== "") {
-                $model1->setWhereIn("po.status", explode(",",$stt));
+            if ($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",", $stt));
             }
             $nextPage = $model1->getDetail();
             if ($nextPage) {
@@ -92,13 +92,13 @@ class Purchaseorder extends MY_Controller {
             $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true) //, "po.supplier" => $data["po"]->supplier
                     ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
                     ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
-            if($prd !== "") {
+            if ($prd !== "") {
                 $model1->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$prd}%')");
             }
-            if($stt !== "") {
-                $model1->setWhereIn("po.status", explode(",",$stt));
+            if ($stt !== "") {
+                $model1->setWhereIn("po.status", explode(",", $stt));
             }
-            
+
             $prevPage = $model1->getDetail();
             if ($prevPage) {
                 $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}");
@@ -275,177 +275,146 @@ class Purchaseorder extends MY_Controller {
                         $status_ = "waiting_approve";
                         $status = "exception";
                     } else {
-                        $cekInv = $modelInv->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "status <>" => "cancel"])->getDetail();
-                        if ($cekInv) {
-                            $modelPO = new $this->m_global;
-                            $modelJurnal = clone $modelPO;
-                            $dataDetail = $modelPO->setTables("purchase_order_detail")->setJoins("tax", "tax_id = tax.id", "left")
-                                            ->setSelects(["purchase_order_detail.*", "tax.amount as tax_amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax"])
-                                            ->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["po_no_po"])->getData();
-                            $query = [];
-                            foreach ($dataDetail as $key => $value) {
-                                $query [] = "update invoice_detail set harga_satuan='{$value->harga_per_uom_beli}',tax_id='{$value->tax_id}',amount_tax='{$value->tax_amount}',diskon='{$value->diskon}' "
-                                        . " where invoice_id={$cekInv->id} and kode_produk='{$value->kode_produk}' and reff_note='{$value->reff_note}'";
-                                $logInvDetail [] = "kode produk {$value->kode_produk}, harga satuan " . number_format($value->harga_per_uom_beli, 4) . "Nilai Pajak " . ($value->tax_amount * 100) . "% ,"
-                                        . "diskon {$value->diskon}";
-                            }
-                            if (count($query) > 0) {
-                                $cekUpdateIn = $modelPO->query($query);
-                                if ($cekUpdateIn !== "") {
-                                    throw new \Exception("Update pada data invoice gagal.", 500);
-                                }
-
-                                if ($data->nilai_currency > 1) {
-                                    $hutangrp = $data->total * $data->nilai_currency;
-                                    $hutangvalas = $data->total;
-                                    $totalrp = $data->total * $data->nilai_currency;
-                                    $dpprp = $data->dpp_lain * $data->nilai_currency;
-                                    $dppvalas = $data->dpp_lain;
-                                    $totalValas = $data->total;
-                                } else {
-                                    $hutangrp = $data->total;
-                                    $hutangvalas = 0;
-                                    $totalrp = $data->total;
-                                    $dpprp = $data->dpp_lain;
-                                    $dppvalas = 0;
-                                    $totalValas = 0;
-                                }
-                                $modelInv->update([
-                                    "total" => $data->total,
-                                    "dpp_lain" => $data->dpp_lain,
-                                    "hutang_rp" => round($hutangrp),
-                                    "hutang_valas" => round($hutangvalas),
-                                    "total_valas" => round($totalValas),
-                                    "total_rp" => round($totalrp),
-                                    "dpp_lain_rp" => round($dpprp),
-                                    "dpp_lain_valas" => round($dppvalas)
-                                ]);
-                                $this->_module->gen_history("invoice", $cekInv->id, 'edit',
-                                        "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
-                                        $username);
-                            }
-                            $cekJurnal = $modelJurnal->setTables("acc_jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
-                            if ($cekJurnal !== null) {
-                                $items = new $this->m_global;
-                                $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $cekInv->id])
-                                                ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
-                                                ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
-                                                ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
-                                                ->setJoins("currency_kurs", "currency_kurs.id = invoice.matauang", "left")
-                                                ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
-                                                ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang,coalesce(tax.tax_lain_id,0) as tax_lain_id",
-                                                    "tax.dpp as dpp_tax,tax.ket,tax.nama as tax_nama,currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
-                                                    "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "partner.nama as nama_supp"])
-                                                ->setOrder(["invoice_id"])->getData();
-                                $updateQueryJurnal = [];
-                                $tax = 0;
-                                $taxLain = 0;
-                                $totalNominal = 0;
-                                $pajakLain = [];
-                                $modelJurnal = new $this->m_global;
-                                $modelJurnal->setTables("acc_jurnal_entries_items");
-                                $jurnal_items = [];
-                                $rowCount = 0;
-                                foreach ($dataItems as $key => $value) {
-                                    $rowCount++;
-                                    $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
-                                    $ttls = ($nominal * $value->nilai_matauang);
-                                    $nm = "[{$value->kode_produk}] {$value->nama_produk} (" . number_format($value->qty_beli, 2) . " {$value->uom_beli})";
-//                                    $updateQueryJurnal[] = "update acc_jurnal_entries_items set nominal_curr ='{$nominal}',nominal='{$ttls}' where kode = '{$cekJurnal->kode}' and nama LIKE '{$nm}'";
-//                                    $tax += $nominal * $value->tax_amount;
-                                    $totalNominal += $nominal;
-                                    $logJurnal [] = "nominal Kurs {$nominal} nominal {$ttls} untuk produk {$value->kode_produk} {$value->nama_produk}";
-                                    $jurnalItems[] = array(
-                                        "kode" => $cekJurnal->kode,
-                                        "nama" => $nm,
-                                        "reff_note" => $value->reff_note,
-                                        "partner" => $value->id_supplier,
-                                        "kode_coa" => $value->account,
-                                        "posisi" => "D",
-                                        "nominal_curr" => $nominal,
-                                        "kurs" => $value->kurs,
-                                        "kode_mua" => $value->name_curr,
-                                        "nominal" => $ttls,
-                                        "row_order" => ($key + 1)
-                                    );
-                                    if ($value->tax_id !== "0") {
-                                        $pajakLain[] = array(
-                                            "nominal" => $nominal,
-                                            "tax_lain" => $value->tax_lain_id,
-                                            "tax" => $value->tax_id,
-                                            "dpp_tax" => $value->dpp_tax,
-                                            "ket_tax" => $value->ket,
-                                            "amount" => $value->tax_amount,
-                                            "tax_nama" => $value->tax_nama
-                                        );
+//                        $cekInv = $modelInv->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "status <>" => "cancel"])->getDetail();
+                        $getInv = $modelInv->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "status <>" => "cancel"])->getData();
+                        if (count($getInv) > 0) {
+                            foreach ($getInv as $key => $cekInv) {
+                                if ($cekInv) {
+                                    $modelPO = new $this->m_global;
+                                    $modelJurnal = clone $modelPO;
+                                    $dataDetail = $modelPO->setTables("purchase_order_detail")->setJoins("tax", "tax_id = tax.id", "left")
+                                                    ->setSelects(["purchase_order_detail.*", "tax.amount as tax_amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax"])
+                                                    ->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["po_no_po"])->getData();
+                                    $query = [];
+                                    foreach ($dataDetail as $key => $value) {
+                                        $query [] = "update invoice_detail set harga_satuan='{$value->harga_per_uom_beli}',tax_id='{$value->tax_id}',amount_tax='{$value->tax_amount}',diskon='{$value->diskon}' "
+                                                . " where invoice_id={$cekInv->id} and kode_produk='{$value->kode_produk}' and reff_note='{$value->reff_note}'";
+                                        $logInvDetail [] = "kode produk {$value->kode_produk}, harga satuan " . number_format($value->harga_per_uom_beli, 4) . "Nilai Pajak " . ($value->tax_amount * 100) . "% ,"
+                                                . "diskon {$value->diskon}";
                                     }
-                                }
-                                $checkDpp = $dataItems[0]->dpp_lain > 0;
-                                $modelSetting = new $this->m_global;
-                                $model2 = clone $modelSetting;
-                                $modelSetting->setTables("setting");
-                                if (count($pajakLain) > 0) {
-                                    $rowCount++;
+                                    if (count($query) > 0) {
+                                        $cekUpdateIn = $modelPO->query($query);
+                                        if ($cekUpdateIn !== "") {
+                                            throw new \Exception("Update pada data invoice gagal.", 500);
+                                        }
 
-                                    if (count($pajakLain) > 0) {
-                                        $dataPajakLain = [];
-                                        $model2->setTables("tax");
-                                        foreach ($pajakLain as $kk => $v) {
-                                            $value = (object) $v;
-                                            $taxx = 0;
-                                            $base = 0;
-                                            if ($checkDpp && $value->dpp_tax === "1") {
-                                                $base = (($value->nominal * 11) / 12);
-                                                $taxx = $base * $value->amount;
-                                            } else {
-                                                $base = $value->nominal;
-                                                $taxx = $base * $value->amount;
+                                        if ($data->nilai_currency > 1) {
+                                            $hutangrp = $data->total * $data->nilai_currency;
+                                            $hutangvalas = $data->total;
+                                            $totalrp = $data->total * $data->nilai_currency;
+                                            $dpprp = $data->dpp_lain * $data->nilai_currency;
+                                            $dppvalas = $data->dpp_lain;
+                                            $totalValas = $data->total;
+                                        } else {
+                                            $hutangrp = $data->total;
+                                            $hutangvalas = 0;
+                                            $totalrp = $data->total;
+                                            $dpprp = $data->dpp_lain;
+                                            $dppvalas = 0;
+                                            $totalValas = 0;
+                                        }
+                                        $modelInv->update([
+                                            "total" => $data->total,
+                                            "dpp_lain" => $data->dpp_lain,
+                                            "hutang_rp" => round($hutangrp),
+                                            "hutang_valas" => round($hutangvalas),
+                                            "total_valas" => round($totalValas),
+                                            "total_rp" => round($totalrp),
+                                            "dpp_lain_rp" => round($dpprp),
+                                            "dpp_lain_valas" => round($dppvalas)
+                                        ]);
+                                        $this->_module->gen_history("invoice", $cekInv->id, 'edit',
+                                                "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
+                                                $username);
+                                    }
+                                    $cekJurnal = $modelJurnal->setTables("acc_jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
+                                    if ($cekJurnal !== null) {
+                                        $items = new $this->m_global;
+                                        $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $cekInv->id])
+                                                        ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
+                                                        ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
+                                                        ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
+                                                        ->setJoins("currency_kurs", "currency_kurs.id = invoice.matauang", "left")
+                                                        ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
+                                                        ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang,coalesce(tax.tax_lain_id,0) as tax_lain_id",
+                                                            "tax.dpp as dpp_tax,tax.ket,tax.nama as tax_nama,currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
+                                                            "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "partner.nama as nama_supp"])
+                                                        ->setOrder(["invoice_id"])->getData();
+                                        $updateQueryJurnal = [];
+                                        $tax = 0;
+                                        $taxLain = 0;
+                                        $totalNominal = 0;
+                                        $pajakLain = [];
+                                        $modelJurnal = new $this->m_global;
+                                        $modelJurnal->setTables("acc_jurnal_entries_items");
+                                        $jurnalItems = [];
+                                        $rowCount = 0;
+                                        foreach ($dataItems as $key => $value) {
+//                                            $pajakLain = [];
+//                                            $jurnal_items = [];
+//                                            $updateQueryJurnal = [];
+                                            $rowCount++;
+                                            $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
+                                            $ttls = ($nominal * $value->nilai_matauang);
+                                            $nm = "[{$value->kode_produk}] {$value->nama_produk} (" . number_format($value->qty_beli, 2) . " {$value->uom_beli})";
+                                            $totalNominal += $nominal;
+                                            $logJurnal [] = "nominal Kurs {$nominal} nominal {$ttls} untuk produk {$value->kode_produk} {$value->nama_produk}";
+                                            $jurnalItems[] = array(
+                                                "kode" => $cekJurnal->kode,
+                                                "nama" => $nm,
+                                                "reff_note" => $value->reff_note,
+                                                "partner" => $value->id_supplier,
+                                                "kode_coa" => $value->account,
+                                                "posisi" => "D",
+                                                "nominal_curr" => $nominal,
+                                                "kurs" => $value->kurs,
+                                                "kode_mua" => $value->name_curr,
+                                                "nominal" => $ttls,
+                                                "row_order" => ($key + 1)
+                                            );
+                                            if ($value->tax_id !== "0") {
+                                                $pajakLain[] = array(
+                                                    "nominal" => $nominal,
+                                                    "tax_lain" => $value->tax_lain_id,
+                                                    "tax" => $value->tax_id,
+                                                    "dpp_tax" => $value->dpp_tax,
+                                                    "ket_tax" => $value->ket,
+                                                    "amount" => $value->tax_amount,
+                                                    "tax_nama" => $value->tax_nama
+                                                );
                                             }
-                                            $taxName = explode(",", $value->tax_nama);
-                                            $taxNominal = ($taxx * $dataItems[0]->nilai_matauang);
-                                            $defaultPpn = $modelSetting->setWheres(["setting_name" => "pajak_" . str_replace(" ", "", $taxName[0])], true)->setSelects(["value"])->getDetail();
+//                                        log_message("error","{$cekInv->id} -> ".json_encode($jurnalItems));
+                                        }
+                                        $checkDpp = $dataItems[0]->dpp_lain > 0;
+                                        $modelSetting = new $this->m_global;
+                                        $model2 = clone $modelSetting;
+                                        $modelSetting->setTables("setting");
+                                        if (count($pajakLain) > 0) {
+                                            $rowCount++;
 
-                                            $taxLain += $taxNominal;
-                                            if (isset($dataPajakLain[$taxName[0]])) {
-                                                $dataPajakLain[$taxName[0]]["nominal_curr"] += $taxx;
-                                                $dataPajakLain[$taxName[0]]["nominal"] += $taxNominal;
-                                            } else {
-                                                $dataPajakLain[$taxName[0]] = [
-                                                    "nominal_curr" => $taxx,
-                                                    "nominal" => $taxNominal,
-                                                    "kode" => $cekJurnal->kode,
-                                                    "nama" => $taxName[0],
-                                                    "reff_note" => "",
-                                                    "partner" => $dataItems[0]->id_supplier,
-                                                    "kode_coa" => ($defaultPpn->value ?? 0),
-                                                    "posisi" => "D",
-                                                    "kurs" => $dataItems[0]->kurs,
-                                                    "kode_mua" => $dataItems[0]->name_curr,
-                                                    "row_order" => $rowCount
-                                                ];
-                                            }
-
-                                            if ($value->tax_lain !== "0") {
-                                                $dataTax = $model2->setWhereIn("id", explode(",", $value->tax_lain), true)->setOrder(["id"])->getData();
-                                                foreach ($dataTax as $kkk => $datass) {
-                                                    $rowCount++;
+                                            if (count($pajakLain) > 0) {
+                                                $dataPajakLain = [];
+                                                $model2->setTables("tax");
+                                                foreach ($pajakLain as $kk => $v) {
+                                                    $value = (object) $v;
                                                     $taxx = 0;
                                                     $base = 0;
-                                                    if ($checkDpp && $datass->dpp === "1") {
+                                                    if ($checkDpp && $value->dpp_tax === "1") {
                                                         $base = (($value->nominal * 11) / 12);
-                                                        $taxx = $base * $datass->amount;
+                                                        $taxx = $base * $value->amount;
                                                     } else {
                                                         $base = $value->nominal;
-                                                        $taxx = $base * $datass->amount;
+                                                        $taxx = $base * $value->amount;
                                                     }
-                                                    $taxName = explode(",", $datass->nama);
+                                                    $taxName = explode(",", $value->tax_nama);
                                                     $taxNominal = ($taxx * $dataItems[0]->nilai_matauang);
+                                                    $defaultPpn = $modelSetting->setWheres(["setting_name" => "pajak_" . str_replace(" ", "", $taxName[0])], true)->setSelects(["value"])->getDetail();
+
                                                     $taxLain += $taxNominal;
                                                     if (isset($dataPajakLain[$taxName[0]])) {
                                                         $dataPajakLain[$taxName[0]]["nominal_curr"] += $taxx;
                                                         $dataPajakLain[$taxName[0]]["nominal"] += $taxNominal;
                                                     } else {
-                                                        $defaultPpn = $modelSetting->setWheres(["setting_name" => "pajak_" . str_replace(" ", "", $taxName[0])], true)->setSelects(["value"])->getDetail();
                                                         $dataPajakLain[$taxName[0]] = [
                                                             "nominal_curr" => $taxx,
                                                             "nominal" => $taxNominal,
@@ -460,46 +429,77 @@ class Purchaseorder extends MY_Controller {
                                                             "row_order" => $rowCount
                                                         ];
                                                     }
+
+                                                    if ($value->tax_lain !== "0") {
+                                                        $dataTax = $model2->setWhereIn("id", explode(",", $value->tax_lain), true)->setOrder(["id"])->getData();
+                                                        foreach ($dataTax as $kkk => $datass) {
+                                                            $rowCount++;
+                                                            $taxx = 0;
+                                                            $base = 0;
+                                                            if ($checkDpp && $datass->dpp === "1") {
+                                                                $base = (($value->nominal * 11) / 12);
+                                                                $taxx = $base * $datass->amount;
+                                                            } else {
+                                                                $base = $value->nominal;
+                                                                $taxx = $base * $datass->amount;
+                                                            }
+                                                            $taxName = explode(",", $datass->nama);
+                                                            $taxNominal = ($taxx * $dataItems[0]->nilai_matauang);
+                                                            $taxLain += $taxNominal;
+                                                            if (isset($dataPajakLain[$taxName[0]])) {
+                                                                $dataPajakLain[$taxName[0]]["nominal_curr"] += $taxx;
+                                                                $dataPajakLain[$taxName[0]]["nominal"] += $taxNominal;
+                                                            } else {
+                                                                $defaultPpn = $modelSetting->setWheres(["setting_name" => "pajak_" . str_replace(" ", "", $taxName[0])], true)->setSelects(["value"])->getDetail();
+                                                                $dataPajakLain[$taxName[0]] = [
+                                                                    "nominal_curr" => $taxx,
+                                                                    "nominal" => $taxNominal,
+                                                                    "kode" => $cekJurnal->kode,
+                                                                    "nama" => $taxName[0],
+                                                                    "reff_note" => "",
+                                                                    "partner" => $dataItems[0]->id_supplier,
+                                                                    "kode_coa" => ($defaultPpn->value ?? 0),
+                                                                    "posisi" => "D",
+                                                                    "kurs" => $dataItems[0]->kurs,
+                                                                    "kode_mua" => $dataItems[0]->name_curr,
+                                                                    "row_order" => $rowCount
+                                                                ];
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                foreach ($dataPajakLain as $kk => $valueee) {
+                                                    $jurnalItems[] = $valueee;
+                                                    $logJurnal [] = "{$kk} update nominal Kurs {$valueee['nominal_curr']} nominal {$valueee['nominal']}";
                                                 }
                                             }
                                         }
-                                        foreach ($dataPajakLain as $kk => $valueee) {
-//                                            $updateQueryJurnal[] = "update acc_jurnal_entries_items set nominal_curr ='{$valueee['nominal_curr']}', nominal='{$valueee['nominal']}' where kode='{$cekJurnal->kode}' and nama='{$kk}'";
-                                            $jurnalItems[] = $valueee;
-                                            $logJurnal [] = "{$kk} update nominal Kurs {$valueee['nominal_curr']} nominal {$valueee['nominal']}";
+//                                        log_message("error","{$cekInv->id} ".json_encode($jurnalItems));
+                                        if (count($jurnalItems) > 0) {
+                                            $defaultPpn = $modelSetting->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
+                                            $ttmax = $totalNominal + $tax + $taxLain;
+                                            $nttmax = $ttmax * $dataItems[0]->nilai_matauang;
+                                            $jurnalItems[] = [
+                                                "nominal_curr" => $ttmax,
+                                                "nominal" => $nttmax,
+                                                "kode" => $cekJurnal->kode,
+                                                "nama" => "",
+                                                "reff_note" => "Pembelian",
+                                                "partner" => $dataItems[0]->id_supplier,
+                                                "kode_coa" => ($defaultPpn->value ?? 0),
+                                                "posisi" => "C",
+                                                "kurs" => $dataItems[0]->kurs,
+                                                "kode_mua" => $dataItems[0]->name_curr,
+                                                "row_order" => $rowCount + 1
+                                            ];
+//                                            log_message("error",json_encode($jurnalItems));
+                                            $modelJurnal->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $cekJurnal->kode], true)->delete();
+                                            $cekUpdateIn = $modelJurnal->saveBatch($jurnalItems);
+                                            $logJurnal [] = "nominal Kurs {$ttmax} nominal {$nttmax} Untuk Hutang Dagang";
+                                            $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                                                "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
                                         }
                                     }
-                                }
-
-                                if (count($jurnalItems) > 0) {
-                                    $defaultPpn = $modelSetting->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
-                                    $ttmax = $totalNominal + $tax + $taxLain;
-                                    $nttmax = $ttmax * $dataItems[0]->nilai_matauang;
-//                                    $updateQueryJurnal[] = "update acc_jurnal_entries_items set nominal_curr ='{$ttmax}',nominal='{$nttmax}' where kode = '{$cekJurnal->kode}' and kode_coa = '{$defaultPpn->value}'";
-                                    $jurnalItems[] = [
-                                        "nominal_curr" => $ttmax,
-                                        "nominal" => $nttmax,
-                                        "kode" => $cekJurnal->kode,
-                                        "nama" => "",
-                                        "reff_note" => "Retur Pembelian",
-                                        "partner" => $dataItems[0]->id_supplier,
-                                        "kode_coa" => ($defaultPpn->value ?? 0),
-                                        "posisi" => "C",
-                                        "kurs" => $dataItems[0]->kurs,
-                                        "kode_mua" => $dataItems[0]->name_curr,
-                                        "row_order" => $rowCount + 1
-                                    ];
-                                    $modelJurnal->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $cekJurnal->kode], true)->delete();
-                                    $cekUpdateIn = $modelJurnal->saveBatch($jurnalItems);
-                                    $logJurnal [] = "nominal Kurs {$ttmax} nominal {$nttmax} Untuk Hutang Dagang";
-//                                    $cekUpdateIn = $modelPO->query($updateQueryJurnal);
-//                                    if ($cekUpdateIn !== "") {
-//                                        throw new \Exception(json_encode($cekUpdateIn), 500);
-//                                    }
-//                                    $listLog[] = logArrayToString("; ", ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
-//                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""]);
-                                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
-                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
                                 }
                             }
                         }
