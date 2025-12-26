@@ -355,7 +355,7 @@
                                         <div class="tab-pane" id="tab_2">
                                             <div class="col-md-3 col-xs-12">
                                                 <div class="pull-left">
-                                                    <?php if (!in_array($po->status, ['exception', 'cancel'])) { ?>
+                                                    <?php if (in_array($po->status, ['purchase_confirmed', 'done'])) { ?>
                                                         <button class="btn btn-default btn-sm btn-cancel_retur" type="button">Batalkan Retur</button>
                                                     <?php } ?>
                                                 </div>
@@ -434,7 +434,7 @@
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="col-md-3 col-xs-12">
                                                 <div class="pull-left">
-                                                    <?php if (!in_array($po->status, ['exception', 'cancel'])) { ?>
+                                                    <?php if (in_array($po->status, ['purchase_confirmed', 'done'])) { ?>
                                                         <button class="btn btn-danger btn-sm btn-retur" type="button">Retur</button>
                                                     <?php } ?>
                                                 </div>

@@ -82,9 +82,9 @@
                                                             <label class="form-label">Status</label>
                                                         </div>
                                                         <div class="col-xs-8 col-md-8">
-                                                            <select name="status" class="form-control select2" id="status" style="width: 100%">
+                                                            <select name="status" class="form-control select2" id="status" style="width: 100%" multiple>
                                                                 <option></option>
-                                                                <option value="draft">draft</option>
+                                                                <option value="draft">Draft</option>
                                                                 <option value="waiting_approval">Waiting Approval</option>
                                                             </select>
                                                         </div>
