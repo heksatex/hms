@@ -70,7 +70,17 @@
                 </tr>
                 <?php
             }
-            ?>
+
+            if ($no > 0) {
+                ?>
+            <style>
+                #btn-confirm{
+                    display: inline;
+                }
+            </style>
+            <?php
+        }
+        ?>
         </tbody>
     </table>
 </div>

@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <style>
+            #btn-confirm{
+                display: none;
+            }
+        </style>
         <?php
         $this->load->view("admin/_partials/head.php");
 
@@ -52,14 +57,14 @@
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4"><label class="form-label required">Bulan</label></div>
                                                     <div class="col-xs-8 col-md-8">
-                                                        <input name="bulan" id="bulan" class="form-control input-sm" type="month" value="<?= $datas->bulan ?>" <?= ($datas->status==="confirm") ? "readonly" : "" ?>>
+                                                        <input name="bulan" id="bulan" class="form-control input-sm" type="month" value="<?= $datas->bulan ?>" <?= ($datas->status === "confirm") ? "readonly" : "" ?>>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4"><label class="form-label required">Currency</label></div>
                                                     <div class="col-xs-8 col-md-8">
                                                         <input type="hidden" name="symcurr" id="symcurr">
-                                                        <select class="form-control input-sm currency" name="currency" id="currency" style="width: 100%" <?= ($datas->status==="confirm") ? "disabled" : "" ?>>
+                                                        <select class="form-control input-sm currency" name="currency" id="currency" style="width: 100%" <?= ($datas->status === "confirm") ? "disabled" : "" ?>>
                                                             <option value="<?= $datas->curr ?>" selected><?= $datas->curr ?></option>
                                                         </select>
                                                     </div>
@@ -73,7 +78,7 @@
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4"><label class="form-label required">Kurs</label></div>
                                                     <div class="col-xs-8 col-md-8">
-                                                        <input name="kurs" id="kurs" <?= ($datas->status==="confirm") ? "readonly" : "" ?>
+                                                        <input name="kurs" id="kurs" <?= ($datas->status === "confirm") ? "readonly" : "" ?>
                                                                class="form-control input-sm" type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="<?= number_format($datas->kurs, 2, ".", ",") ?>">
                                                         <button type="submit" class="btn-simpan" style="display: none;"></button>
                                                     </div>
