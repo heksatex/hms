@@ -163,6 +163,7 @@
                                                 <th class='style bb ws' style="min-width: 150px">Uraian</th>
                                                 <th class='style bb ws'>Customer</th>
                                                 <th class='style bb ws'>COA</th>
+                                                <th class='style bb ws text-left'>Jenis Ppn</th>
                                                 <th class='style bb ws'>Curr</th>
                                                 <th class='style bb ws text-right'>Kurs</th>
                                                 <th class='style bb ws text-right'>Qty</th>
@@ -172,7 +173,7 @@
                                         </thead>
                                         <tbody id="tBody">
                                             <tr>
-                                                <td colspan="17">Tidak ada Data</td>
+                                                <td colspan="18">Tidak ada Data</td>
                                             </tr>
                                         </tbody>
                                     </table>
