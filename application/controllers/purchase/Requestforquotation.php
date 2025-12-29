@@ -171,6 +171,12 @@ class Requestforquotation extends MY_Controller {
                     $status .= " ({$field->poe_status})";
                 }
                 if (strtolower($level) === "direksi") {
+                    if(strpos(strtolower($status), "waiting") !== false) {
+                        
+                    }
+                    else {
+                        continue;
+                    }
                     $poenc = encrypt_url($field->no_po);
                     $no = "{$field->id}|{$poenc}|{$field->status}|{$field->poe_status}";
                 }
