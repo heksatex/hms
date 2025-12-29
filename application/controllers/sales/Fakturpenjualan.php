@@ -553,14 +553,14 @@ class Fakturpenjualan extends MY_Controller {
 //                            'required' => '{field} Pada Item harus diisi'
 //                        ]
 //                    ],
-                    [
-                        'field' => 'uomlot[]',
-                        'label' => 'Uom Lot',
-                        'rules' => ['trim', 'required'],
-                        'errors' => [
-                            'required' => '{field} Pada Item harus dipilih'
-                        ]
-                    ],
+//                    [
+//                        'field' => 'uomlot[]',
+//                        'label' => 'Uom Lot',
+//                        'rules' => ['trim', 'required'],
+//                        'errors' => [
+//                            'required' => '{field} Pada Item harus dipilih'
+//                        ]
+//                    ],
 //                    [
 //                        'field' => 'noacc[]',
 //                        'label' => 'No Acc',
@@ -586,14 +586,14 @@ class Fakturpenjualan extends MY_Controller {
                             "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
-                    [
-                        'field' => 'qtylot[]',
-                        'label' => 'QTY Lot',
-                        'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
-                        'errors' => [
-                            "regex_match" => "{field} harus berupa number / desimal"
-                        ]
-                    ],
+//                    [
+//                        'field' => 'qtylot[]',
+//                        'label' => 'QTY Lot',
+//                        'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+//                        'errors' => [
+//                            "regex_match" => "{field} harus berupa number / desimal"
+//                        ]
+//                    ],
                 ]);
             }
 
@@ -1464,15 +1464,15 @@ class Fakturpenjualan extends MY_Controller {
                     "regex_match" => "{field} harus berupa number / desimal"
                 ]
             ],
-            [
-                'field' => 'qty_lot',
-                'label' => 'Qty LOT',
-                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
-                'errors' => [
-                    'required' => '{field} Harus diisi',
-                    "regex_match" => "{field} harus berupa number / desimal"
-                ]
-            ],
+//            [
+//                'field' => 'qty_lot',
+//                'label' => 'Qty LOT',
+//                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+//                'errors' => [
+//                    'required' => '{field} Harus diisi',
+//                    "regex_match" => "{field} harus berupa number / desimal"
+//                ]
+//            ],
             [
                 'field' => 'no_acc',
                 'label' => 'No ACC',
@@ -1497,14 +1497,14 @@ class Fakturpenjualan extends MY_Controller {
                     'required' => '{field} Harus dipilih',
                 ]
             ],
-            [
-                'field' => 'uom_lot',
-                'label' => 'Uom Lot',
-                'rules' => ['required'],
-                'errors' => [
-                    'required' => '{field} Harus dipilih',
-                ]
-            ],
+//            [
+//                'field' => 'uom_lot',
+//                'label' => 'Uom Lot',
+//                'rules' => ['required'],
+//                'errors' => [
+//                    'required' => '{field} Harus dipilih',
+//                ]
+//            ],
             [
                 'field' => 'harga',
                 'label' => 'Harga',

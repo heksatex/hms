@@ -56,7 +56,7 @@ class Bukupenjualan extends MY_Controller {
                     ->setJoins("faktur_jurnal","(jei.kode = jurnal_kode and jurnal_order = jei.row_order)","left")
                     ->setJoins("acc_faktur_penjualan_detail fjd","fjd.id = faktur_jurnal.faktur_detail_id","left")
                     ->setJoins("acc_coa ac", "ac.kode_coa = jei.kode_coa", "left")
-                    ->setSelects(["fp.no_faktur_internal,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa","fjd.harga,fjd.qty,fjd.uom"])
+                    ->setSelects(["fp.no_faktur_internal,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa","fjd.harga,fjd.qty,fjd.uom,jenis_ppn"])
                     ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"
                         , "jei.posisi" => strtoupper($posisi)])
                     ->setOrder(["jei.kode_coa" => "asc"]);
@@ -134,12 +134,13 @@ class Bukupenjualan extends MY_Controller {
             $sheet->setCellValue("F{$row}", 'Customer');
             $sheet->setCellValue("G{$row}", 'Coa');
             $sheet->setCellValue("H{$row}", 'Nama Coa');
-            $sheet->setCellValue("I{$row}", 'Curr');
-            $sheet->setCellValue("j{$row}", 'Kurs');
-            $sheet->setCellValue("k{$row}", 'Qty');
-            $sheet->setCellValue("k{$row}", 'Uom');
-            $sheet->setCellValue("m{$row}", 'Harga');
-            $sheet->setCellValue("n{$row}", 'Total Harga');
+            $sheet->setCellValue("i{$row}", 'Jenis Ppn');
+            $sheet->setCellValue("j{$row}", 'Curr');
+            $sheet->setCellValue("k{$row}", 'Kurs');
+            $sheet->setCellValue("l{$row}", 'Qty');
+            $sheet->setCellValue("m{$row}", 'Uom');
+            $sheet->setCellValue("n{$row}", 'Harga');
+            $sheet->setCellValue("o{$row}", 'Total Harga');
             $no = 0;
             $grandTotal = 0;
             $total = 0;
@@ -169,18 +170,19 @@ class Bukupenjualan extends MY_Controller {
                 $sheet->setCellValue("F{$row}", $value->partner_nama);
                 $sheet->setCellValue("G{$row}", $value->kode_coa);
                 $sheet->setCellValue("H{$row}", $value->coa);
-                $sheet->setCellValue("i{$row}", $value->kode_mua);
-                $sheet->setCellValue("j{$row}", $value->kurs);
-                $sheet->setCellValue("k{$row}", ($value->qty) ? $value->qty : $q);
-                $sheet->setCellValue("l{$row}", ($value->qty) ? $value->uom : $u);
-                $sheet->setCellValue("m{$row}", $value->harga);
-                $sheet->setCellValue("n{$row}", ($value->qty) ? $harga : $value->nominal);
+                $sheet->setCellValue("i{$row}", $value->jenis_ppn);
+                $sheet->setCellValue("j{$row}", $value->kode_mua);
+                $sheet->setCellValue("k{$row}", $value->kurs);
+                $sheet->setCellValue("l{$row}", ($value->qty) ? $value->qty : $q);
+                $sheet->setCellValue("m{$row}", ($value->qty) ? $value->uom : $u);
+                $sheet->setCellValue("n{$row}", $value->harga);
+                $sheet->setCellValue("o{$row}", ($value->qty) ? $harga : $value->nominal);
                 if (isset($data[$key + 1])) {
                     if ($value->kode_coa !== $data[$key + 1]->kode_coa) {
                         $row += 1;
                         $sheet->setCellValue("G{$row}", $value->kode_coa);
                         $sheet->setCellValue("H{$row}", "Total {$value->coa}");
-                        $sheet->setCellValue("n{$row}", ($value->qty) ? $totalHarga:$total);
+                        $sheet->setCellValue("o{$row}", ($value->qty) ? $totalHarga:$total);
                         $total = 0;
                         $totalHarga = 0;
                     }
@@ -188,7 +190,7 @@ class Bukupenjualan extends MY_Controller {
                     $row += 1;
                     $sheet->setCellValue("G{$row}", $value->kode_coa);
                     $sheet->setCellValue("H{$row}", "Total {$value->coa}");
-                    $sheet->setCellValue("n{$row}", ($value->qty) ? $totalHarga:$total);
+                    $sheet->setCellValue("o{$row}", ($value->qty) ? $totalHarga:$total);
                     $total = 0;
                     $totalHarga = 0;
                 }
