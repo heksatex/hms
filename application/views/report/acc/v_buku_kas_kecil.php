@@ -45,29 +45,11 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-body">
-                            <form id="form-search" name="form-search" class="form-horizontal form-search" action="<?= base_url('report/bukukas/export') ?>" method="post">
+                            <form id="form-search" name="form-search" class="form-horizontal form-search" action="<?= base_url('report/bukukaskecil/export') ?>" method="post">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="form-group">
-<!--                                                <div class="col-md-6 col-xs-12">
-                                                    <div class="col-xs-3">
-                                                        <label class="form-label">Kas</label>
-                                                    </div>
-                                                    <div class="col-xs-9 col-md-9">
-                                                        <select class="form-control input-sm no_acc" name="kode_coa" id="kode_coa" required>
-                                                            <option value=""></option>
-                                                            <?php
-                                                            foreach ($coa as $key => $value) {
-                                                                ?>
-                                                                <option value="<?= $value->kode_coa ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
-                                                                <?php
-                                                            }
-                                                            ?>
-                                                        </select>
-                                                        <input type="hidden" name="coa" id="coa">
-                                                    </div>
-                                                </div>-->
                                                 <div class="col-md-6 col-xs-12">
                                                     <div class="col-xs-4">
                                                         <label class="form-label">Periode</label>
@@ -76,16 +58,21 @@
                                                         <input type="text" class="form-control" name="tanggal" id="tanggal">
                                                     </div>
                                                 </div>
+                                                <input type="hidden" name="coa" id="coa" value="Kas Kecil">
+                                                <input type="hidden" name="kode_coa" id="kode_coa" value="1111.02">
+                                                <div class="col-md-6 col-xs-12">
+                                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
+                                                    <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="export" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o"  style="color:green"></i> Excel</button>
+
+
+                                                </div>
                                             </div>
 
 
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
-                                    <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="export" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o"  style="color:green"></i> Excel</button>
-                                </div>
+                                <div class="col-md-4"></div>
                                 <br>
                                 <br>
 
@@ -143,13 +130,13 @@
                         '1..P': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                     }
                 });
-                $("#kode_coa").on("change", function () {
-                    var selectedText = $(this).find('option:selected').text();
-                    $("#coa").val(selectedText);
-                });
+//                $("#kode_coa").on("change", function () {
+//                    var selectedText = $(this).find('option:selected').text();
+//                    $("#coa").val(selectedText);
+//                });
                 $("#search").on("click", function () {
                     $.ajax({
-                        url: "<?= base_url('report/bukukas/search') ?>",
+                        url: "<?= base_url('report/bukukaskecil/search') ?>",
                         type: "POST",
                         data: {
                             tanggal: $("#tanggal").val(),
