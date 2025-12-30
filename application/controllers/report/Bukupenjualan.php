@@ -49,6 +49,7 @@ class Bukupenjualan extends MY_Controller {
             $posisi = $this->input->post("posisi");
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
+            $coaPemb = $model->setTables("setting")->setWheres(["setting_name"=>"selisih_pembulatan_penjualan"])->setSelects(["value"])->getDetail();
             $model->setTables("acc_faktur_penjualan fp")
 //                    ->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
                     ->setJoins("acc_jurnal_entries je", "je.kode = fp.jurnal")
@@ -56,7 +57,8 @@ class Bukupenjualan extends MY_Controller {
                     ->setJoins("faktur_jurnal","(jei.kode = jurnal_kode and jurnal_order = jei.row_order)","left")
                     ->setJoins("acc_faktur_penjualan_detail fjd","fjd.id = faktur_jurnal.faktur_detail_id","left")
                     ->setJoins("acc_coa ac", "ac.kode_coa = jei.kode_coa", "left")
-                    ->setSelects(["fp.no_faktur_internal,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa","fjd.harga,fjd.qty,fjd.uom,jenis_ppn"])
+                    ->setSelects(["fp.no_faktur_internal,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa","fjd.harga,fjd.qty,fjd.uom,jenis_ppn",""])
+                    
                     ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"
                         , "jei.posisi" => strtoupper($posisi)])
                     ->setOrder(["jei.kode_coa" => "asc"]);
@@ -72,6 +74,9 @@ class Bukupenjualan extends MY_Controller {
                 } else {
                     $model->setWheres(["no_faktur_pajak" => ""]);
                 }
+            }
+            if($coaPemb){
+                $model->setWheres(["jei.kode_coa <>"=>$coaPemb->value]);
             }
             return $model;
         } catch (Exception $ex) {
@@ -130,7 +135,7 @@ class Bukupenjualan extends MY_Controller {
             $sheet->setCellValue("B{$row}", 'No Faktur');
             $sheet->setCellValue("C{$row}", 'No SJ');
             $sheet->setCellValue("D{$row}", 'Tanggal');
-            $sheet->setCellValue("E{$row}", 'Uraian');
+            $sheet->setCellValue("E{$row}", 'Nama');
             $sheet->setCellValue("F{$row}", 'Customer');
             $sheet->setCellValue("G{$row}", 'Coa');
             $sheet->setCellValue("H{$row}", 'Nama Coa');
@@ -155,18 +160,20 @@ class Bukupenjualan extends MY_Controller {
                 $qty = explode("/ ", $value->nama);
                 $q = "";
                 $u = "";
+                $nama = "";
                 if (count($qty) > 1) {
                     $qtys = trim(end($qty));
                     $qu = explode(" ", $qtys);
                     $q = $qu[0] ?? "";
                     $u = $qu[1] ?? "";
+                    $nama = $qty[0];
                 }
 
                 $sheet->setCellValue("A{$row}", $no);
                 $sheet->setCellValue("B{$row}", $value->no_faktur_internal);
                 $sheet->setCellValue("C{$row}", $value->no_sj);
                 $sheet->setCellValue("D{$row}", $value->tanggal);
-                $sheet->setCellValue("E{$row}", $value->nama);
+                $sheet->setCellValue("E{$row}", $nama);
                 $sheet->setCellValue("F{$row}", $value->partner_nama);
                 $sheet->setCellValue("G{$row}", $value->kode_coa);
                 $sheet->setCellValue("H{$row}", $value->coa);

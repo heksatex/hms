@@ -11,7 +11,7 @@ foreach ($data as $key => $value) {
     $no++;
     $qty = explode("/ ", $value->nama);
     $qtys = (count($qty) > 1) ? end($qty) : "";
-
+    $nama = (count($qty) > 1) ? $qty[0] : "";
     $totalanItem = ($value->qty) ? number_format($harga, 2) : number_format($value->nominal, 2);
     ?>
     <tr>
@@ -19,7 +19,7 @@ foreach ($data as $key => $value) {
         <td><?= $value->no_faktur_internal ?></td>
         <td><?= $value->no_sj ?></td>
         <td><?= $value->tanggal ?></td>
-        <td><?= $value->nama ?></td>
+        <td><?= $nama ?></td>
         <td><?= $value->partner_nama ?></td>
         <td><?= "{$value->kode_coa} - {$value->coa}" ?></td>
         <td><?= $value->jenis_ppn ?></td>
