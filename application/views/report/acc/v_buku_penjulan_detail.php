@@ -22,6 +22,7 @@ foreach ($data as $key => $value) {
         <td><?= $value->nama ?></td>
         <td><?= $value->partner_nama ?></td>
         <td><?= "{$value->kode_coa} - {$value->coa}" ?></td>
+        <td><?= $value->jenis_ppn ?></td>
         <td><?= $value->kode_mua ?></td>
         <td class="text-right"><?= number_format($value->kurs,2) ?></td>
         <td style="text-align: right;"><?= ($value->qty) ? number_format($value->qty, 2) . " {$value->uom}" : $qtys ?></td>
@@ -45,11 +46,13 @@ foreach ($data as $key => $value) {
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
                 <td class="text-bold" style="text-align: right;"><?= ($value->qty) ? number_format($totalHarga, 2) : number_format($total, 2) ?></td>
 
             </tr>
             <tr>
                 <td>&nbsp;</td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -80,39 +83,11 @@ foreach ($data as $key => $value) {
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
             <td class="text-bold" style="text-align: right;"><?= ($value->qty) ? number_format($totalHarga, 2) : number_format($total, 2) ?></td>
 
         </tr>
         <?php
     }
-}
-
-if ($grandTotal > 0) {
-    ?>
-    <!--    <tr>
-    <td>&nbsp;</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td class="text-right"></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td class="text-right"></td>
-    </tr>
-    <tr>
-    <td>&nbsp;</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td class="text-bold">Grand Total</td>
-    <td></td>
-    <td></td>
-    <td class="text-right text-bold"><?= number_format($grandTotal, 2) ?></td>
-    </tr>-->
-    <?php
 }
 ?>

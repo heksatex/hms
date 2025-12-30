@@ -177,10 +177,10 @@
                         Subtotal
                     </td>
                     <td style="text-align: right">
-                        <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($subtotalValas, 2) ?>
+                        <?= $curr->symbol ?>&nbsp;&nbsp;<?=number_format($head->grand_total,2) ?>
                     </td>
                     <td style="text-align: right">
-                        <?= "Rp. ".number_format($head->grand_total * $head->kurs_nominal, 2) ?>
+                        <?= "Rp. ".number_format(round($head->grand_total * $head->kurs_nominal), 2) ?>
                     </td>
                 </tr>
                 <tr>
@@ -191,7 +191,7 @@
                         <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format($head->diskon, 2, ".", ",") ?>
                     </td>
                     <td style="text-align: right">
-                        <?= "Rp. ".number_format($head->diskon * $head->kurs_nominal, 2, ".", ",") ?>
+                        <?= "Rp. ".number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ",") ?>
                     </td>
                 </tr>
                 <tr>
@@ -213,7 +213,7 @@
                         <?= $curr->symbol ?>&nbsp;&nbsp;<?= number_format(($head->final_total), 2, ".", ",") ?>
                     </td>
                     <td style="text-align: right">
-                        <?= "Rp. ".number_format(($head->final_total * $head->kurs_nominal), 2, ".", ",") ?>
+                        <?= "Rp. ".number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",") ?>
                     </td>
                 </tr>
             </tfoot>
