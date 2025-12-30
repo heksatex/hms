@@ -2612,7 +2612,7 @@ class Pengirimanbarang extends MY_Controller {
 
             $tgl_now = date('d-m-Y H:i:s');
             $buff = $printer->getPrintConnector();
-            $buff->write("\x1bC".chr(34));
+            $buff->write("\x1bC".chr(42));
             $buff->write("\x1bM");
             $printer->text("Tanggal Cetak : {$tgl_now}");
 //            $printer->feed();
