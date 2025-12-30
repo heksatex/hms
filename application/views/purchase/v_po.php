@@ -134,7 +134,7 @@
             "ordering": true,
             "info": true,
             "autoWidth": false,
-            "stateSave":true,
+            "stateSave":false,
             "ajax": {
                 "url": "<?php echo site_url('purchase/purchaseorder/list_data') ?>",
                 "type": "POST",
