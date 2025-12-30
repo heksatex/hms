@@ -53,7 +53,7 @@ class Mutasipenjualan extends MY_Controller
             'no_faktur'  => !empty($post['no_faktur'])  ? $post['no_faktur']  : null,
             'no_sj'      => !empty($post['no_sj'])      ? $post['no_sj']      : null,
             'tipe'       => !empty($post['tipe'])       ? $post['tipe']       : null,
-            'lunas'      => !empty($post['status_lunas'])       ? $post['status_lunas']       : 0,
+            'lunas'      => !empty($post['status_lunas'])       ? $post['status_lunas']       : '0',
         ];
     }
 
