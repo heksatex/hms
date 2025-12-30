@@ -180,7 +180,7 @@
                         <?= $curr->symbol ?>&nbsp;&nbsp;<?=number_format($head->grand_total,2) ?>
                     </td>
                     <td style="text-align: right">
-                        <?= "Rp. ".number_format(round*$head->grand_total * $head->kurs_nominal(), 2) ?>
+                        <?= "Rp. ".number_format(round($head->grand_total * $head->kurs_nominal), 2) ?>
                     </td>
                 </tr>
                 <tr>

@@ -96,12 +96,13 @@ class Picklist extends MY_Controller {
                     ->setGroups(["warna_remark", "corak_remark", "uom_lebar_jadi", "uom", "uom2", "valid", "lebar_jadi"])
                     ->setSelects(["warna_remark", "corak_remark", "uom_lebar_jadi", "uom", "uom2", "valid", "kode_produk", "lebar_jadi"])
                     ->setSelects(["sum(qty) as qty_1,sum(qty2) as qty_2,count(valid) as c_valid"])
-                    ->setOrder(["corak_remark"=>"asc","warna_remark"=>"asc"])
+                    ->setOrder(["corak_remark" => "asc", "warna_remark" => "asc"])
                     ->getData();
             $status = [];
             foreach ($dt as $key => $value) {
-                if (!isset($status[$value->kode_produk])) {
-                    $status[$value->kode_produk] = [
+                $is = "{$value->corak_remark}{$value->warna_remark}{$value->uom_lebar_jadi}{$value->uom}{$value->uom2}{$value->lebar_jadi}";
+                if (!isset($status[$is])) {
+                    $status[$is] = [
                         "corak" => $value->corak_remark,
                         "warna" => $value->warna_remark,
                         "lebar_jadi" => "{$value->lebar_jadi} {$value->uom_lebar_jadi}",
@@ -115,7 +116,7 @@ class Picklist extends MY_Controller {
                         ]
                     ];
                 }
-                $status[$value->kode_produk]["status"][$value->valid] = $value->c_valid;
+                $status[$is]["status"][$value->valid] = $value->c_valid;
             }
             $data["status_item"] = $status;
             $this->load->view('warehouse/v_picklist_edit', $data);
