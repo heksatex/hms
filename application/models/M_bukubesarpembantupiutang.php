@@ -47,7 +47,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency' => 'Rp'];
         } else {
             $cr_condition = ($currency === 'valas') ? '<>' : '';
-            
+
             $where_utang = ['tanggal >= ' => $tgldari, 'tanggal <= ' => $tglsampai, 'status' => 'confirm', 'kurs ' . $cr_condition => 1];
             $where_diskon = ['tanggal >= ' => $tgldari, 'tanggal <= ' => $tglsampai, 'status' => 'confirm', 'sub.total_all <>' => 0, 'kurs ' . $cr_condition => 1];
             $where_pelunasan = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
@@ -57,7 +57,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             // $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas' => 0];
             // $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas' => 1];
         }
-        
+
         $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done',  'appsk.lunas' => 0];
         $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done',  'appsk.lunas <> ' => 0];
         // saldo berdasakran periode berjalan
@@ -169,14 +169,12 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         $tmp_currency = [];
 
-        if($tipe == 'kas_um'){
+        if ($tipe == 'kas_um') {
             $tmp_where = ['tanggal >= ' => $tgl_dari, 'tanggal <= ' => $tgl_sampai];
             $subquery  = $this->get_saldo_kas_um($tmp_where, 'partner_id', $currency);
-
-        } else if($tipe == 'refund'){
+        } else if ($tipe == 'refund') {
             $tmp_where = ['tanggal >= ' => $tgl_dari, 'tanggal <= ' => $tgl_sampai];
             $subquery  = $this->get_saldo_refund($tmp_where, 'partner_id', $currency);
-
         } else if ($tipe == 'faktur') {
             $tmp_where = ['tanggal >= ' => $tgl_dari, 'tanggal <= ' => $tgl_sampai, 'status' => 'confirm'];
             if ($currency === 'valas') {
@@ -218,14 +216,14 @@ class M_bukubesarpembantupiutang extends CI_Model
             $tmp_where = ['app.tanggal_transaksi >= ' => $tgl_dari, 'app.tanggal_transaksi <= ' => $tgl_sampai, 'app.status' => 'done',  'appsk.lunas' => 0];
             // if ($currency === 'valas') {
             //     $cr_condition = ($currency === 'valas') ? '<>' : '';
-                // $tmp_where = array_merge($tmp_where, ['apps.tipe_currency ' . $cr_condition => 'Rp']);
+            // $tmp_where = array_merge($tmp_where, ['apps.tipe_currency ' . $cr_condition => 'Rp']);
             // }
             $subquery  = $this->get_saldo_deposit($tmp_where, 'app.partner_id', $currency);
         } else if ($tipe == 'deposit_pel') {
-            $tmp_where = ['app.tanggal_transaksi >= ' => $tgl_dari, 'app.tanggal_transaksi <= ' => $tgl_sampai, 'app.status' => 'done',  'appsk.lunas <> '=> 0];
+            $tmp_where = ['app.tanggal_transaksi >= ' => $tgl_dari, 'app.tanggal_transaksi <= ' => $tgl_sampai, 'app.status' => 'done',  'appsk.lunas <> ' => 0];
             // if ($currency === 'valas') {
             //     $cr_condition = ($currency === 'valas') ? '<>' : '';
-                // $tmp_where = array_merge($tmp_where, ['apps.tipe_currency ' . $cr_condition => 'Rp']);
+            // $tmp_where = array_merge($tmp_where, ['apps.tipe_currency ' . $cr_condition => 'Rp']);
             // }
             $subquery  = $this->get_saldo_deposit($tmp_where, 'app.partner_id', $currency);
         } else { // koreksi
@@ -251,16 +249,16 @@ class M_bukubesarpembantupiutang extends CI_Model
         $list_coa = array_column($rows, 'kode_coa');
         // Cegah error kalau COA kosong
         if (empty($list_coa)) {
-            $list_coa = ['__EMPTY__']; 
+            $list_coa = ['__EMPTY__'];
         }
         return array_map('strval', $list_coa);
     }
 
-    function query1() 
+    function query1()
     {
         $this->db->where_in('abmd.kode_coa', $this->get_list_coa_um_by_transaksi());
-        $this->db->where('abmd.lunas',0);
-        $this->db->where('abm.status','confirm');
+        $this->db->where('abmd.lunas', 0);
+        $this->db->where('abm.status', 'confirm');
         $this->db->select("abmd.id,(abm.no_bm) as no_bukti, abm.partner_id,  abm.tanggal, abmd.currency_id, ck1.currency, abmd.kurs,abmd.nominal, 'bank' as tipe2, abmd.uraian, abmd.kode_coa, abm.status");
         $this->db->from("acc_bank_masuk abm");
         $this->db->join("acc_bank_masuk_detail abmd ", "abm.id = abmd.bank_masuk_id", "left");
@@ -271,8 +269,8 @@ class M_bukubesarpembantupiutang extends CI_Model
     function query2()
     {
         $this->db->where_in('akmd.kode_coa', $this->get_list_coa_um_by_transaksi());
-        $this->db->where('akmd.lunas',0);
-        $this->db->where('akm.status','confirm');
+        $this->db->where('akmd.lunas', 0);
+        $this->db->where('akm.status', 'confirm');
         $this->db->select("akmd.id,(akm.no_km) as no_bukti, akm.partner_id, akm.tanggal, akmd.currency_id, ck2.currency, akmd.kurs,akmd.nominal, 'kas' as tipe2, akmd.uraian, akmd.kode_coa, akm.status");
         $this->db->from("acc_kas_masuk akm");
         $this->db->join("acc_kas_masuk_detail akmd ", "akm.id = akmd.kas_masuk_id", "left");
@@ -283,24 +281,23 @@ class M_bukubesarpembantupiutang extends CI_Model
     function query3()
     {
         $this->db->where_in('agmd.kode_coa', $this->get_list_coa_um_by_transaksi());
-        $this->db->where('agmd.lunas',0);
-        $this->db->where('agm.status','confirm');
+        $this->db->where('agmd.lunas', 0);
+        $this->db->where('agm.status', 'confirm');
         $this->db->select("agmd.id,(agm.no_gm) as no_bukti,agm.partner_id, agm.tanggal, agmd.currency_id, ck3.currency, agmd.kurs,agmd.nominal, 'giro' as tipe2, iF(agm.transinfo !='', agm.transinfo, agm.lain2 ) as uraian, agmd.kode_coa, agm.status");
         $this->db->from("acc_giro_masuk agm");
         $this->db->join("acc_giro_masuk_detail agmd ", "agm.id = agmd.giro_masuk_id", "left");
         $this->db->join("currency_kurs ck3 ", "agmd.currency_id = ck3.id", "left");
         return $query3_sql = $this->db->get_compiled_select();
-
     }
 
-    function get_saldo_kas_um(array $where = [], string $group = '', string $currency = '') 
+    function get_saldo_kas_um(array $where = [], string $group = '', string $currency = '')
     {
-        $union_sql  = $this->query1() . " UNION ALL ". $this->query2() . " UNION ALL " . $this->query3();
-        if(count($where) > 0) {
+        $union_sql  = $this->query1() . " UNION ALL " . $this->query2() . " UNION ALL " . $this->query3();
+        if (count($where) > 0) {
             $this->db->where($where);
         }
 
-        if($group) {
+        if ($group) {
             $this->db->group_by($group);
         }
 
@@ -317,7 +314,6 @@ class M_bukubesarpembantupiutang extends CI_Model
                         0 as tppn");
         $this->db->FROM("($union_sql) as sub");
         return $query = $this->db->get_compiled_select();
-
     }
 
     function get_saldo_piutang_sub(array $where = [], string $group = '', string $currency = '')
@@ -337,7 +333,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
 
         $dpp    = ($currency === 'valas') ? "SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))" : "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0) ";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)"; 
+        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
         $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
 
         $this->db->SELECT("a.id,a.no_faktur_internal,
@@ -348,9 +344,9 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->JOIN("acc_faktur_penjualan_detail b", "b.faktur_id = a.id", "INNER");
         // $this->where('a.id = fak.id');
         return $this->db->get_compiled_select();
-
     }
 
+    var $no_sj = array('SAMPLE', 'SJM');
 
     function get_saldo_piutang(array $where = [], string $group = '', string $currency = '')
     {
@@ -364,6 +360,10 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
 
+        // $i = 0;
+        foreach ($this->no_sj as $item) { // loop column 
+            $this->db->not_like('fak.no_sj', $item);
+        }
 
         // ROUND(CAST(nilai AS DECIMAL(20,4)), 2)
 
@@ -408,6 +408,10 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
 
+        foreach ($this->no_sj as $item) { // loop column 
+            $this->db->not_like('a.no_sj', $item);
+        }
+
         // $dpp    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.diskon AS DECIMAL(20,4))), 2)" : "ROUND(SUM(CAST(b.diskon AS DECIMAL(20,4)))*a.kurs_nominal , 0)";
         // $ppn    = ($currency === 'valas') ? "ROUND(SUM(CAST(b.diskon * 11/12 * a.tax_value AS DECIMAL(20,4))), 2)" : "ROUND(ROUND(ROUND(SUM(CAST(b.diskon AS DECIMAL(20,4))) * 11/12, 0) * a.tax_value, 0) *a.kurs_nominal , 0)";
         // $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.diskon AS DECIMAL(20,4))), 2),0) + IFNULL(ROUND(SUM(CAST(b.diskon * 11/12 * a.tax_value AS DECIMAL(20,4))), 2), 0)" : "IFNULL(ROUND(SUM(CAST(b.diskon AS DECIMAL(20,4)))*a.kurs_nominal , 0),0) + IFNULL(ROUND(SUM(CAST(b.diskon * 11/12 * a.tax_value AS DECIMAL(20,4))), 0), 0)";
@@ -427,7 +431,6 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->FROM("acc_faktur_penjualan a");
         $this->db->JOIN("acc_faktur_penjualan_detail b", "b.faktur_id = a.id", "INNER");
         return $this->db->get_compiled_select();
-
     }
 
 
@@ -445,7 +448,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         }
         $this->db->having('total_diskon <> 0');
 
-      
+
         $this->db->SELECT("fak.id as id_bukti, fak.no_faktur as id_bukti_ecr, fak.no_faktur_internal as no_bukti,tanggal as tgl, partner_id as id_partner,
         CONCAT(
             'Diskon: ', 
@@ -516,16 +519,16 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         $dpp_retur =  "sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) ";
         // $ppn_retur =  "ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * 11 / 12,0) *  CAST(ret.tax_value as DECIMAL(20,4)), 0) * CAST(ret.kurs_nominal as DECIMAL(20,4)) ,0)" ;
-        $ppn_retur =  "ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * 11 / 12,2) * CAST(ret.tax_value as DECIMAL(20,4)), 2)" ;
+        $ppn_retur =  "ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * 11 / 12,2) * CAST(ret.tax_value as DECIMAL(20,4)), 2)";
         $total_retur = "IFNULL(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)), 0) + IFNULL(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * 11 / 12,2) * CAST(ret.tax_value as DECIMAL(20,4)), 2), 0)";
 
 
         $dpp_retur_diskon =  "ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) ";
         // $ppn_retur_diskon =  "ROUND(ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),0) * 11 / 12,0) *  CAST(ret.tax_value as DECIMAL(20,4)), 0) * CAST(ret.kurs_nominal as DECIMAL(20,4)) ,0)" ;
-        $ppn_retur_diskon =  "ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) * 11 / 12,2) *  CAST(ret.tax_value as DECIMAL(20,4)), 2) " ;
+        $ppn_retur_diskon =  "ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) * 11 / 12,2) *  CAST(ret.tax_value as DECIMAL(20,4)), 2) ";
         $total_retur_diskon =  "IFNULL(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) ,0) + IFNULL(ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) * 11 / 12,2) *  CAST(ret.tax_value as DECIMAL(20,4)), 2)  ,0)";
 
-        
+
         $total_dpp_retur = ($currency === 'valas') ? "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2)" : "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0)";
         $total_ppn_retur = ($currency === 'valas') ? "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2)" : "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0)";
         $total_all       = ($currency === 'valas') ? "ROUND(ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2) + ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2),2)" : "ROUND(ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0) + ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0),0) ";
@@ -667,11 +670,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
 
         $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  
-            CONCAT('Koreksi : ', 
-            (SELECT GROUP_CONCAT(DISTINCT nama_koreksi)
-             FROM acc_pelunasan_piutang_summary_koreksi appsk
-						 LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode
-             WHERE appsk.pelunasan_summary_id = apps.id), 
+            CONCAT('Koreksi : ', ack.nama_koreksi,
             ' - ',
             COALESCE((SELECT GROUP_CONCAT(CONCAT(' - Curr : ' ,currency,' - Kurs : ',kurs, ' - Valas : ', total_valas)) FROM acc_pelunasan_piutang_metode appm Where appm.pelunasan_piutang_id = app.id AND appm.tipe = 'koreksi') , ''),
             IF('$currency' = 'valas', 
@@ -693,6 +692,9 @@ class M_bukubesarpembantupiutang extends CI_Model
                         apps.tipe_currency");
         $this->db->FROM('acc_pelunasan_piutang app');
         $this->db->jOIN("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id", "INNER");
+        $this->db->JOIN("(SELECT GROUP_CONCAT(DISTINCT ack.nama_koreksi) as nama_koreksi, appsk.pelunasan_summary_id, ack.koreksi_bb
+                        FROM acc_pelunasan_piutang_summary_koreksi appsk
+                        LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode) as ack", "ack.pelunasan_summary_id = apps.id", "INNER");
         return $this->db->get_compiled_select();
     }
 
@@ -708,7 +710,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         $total_m_koreksi  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
 
-      
+
         $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, 
             COALESCE((SELECT GROUP_CONCAT(CONCAT(' - Curr : ' ,currency,' - Kurs : ',kurs, ' - Valas : ', total_valas)) FROM acc_pelunasan_piutang_metode appm Where appm.pelunasan_piutang_id = app.id AND appm.tipe = 'koreksi') , ''),
             IF('$currency' = 'valas', 
@@ -741,10 +743,10 @@ class M_bukubesarpembantupiutang extends CI_Model
     function get_saldo_koreksi(array $where = [], string $group = '',  string $currency = '')
     {
         $where_tipe_cur = ($currency === 'valas') ? 'Valas' : 'Rp';
-        $where_normal = ['apps.mode' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency'=> $where_tipe_cur ];
-        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal,'', $currency);
-        $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency'=> $where_tipe_cur,  'appsk.head'=> 'false', 'appsk.alat_pelunasan'=> 'false'];
-        $sub_query_split  = $this->get_saldo_koreksi_split($where_split,'', $currency);
+        $where_normal = ['apps.mode' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency' => $where_tipe_cur, 'ack.koreksi_bb' => 'true'];
+        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, '', $currency);
+        $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency' => $where_tipe_cur,  'appsk.head' => 'false', 'appsk.alat_pelunasan' => 'false', 'ack.koreksi_bb' => 'true'];
+        $sub_query_split  = $this->get_saldo_koreksi_split($where_split, '', $currency);
 
         if (count($where) > 0) {
             $this->db->where($where);
@@ -770,7 +772,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         (total_dpp_ppn)   AS total_dpp_ppn
                         
                         ");
-        $this->db->FROM("(".$sub_query_normal." UNION ALL ".$sub_query_split.") as t ");
+        $this->db->FROM("(" . $sub_query_normal . " UNION ALL " . $sub_query_split . ") as t ");
         return $this->db->get_compiled_select();
     }
 
@@ -822,18 +824,18 @@ class M_bukubesarpembantupiutang extends CI_Model
         $list_coa = array_column($rows, 'kode_coa');
         // Cegah error kalau COA kosong
         if (empty($list_coa)) {
-            $list_coa = ['__EMPTY__']; 
+            $list_coa = ['__EMPTY__'];
         }
         return array_map('strval', $list_coa);
     }
 
     function query4($currency)
     {
-       
+
         $this->db->where_in('b.kode_coa', $this->get_list_coa_by_transaksi());
         $where = ["a.status" => 'confirm', "b.lunas" => 0];
         $cr_condition = ($currency === 'valas') ? '<>' : '';
-        if(!empty($cr_condition)){
+        if (!empty($cr_condition)) {
             $where = array_merge($where, ['c.currency ' . $cr_condition => 'IDR']);
         }
         if (count($where) > 0) {
@@ -851,7 +853,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->where_in('e.kode_coa', $this->get_list_coa_by_transaksi());
         $where = ["h.status" => 'confirm', 'e.lunas' => 0];
         $cr_condition = ($currency === 'valas') ? '<>' : '';
-        if(!empty($cr_condition)){
+        if (!empty($cr_condition)) {
             $where = array_merge($where, ['i.currency ' . $cr_condition => 'IDR']);
         }
         if (count($where) > 0) {
@@ -866,11 +868,11 @@ class M_bukubesarpembantupiutang extends CI_Model
 
     function query6($currency)
     {
-       
+
         $this->db->where_in('g.kode_coa', $this->get_list_coa_by_transaksi());
         $where = ["f.status" => 'confirm', 'g.lunas' => 0];
         $cr_condition = ($currency === 'valas') ? '<>' : '';
-        if(!empty($cr_condition)){
+        if (!empty($cr_condition)) {
             $where = array_merge($where, ['j.currency ' . $cr_condition => 'IDR']);
         }
         if (count($where) > 0) {
@@ -883,14 +885,14 @@ class M_bukubesarpembantupiutang extends CI_Model
         return $query3_sql = $this->db->get_compiled_select();
     }
 
-    function get_saldo_refund(array $where = [], string $group = '', string $currency = '') 
+    function get_saldo_refund(array $where = [], string $group = '', string $currency = '')
     {
-        $union_sql  = $this->query4($currency) . " UNION ALL ". $this->query5($currency) . " UNION ALL " . $this->query6($currency);
-        if(count($where) > 0) {
+        $union_sql  = $this->query4($currency) . " UNION ALL " . $this->query5($currency) . " UNION ALL " . $this->query6($currency);
+        if (count($where) > 0) {
             $this->db->where($where);
         }
 
-        if($group) {
+        if ($group) {
             $this->db->group_by($group);
         }
 
@@ -907,9 +909,8 @@ class M_bukubesarpembantupiutang extends CI_Model
                         0 as tppn");
         $this->db->FROM("($union_sql) as sub");
         return $query = $this->db->get_compiled_select();
-
     }
-    
+
 
     public function get_list_bukubesar_detail($tgldari, $tglsampai, $checkhidden, array $where = [], $currency)
     {
@@ -937,8 +938,8 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
             $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency' => 'Rp'];
-            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas <>'=>0];
+            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas' => 0];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' => 'Rp', 'appsk.lunas <>' => 0];
         } else {
             $cr_condition = ($currency === 'valas') ? '<>' : '';
 
@@ -948,8 +949,8 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
             $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency ' . $cr_condition => 'Rp'];
-            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>'=>0];
+            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas' => 0];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'app.status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>' => 0];
         }
 
         // saldo berdasakran periode berjalan
@@ -1044,8 +1045,8 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp'];
             $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency' => 'Rp'];
-            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas <>'=>0];
+            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas' => 0];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency' => 'Rp', 'appsk.lunas <>' => 0];
         } else {
             $cr_condition = ($currency === 'valas') ? '<>' : '';
 
@@ -1055,8 +1056,8 @@ class M_bukubesarpembantupiutang extends CI_Model
             $where_retur = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi  <= ' => $tglsampai, 'appm.currency_id ' . $cr_condition => 1];
             $where_um    = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp'];
             $where_koreksi = ['tanggal_transaksi >= ' => $tgldari, 'tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'tipe_currency ' . $cr_condition => 'Rp'];
-            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas'=>0];
-            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>'=>0];
+            $where_deposit = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas' => 0];
+            $where_deposit_pel = ['app.tanggal_transaksi >= ' => $tgldari, 'app.tanggal_transaksi <= ' => $tglsampai, 'status' => 'done', 'apps.tipe_currency ' . $cr_condition => 'Rp', 'appsk.lunas <>' => 0];
         }
 
         $where_kas_um           = ['tanggal >= ' => $tgldari, 'tanggal <= ' => $tglsampai];
@@ -1075,7 +1076,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->where($where);
         }
 
-        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi . ' UNION ALL ' . $subquery_diskon . " UNION ALL ".$subquery_kas . " UNION ALL " . $subquery_refund;
+        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi . ' UNION ALL ' . $subquery_diskon . " UNION ALL " . $subquery_kas . " UNION ALL " . $subquery_refund;
 
         $this->db->SELECT('id_bukti, id_bukti_ecr,  no_bukti, tgl, id_partner, uraian, debit, credit, status, link');
         $this->db->from('(' . $union_sql . ') as sub');
@@ -1089,7 +1090,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
     function get_list_golongan()
     {
-        $this->db->order_by('id','asc');
+        $this->db->order_by('id', 'asc');
         $query = $this->db->get('partner_gol');
         return $query->result();
     }

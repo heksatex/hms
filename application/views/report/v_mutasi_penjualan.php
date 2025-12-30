@@ -215,7 +215,7 @@
                                                             <select type="text" class="form-control input-sm" name="status_lunas" id="status_lunas">
                                                                 <option value='all'>All</option>
                                                                 <option value="1">Lunas</option>
-                                                                <option value="0">Belum Lunas</option>
+                                                                <option value="0" selected>Belum Lunas</option>
                                                             </select>
                                                         </div>
                                                     </div>
