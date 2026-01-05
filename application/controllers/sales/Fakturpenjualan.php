@@ -32,6 +32,7 @@ class Fakturpenjualan extends MY_Controller {
         $this->load->driver('cache', array('adapter' => 'file'));
         $this->config->load('additional');
         $this->load->library("token");
+        $this->load->library("dompdflib");
     }
 
     protected $tipe = [
@@ -1663,6 +1664,7 @@ class Fakturpenjualan extends MY_Controller {
                 mkdir(FCPATH . $url, 0775, TRUE);
             }
             $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
+            $mpdf->autoPageBreak = true;
             $mpdf->WriteHTML($html);
             $filename = str_replace("/", "-", $data["head"]->no_faktur_internal);
             $pathFile = "{$url}/{$filename}.pdf";
