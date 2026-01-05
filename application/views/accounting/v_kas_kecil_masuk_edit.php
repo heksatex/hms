@@ -190,7 +190,7 @@
                                                             </td>
                                                             <td>
                                                                 <input type="text" class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2) ?>" disabled>
-                                                                <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
+                                                                <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
                                                                        style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
                                                             </td>
                                                         </tr>
@@ -300,7 +300,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut text-right input-sm" value="0" required/>
+                        <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut text-right input-sm" value="0" required/>
                     </td>
                 </tr>
             </template>
@@ -530,6 +530,7 @@ if ($datas->status == 'confirm') {
                         $(".ftotal_nominal").hide();
                         $(".total_nominal").show();
                         $("#btn-confirm").hide();
+                        setNominalCurrency();
                     });
                     $("#btn-cancel").on("click", function (e) {
                         e.preventDefault();
