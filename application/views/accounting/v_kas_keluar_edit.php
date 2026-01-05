@@ -591,6 +591,7 @@ if ($datas->status == 'confirm') {
                         $(this).hide();
                         $("#btn-cancel").show();
                         $("#btn-simpan").show();
+                        $("#btn-confirm").hide();
                         $(".btn-add-item-fpt").show();
                         $(".no-urut").hide();
                         $(".btn-rmv-item").show();
@@ -628,6 +629,7 @@ if ($datas->status == 'confirm') {
                         $(".list-new").remove();
                         $(".ftotal_nominal").show();
                         $(".total_nominal").hide();
+                        $("#btn-confirm").show();
                     });
 
                     $("#kaskeluar-detail").on("click", ".btn-rmv-item", function () {
