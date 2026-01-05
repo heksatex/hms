@@ -249,15 +249,18 @@
 
         // set date tglsampai
         $('#tglsampai').datetimepicker({
-            defaultDate: new Date().toLocaleString('en-US', {
-                timeZone: 'Asia/Jakarta'
-            }),
+            defaultDate: (function() {
+                const now = new Date(
+                    new Date().toLocaleString('en-US', {
+                        timeZone: 'Asia/Jakarta'
+                    })
+                );
+
+                // set ke akhir bulan
+                return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            })(),
             format: 'D-MMMM-YYYY',
-            ignoreReadonly: true,
-            // maxDate: new Date(),
-            //minDate : 
-            //maxDate: new Date(),
-            //startDate: StartDate,
+            ignoreReadonly: true
         });
 
         //select 2 Customer
