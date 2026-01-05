@@ -162,13 +162,14 @@
                                                 <th class='style bb ws text-right'>Harga</th>
                                                 <th class='style bb ws text-right'>DPP</th>
                                                 <th class='style bb ws text-right'>PPN</th>
+                                                <th class='style bb ws text-right'>PPH23</th>
                                                 <th class='style bb ws'>Faktur Pajak</th>
                                                 <th class='style bb ws'>Tanggal FP</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="17">Tidak ada Data</td>
+                                                <td colspan="18">Tidak ada Data</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -334,13 +335,14 @@
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.harga.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.dpp.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.ppn.toFixed(4))),
+                                    $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.pph23.toFixed(4))),
                                     $("<td>").text(value.no_faktur_pajak),
                                     $("<td>").text(value.tanggal_fk),
                                 );
                                 tbody.append(tr);
                             });
                             if (empty == true) {
-                                var tr = $("<tr>").append($("<td colspan='16' >").text('Tidak ada Data'));
+                                var tr = $("<tr>").append($("<td colspan='17' >").text('Tidak ada Data'));
                                 tbody.append(tr);
                             }
                             $("#example1").append(tbody);

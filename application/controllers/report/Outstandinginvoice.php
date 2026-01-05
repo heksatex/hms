@@ -252,7 +252,7 @@ class Outstandinginvoice extends MY_Controller
             )
         );
 
-        $table_head_columns  = array('No', 'Supplier', 'Invoice', 'PO', 'Receiving', 'Tanggal', 'Total Hutang (Rp)', 'Sisa Hutang (Rp)', 'Total Hutang (Valas)' , 'Sisa Hutang (Valas)', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Supplier', 'Invoice', 'PO', 'Receiving', 'Tanggal', 'Total Hutang (Rp)', 'Sisa Hutang (Rp)', 'Total Hutang (Valas)', 'Sisa Hutang (Valas)', 'Umur (Hari)');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $activeSheet->setCellValueByColumnAndRow($column, $rowCount, $field);
@@ -260,7 +260,7 @@ class Outstandinginvoice extends MY_Controller
         }
 
         // set width and border
-        $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I','J','K');
+        $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K');
         $loop = 0;
         foreach ($index_header as $val) {
 
@@ -270,14 +270,14 @@ class Outstandinginvoice extends MY_Controller
                 $getSheet->getColumnDimension($val)->setAutoSize(true); // index A
             } else if ($loop ==  1) {
                 $getSheet->getColumnDimension($val)->setWidth(10); // index B
-            } else if ($loop == 2 OR $loop == 3 or $loop == 4) {
+            } else if ($loop == 2 or $loop == 3 or $loop == 4) {
                 $getSheet->getColumnDimension($val)->setWidth(15); // index C/D/E
-            } else if ( $loop == 5) {
+            } else if ($loop == 5) {
                 $getSheet->getColumnDimension($val)->setWidth(14); // index F
             } else if ($loop > 5) {
                 $getSheet->getColumnDimension($val)->setWidth(18); // index -> G-J
                 $getSheet->getStyle($val . '' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-            } else if ( $loop == 10) {
+            } else if ($loop == 10) {
                 $getSheet->getColumnDimension($val)->setWidth(14); // index K
                 $getSheet->getStyle($val . '' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
             }
@@ -291,13 +291,14 @@ class Outstandinginvoice extends MY_Controller
         return;
     }
 
-    public function export_pdf() {
-     
+    public function export_pdf1()
+    {
+
         $this->load->library('dompdflib');
-        $data_arr  = json_decode($this->input->get('params'),true);  
+        $data_arr  = json_decode($this->input->get('params'), true);
         $tgl_now   = date("Y-m-d");
         $partner   = '';
-        foreach($data_arr as $rows){
+        foreach ($data_arr as $rows) {
             $partner = $rows['partner'];
         }
 
@@ -307,5 +308,231 @@ class Outstandinginvoice extends MY_Controller
         $data['periode'] = tgl_indo(date('d-m-Y', strtotime($tgl_now)));
         $cnt = $this->load->view('report/v_outstanding_invoice_pdf', $data, true);
         $this->dompdflib->generate($cnt);
+    }
+
+
+    public function export_pdf()
+    {
+        // =============================
+        // DATA
+        // =============================
+        $data_arr = json_decode($this->input->get('params'), true);
+        $partner = '';
+        foreach ($data_arr as $r) {
+            $partner = $r['partner'];
+        }
+        $data = $this->proses_data($partner);
+
+        $this->load->library('Pdf');
+
+        // =============================
+        // PAGE SETUP
+        // =============================
+        $LEFT = 5;
+        $TOP  = 25;
+
+        $PAGE_BOTTOM = 285;
+        $FOOTER_Y    = -15;
+
+        // TOTAL WIDTH = 194 mm
+        $w = [
+            5,     // No
+            26.5,  // Invoice
+            21.2,  // PO
+            26.5,  // Receiving
+            15,    // Tanggal
+            22.8,  // Total (Rp)
+            22.8,  // Sisa (Rp)
+            22.8,  // Total Valas
+            22.8,  // Sisa Valas
+            10.6   // Hari
+        ];
+
+        $pdf = new Pdf('P', 'mm', 'A4');
+        $pdf->AliasNbPages();
+        $pdf->SetMargins($LEFT, $TOP, $LEFT);
+        $pdf->SetAutoPageBreak(false);
+        $pdf->AddPage();
+
+        // =============================
+        // HEADER
+        // =============================
+        $renderHeader = function () use ($pdf, $LEFT) {
+
+            $pdf->SetY(8);
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(0, 6, 'PT. HEKSATEX INDAH', 0, 1, 'C');
+
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(0, 6, 'OUTSTANDING INVOICE', 0, 1, 'C');
+
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(0, 6, 'Per Tgl. ' . tgl_indo(date('d-m-Y')), 0, 1, 'C');
+
+            $pdf->Ln(4);
+            $pdf->SetX($LEFT);
+        };
+
+        // =============================
+        // FOOTER
+        // =============================
+        $renderFooter = function () use ($pdf, $FOOTER_Y) {
+            $pdf->SetY($FOOTER_Y);
+            $pdf->SetFont('Arial', '', 7);
+            $pdf->Cell(0, 8, 'Halaman ' . $pdf->PageNo() . ' dari {nb}', 0, 0, 'C');
+        };
+
+        // =============================
+        // TABLE HEADER
+        // =============================
+        $renderTableHeader = function () use ($pdf, $w, $LEFT) {
+
+            $pdf->SetX($LEFT);
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->SetFillColor(220, 220, 220);
+
+            $headers = [
+                'No',
+                'Invoice',
+                'PO',
+                'Receiving',
+                'Tanggal',
+                'Total Rp',
+                'Sisa Rp',
+                'Total Valas',
+                'Sisa Valas',
+                'Hari'
+            ];
+
+            foreach ($headers as $i => $txt) {
+                $align = ($i >= 5) ? 'R' : 'C';
+                $pdf->Cell($w[$i], 7, $txt, 1, 0, $align, true);
+            }
+            $pdf->Ln();
+            $pdf->SetFont('Arial', '', 7);
+        };
+
+        // =============================
+        // HITUNG BARIS (FPDF AKURAT)
+        // =============================
+        $nbLines = function ($width, $text) use ($pdf) {
+            return max(1, $pdf->NbLines($width, $text));
+        };
+
+        // =============================
+        // PAGE BREAK
+        // =============================
+        $checkPageBreak = function ($height) use (
+            $pdf,
+            $PAGE_BOTTOM,
+            $renderHeader,
+            $renderTableHeader,
+            $renderFooter
+        ) {
+            if ($pdf->GetY() + $height > $PAGE_BOTTOM) {
+                $renderFooter();
+                $pdf->AddPage();
+                $renderHeader();
+                $renderTableHeader();
+            }
+        };
+
+        // =============================
+        // DRAW ROW
+        // =============================
+        $drawRow = function ($row) use ($pdf, $w, $LEFT, $checkPageBreak, $nbLines) {
+
+            $multiCols = [1, 2, 3]; // Invoice, PO, Receiving
+
+            $maxLine = 1;
+            foreach ($multiCols as $i) {
+                $maxLine = max($maxLine, $nbLines($w[$i], $row[$i]));
+            }
+            $h = $maxLine * 6;
+
+            $checkPageBreak($h);
+
+            $x = $LEFT;
+            $y = $pdf->GetY();
+
+            // BORDER
+            foreach ($w as $width) {
+                $pdf->Rect($x, $y, $width, $h);
+                $x += $width;
+            }
+
+            // CONTENT
+            $x = $LEFT;
+            foreach ($row as $i => $txt) {
+
+                $pdf->SetXY($x, $y);
+
+                if (in_array($i, $multiCols)) {
+                    $pdf->MultiCell($w[$i], 6, $txt, 0, 'L');
+                } else {
+                    $align = ($i >= 5) ? 'R' : 'C';
+                    $pdf->Cell($w[$i], $h, $txt, 0, 0, $align);
+                }
+
+                $x += $w[$i];
+            }
+
+            $pdf->SetY($y + $h);
+        };
+
+        // =============================
+        // RENDER
+        // =============================
+        $renderHeader();
+        $renderTableHeader();
+
+        foreach ($data as $supplier) {
+
+            $checkPageBreak(10);
+
+            $pdf->SetX($LEFT);
+            $pdf->SetFont('Arial', 'B', 7);
+            $pdf->Cell(array_sum($w), 7, 'Supplier : ' . $supplier['nama_partner'], 1, 1);
+            $pdf->SetFont('Arial', '', 7);
+
+            $no = 1;
+            $sub = [0, 0, 0, 0];
+
+            foreach ($supplier['tmp_data_items'] as $item) {
+
+                $drawRow([
+                    $no++,
+                    $item['no_invoice'],
+                    $item['no_po'],
+                    $item['origin'],
+                    $item['tanggal'],
+                    number_format($item['hutang_rp'], 2),
+                    number_format($item['sisa_hutang_rp'], 2),
+                    number_format($item['hutang_valas'], 2),
+                    number_format($item['sisa_hutang_valas'], 2),
+                    $item['hari']
+                ]);
+
+                $sub[0] += $item['hutang_rp'];
+                $sub[1] += $item['sisa_hutang_rp'];
+                $sub[2] += $item['hutang_valas'];
+                $sub[3] += $item['sisa_hutang_valas'];
+            }
+
+            // SUBTOTAL
+            $checkPageBreak(8);
+            $pdf->SetX($LEFT);
+            $pdf->SetFont('Arial', 'B', 7);
+
+            $pdf->Cell(array_sum(array_slice($w, 0, 5)), 7, 'Total :', 1, 0, 'R');
+            $pdf->Cell($w[5], 7, number_format($sub[0], 2), 1, 0, 'R');
+            $pdf->Cell($w[6], 7, number_format($sub[1], 2), 1, 0, 'R');
+            $pdf->Cell($w[7], 7, number_format($sub[2], 2), 1, 0, 'R');
+            $pdf->Cell($w[8], 7, number_format($sub[3], 2), 1, 0, 'R');
+            $pdf->Cell($w[9], 7, '', 1, 1);
+        }
+
+        $renderFooter();
+        $pdf->Output('I', 'Outstanding_Invoice.pdf');
     }
 }

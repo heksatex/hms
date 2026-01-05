@@ -296,7 +296,7 @@ class Umurutang extends MY_Controller
     }
 
 
-    public function export_pdf()
+    public function export_pdf1()
     {
 
         $this->load->library('dompdflib');
@@ -314,5 +314,195 @@ class Umurutang extends MY_Controller
         $data['periode'] = tgl_indo(date('d-m-Y', strtotime($tgl_now)));
         $cnt = $this->load->view('report/v_umur_utang_pdf', $data, true);
         $this->dompdflib->generate($cnt);
+    }
+
+
+    public function export_pdf()
+    {
+        $partner = $this->input->get('partner');
+
+        // =============================
+        // AMBIL DATA
+        // =============================
+        list($bulanLabels, $items) = $this->proses_data($partner);
+
+        $this->load->library('Pdf');
+        $periode = tgl_indo(date('d-m-Y'));
+
+        // =============================
+        // PAGE SETUP
+        // =============================
+        $LEFT = 5;
+        $TOP  = 30;
+
+        $PAGE_BOTTOM = 285;
+        $FOOTER_Y    = -15;
+
+        // TOTAL WIDTH = 194 mm
+        $w = [
+            6,    // No
+            48,   // Supplier
+            26,   // Total
+            23,   // Bulan Ini
+            23,   // 1 Bulan
+            23,   // 2 Bulan
+            23,   // 3 Bulan
+            26    // > 3 Bulan
+        ];
+
+        $pdf = new Pdf('P', 'mm', 'A4');
+        $pdf->AliasNbPages();
+        $pdf->SetMargins($LEFT, $TOP, $LEFT);
+        $pdf->SetAutoPageBreak(false);
+        $pdf->AddPage();
+
+        // =============================
+        // HEADER
+        // =============================
+        $renderHeader = function () use ($pdf, $LEFT, $periode) {
+            $pdf->SetY(8);
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(0, 6, 'PT. HEKSATEX INDAH', 0, 1, 'C');
+
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(0, 6, 'UMUR UTANG (AGING)', 0, 1, 'C');
+
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(0, 6, 'Per Tgl. ' . $periode, 0, 1, 'C');
+
+            $pdf->Ln(4);
+            $pdf->SetX($LEFT);
+        };
+
+        // =============================
+        // FOOTER
+        // =============================
+        $renderFooter = function () use ($pdf, $FOOTER_Y) {
+            $pdf->SetY($FOOTER_Y);
+            $pdf->SetFont('Arial', '', 7);
+            $pdf->Cell(0, 8, 'Halaman ' . $pdf->PageNo() . ' dari {nb}', 0, 0, 'C');
+        };
+
+        // =============================
+        // TABLE HEADER
+        // =============================
+        $renderTableHeader = function () use ($pdf, $w, $LEFT, $bulanLabels) {
+
+            $headers = array_merge(
+                ['No', 'Supplier', 'Total'],
+                $bulanLabels
+            );
+
+            $pdf->SetX($LEFT);
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->SetFillColor(220, 220, 220);
+
+            foreach ($headers as $i => $txt) {
+                $align = ($i >= 2) ? 'R' : 'C';
+                $pdf->Cell($w[$i], 7, $txt, 1, 0, $align, true);
+            }
+            $pdf->Ln();
+            $pdf->SetFont('Arial', '', 7);
+        };
+
+        // =============================
+        // UTIL
+        // =============================
+        $nbLines = function ($width, $text) use ($pdf) {
+            return max(1, $pdf->NbLines($width, $text));
+        };
+
+        $checkPageBreak = function ($h) use (
+            $pdf,
+            $PAGE_BOTTOM,
+            $renderHeader,
+            $renderTableHeader,
+            $renderFooter
+        ) {
+            if ($pdf->GetY() + $h > $PAGE_BOTTOM) {
+                $renderFooter();
+                $pdf->AddPage();
+                $renderHeader();
+                $renderTableHeader();
+            }
+        };
+
+        // =============================
+        // DRAW ROW
+        // =============================
+        $drawRow = function ($row) use ($pdf, $w, $LEFT, $checkPageBreak, $nbLines) {
+
+            $h = $nbLines($w[1], $row[1]) * 6;
+            $checkPageBreak($h);
+
+            $x = $LEFT;
+            $y = $pdf->GetY();
+
+            foreach ($w as $width) {
+                $pdf->Rect($x, $y, $width, $h);
+                $x += $width;
+            }
+
+            $x = $LEFT;
+            foreach ($row as $i => $txt) {
+
+                $pdf->SetXY($x, $y);
+
+                if ($i === 1) {
+                    $pdf->MultiCell($w[$i], 6, $txt, 0, 'L');
+                } else {
+                    $align = ($i >= 2) ? 'R' : 'C';
+                    $pdf->Cell($w[$i], $h, $txt, 0, 0, $align);
+                }
+                $x += $w[$i];
+            }
+            $pdf->SetY($y + $h);
+        };
+
+        // =============================
+        // RENDER
+        // =============================
+        $renderHeader();
+        $renderTableHeader();
+
+        $no = 1;
+        $total = array_fill(0, 6, 0);
+
+        foreach ($items as $row) {
+
+            $drawRow([
+                $no++,
+                $row['nama_partner'],
+                number_format($row['total_hutang'], 2),
+                number_format($row['hutang_bulan_ini'], 2),
+                number_format($row['hutang_bulan_1'], 2),
+                number_format($row['hutang_bulan_2'], 2),
+                number_format($row['hutang_bulan_3'], 2),
+                number_format($row['hutang_lebih_dari_3_bulan'], 2),
+            ]);
+
+            $total[0] += $row['total_hutang'];
+            $total[1] += $row['hutang_bulan_ini'];
+            $total[2] += $row['hutang_bulan_1'];
+            $total[3] += $row['hutang_bulan_2'];
+            $total[4] += $row['hutang_bulan_3'];
+            $total[5] += $row['hutang_lebih_dari_3_bulan'];
+        }
+
+        // =============================
+        // TOTAL
+        // =============================
+        $checkPageBreak(8);
+        $pdf->SetX($LEFT);
+        $pdf->SetFont('Arial', 'B', 7);
+
+        $pdf->Cell($w[0] + $w[1], 7, 'Total :', 1, 0, 'R');
+        for ($i = 0; $i < 6; $i++) {
+            $pdf->Cell($w[$i + 2], 7, number_format($total[$i], 2), 1, 0, 'R');
+        }
+        $pdf->Ln();
+
+        $renderFooter();
+        $pdf->Output('I', 'Aging_Umur_Utang.pdf');
     }
 }
