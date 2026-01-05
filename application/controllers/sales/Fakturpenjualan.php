@@ -1714,7 +1714,7 @@ class Fakturpenjualan extends MY_Controller {
                 $printer->text(trim($value));
                 if ($key === 0) {
                     $printer->text(str_pad("", 35));
-                    $printer->text(str_pad("Bandung, " . date("d-m-Y"), 30, " ", STR_PAD_LEFT));
+                    $printer->text(str_pad("Bandung, " . date("d-m-Y", strtotime($head->tanggal)), 30, " ", STR_PAD_LEFT));
                 }
                 $printer->text("\n");
             }
