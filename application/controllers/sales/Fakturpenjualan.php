@@ -1030,7 +1030,7 @@ class Fakturpenjualan extends MY_Controller {
                                 "nominal_curr" => abs($hsl),
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => round(abs($hsl),2),
+                                "nominal" => round(abs($hsl), 2),
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
@@ -2095,20 +2095,24 @@ class Fakturpenjualan extends MY_Controller {
 //                $printer->text(str_pad(" Rp.", 4));
                 $printer->text(str_pad("Rp. " . number_format(round($head->grand_total * $head->kurs_nominal), 2, ".", ","), 25, " ", STR_PAD_LEFT));
                 $printer->feed();
+                $spltnm = 1;
+                if (strtolower($head->jenis_ppn) !== "kbn") {
+                    $printer->text(str_pad(" ", 13));
+                    $printer->text(str_pad(($spltTbl[$spltnm] ?? " "), 79));
+                    $printer->text(str_pad("Dpp Nilai Lain", 20, " ", STR_PAD_RIGHT));
+                    $printer->text(str_pad("Rp. " . $dpp, 25, " ", STR_PAD_LEFT));
+                    $printer->feed();
+                    $spltnm++;
+                }
+
                 $printer->text(str_pad(" ", 13));
-                $printer->text(str_pad(($spltTbl[1] ?? " "), 79));
-                $printer->text(str_pad("Dpp Nilai Lain", 20, " ", STR_PAD_RIGHT));
-//                $printer->text(str_pad(" Rp.", 4));
-                $printer->text(str_pad("Rp. " . $dpp, 25, " ", STR_PAD_LEFT));
-                $printer->feed();
-                $printer->text(str_pad(" ", 13));
-                $printer->text(str_pad(($spltTbl[2] ?? " "), 79));
+                $printer->text(str_pad(($spltTbl[$spltnm] ?? " "), 79));
                 $printer->text(str_pad("Discount", 20, " ", STR_PAD_RIGHT));
-//                $printer->text(str_pad(" Rp.", 4));
+                $spltnm++ ;
                 $printer->text(str_pad("Rp. " . number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ","), 25, " ", STR_PAD_LEFT));
                 $printer->feed();
                 $printer->text(str_pad(" ", 13));
-                $printer->text(str_pad(" ", 79));
+                $printer->text(str_pad(($spltTbl[$spltnm] ?? " "), 79));
                 $printer->text(str_pad("PPN ", 20, " ", STR_PAD_RIGHT));
 //                $printer->text(str_pad(" Rp.", 4));
                 $printer->text(str_pad("Rp. " . number_format(round($head->ppn * $head->kurs_nominal), 2, ".", ","), 25, " ", STR_PAD_LEFT));
