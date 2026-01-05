@@ -196,7 +196,7 @@
                                                             </td>
                                                             <td>
                                                                 <input type="text" class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2) ?>" disabled>
-                                                                <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
+                                                                <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
                                                                        style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
                                                             </td>
                                                         </tr>
@@ -305,7 +305,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" autocomplete="off" class="form-control nominal nominal:nourut text-right input-sm" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="0" required/>
+                        <input type="text" name="nominal[]" autocomplete="off" class="form-control nominal nominal:nourut text-right input-sm" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="0" required/>
                         <input type="hidden"  value="0" name="po_detail[]" class="form-control"/>
                     </td>
                 </tr>
@@ -342,7 +342,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text"  value="0" name="nominal[]" class="form-control nominal nominal:nourut text-right input-sm" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' required/>
+                        <input type="text"  value="0" name="nominal[]" class="form-control nominal nominal:nourut text-right input-sm" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' required/>
                         <input type="hidden"  value="0" name="po_detail[]" class="form-control po:nourut"/>
                     </td>
                 </tr>
@@ -606,6 +606,7 @@ if ($datas->status == 'confirm') {
                         $(".ftotal_nominal").hide();
                         $(".total_nominal").show();
                         getPartner();
+                        setNominalCurrency();
                     });
                     $("#btn-cancel").on("click", function (e) {
                         e.preventDefault();

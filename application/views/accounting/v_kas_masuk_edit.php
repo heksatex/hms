@@ -196,7 +196,7 @@
                                                             <td>
                                                                 <input type="hidden" name="giro_keluar_detail[]" class="form-control" value="<?= $value->giro_keluar_detail_id ?>" />
                                                                 <input type="text" class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2) ?>" disabled>
-                                                                <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
+                                                                <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
                                                                        style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
                                                             </td>
                                                         </tr>
@@ -307,7 +307,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" autocomplete="off" class="form-control nominal nominal:nourut text-right input-sm" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="0" required/>
+                        <input type="text" name="nominal[]" autocomplete="off" class="form-control nominal nominal:nourut text-right input-sm" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="0" required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control giro_keluar_detail input-sm text-right" value="0" />
                     </td>
                 </tr>
@@ -344,7 +344,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" autocomplete="off" class="form-control nominal nominal:nourut text-right input-sm" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="0" required/>
+                        <input type="text" name="nominal[]" autocomplete="off" class="form-control nominal nominal:nourut text-right input-sm" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="0" required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control giro_keluar_detail:nourut input-sm text-right" value="0" />
                     </td>
                 </tr>
@@ -628,6 +628,7 @@ if ($datas->status == 'confirm') {
                             transaksi = trx.split(",");
                         }
                         getPartner();
+                        setNominalCurrency();
                     });
                     $("#btn-cancel").on("click", function (e) {
                         e.preventDefault();
