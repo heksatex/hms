@@ -232,7 +232,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <input type="text"  class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2, ".", ",") ?>" disabled>
-                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" 
+                                                                    <input type="text" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" 
                                                                            style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
                                                                     <input type="hidden" class="form-control" name="giro_masuk_detail[]" value="<?= $value->giro_masuk_detail_id ?>">
                                                                 </td>
@@ -359,7 +359,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text"  pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" class="form-control input-sm nominal nominal:nourut text-right" value="0" required/>
+                    <input type="text"  pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" class="form-control input-sm nominal nominal:nourut text-right" value="0" required/>
                     <input type="hidden" name="giro_masuk_detail[]" class="form-control"/>
                 </td>
             </tr>
@@ -411,7 +411,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text"  pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" class="form-control input-sm text-right nominal nominal:nourut" value="0" required/>
+                    <input type="text"  pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" class="form-control input-sm text-right nominal nominal:nourut" value="0" required/>
                     <input type="hidden" name="giro_masuk_detail[]" class="form-control gmd:nourut" value="0"/>
                 </td>
             </tr>
@@ -749,6 +749,7 @@ if ($datas->status == 'confirm') {
                     $("#btn-confirm").hide();
                     edit = true;
                     getPartner();
+                    setNominalCurrency();
                 });
 
                 $("#btn-cancel").on("click", function (e) {
