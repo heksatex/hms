@@ -249,17 +249,19 @@
 
         // set date tglsampai
         $('#tglsampai').datetimepicker({
-            defaultDate: new Date().toLocaleString('en-US', {
-                timeZone: 'Asia/Jakarta'
-            }),
-            format: 'D-MMMM-YYYY',
-            ignoreReadonly: true,
-            // maxDate: new Date(),
-            //minDate : 
-            //maxDate: new Date(),
-            //startDate: StartDate,
-        });
+            defaultDate: (function() {
+                const now = new Date(
+                    new Date().toLocaleString('en-US', {
+                        timeZone: 'Asia/Jakarta'
+                    })
+                );
 
+                // set ke akhir bulan
+                return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            })(),
+            format: 'D-MMMM-YYYY',
+            ignoreReadonly: true
+        });
         //select 2 supplier
         $('#partner').select2({
             allowClear: true,
@@ -338,7 +340,7 @@
             var selectedCurrency = $('input[name="currency"]:checked').val();
 
             let slowProcessWarning = setTimeout(function() {
-                please_wait(function(){});
+                please_wait(function() {});
             }, 5000); // 5 detik
 
             $("#example1_processing").css('display', ''); // show loading
@@ -356,7 +358,7 @@
                 },
                 success: function(data) {
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     if (data.status == 'failed') {
                         unblockUI(function() {
                             setTimeout(function() {
@@ -465,7 +467,7 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }

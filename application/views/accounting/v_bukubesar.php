@@ -177,15 +177,18 @@
 
         // set date tglsampai
         $('#tglsampai').datetimepicker({
-            defaultDate: new Date().toLocaleString('en-US', {
-                timeZone: 'Asia/Jakarta'
-            }),
+            defaultDate: (function() {
+                const now = new Date(
+                    new Date().toLocaleString('en-US', {
+                        timeZone: 'Asia/Jakarta'
+                    })
+                );
+
+                // set ke akhir bulan
+                return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            })(),
             format: 'D-MMMM-YYYY',
-            ignoreReadonly: true,
-            // maxDate: new Date(),
-            //minDate : 
-            //maxDate: new Date(),
-            //startDate: StartDate,
+            ignoreReadonly: true
         });
 
 
@@ -328,7 +331,7 @@
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
                 var url = '<?php echo base_url() ?>report/bukubesar/detail';
-                window.open(url + '?coa='+ kode_coa +'&&params=' + arrStr, '_blank');
+                window.open(url + '?coa=' + kode_coa + '&&params=' + arrStr, '_blank');
             }
         }
 
