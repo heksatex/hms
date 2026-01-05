@@ -54,7 +54,7 @@ class M_bukupembelian extends CI_Model
                             invd.harga_satuan,
                             IFNULL(invd.qty_beli * invd.harga_satuan * inv.nilai_matauang, 0) AS dpp,
                             IFNULL((invd.qty_beli * invd.harga_satuan * inv.nilai_matauang) * 11/12 * invd.amount_tax, 0) AS ppn,
-                            
+                            pph23,
                             inv.no_faktur_pajak,
                             inv.tanggal_fk");
         $this->db->from("invoice inv");

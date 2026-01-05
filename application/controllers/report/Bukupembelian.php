@@ -81,7 +81,14 @@ class Bukupembelian extends MY_Controller
 
         $tmp_data = array();
         $num        = 0;
+        $value_pph23 = 0;
         foreach($data as $datas){
+
+            if($datas->pph23 == 1 || $datas->pph23 == '1') {
+                $value_pph23 = 2/100 * $datas->dpp;
+            }
+
+
             $num++;
             $tmp_data[]= array(
                             'no_invoice'=>$datas->no_invoice,
@@ -101,8 +108,10 @@ class Bukupembelian extends MY_Controller
                             'ppn'         =>(float) $datas->ppn,
                             'no_faktur_pajak'=>$datas->no_faktur_pajak,
                             'tanggal_fk'    =>$datas->tanggal_fk,
+                            'pph23'       => (float) $value_pph23
 
             );
+            $value_pph23 = 0;
         
         }
 
@@ -153,7 +162,7 @@ class Bukupembelian extends MY_Controller
 
 
             // header table
-            $table_head_columns  = array('No', 'No Invoice', 'Tgl dibuat', 'RCV', 'PO', 'Uraian', 'Supplier', 'Gudang', 'Qty', 'Uom Beli', 'Currency', 'Kurs', 'Harga', 'DPP', 'PPN', 'No Faktur Pajak', 'Tgl FP');
+            $table_head_columns  = array('No', 'No Invoice', 'Tgl dibuat', 'RCV', 'PO', 'Uraian', 'Supplier', 'Gudang', 'Qty', 'Uom Beli', 'Currency', 'Kurs', 'Harga', 'DPP', 'PPN', 'PPH23', 'No Faktur Pajak', 'Tgl FP');
 
             $column = 0;
             foreach ($table_head_columns as $field) {
@@ -183,14 +192,16 @@ class Bukupembelian extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('M' . $rowCount, $val['harga']);
                 $object->getActiveSheet()->SetCellValue('N' . $rowCount, $val['dpp']);
                 $object->getActiveSheet()->SetCellValue('O' . $rowCount, $val['ppn']);
-                $object->getActiveSheet()->SetCellValue('P' . $rowCount, $val['no_faktur_pajak']);
-                $object->getActiveSheet()->SetCellValue('Q' . $rowCount, $val['tanggal_fk']);
+                $object->getActiveSheet()->SetCellValue('P' . $rowCount, $val['pph23']);
+                $object->getActiveSheet()->SetCellValue('Q' . $rowCount, $val['no_faktur_pajak']);
+                $object->getActiveSheet()->SetCellValue('R' . $rowCount, $val['tanggal_fk']);
 
                 $object->getActiveSheet()->getStyle('I'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $object->getActiveSheet()->getStyle('L'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $object->getActiveSheet()->getStyle('M'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $object->getActiveSheet()->getStyle('N'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $object->getActiveSheet()->getStyle('O'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $object->getActiveSheet()->getStyle('P'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
                 $rowCount++;
             }
