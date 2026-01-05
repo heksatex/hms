@@ -109,6 +109,7 @@
                 $dppKbn = (strtolower($head->jenis_ppn) !== "kbn") ? 5 : 4;
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
+                    $nopo = ($value->no_po !== "") ? "\r\n NO PO : {$value->no_po}" : "";
                     $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                     $totalQty += $value->qty;
                     $totalQtyLot += $value->qty_lot;
@@ -120,12 +121,8 @@
                             <?= ($key + 1) ?>
                         </td>
                         <td>
-                            <?= $value->uraian . $warna ?>
-                            <?php
-                            if ($value->no_po !== "") {
-                                echo "<br>{$value->no_po}";
-                            }
-                            ?>
+                            <?= nl2br($value->uraian.$warna.$nopo) ?>
+                            
                         </td>
                         <td style="text-align: right"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: right"><?= "{$value->qty} {$value->uom}" ?></td>
@@ -140,8 +137,7 @@
                     <td style="text-align: right"> <?= number_format($totalQtyLot, 2) . " {$uomLot}" ?></td>
                     <td style="text-align: right"><?= number_format($totalQty, 2) . " {$uom}" ?></td>
                 </tr>
-            </tbody>
-            <tfoot>
+                
                 <tr>
 
                     <td rowspan="<?= $dppKbn ?>" colspan="4">
@@ -193,7 +189,7 @@
                         <?= "Rp. " . number_format(($head->final_total), 2, ".", ",") ?>
                     </td>
                 </tr>
-            </tfoot>
+            </tbody>
         </table>
         <div id="row">
             <div id="column">
