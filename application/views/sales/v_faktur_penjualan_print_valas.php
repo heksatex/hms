@@ -150,6 +150,29 @@
                         <td style="text-align: right"><?= "Rp. ".number_format($value->jumlah * $head->kurs_nominal, 2) ?></td>
                     </tr>
                     <?php
+                    if ($value->no_po !== "") {
+                        ?>
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                                <?= $value->no_po ?>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <td>  
+                            </td>
+                            <td>
+                            </td>
+                            <td>  
+                            </td>
+                        </tr>
+                        <?php
+                    }
                 }
                 $totals = explode(".", round($head->final_total,2));
                 $terbilang = Kwitansi($totals[0]);
