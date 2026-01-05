@@ -85,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <table cellspacing="0" style="font-size: 14px; width: 100%;border: 1px solid black;border-collapse: collapse;">
+        <table cellspacing="0" style="font-size: 13px; width: 100%;border: 1px solid black;border-collapse: collapse;">
             <thead>
                 <tr>
                     <th rowspan="2" style="width: 30px">No</th>
@@ -95,10 +95,10 @@
                     <th colspan="2">Jumlah</th>
                 </tr>
                 <tr>
-                    <th style="width: 100px">
+                    <th style="width: 120px">
                         Gul/PCS
                     </th>
-                    <th style="width: 100px">
+                    <th style="width: 120px">
                         Satuan
                     </th>
                     <th style="width: 120px">
@@ -107,10 +107,10 @@
                     <th style="width: 120px">
                         IDR
                     </th>
-                    <th style="width: 100px">
+                    <th style="width: 120px">
                         <?= $curr->nama ?>
                     </th>
-                    <th style="width: 160px">
+                    <th style="width: 120px">
                         IDR
                     </th>
                 </tr>
@@ -133,19 +133,15 @@
                     $totalQtyLot += $value->qty_lot;
                     $uomLot = $value->lot;
                     $uom = $value->uom;
-                    $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                    $nopo = ($value->no_po !== "") ? "\r\n NO PO : {$value->no_po}" : "";
+                    $warna = ($value->warna === "") ? "" : "  / {$value->warna}";
                     ?>
                     <tr>
                         <td style="text-align: center;">
                             <?= ($key + 1) ?>
                         </td>
                         <td>
-                            <?= $value->uraian.$warna ?>
-                            <?php 
-                            if ($value->no_po !== "") {
-                                echo "<br>{$value->no_po}";
-                            }
-                            ?>
+                            <?= nl2br($value->uraian.$warna.$nopo) ?>
                         </td>
                         <td style="text-align: right"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: right"><?= "{$value->qty} {$value->uom}" ?></td>
@@ -171,8 +167,7 @@
                      <td style="text-align: right"> <?= number_format($totalQtyLot,2)." {$uomLot}" ?></td>
                     <td style="text-align: right"><?= number_format($totalQty,2)." {$uom}" ?></td>
                 </tr>
-            </tbody>
-            <tfoot>
+                
                 <tr>
                     <td rowspan="4" colspan="5">
                         <p><?= "(*)Kurs : Rp. ".number_format($head->kurs_nominal,2) ?></p>
@@ -221,7 +216,8 @@
                         <?= "Rp. ".number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",") ?>
                     </td>
                 </tr>
-            </tfoot>
+            </tbody>
+           
         </table>
         </br>
         <div id="row">
