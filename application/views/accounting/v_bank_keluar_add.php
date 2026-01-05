@@ -142,7 +142,7 @@
 
                                                 </td>
                                                 <td class="text-bold">
-                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="total_nominal" id="total_nominal" class="form-control input-sm text-right" value="0" readonly/>
+                                                    <input type="text" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="total_nominal" id="total_nominal" class="form-control input-sm text-right" value="0" readonly/>
                                                 </td>
                                             </tr>
                                         </tfoot>
@@ -207,7 +207,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm nominal nominal:nourut text-right" value="0" required/>
+                        <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm nominal nominal:nourut text-right" value="0" required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control"/>
                     </td>
                 </tr>
@@ -265,7 +265,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm nominal text-right nominal:nourut" value="0" required/>
+                        <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm nominal text-right nominal:nourut" value="0" required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control gkd:nourut" value="0"/>
                     </td>
                 </tr>

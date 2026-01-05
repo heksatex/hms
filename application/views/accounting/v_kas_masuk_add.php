@@ -171,7 +171,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
+                        <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control giro_keluar_detail input-sm text-right" value="0" />
                     </td>
                 </tr>
@@ -207,7 +207,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
+                        <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control giro_keluar_detail:nourut input-sm text-right" value="0" />
 
                     </td>

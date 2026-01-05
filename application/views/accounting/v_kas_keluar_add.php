@@ -174,7 +174,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
+                    <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                     <input type="hidden"  value="0" name="po_detail[]" class="form-control"/>
                 </td>
             </tr>
@@ -212,7 +212,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
+                    <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                     <input type="hidden"  value="0" name="po_detail[]" class="form-control po:nourut"/>
                 </td>
             </tr>

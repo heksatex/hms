@@ -160,7 +160,7 @@
                                                 <th class='style bb ws'>No Faktur</th>
                                                 <th class='style bb ws'>No SJ</th>
                                                 <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
-                                                <th class='style bb ws' style="min-width: 150px">Uraian</th>
+                                                <th class='style bb ws' style="min-width: 150px">Nama</th>
                                                 <th class='style bb ws'>Customer</th>
                                                 <th class='style bb ws'>COA</th>
                                                 <th class='style bb ws text-left'>Jenis Ppn</th>
