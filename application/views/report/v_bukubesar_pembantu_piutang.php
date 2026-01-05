@@ -172,9 +172,9 @@
                                                         <th class='style bb' style="min-width: 100px" rowspan="2">Refund</th>
                                                         <th class='style bb' style="min-width: 150px" rowspan="2">
                                                             <span class="smarttip"
-                                                            data-tip="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi + Refund">
-                                                            &#x2757; Saldo Akhir
-                                                        </span>
+                                                                data-tip="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi + Refund">
+                                                                &#x2757; Saldo Akhir
+                                                            </span>
                                                         </th>
                                                         <th class='depo bb text-center ' style="min-width: 150px" colspan="2">Deposit </th>
                                                     </tr>
@@ -241,15 +241,18 @@
 
         // set date tglsampai
         $('#tglsampai').datetimepicker({
-            defaultDate: new Date().toLocaleString('en-US', {
-                timeZone: 'Asia/Jakarta'
-            }),
+            defaultDate: (function() {
+                const now = new Date(
+                    new Date().toLocaleString('en-US', {
+                        timeZone: 'Asia/Jakarta'
+                    })
+                );
+
+                // set ke akhir bulan
+                return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            })(),
             format: 'D-MMMM-YYYY',
-            ignoreReadonly: true,
-            // maxDate: new Date(),
-            //minDate : 
-            //maxDate: new Date(),
-            //startDate: StartDate,
+            ignoreReadonly: true
         });
 
 

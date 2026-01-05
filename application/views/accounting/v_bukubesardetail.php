@@ -32,7 +32,8 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 300px; /* Sesuaikan dengan kebutuhan */
+            max-width: 300px;
+            /* Sesuaikan dengan kebutuhan */
         }
 
         .resizable .resizer:hover {
@@ -52,14 +53,13 @@
             user-select: none;
             height: 100%;
         }
+
         table th,
         table td {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        
     </style>
 </head>
 
@@ -222,15 +222,18 @@
 
         // set date tglsampai
         $('#tglsampai').datetimepicker({
-            defaultDate: new Date().toLocaleString('en-US', {
-                timeZone: 'Asia/Jakarta'
-            }),
+            defaultDate: (function() {
+                const now = new Date(
+                    new Date().toLocaleString('en-US', {
+                        timeZone: 'Asia/Jakarta'
+                    })
+                );
+
+                // set ke akhir bulan
+                return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            })(),
             format: 'D-MMMM-YYYY',
-            ignoreReadonly: true,
-            // maxDate: new Date(),
-            //minDate : 
-            //maxDate: new Date(),
-            //startDate: StartDate,
+            ignoreReadonly: true
         });
 
         //select 2 COA
@@ -253,7 +256,7 @@
                     $.each(data, function(index, item) {
                         results.push({
                             id: item.kode_coa,
-                            text: item.kode_coa +' - '+ item.nama
+                            text: item.kode_coa + ' - ' + item.nama
                         });
                     });
                     return {
@@ -306,7 +309,7 @@
             var tgldari = $('#tgldari').val();
             var tglsampai = $('#tglsampai').val();
             var check_hidden = $("#hidden_check").is(':checked');
-            var coa    = $('#coa').val();
+            var coa = $('#coa').val();
 
             $("#example1_processing").css('display', ''); // show loading
             this_btn.button('loading');
@@ -318,7 +321,7 @@
                     tgldari: tgldari,
                     tglsampai: tglsampai,
                     checkhidden: check_hidden,
-                    coa:coa
+                    coa: coa
                 },
                 success: function(data) {
 
@@ -343,7 +346,7 @@
                             tgldari: tgldari,
                             tglsampai: tglsampai,
                             checkhidden: check_hidden,
-                            coa:coa
+                            coa: coa
                         });
 
                         $.each(data.record, function(key, value) {
@@ -354,7 +357,7 @@
                                 $("<td colspan=2 class='text-center'>").html('<b>No. ACC: </b> ' + value.kode_acc),
                                 $("<td class='text-left' colspan=2>").html('<b>Nama ACC : </b>' + value.nama_acc),
                                 // $("<td class='text-left'>").text(value.nama_acc),
-                                $("<td align=''>").html('<b>Saldo Normal : </b> '+ value.saldo_normal),
+                                $("<td align=''>").html('<b>Saldo Normal : </b> ' + value.saldo_normal),
                                 $("<td colspan='2'>").text(''),
                             );
                             tbody.append(tr);
@@ -369,7 +372,7 @@
 
                             tbody.append(tr2);
                             no = 2
-                            acc  = '';
+                            acc = '';
                             debit = 0;
                             credit = 0;
                             s_akhir = value.saldo_awal;
@@ -396,12 +399,12 @@
                             no = 1;
 
                             var tr4 = $("<tr>").append(
-                                        $("<td colspan='4' class='style_space'>").text(''),
-                                        $("<td class='style_space text-right'>").html('<b>Total : ' +value.kode_acc+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(debit.toFixed(2))+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(credit.toFixed(2))+ '</b>'),
-                                        $("<td class='style_space text-right'>").html('<b>' +formatNumber(s_akhir.toFixed(2))+ '</b>'),
-                                        );
+                                $("<td colspan='4' class='style_space'>").text(''),
+                                $("<td class='style_space text-right'>").html('<b>Total : ' + value.kode_acc + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(s_akhir.toFixed(2)) + '</b>'),
+                            );
                             tbody.append(tr4);
                         });
 
