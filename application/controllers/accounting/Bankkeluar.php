@@ -593,6 +593,7 @@ class Bankkeluar extends MY_Controller {
                 throw new \exception("Data No Bank Keluar {$kode} tidak ditemukan", 500);
             }
             $buff = $printer->getPrintConnector();
+            $printer->feed();
             $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bM");
             $tanggal = date("d-m-Y", strtotime($head->tanggal));
