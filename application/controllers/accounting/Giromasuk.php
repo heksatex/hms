@@ -544,6 +544,7 @@ class Giromasuk extends MY_Controller {
             }
 
             $buff = $printer->getPrintConnector();
+            $printer->feed();
             $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bM");
             $tanggal = date("d-m-Y", strtotime($head->tanggal));

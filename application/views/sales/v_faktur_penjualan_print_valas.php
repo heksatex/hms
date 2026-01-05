@@ -85,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <table cellspacing="0" style="font-size: 12px; width: 100%;border: 1px solid black;border-collapse: collapse;">
+        <table cellspacing="0" style="font-size: 14px; width: 100%;border: 1px solid black;border-collapse: collapse;">
             <thead>
                 <tr>
                     <th rowspan="2" style="width: 30px">No</th>
@@ -95,10 +95,10 @@
                     <th colspan="2">Jumlah</th>
                 </tr>
                 <tr>
-                    <th style="width: 120px">
+                    <th style="width: 100px">
                         Gul/PCS
                     </th>
-                    <th style="width: 120px">
+                    <th style="width: 100px">
                         Satuan
                     </th>
                     <th style="width: 120px">
@@ -107,10 +107,10 @@
                     <th style="width: 120px">
                         IDR
                     </th>
-                    <th style="width: 120px">
+                    <th style="width: 100px">
                         <?= $curr->nama ?>
                     </th>
-                    <th style="width: 120px">
+                    <th style="width: 160px">
                         IDR
                     </th>
                 </tr>
@@ -141,6 +141,11 @@
                         </td>
                         <td>
                             <?= $value->uraian.$warna ?>
+                            <?php 
+                            if ($value->no_po !== "") {
+                                echo "<br>{$value->no_po}";
+                            }
+                            ?>
                         </td>
                         <td style="text-align: right"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: right"><?= "{$value->qty} {$value->uom}" ?></td>
@@ -150,29 +155,6 @@
                         <td style="text-align: right"><?= "Rp. ".number_format($value->jumlah * $head->kurs_nominal, 2) ?></td>
                     </tr>
                     <?php
-                    if ($value->no_po !== "") {
-                        ?>
-                        <tr>
-                            <td>
-                            </td>
-                            <td>
-                                <?= $value->no_po ?>
-                            </td>
-                            <td>
-                            </td>
-                            <td>
-                            </td>
-                            <td>
-                            </td>
-                            <td>  
-                            </td>
-                            <td>
-                            </td>
-                            <td>  
-                            </td>
-                        </tr>
-                        <?php
-                    }
                 }
                 $totals = explode(".", round($head->final_total,2));
                 $terbilang = Kwitansi($totals[0]);

@@ -84,10 +84,10 @@
             <thead>
                 <tr>
                     <th rowspan="2" style="width: 30px">No</th>
-                    <th rowspan="2" style="width: 200px">Jenis Barang / Uraian</th>
+                    <th rowspan="2" style="width: 250px">Jenis Barang / Uraian</th>
                     <th colspan="2">Quantity</th>
                     <th rowspan="2" style="width: 120px;">Harga Satuan</th>
-                    <th rowspan="2" style="width: 150px;">Jumlah</th>
+                    <th rowspan="2" style="width: 160px;">Jumlah</th>
                 </tr>
                 <tr>
                     <th style="width: 100px">
@@ -121,6 +121,11 @@
                         </td>
                         <td>
                             <?= $value->uraian . $warna ?>
+                            <?php 
+                            if ($value->no_po !== "") {
+                                echo "<br>{$value->no_po}";
+                            }
+                            ?>
                         </td>
                         <td style="text-align: right"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: right"><?= "{$value->qty} {$value->uom}" ?></td>
@@ -128,25 +133,6 @@
                         <td style="text-align: right"><?= "Rp. " . number_format($value->jumlah, 2) ?></td>
                     </tr>
                     <?php
-                    if ($value->no_po !== "") {
-                        ?>
-                        <tr>
-                            <td>
-                            </td>
-                            <td>
-                                <?= $value->no_po ?>
-                            </td>
-                            <td>
-                            </td>
-                            <td>
-                            </td>
-                            <td>
-                            </td>
-                            <td>  
-                            </td>
-                        </tr>
-                        <?php
-                    }
                 }
                 ?>
                 <tr>
