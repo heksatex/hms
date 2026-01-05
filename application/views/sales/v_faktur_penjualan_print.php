@@ -106,7 +106,7 @@
                 $totalQtyLot = 0;
                 $uomLot = "";
                 $uom = "";
-
+                $dppKbn = (strtolower($head->jenis_ppn) !== "kbn") ? 5 : 4;
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
                     $warna = ($value->warna === "") ? "" : " / {$value->warna}";
@@ -121,7 +121,7 @@
                         </td>
                         <td>
                             <?= $value->uraian . $warna ?>
-                            <?php 
+                            <?php
                             if ($value->no_po !== "") {
                                 echo "<br>{$value->no_po}";
                             }
@@ -143,7 +143,8 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td rowspan="5" colspan="4">
+
+                    <td rowspan="<?= $dppKbn ?>" colspan="4">
                         Terbilang : <?= Kwitansi(round($head->final_total)) ?> Rupiah
                     </td>
                     <td style="font-weight: bold;">
@@ -153,17 +154,21 @@
                         <?= "Rp. " . number_format(round($head->grand_total), 2, ".", ",") ?>
                     </td>
                 </tr>
-                <tr>
-                    <td style="font-weight: bold;">
-                        Dpp Nilai Lain
-                    </td>
-                    <?php
-                    $subtotal2 = (round($head->grand_total) - round($head->diskon));
+                <?php
+                if (strtolower($head->jenis_ppn) !== "kbn") {
                     ?>
-                    <td style="text-align: right">
-                        <?= "Rp. " . number_format($head->dpp_lain, 2, ".", ",") ?>
-                    </td>
-                </tr>
+                    <tr>
+                        <td style="font-weight: bold;">
+                            Dpp Nilai Lain
+                        </td>
+                        <?php
+                        $subtotal2 = (round($head->grand_total) - round($head->diskon));
+                        ?>
+                        <td style="text-align: right">
+                            <?= "Rp. " . number_format($head->dpp_lain, 2, ".", ",") ?>
+                        </td>
+                    </tr>
+                <?php } ?>
                 <tr>
                     <td style="font-weight: bold;">
                         Discount
