@@ -446,8 +446,10 @@ class Kaskecilkeluar extends MY_Controller {
                 throw new \exception("Data No Kas Kecil Keluar {$kode} tidak ditemukan", 500);
             }
             $buff = $printer->getPrintConnector();
-            $printer->feed();
-            $buff->write("\x1bC" . chr(34));
+            $buff->write("\x1bO");
+            $buff->write("\x1b" . chr(2));
+            $buff->write("\x1bC" . chr(33));
+            $buff->write("\x1bN" . chr(4));
             $buff->write("\x1bM");
             $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));

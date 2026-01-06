@@ -130,7 +130,7 @@
                     $uomLot = $value->lot;
                     $uom = $value->uom;
                     $nopo = ($value->no_po !== "") ? "\r\n NO PO : {$value->no_po}" : "";
-                    $warna = ($value->warna === "") ? "" : "  / {$value->warna}";
+                    $warna = ($value->warna === "") ? "" : "/{$value->warna}";
                     ?>
                     <tr>
                         <td style="text-align: center;">

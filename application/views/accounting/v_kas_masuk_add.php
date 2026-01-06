@@ -32,7 +32,7 @@
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-acc-kasmasuk" id="form-acc-kasmasuk" action="<?= base_url("accounting/kasmasuk/simpan") ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Bukti Kas Masuk</h3>
+                                <h3 class="box-title">Bukti Kas Masuk <span id="no"></span></h3>
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -287,7 +287,7 @@
 //                    }
                 });
             });
-            
+
             const setNominalCurrency = (() => {
                 $("input[data-type='currency']").on({
                     keyup: function () {
@@ -386,7 +386,21 @@
                 $(".no_acc").on("change", function () {
                     var txt = $(".no_acc option:selected").text();
                     var txtt = txt.split(' - ');
-                    $("#coa_name").val(txtt.at(-1));
+                    var coa = txtt.at(-1);
+                    $("#coa_name").val(coa);
+                    if (txtt.length > 1) {
+                        previewNo(coa,$("#tanggal").val());
+                    }
+                });
+                
+                $("#tanggal").on("blur",function(){
+                    previewNo($("#coa_name").val(),$("#tanggal").val());
+                });
+
+                const previewNo = ((coa, tgl) => {
+                    $.post("<?= base_url('accounting/kasmasuk/preview_no') ?>", {coa_name: coa, tanggal: tgl}, function (data) {
+                        $("#no").html(data.data);
+                    });
                 });
 
                 $(".btn-add-item").on("click", function (e) {
@@ -397,11 +411,11 @@
                     $("#kasmasuk-detail tbody").append(isi_tmplt);
                     setCoaItem();
                     setCurr();
-                    $(".nominal"+no).on("blur", function () {
+                    $(".nominal" + no).on("blur", function () {
                         calculateTotal();
                     });
 
-                    $(".nominal"+no).keyup(function (ev) {
+                    $(".nominal" + no).keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
                         }

@@ -63,6 +63,33 @@ class Kaskeluar extends MY_Controller {
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_keluar_add', $data);
     }
+    
+    public function preview_no() {
+        try {
+            $coaName = $this->input->post("coa_name");
+            $tanggal = $this->input->post("tanggal");
+            if (strtolower($coaName) === 'kas valas') {
+                if (!$nokm = $this->token->noUrut('kas_keluar_valas', date('ym', strtotime($tanggal)), false)->generate('KKVH', '/%03d')
+                                ->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal)) . "/"))->get()) {
+
+                    $nokm = sprintf("KKVH/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal))) . "/%03d", 1);
+                }
+            } else {
+                if (!$nokm = $this->token->noUrut('kas_keluar', date('ym', strtotime($tanggal)), false)->generate('KKBRH', '/%03d')
+                                ->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal)) . "/"))->get()) {
+
+                    $nokm = sprintf("KKBRH/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal))) . "/%03d", 1);
+                }
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $nokm)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
 
     public function list_data() {
         try {
@@ -609,8 +636,11 @@ class Kaskeluar extends MY_Controller {
                 throw new \exception("Data No Kas Keluar {$kode} tidak ditemukan", 500);
             }
             $buff = $printer->getPrintConnector();
-            $printer->feed();
-            $buff->write("\x1bC" . chr(34));
+            $buff->write("\x1bO");
+            $buff->write("\x1b" . chr(2));
+            $buff->write("\x1bC" . chr(33));
+            $buff->write("\x1bN" . chr(4));
+//            $printer->feed();
             $buff->write("\x1bM");
             $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
@@ -657,7 +687,7 @@ class Kaskeluar extends MY_Controller {
 //            $printer->selectPrintMode();
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-            $printer->text(str_pad("Untuk transaksi : {$head->transinfo}", 120));
+            $printer->text(str_pad("Untuk transaksi : {$head->transinfo}", 118));
             $printer->setUnderline(Printer::UNDERLINE_NONE);
             $printer->feed();
             $detail = $model->setTables("acc_kas_keluar_detail")

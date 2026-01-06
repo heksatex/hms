@@ -110,7 +110,7 @@
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
                     $nopo = ($value->no_po !== "") ? "\r\n NO PO : {$value->no_po}" : "";
-                    $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                    $warna = ($value->warna === "") ? "" : "/{$value->warna}";
                     $totalQty += $value->qty;
                     $totalQtyLot += $value->qty_lot;
                     $uomLot = $value->lot;

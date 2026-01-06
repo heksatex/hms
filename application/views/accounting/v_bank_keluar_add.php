@@ -32,7 +32,7 @@
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-acc-bankkeluar" id="form-acc-bankkeluar" action="<?= base_url("accounting/bankkeluar/simpan") ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Bukti Bank Keluar</h3>
+                                <h3 class="box-title">Bukti Bank Keluar <span id="no"></h3> 
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -528,6 +528,17 @@
                 },
                         false
                         );
+
+                const previewNo = ((tgl) => {
+                    $.post("<?= base_url('accounting/bankkeluar/preview_no') ?>", {kode: "BBKH", tanggal: tgl}, function (data) {
+                        $("#no").html(data.data);
+                    });
+                });
+
+                previewNo($("#tanggal").val());
+                $("#tanggal").on("blur", function () {
+                    previewNo($("#tanggal").val());
+                });
 
             });
 
