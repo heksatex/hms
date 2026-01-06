@@ -3,12 +3,14 @@ $no = 0;
 foreach ($data as $key => $value) {
     $no += 1;
     $dpplainDikon = ($value->diskon * 11 / 12);
+    $uraian = $value->uraian;
+    $uraian .=($value->warna === "") ? "":"/{$value->warna}";
     ?>
     <tr>
         <td><?= $no ?></td>
         <td><?= $value->no_sj ?></td>
         <td><?= $value->tanggal ?></td>
-        <td><?= $value->uraian ?></td>
+        <td><?= $uraian ?></td>
         <td class="text-right"><?= number_format(($value->harga * $value->kurs_nominal), 2) ?></td>
         <td ><?= "{$value->qty} {$value->uom}" ?></td>
         <td class="text-right"><?= number_format(($value->diskon * $value->kurs_nominal), 2) ?></td>

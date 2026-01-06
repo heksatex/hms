@@ -68,7 +68,7 @@ class Exportcoretax extends MY_Controller {
             $tanggalAkhir = date("Y-m-d", strtotime($periodes[1]));
             $wheres = ["tanggal >=" => $tanggalAwal, "tanggal <=" => $tanggalAkhir, "partner_id" => $customer, "status" => "confirm"];
             $this->data->setTables("acc_faktur_penjualan fp")->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
-                    ->setOrder(["no_sj" => "asc"])->setWheres($wheres)
+                    ->setOrder(["no_sj" => "asc","uraian" => "asc","warna" => "asc"])->setWheres($wheres)
                     ->setSelects(["no_sj", "tanggal", "tax_value", "kurs_nominal", "fpd.*"]);
         } catch (Exception $ex) {
             throw $ex;
@@ -184,10 +184,12 @@ class Exportcoretax extends MY_Controller {
             foreach ($data as $key => $value) {
                 $dpplainDikon = ($value->diskon * 11 / 12);
                 $rowFD += 1;
+                $uraian = $value->uraian;
+                $uraian .=($value->warna === "") ? "":"/{$value->warna}";
                 $baris = ($tempSj === $value->no_sj) ? $baris : $baris + 1;
                 $sheetFD->setCellValue("A{$rowFD}", $baris);
                 $sheetFD->setCellValue("b{$rowFD}", "A");
-                $sheetFD->setCellValue("d{$rowFD}", $value->uraian);
+                $sheetFD->setCellValue("d{$rowFD}", $uraian);
                 $sheetFD->setCellValue("e{$rowFD}", $value->satuan_ukur);
                 $sheetFD->setCellValue("f{$rowFD}", ($value->harga * $value->kurs_nominal));
                 $sheetFD->setCellValue("g{$rowFD}", $value->qty);
@@ -205,7 +207,6 @@ class Exportcoretax extends MY_Controller {
                 $rowFD += 1;
                 $rowF += 1;
                 $sheetFD->setCellValue("A{$rowFD}", "END");
-                $sheetFD->setCellValue("A{$rowF}", "END");
             }
             $periode = $this->input->post("periode");
             $nm = str_replace(".", "_", $namaPembeli);
