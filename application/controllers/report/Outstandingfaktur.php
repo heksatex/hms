@@ -59,7 +59,7 @@ class Outstandingfaktur extends MY_Controller {
         try {
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan")->setOrder(["tanggal" => "asc", "no_faktur_internal" => "asc"])
-                    ->setSelects(["acc_faktur_penjualan.*", "DATEDIFF(CURDATE(), tanggal) AS hari"]);
+                    ->setSelects(["acc_faktur_penjualan.*", "DATEDIFF(CURDATE(), tanggal) AS hari"])->setWheres(["lunas" => 0, "status" => "confirm"]);
             return $model;
         } catch (Exception $ex) {
             throw $ex;

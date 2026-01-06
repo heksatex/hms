@@ -81,23 +81,23 @@
             </div>
         </div>
         <table cellspacing="0" style="font-size: 12px; width: 100%;border: 1px solid black;border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <th rowspan="2" style="width: 30px">No</th>
-                    <th rowspan="2" style="width: 250px">Jenis Barang / Uraian</th>
-                    <th colspan="2">Quantity</th>
-                    <th rowspan="2" style="width: 120px;">Harga Satuan</th>
-                    <th rowspan="2" style="width: 160px;">Jumlah</th>
-                </tr>
-                <tr>
-                    <th style="width: 100px">
-                        Gul/PCS
-                    </th>
-                    <th style="width: 100px">
-                        Satuan
-                    </th>
-                </tr>
-            </thead>
+
+            <tr>
+                <th rowspan="2" style="width: 30px">No</th>
+                <th rowspan="2" style="width: 250px">Jenis Barang / Uraian</th>
+                <th colspan="2">Quantity</th>
+                <th rowspan="2" style="width: 120px;">Harga Satuan</th>
+                <th rowspan="2" style="width: 160px;">Jumlah</th>
+            </tr>
+            <tr>
+                <th style="width: 100px">
+                    Gul/PCS
+                </th>
+                <th style="width: 100px">
+                    Satuan
+                </th>
+            </tr>
+
             <tbody>
                 <?php
                 $dpp = number_format(($head->grand_total - $head->diskon) * 11 / 12, 2, ".", ",");
@@ -121,8 +121,8 @@
                             <?= ($key + 1) ?>
                         </td>
                         <td>
-                            <?= nl2br($value->uraian.$warna.$nopo) ?>
-                            
+                            <?= nl2br($value->uraian . $warna . $nopo) ?>
+
                         </td>
                         <td style="text-align: right"><?= "{$value->qty_lot} {$value->lot}" ?></td>
                         <td style="text-align: right"><?= "{$value->qty} {$value->uom}" ?></td>
@@ -137,7 +137,10 @@
                     <td style="text-align: right"> <?= number_format($totalQtyLot, 2) . " {$uomLot}" ?></td>
                     <td style="text-align: right"><?= number_format($totalQty, 2) . " {$uom}" ?></td>
                 </tr>
-                
+
+
+            </tbody>
+            <tfoot>
                 <tr>
 
                     <td rowspan="<?= $dppKbn ?>" colspan="4">
@@ -189,7 +192,7 @@
                         <?= "Rp. " . number_format(($head->final_total), 2, ".", ",") ?>
                     </td>
                 </tr>
-            </tbody>
+            </tfoot>
         </table>
         <div id="row">
             <div id="column">
