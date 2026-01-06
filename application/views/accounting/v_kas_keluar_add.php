@@ -375,7 +375,7 @@
                 });
                 
                 const previewNo = ((coa, tgl) => {
-                    $.post("<?= base_url('accounting/kasmasuk/preview_no') ?>", {coa_name: coa, tanggal: tgl}, function (data) {
+                    $.post("<?= base_url('accounting/kaskeluar/preview_no') ?>", {coa_name: coa, tanggal: tgl}, function (data) {
                         $("#no").html(data.data);
                     });
                 });
