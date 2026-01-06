@@ -71,7 +71,7 @@ class Bankmasuk extends MY_Controller {
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
-        
+
         $this->load->view('accounting/v_bank_masuk_add', $data);
     }
 
@@ -738,19 +738,69 @@ class Bankmasuk extends MY_Controller {
             $printer->setUnderline(Printer::UNDERLINE_NONE);
             $totals = 0;
             $no = 0;
-            foreach ($detail as $keys => $values) {
-                $no += 1;
-                $totals += $values->nominal;
-                $line = str_pad($no, 5);
-                $line .= str_pad($values->uraian, 40);
-//                $line .= str_pad($values->no_rek, 20);
-                $line .= str_pad($values->no_bg, 20);
-//                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_cair)), 15);
-                $line .= str_pad($values->kode_coa, 20, " ", STR_PAD_BOTH);
-                $line .= str_pad(number_format($values->kurs, 2), 10, " ", STR_PAD_BOTH);
-                $line .= str_pad($values->curr, 10, " ", STR_PAD_BOTH);
-                $line .= str_pad(number_format($values->nominal, 2), 30, " ", STR_PAD_LEFT);
-                $printer->text($line . "\n");
+            foreach ($detail as $keys => $value) {
+                $totals += $value->nominal;
+                $no = str_split(($key + 1), 4);
+                foreach ($no as $k => $vls) {
+                    $vls = trim($vls);
+                    $no[$k] = $vls;
+                }
+                $uraian = str_split($value->uraian, 39);
+                foreach ($uraian as $k => $vls) {
+                    $vls = trim($vls);
+                    $uraian[$k] = $vls;
+                }
+                $nobg = str_split($value->no_bg, 19);
+                foreach ($nobg as $k => $vls) {
+                    $vls = trim($vls);
+                    $nobg[$k] = $vls;
+                }
+                $coa = str_split($value->kode_coa, 19);
+                foreach ($coa as $k => $vls) {
+                    $vls = trim($vls);
+                    $coa[$k] = $vls;
+                }
+                $kurs = str_split(number_format($value->kurs, 2), 9);
+                foreach ($coa as $k => $vls) {
+                    $vls = trim($vls);
+                    $kurs[$k] = $vls;
+                }
+                $curr = str_split($value->curr, 9);
+                foreach ($coa as $k => $vls) {
+                    $vls = trim($vls);
+                    $curr[$k] = $vls;
+                }
+                $nominal = str_split(number_format($value->nominal, 2), 29);
+                foreach ($nominal as $k => $vls) {
+                    $vls = trim($vls);
+                    $nominal[$k] = $vls;
+                }
+
+                $counter = 0;
+                $temp = [];
+                $temp[] = count($no);
+                $temp[] = count($uraian);
+                $temp[] = count($coa);
+                $temp[] = count($kurs);
+                $temp[] = count($curr);
+                $temp[] = count($nobg);
+                $counter = max($temp);
+                for ($i = 0; $i < $counter; $i++) {
+                    if (($counter - 1) === $i) {
+                        $printer->setUnderline(Printer::UNDERLINE_SINGLE);
+                    }
+                    $line = (isset($no[$i])) ? str_pad($no[$i], 5) : str_pad("", 5);
+                    $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 40, " ", STR_PAD_RIGHT) : str_pad("", 40, " ", STR_PAD_RIGHT);
+                    $line .= (isset($nobg[$i])) ? str_pad($nobg[$i], 20, " ", STR_PAD_RIGHT) : str_pad("", 20, " ", STR_PAD_RIGHT);
+                    $line .= (isset($coa[$i])) ? str_pad($coa[$i], 20, " ", STR_PAD_RIGHT) : str_pad("", 20, " ", STR_PAD_RIGHT);
+                    $line .= (isset($kurs[$i])) ? str_pad($kurs[$i], 10, " ", STR_PAD_LEFT) : str_pad("", 10, " ", STR_PAD_LEFT);
+                    $line .= (isset($curr[$i])) ? str_pad($curr[$i], 10, " ", STR_PAD_RIGHT) : str_pad("", 10, " ", STR_PAD_RIGHT);
+                    $line .= (isset($nominal[$i])) ? str_pad($nominal[$i], 30, " ", STR_PAD_LEFT) : str_pad("", 30, " ", STR_PAD_LEFT);
+                    $printer->text($line . "\n");
+                    if (($counter - 1) === $i) {
+                        $printer->setUnderline(Printer::UNDERLINE_NONE);
+                    }
+                }
             }
             $printer->feed();
 
