@@ -86,7 +86,7 @@
             </div>
         </div>
         <table cellspacing="0" style="font-size: 13px; width: 100%;border: 1px solid black;border-collapse: collapse;">
-            <thead>
+            
                 <tr>
                     <th rowspan="2" style="width: 30px">No</th>
                     <th rowspan="2" style="width: 250px">Jenis Barang / Uraian</th>
@@ -114,10 +114,6 @@
                         IDR
                     </th>
                 </tr>
-                <tr>
-
-                </tr>
-            </thead>
             <tbody>
                 <?php
                 $subtotal = 0;
@@ -168,6 +164,9 @@
                     <td style="text-align: right"><?= number_format($totalQty,2)." {$uom}" ?></td>
                 </tr>
                 
+                
+            </tbody>
+            <tfoot>
                 <tr>
                     <td rowspan="4" colspan="5">
                         <p><?= "(*)Kurs : Rp. ".number_format($head->kurs_nominal,2) ?></p>
@@ -216,7 +215,7 @@
                         <?= "Rp. ".number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",") ?>
                     </td>
                 </tr>
-            </tbody>
+            </tfoot>
            
         </table>
         </br>
