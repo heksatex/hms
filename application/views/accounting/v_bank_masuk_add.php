@@ -29,7 +29,7 @@
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-acc-bankmasuk" id="form-acc-bankmasuk" action="<?= base_url("accounting/bankmasuk/simpan") ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Bukti Bank Masuk</h3>
+                                <h3 class="box-title">Bukti Bank Masuk <span id="no"></h3>
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -524,7 +524,17 @@
                         });
                     }
                 });
-
+                
+                const previewNo = ((tgl) => {
+                    $.post("<?= base_url('accounting/bankkeluar/preview_no') ?>", {kode: "BBMH", tanggal: tgl}, function (data) {
+                        $("#no").html(data.data);
+                    });
+                });
+                
+                previewNo($("#tanggal").val());
+                $("#tanggal").on("blur",function(){
+                    previewNo($("#tanggal").val());
+                });
 
             });
             const addToTable = ((data, url) => {

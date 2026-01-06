@@ -142,6 +142,7 @@ class Girokeluar extends MY_Controller {
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi",["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
+        
         $this->load->view('accounting/v_giro_keluar_add', $data);
     }
 
@@ -552,8 +553,11 @@ class Girokeluar extends MY_Controller {
             }
 
             $buff = $printer->getPrintConnector();
-            $printer->feed();
-            $buff->write("\x1bC" . chr(34));
+            $buff->write("\x1bO");
+            $buff->write("\x1b" . chr(2));
+            $buff->write("\x1bC" . chr(33));
+            $buff->write("\x1bN" . chr(4));
+//            $printer->feed();
             $buff->write("\x1bM");
             $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
