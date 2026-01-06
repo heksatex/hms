@@ -140,9 +140,41 @@ class Bankkeluar extends MY_Controller {
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama"=>"asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
+       
         $this->load->view('accounting/v_bank_keluar_add', $data);
+    }
+    
+    public function preview_no() {
+        try {
+            $kodes = [
+                "BBKH"=>"bank_keluar",
+                "BBMH"=>"bank_masuk",
+                "MKGH"=>"giro_masuk",
+                "BGKH"=>"giro_keluar",
+                "KKM"=>"kas_kecil_masuk",
+                "KKK"=>"kas_kecil_keluar"
+                
+            ];
+            $kode = $this->input->post("kode");
+            $tanggal = $this->input->post("tanggal");
+            $no = "";
+            if ($kode !== '') {
+                if (!$no = $this->token->noUrut($kodes[$kode], date('ym', strtotime($tanggal)), false)->generate($kode, '/%03d')
+                                ->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal)) . "/"))->get()) {
+
+                    $no = sprintf("{$kode}/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal))) . "/%03d", 1);
+                }
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $no)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
     }
 
     public function get_view_bukti_giro() {
@@ -263,7 +295,7 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -360,7 +392,7 @@ class Bankkeluar extends MY_Controller {
 
             $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
-                            ->setSelects(["agkd.*","partner_id,partner_nama,agk.lain2 as lain,agk.transinfo"])
+                            ->setSelects(["agkd.*", "partner_id,partner_nama,agk.lain2 as lain,agk.transinfo"])
                             ->setSelects(["currency_kurs.currency as curr"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
             $this->output->set_status_header(200)
@@ -394,7 +426,7 @@ class Bankkeluar extends MY_Controller {
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama"=>"asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama" => "asc"])->getData();
             $data['id_dept'] = 'ACCBK';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -459,7 +491,7 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -593,8 +625,10 @@ class Bankkeluar extends MY_Controller {
                 throw new \exception("Data No Bank Keluar {$kode} tidak ditemukan", 500);
             }
             $buff = $printer->getPrintConnector();
-            $printer->feed();
-            $buff->write("\x1bC" . chr(34));
+            $buff->write("\x1bO");
+            $buff->write("\x1b" . chr(2));
+            $buff->write("\x1bC" . chr(33));
+            $buff->write("\x1bN" . chr(4));
             $buff->write("\x1bM");
             $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
@@ -646,15 +680,14 @@ class Bankkeluar extends MY_Controller {
             $buff->write("\x1bX" . chr(15));
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("No", 3));
-            $printer->text(str_pad("Bank", 13, " ", STR_PAD_RIGHT));
-            $printer->text(str_pad("No Rek", 20, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("Uraian", 46, " ", STR_PAD_RIGHT));
             $printer->text(str_pad("No Cek/BG", 20, " ", STR_PAD_RIGHT));
-            $printer->text(str_pad("Tgl.JT", 13, " ", STR_PAD_RIGHT));
-            $printer->text(str_pad("Tgl.Cair", 13, " ", STR_PAD_RIGHT));
+//            $printer->text(str_pad("Tgl.JT", 13, " ", STR_PAD_RIGHT));
+//            $printer->text(str_pad("Tgl.Cair", 13, " ", STR_PAD_RIGHT));
             $printer->text(str_pad("No Acc(Debet)", 15, " ", STR_PAD_BOTH));
             $printer->text(str_pad("Kurs", 10, " ", STR_PAD_BOTH));
             $printer->text(str_pad("Curr", 10, " ", STR_PAD_BOTH));
-            $printer->text(str_pad("Nominal", 20, " ", STR_PAD_LEFT));
+            $printer->text(str_pad("Nominal", 33, " ", STR_PAD_LEFT));
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_NONE);
             $totals = 0;
@@ -664,15 +697,14 @@ class Bankkeluar extends MY_Controller {
                 $no += 1;
                 $totals += $values->nominal;
                 $line = str_pad($no, 3);
-                $line .= str_pad($values->bank, 13);
-                $line .= str_pad($values->no_rek, 20);
+                $line .= str_pad($values->uraian, 46);
                 $line .= str_pad($values->no_bg, 20);
-                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_jt)), 13);
-                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_cair)), 13);
+//                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_jt)), 13);
+//                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_cair)), 13);
                 $line .= str_pad($values->kode_coa, 15, " ", STR_PAD_BOTH);
                 $line .= str_pad(number_format($values->kurs, 2), 10, " ", STR_PAD_BOTH);
                 $line .= str_pad($values->curr, 10, " ", STR_PAD_BOTH);
-                $line .= str_pad(number_format($values->nominal, 2), 20, " ", STR_PAD_LEFT);
+                $line .= str_pad(number_format($values->nominal, 2), 33, " ", STR_PAD_LEFT);
                 $printer->text($line . "\n");
             }
             $printer->feed();
@@ -851,9 +883,9 @@ class Bankkeluar extends MY_Controller {
                 default:
                     $this->validasiPin($pin, "Batal / Cancel Data Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
 
-                    $lunas =  $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id, "lunas" => 1])->getDetail();
-                    if($lunas) {
-                         throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
+                    $lunas = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id, "lunas" => 1])->getDetail();
+                    if ($lunas) {
+                        throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
                     }
                     $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id, "giro_keluar_detail_id <>" => '0'])
                                     ->setSelects(["GROUP_CONCAT(giro_keluar_detail_id) as gids"])->getDetail();

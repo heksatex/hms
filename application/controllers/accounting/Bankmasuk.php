@@ -71,6 +71,7 @@ class Bankmasuk extends MY_Controller {
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
+        
         $this->load->view('accounting/v_bank_masuk_add', $data);
     }
 
@@ -669,7 +670,10 @@ class Bankmasuk extends MY_Controller {
             }
 
             $buff = $printer->getPrintConnector();
-            $buff->write("\x1bC" . chr(34));
+            $buff->write("\x1bO");
+            $buff->write("\x1b" . chr(2));
+            $buff->write("\x1bC" . chr(33));
+            $buff->write("\x1bN" . chr(4));
             $buff->write("\x1bM");
             $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
@@ -722,14 +726,14 @@ class Bankmasuk extends MY_Controller {
             $buff->write("\x1bX" . chr(15));
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("No", 5));
-            $printer->text(str_pad("Bank", 15, " ", STR_PAD_RIGHT));
-            $printer->text(str_pad("No Rek", 20, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("uraian", 40, " ", STR_PAD_RIGHT));
+//            $printer->text(str_pad("No Rek", 20, " ", STR_PAD_RIGHT));
             $printer->text(str_pad("No Cek/BG", 20, " ", STR_PAD_RIGHT));
-            $printer->text(str_pad("Tgl.Cair", 15, " ", STR_PAD_RIGHT));
+//            $printer->text(str_pad("Tgl.Cair", 15, " ", STR_PAD_RIGHT));
             $printer->text(str_pad("No Acc(Kredit)", 20, " ", STR_PAD_BOTH));
             $printer->text(str_pad("Kurs", 10, " ", STR_PAD_BOTH));
             $printer->text(str_pad("Curr", 10, " ", STR_PAD_BOTH));
-            $printer->text(str_pad("Nominal", 20, " ", STR_PAD_LEFT));
+            $printer->text(str_pad("Nominal", 30, " ", STR_PAD_LEFT));
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_NONE);
             $totals = 0;
@@ -738,14 +742,14 @@ class Bankmasuk extends MY_Controller {
                 $no += 1;
                 $totals += $values->nominal;
                 $line = str_pad($no, 5);
-                $line .= str_pad($values->bank, 15);
-                $line .= str_pad($values->no_rek, 20);
+                $line .= str_pad($values->uraian, 40);
+//                $line .= str_pad($values->no_rek, 20);
                 $line .= str_pad($values->no_bg, 20);
-                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_cair)), 15);
+//                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_cair)), 15);
                 $line .= str_pad($values->kode_coa, 20, " ", STR_PAD_BOTH);
                 $line .= str_pad(number_format($values->kurs, 2), 10, " ", STR_PAD_BOTH);
                 $line .= str_pad($values->curr, 10, " ", STR_PAD_BOTH);
-                $line .= str_pad(number_format($values->nominal, 2), 20, " ", STR_PAD_LEFT);
+                $line .= str_pad(number_format($values->nominal, 2), 30, " ", STR_PAD_LEFT);
                 $printer->text($line . "\n");
             }
             $printer->feed();
