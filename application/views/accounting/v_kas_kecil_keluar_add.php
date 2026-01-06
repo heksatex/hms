@@ -32,7 +32,7 @@
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-acc-kaskecil" id="form-acc-kaskecil" action="<?= base_url("accounting/kaskecilkeluar/simpan") ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Bukti Kas Kecil Keluar</h3>
+                                <h3 class="box-title">Bukti Kas Kecil Keluar <span id="no"></h3>
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -361,6 +361,17 @@
                     });
                 }
             });
+            
+            const previewNo = ((tgl) => {
+                    $.post("<?= base_url('accounting/bankkeluar/preview_no') ?>", {kode: "KKK", tanggal: tgl}, function (data) {
+                        $("#no").html(data.data);
+                    });
+                });
+
+                previewNo($("#tanggal").val());
+                $("#tanggal").on("blur", function () {
+                    previewNo($("#tanggal").val());
+                });
 
         });
 

@@ -32,7 +32,7 @@
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-acc-girokeluar" id="form-acc-girokeluar" action="<?= base_url("accounting/girokeluar/simpan") ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Bukti Giro Keluar</h3>
+                                <h3 class="box-title">Bukti Giro Keluar <span id="no"></h3>
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -435,6 +435,17 @@
                             s2element.select2('focus');
                         });
                     }
+                });
+
+                const previewNo = ((tgl) => {
+                    $.post("<?= base_url('accounting/bankkeluar/preview_no') ?>", {kode: "BGKH", tanggal: tgl}, function (data) {
+                        $("#no").html(data.data);
+                    });
+                });
+
+                previewNo($("#tanggal").val());
+                $("#tanggal").on("blur", function () {
+                    previewNo($("#tanggal").val());
                 });
 
             });

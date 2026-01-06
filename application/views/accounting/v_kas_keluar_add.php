@@ -33,7 +33,7 @@
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-acc-kasadd" id="form-acc-kasadd" action="<?= base_url("accounting/kaskeluar/simpan") ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Bukti Kas Keluar</h3>
+                                <h3 class="box-title">Bukti Kas Keluar <span id="no"></span></h3>
                             </div>
                             <div class="box-body">
 
@@ -364,7 +364,20 @@
                 $(".no_acc").on("change", function () {
                     var txt = $(".no_acc option:selected").text();
                     var txtt = txt.split(' - ');
-                    $("#coa_name").val(txtt.at(-1));
+                    var coa = txtt.at(-1);
+                    $("#coa_name").val(coa);
+                    if (txtt.length > 1) {
+                        previewNo(coa,$("#tanggal").val());
+                    }
+                });
+                $("#tanggal").on("blur",function(){
+                    previewNo($("#coa_name").val(),$("#tanggal").val());
+                });
+                
+                const previewNo = ((coa, tgl) => {
+                    $.post("<?= base_url('accounting/kasmasuk/preview_no') ?>", {coa_name: coa, tanggal: tgl}, function (data) {
+                        $("#no").html(data.data);
+                    });
                 });
 
 
