@@ -202,7 +202,12 @@
                     </td>
                     <td>
                         <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
-                            <option value="1" selected>IDR</option>
+                           <!--<option value="1" selected>IDR</option>-->
+                            <?php foreach ($curr as $key => $values) {
+                                ?>
+                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                            <?php }
+                            ?>
 
                         </select>
                     </td>

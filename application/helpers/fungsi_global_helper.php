@@ -98,13 +98,16 @@ function bln_indo($tanggal) {
 function logArrayToString(string $seperator, array $data, string $indikatorVal = "=") {
     $hasil = "";
     foreach ($data as $key => $value) {
+        if(is_object($value)) {
+            $value = (array)$value;
+        }
         if (is_array($value)) {
 
             $hasil .= " " . ($key + 1) . " " . logArrayToString($seperator, $value, $indikatorVal);
         } else {
             $hasil = implode($seperator, array_map(
                             function ($v, $k) use ($indikatorVal) {
-                                return sprintf("%s{$indikatorVal}%s", $k, $v);
+                                return sprintf("%s{$indikatorVal}%s", addslashes($k), addslashes($v));
                             },
                             $data,
                             array_keys($data)
@@ -257,14 +260,14 @@ function KwitansiDesimal($x) {
     $rst = "";
     $bilangan = array("Nol", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan");
     $char = str_split($x);
-    if(end($char) === "0"){
+    if (end($char) === "0") {
         unset($char[count($char) - 1]);
         return KwitansiDesimal(join("", $char));
     }
     foreach ($char as $value) {
         $rst .= " {$bilangan[$value]}";
     }
-    
+
     return $rst;
 }
 

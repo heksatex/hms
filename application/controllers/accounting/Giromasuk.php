@@ -461,7 +461,8 @@ class Giromasuk extends MY_Controller {
                 }
             }
 
-            $model->setTables("acc_giro_masuk_detail")->setWheres(["no_gm" => $kode])->delete();
+            $asalDetail = $model->setTables("acc_giro_masuk_detail")->setWheres(["no_gm" => $kode])->getData();
+            $model->delete();
             $model->setTables("acc_giro_masuk")->setWheres(["no_gm" => $kode])->update($header);
 
             if (count($kodeCoa) > 0) {
@@ -500,8 +501,8 @@ class Giromasuk extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", json_decode($this->input->post("head"), true));
-            $log .= "\nDETAIL -> " . logArrayToString("; ", json_decode($this->input->post("detail"), true));
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$dt);
+            $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);

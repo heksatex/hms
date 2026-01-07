@@ -107,6 +107,7 @@
                 $uomLot = "";
                 $uom = "";
                 $dppKbn = (strtolower($head->jenis_ppn) !== "kbn") ? 5 : 4;
+                $taxx = ($head->tax > 0) ? 1 : 0;
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
                     $nopo = ($value->no_po !== "") ? "\r\n NO PO : {$value->no_po}" : "";
@@ -181,9 +182,10 @@
                         Ppn
                     </td>
                     <td style="text-align: right">
-                        <?= "Rp. " . number_format(round($head->ppn), 2, ".", ","); ?>
+                        <?= "Rp. " . number_format(round(($taxx === 1) ? $head->ppn : 0), 2, ".", ","); ?>
                     </td>
                 </tr>
+
                 <tr>
                     <td style="font-weight: bold;">
                         TOTAL
