@@ -124,8 +124,8 @@
                 });
                 $('#tanggal').daterangepicker({
 //                    autoUpdateInput: false,
-                    endDate: moment().startOf('day'),
-                    startDate: moment().startOf('day').add(-1, 'week'),
+                    startDate: moment().startOf('month'),
+                    endDate: moment().endOf('month'),
                     locale: {
                         format: 'YYYY-MM-DD'
                     },

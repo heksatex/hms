@@ -141,8 +141,8 @@ class Bukubank extends MY_Controller {
             $queryKasKeluar = $model->getQuery();
 
             $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
-            $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")->setOrder(["tanggal"=>"asc","kas.kode_coa"=>"asc"])
-                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa,partner_nama,lain2"]);
+            $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")->setOrder(["tanggal"=>"asc","no_bukti"=>"asc","kas.kode_coa"=>"asc"])
+                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa,partner_nama,lain2,kas.kode_coa"]);
             return $model;
         } catch (Exception $ex) {
             throw $ex;
@@ -224,7 +224,7 @@ class Bukubank extends MY_Controller {
                 $sheet->setCellValue("B{$row}", $dt);
                 $sheet->setCellValue("C{$row}", $no_bukti);
                 $sheet->setCellValue("D{$row}", $value->uraian);
-                $sheet->setCellValue("E{$row}", $value->coa);
+                $sheet->setCellValue("E{$row}", $value->kode_coa);
                 $sheet->setCellValue("F{$row}", $debet);
                 $sheet->setCellValue("G{$row}", $kredit);
                 $sheet->setCellValue("H{$row}", $saldos);
@@ -238,7 +238,9 @@ class Bukubank extends MY_Controller {
                 $sheet->setCellValue("G{$row}", $kredits);
                 $sheet->setCellValue("H{$row}", $saldos);
             }
-
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $tanggal = $this->input->post("tanggal");
             $writer = new Xlsx($spreadsheet);
             $filename = "Buku Bank {$tanggal}";

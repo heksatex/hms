@@ -168,7 +168,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td rowspan="4" colspan="5">
+                    <td rowspan="3" colspan="5">
                         <p><?= "(*)Kurs : Rp. ".number_format($head->kurs_nominal,2) ?></p>
                         Terbilang : <?= $terbilang.$terbilang2 ?> <?= $curr->ket ?>
                     </td>
@@ -193,7 +193,7 @@
                         <?= "Rp. ".number_format(round($head->diskon * $head->kurs_nominal), 2, ".", ",") ?>
                     </td>
                 </tr>
-                <tr>
+<!--                <tr>
                     <td style="font-weight: bold;">
                         <?= "Ppn " ?>
                     </td>
@@ -203,7 +203,7 @@
                     <td style="text-align: right">
                         <?= "Rp. ".number_format(($head->ppn) * $head->kurs_nominal, 2, ".", ","); ?>
                     </td>
-                </tr>
+                </tr>-->
                 <tr>
                     <td style="font-weight: bold;">
                         TOTAL

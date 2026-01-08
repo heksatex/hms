@@ -494,10 +494,10 @@ class Kasmasuk extends MY_Controller {
             ];
             $detail = [];
             $this->_module->startTransaction();
-            $model = new $this->m_global;
+            
             $model->setTables("acc_kas_masuk")->setWheres(["no_km" => $kode])->update($header);
-            $model->setTables("acc_kas_masuk_detail")->setWheres(["no_km" => $kode])->delete();
-
+            $asalDetail = $model->setTables("acc_kas_masuk_detail")->setWheres(["no_km" => $kode])->getData();
+            $model->delete();
             if (count($kodeCoa) > 0) {
 
 
@@ -530,22 +530,22 @@ class Kasmasuk extends MY_Controller {
                 $nogk = explode(",", $this->input->post("trx"));
                 $model->setTables("acc_giro_keluar")->setWhereIn("no_gk", $nogk)->update(["no_bk2" => $kode]);
             }
-            $log = [
-                "asal_data" => [
-                    "DATA" => json_decode($this->input->post("head"), true),
-                    "DETAIL" => json_decode($this->input->post("detail"), true)
-                ],
-                "perubahan" => [
-                    "DATA" => $header,
-                    "DETAIL" => $detail
-                ]
-            ];
+//            $log = [
+//                "asal_data" => [
+//                    "DATA" => json_decode($this->input->post("head"), true),
+//                    "DETAIL" => json_decode($this->input->post("detail"), true)
+//                ],
+//                "perubahan" => [
+//                    "DATA" => $header,
+//                    "DETAIL" => $detail
+//                ]
+//            ];
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", json_decode($this->input->post("head"), true));
-            $log .= "\nDETAIL -> " . logArrayToString("; ", json_decode($this->input->post("detail"), true));
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$dt);
+            $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);

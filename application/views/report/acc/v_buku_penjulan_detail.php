@@ -18,6 +18,7 @@ foreach ($data as $key => $value) {
         <td><?= $no ?></td>
         <td><?= $value->no_faktur_internal ?></td>
         <td><?= $value->no_sj ?></td>
+        <td><?= $value->no_faktur_pajak ?></td>
         <td><?= $value->tanggal ?></td>
         <td><?= $nama ?></td>
         <td><?= $value->partner_nama ?></td>
