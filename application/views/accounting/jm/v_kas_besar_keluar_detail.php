@@ -1,11 +1,13 @@
 <?php
 $total = 0;
+$grandTotal = 0;
 $kredits = $data["debit"];
 foreach ($kredits as $key => $value) {
     $total += $value->nominals;
+    $grandTotal += $value->nominals
     ?>
     <tr>
-        <td><?= $value->tanggal ?></td>
+        <td><?= $value->tanggal ?> </td>
         <td><?= $value->no_bukti ?></td>
         <td><?= $value->uraian ?></td>
         <td><?= $value->partner ?></td>
@@ -67,5 +69,33 @@ foreach ($kredits as $key => $value) {
         </tr>
         <?php
     }
+}
+if (count($kredits) > 0) {
+    ?>
+        <tr>
+        <td>&nbsp;</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+<tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="text-right">
+               
+            </td>
+            <td></td>
+            <td><?= "Grand Total" ?></td>
+            <td class="text-right">
+                <?= number_format($grandTotal, 2) ?>
+            </td>
+        </tr>
+    <?php
 }
 ?>
