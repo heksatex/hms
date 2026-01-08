@@ -450,7 +450,7 @@ class Girokeluar extends MY_Controller {
                 "partner_id" => $this->input->post("partner"),
                 "partner_nama" => $this->input->post("partner_name"),
                 "lain2" => $this->input->post("lain_lain"),
-                "transinfo" => $trx_intern,
+                "transinfo" => $this->input->post("transaksi"),
                 "pindah" => ($trx_intern !== '') ? 1 : 0
             ];
             $detail = [];
