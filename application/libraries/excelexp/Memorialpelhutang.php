@@ -38,7 +38,7 @@ class Memorialpelhutang {
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setSelects(["bkd.uraian"]);
-                    $model->setGroups(["bk.kode_coa"], true)->setOrder(["bk.kode_coa"], true);
+                    $model->setGroups(["bk.kode_coa","bkd.no_bk"], true)->setOrder(["bk.kode_coa","bkd.no_bk"], true);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
@@ -61,7 +61,7 @@ class Memorialpelhutang {
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["gk.kode_coa"], true)->setOrder(["gk.kode_coa"], true);
+                    $model->setGroups(["gk.kode_coa","gkd.no_gk"], true)->setOrder(["gk.kode_coa","gkd.no_gk"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
@@ -84,8 +84,6 @@ class Memorialpelhutang {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getStyle("C")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -152,6 +150,8 @@ class Memorialpelhutang {
                 $sheet->setCellValue("D{$row}", $grandTotalDebit);
                 $sheet->setCellValue("E{$row}", $grandTotalKredit);
             }
+            $sheet->getStyle("D2:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$data["filter"]}";
@@ -172,8 +172,6 @@ class Memorialpelhutang {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'Tanggal');
             $sheet->setCellValue("B{$row}", 'No Bukti');
@@ -257,6 +255,9 @@ class Memorialpelhutang {
                 $sheet->setCellValue("G{$row}", "Grand Total");
                 $sheet->setCellValue("H{$row}", $grandTotal);
             }
+            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
@@ -276,8 +277,6 @@ class Memorialpelhutang {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'Tanggal');
             $sheet->setCellValue("B{$row}", 'No Bukti');
@@ -361,6 +360,9 @@ class Memorialpelhutang {
                 $sheet->setCellValue("G{$row}", "Grand Total");
                 $sheet->setCellValue("H{$row}", $grandTotal);
             }
+            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";

@@ -52,8 +52,6 @@ class Memorialpenkasbesar {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getStyle("C")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -83,6 +81,9 @@ class Memorialpenkasbesar {
                 $sheet->setCellValue("E{$row}", "{$totalKredit}");
             }
             
+            $sheet->getStyle("D2:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+//            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             
             $nm = str_replace("/", "_", $this->data["periode"]);
             $filename = "jurnal {$this->data['jurnal']} {$nm} global";
@@ -104,8 +105,6 @@ class Memorialpenkasbesar {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'Tanggal');
             $sheet->setCellValue("B{$row}", 'No Bukti');
@@ -145,6 +144,10 @@ class Memorialpenkasbesar {
                     $sheet->setCellValue("H{$row}", $total);
                 }
             }
+            
+            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} detail";
             $url = "dist/storages/report/jurnal_memorial";
