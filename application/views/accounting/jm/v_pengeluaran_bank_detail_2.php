@@ -85,8 +85,7 @@ foreach ($bank as $key => $value) {
     <td></td>
 </tr>
 <?php
-$totalGiroKredit += 0;
-$totalGiroValas += 0;
+
 $giro = $data["giro_debit"];
 foreach ($giro as $key => $value) {
     $totalGiroKredit += $value->nominals;
