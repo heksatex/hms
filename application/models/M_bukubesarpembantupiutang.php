@@ -671,7 +671,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  
             CONCAT('Koreksi : ', ack.nama_koreksi,
-            ' - ',
+            '  ',
             COALESCE((SELECT GROUP_CONCAT(CONCAT(' - Curr : ' ,currency,' - Kurs : ',kurs, ' - Valas : ', total_valas)) FROM acc_pelunasan_piutang_metode appm Where appm.pelunasan_piutang_id = app.id AND appm.tipe = 'koreksi') , ''),
             IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', apps.kurs, (SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id)), 
@@ -694,7 +694,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->jOIN("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id", "INNER");
         $this->db->JOIN("(SELECT GROUP_CONCAT(DISTINCT ack.nama_koreksi) as nama_koreksi, appsk.pelunasan_summary_id, ack.koreksi_bb
                         FROM acc_pelunasan_piutang_summary_koreksi appsk
-                        LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode) as ack", "ack.pelunasan_summary_id = apps.id", "INNER");
+                        LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode GROUP BY appsk.pelunasan_piutang_id) as ack", "ack.pelunasan_summary_id = apps.id", "INNER");
         return $this->db->get_compiled_select();
     }
 

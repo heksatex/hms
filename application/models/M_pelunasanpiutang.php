@@ -7,7 +7,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 class M_pelunasanpiutang extends CI_Model
 {
 
-    var $column_order = array(null, 'no_pelunasan', 'tanggal_transaksi', 'partner_nama', 'nama_status');
+    var $column_order = array(null, 'no_pelunasan', 'tanggal_transaksi', 'partner_nama',  'total_pelunasan', 'nama_status',);
     var $column_search = array('no_pelunasan', 'tanggal_transaksi', 'partner_nama', 'nama_status');
     var $order        = array('no_pelunasan' => 'desc');
 
@@ -21,7 +21,20 @@ class M_pelunasanpiutang extends CI_Model
     private function _get_datatables_query()
     {
 
-        $this->db->select("pl.no_pelunasan, pl.tanggal_dibuat, pl.tanggal_transaksi, pl.status, pl.partner_id, pl.partner_nama, mmss.nama_status");
+        if($this->input->post('partner')){
+    		$this->db->like('pl.partner_nama',$this->input->post('partner'));
+        }
+		if($this->input->post('status') != 'all'){
+    		$this->db->where('pl.status',$this->input->post('status'));
+        }
+        
+		if($this->input->post('checkTgl') == 1){
+			$this->db->where('pl.tanggal_transaksi >=', date("Y-m-d H:i:s", strtotime($this->input->post('tgldari')) ));
+			$this->db->where('pl.tanggal_transaksi <=', date("Y-m-d 23:59:59", strtotime($this->input->post('tglsampai')) ));
+		}
+
+        $this->db->select("pl.no_pelunasan, pl.tanggal_dibuat, pl.tanggal_transaksi, pl.status, pl.partner_id, pl.partner_nama, mmss.nama_status,
+                 (SELECT sum(total_rp) as total FROM acc_pelunasan_piutang_metode WHERE pelunasan_piutang_id = pl.id GROUP BY pelunasan_piutang_id) as total_pelunasan");
         $this->db->from("acc_pelunasan_piutang pl");
         $this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pl.status", "inner");
 
