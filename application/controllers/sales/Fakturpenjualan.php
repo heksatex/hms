@@ -699,10 +699,7 @@ class Fakturpenjualan extends MY_Controller {
                         ];
                     }
 
-                    if ($header["kurs_nominal"] > 1) {
-
-                        $header["total_piutang_valas"] = round($header["final_total"], 2);
-                        $header["piutang_valas"] = round($header["final_total"], 2);
+                    if ((double) $header["kurs_nominal"] > 1) {
                         $header["grand_total"] = round($grandTotal, 2);
                         $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon, 2);
                         $header["diskon"] = $alldiskon;
@@ -719,6 +716,9 @@ class Fakturpenjualan extends MY_Controller {
                         $header["diskon_ppn"] = round($ppn_diskon, 2);
                         $header["ppn"] = round($pajak, 2);
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"], 2);
+                        
+                        $header["total_piutang_valas"] = round($header["final_total"], 2);
+                        $header["piutang_valas"] = round($header["final_total"], 2);
                     } else {
                         $header["grand_total"] = round($grandTotal);
                         $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon);
@@ -737,6 +737,7 @@ class Fakturpenjualan extends MY_Controller {
                         $header["ppn"] = $pajak;
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"]);
                     }
+
                     $header["total_piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
                     $header["piutang_rp"] = round($header["final_total"] * $header["kurs_nominal"]);
 
@@ -787,7 +788,7 @@ class Fakturpenjualan extends MY_Controller {
                 if (count($detail) > 0)
                     $model->setTables("acc_faktur_penjualan_detail")->saveBatch($detail);
             }
-
+//            log_message("error",json_encode($header));
             $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" => $kode])->update($header);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
