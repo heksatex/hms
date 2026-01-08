@@ -571,19 +571,10 @@ class Bankmasuk extends MY_Controller {
             ];
             $model = new $this->m_global;
             $nobg = $this->input->post("nobg");
-//            if (is_array($nobg)) {
-//                $checkBG = $model->setTables("acc_bank_keluar_detail")->setWhereIn("no_bg", $nobg)->getDetail();
-//                if ($checkBG) {
-//                    throw new \Exception("NO Cek / BG {$checkBG->no_bg} sudah terpakai pada Bank Keluar {$checkBG->no_bk}", 500);
-//                }
-//                $checkBG = $model->setTables("acc_bank_masuk_detail")->setWheres(["bank_masuk_id <>" => $ids])->setWhereIn("no_bg", $nobg)->getDetail();
-//                if ($checkBG) {
-//                    throw new \Exception("NO Cek / BG {$checkBG->no_bg} sudah terpakai pada Bank Masuk {$checkBG->no_bm}", 500);
-//                }
-//            }
-
-            $model->setTables("acc_bank_masuk_detail")->setWheres(["bank_masuk_id" => $ids])->delete();
-            $model->setTables("acc_bank_masuk")->setWheres(["no_bm" => $kode])->update($header);
+            $asalDetail = $model->setTables("acc_bank_masuk_detail")->setWheres(["bank_masuk_id" => $ids])->getData();
+            $model->delete();
+            $asal = $model->setTables("acc_bank_masuk")->setWheres(["no_bm" => $kode])->getDetail();
+            $model->update($header);
             $detail = [];
             $this->_module->startTransaction();
             if (count($kodeCoa) > 0) {
@@ -624,13 +615,12 @@ class Bankmasuk extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", json_decode($this->input->post("head"), true));
-            $log .= "\nDETAIL -> " . logArrayToString("; ", json_decode($this->input->post("detail"), true));
+            $log = "";
+            $log .= "Asal Data : DATA -> " . logArrayToString("; ", (array)$asal);
+            $log .= "\nDETAIL -> " . logArrayToString("; ",$asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
-
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
             $url = site_url("accounting/bankmasuk/edit/{$id}");
             $this->output->set_status_header(200)
@@ -761,12 +751,12 @@ class Bankmasuk extends MY_Controller {
                     $coa[$k] = $vls;
                 }
                 $kurs = str_split(number_format($value->kurs, 2), 9);
-                foreach ($coa as $k => $vls) {
+                foreach ($kurs as $k => $vls) {
                     $vls = trim($vls);
                     $kurs[$k] = $vls;
                 }
-                $curr = str_split($value->curr, 9);
-                foreach ($coa as $k => $vls) {
+               $curr = str_split("{$value->curr}", 9);
+                foreach ($curr as $k => $vls) {
                     $vls = trim($vls);
                     $curr[$k] = $vls;
                 }
@@ -786,20 +776,14 @@ class Bankmasuk extends MY_Controller {
                 $temp[] = count($nobg);
                 $counter = max($temp);
                 for ($i = 0; $i < $counter; $i++) {
-                    if (($counter - 1) === $i) {
-                        $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-                    }
                     $line = (isset($no[$i])) ? str_pad($no[$i], 5) : str_pad("", 5);
                     $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 40, " ", STR_PAD_RIGHT) : str_pad("", 40, " ", STR_PAD_RIGHT);
                     $line .= (isset($nobg[$i])) ? str_pad($nobg[$i], 20, " ", STR_PAD_RIGHT) : str_pad("", 20, " ", STR_PAD_RIGHT);
-                    $line .= (isset($coa[$i])) ? str_pad($coa[$i], 20, " ", STR_PAD_RIGHT) : str_pad("", 20, " ", STR_PAD_RIGHT);
-                    $line .= (isset($kurs[$i])) ? str_pad($kurs[$i], 10, " ", STR_PAD_LEFT) : str_pad("", 10, " ", STR_PAD_LEFT);
-                    $line .= (isset($curr[$i])) ? str_pad($curr[$i], 10, " ", STR_PAD_RIGHT) : str_pad("", 10, " ", STR_PAD_RIGHT);
+                    $line .= (isset($coa[$i])) ? str_pad($coa[$i], 20, " ", STR_PAD_BOTH) : str_pad("", 20, " ", STR_PAD_BOTH);
+                    $line .= (isset($kurs[$i])) ? str_pad("{$kurs[$i]}", 10, " ", STR_PAD_BOTH) : str_pad("", 10, " ", STR_PAD_BOTH);
+                    $line .= (isset($curr[$i])) ? str_pad("{$curr[$i]}", 10, " ", STR_PAD_BOTH) : str_pad("", 10, " ", STR_PAD_BOTH);
                     $line .= (isset($nominal[$i])) ? str_pad($nominal[$i], 30, " ", STR_PAD_LEFT) : str_pad("", 30, " ", STR_PAD_LEFT);
                     $printer->text($line . "\n");
-                    if (($counter - 1) === $i) {
-                        $printer->setUnderline(Printer::UNDERLINE_NONE);
-                    }
                 }
             }
             $printer->feed();

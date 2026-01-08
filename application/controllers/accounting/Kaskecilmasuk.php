@@ -368,7 +368,8 @@ class Kaskecilmasuk extends MY_Controller {
             ];
             $this->_module->startTransaction();
             $model->setTables("acc_kas_kecil_masuk")->setWheres(["no_kkm" => $kode])->update($header);
-            $model->setTables("acc_kas_kecil_masuk_detail")->setWheres(["no_kkm" => $kode])->delete();
+            $asalDetail = $model->setTables("acc_kas_kecil_masuk_detail")->setWheres(["no_kkm" => $kode])->getData();
+            $model->delete();
             $detail = [];
             if (count($kodeCoa) > 0) {
                 $kurs = $this->input->post("kurs");
@@ -398,8 +399,8 @@ class Kaskecilmasuk extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", json_decode($this->input->post("head"), true));
-            $log .= "\nDETAIL -> " . logArrayToString("; ", json_decode($this->input->post("detail"), true));
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$dt);
+            $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);

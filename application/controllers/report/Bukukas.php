@@ -89,7 +89,7 @@ class Bukukas extends MY_Controller {
             $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")
                     ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa", "partner_nama,lain2,nama_curr,kurs"])
-                    ->setOrder(["tanggal"=>"asc","uraian"=>"asc"]);
+                    ->setOrder(["tanggal" => "asc", "no_bukti" => "asc", "uraian" => "asc"]);
             return $model;
         } catch (Exception $ex) {
             throw $ex;
@@ -116,14 +116,14 @@ class Bukukas extends MY_Controller {
                     ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_debit"])
                     ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D"])
                     ->getQuery();
-            
+
             //Kredit
-            
+
             $saldoKredit = $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
                     ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit"])
                     ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C"])
                     ->getQuery();
-            
+
             $model->setTables("acc_coa coa")->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$entries}) as jr ", "jr.kode_coa = coa.kode_coa", "left")
@@ -237,7 +237,7 @@ class Bukukas extends MY_Controller {
                 }
             }
 
-            
+
             $kredits = 0;
             $debets = 0;
             $temp = "";
@@ -306,12 +306,22 @@ class Bukukas extends MY_Controller {
                     $sheet->setCellValue("H{$row}", $valass["euro"]["debit"]);
                     $sheet->setCellValue("I{$row}", $valass["euro"]["kredit"]);
                     $sheet->setCellValue("J{$row}", $saldos);
+                    $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("I2:I{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
                 } else {
                     $sheet->setCellValue("F{$row}", $debets);
                     $sheet->setCellValue("G{$row}", $kredits);
                     $sheet->setCellValue("H{$row}", $saldos);
+
+                    $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
                 }
             }
+
 
             $tanggal = $this->input->post("tanggal");
             $writer = new Xlsx($spreadsheet);
