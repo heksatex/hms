@@ -365,6 +365,7 @@ class Kaskecilmasuk extends MY_Controller {
                 "partner_nama" => $this->input->post("partner_nama"),
                 "lain2" => $this->input->post("lain_lain"),
                 "transinfo" => $this->input->post("transaksi"),
+                "total_rp"=>0
             ];
             $this->_module->startTransaction();
             $model->setTables("acc_kas_kecil_masuk")->setWheres(["no_kkm" => $kode])->update($header);
