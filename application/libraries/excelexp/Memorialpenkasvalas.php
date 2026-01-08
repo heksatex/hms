@@ -52,9 +52,6 @@ class Memorialpenkasvalas {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getStyle("C")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -91,6 +88,11 @@ class Memorialpenkasvalas {
                 $sheet->setCellValue("E{$row}", $totalDebit);
                 $sheet->setCellValue("F{$row}", $totalKredit);
             }
+            
+            $sheet->getStyle("D2:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$data["filter"]}";
             $url = "dist/storages/report/jurnal_memorial";
@@ -110,10 +112,6 @@ class Memorialpenkasvalas {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("G")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            $sheet->getStyle("J")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'Tanggal');
             $sheet->setCellValue("B{$row}", 'No Bukti');
@@ -176,6 +174,11 @@ class Memorialpenkasvalas {
                 $sheet->setCellValue("I{$row}", "Grand Total");
                 $sheet->setCellValue("J{$row}", $grandTotal);
             }
+            
+            $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
