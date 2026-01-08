@@ -129,8 +129,8 @@ class M_mutasipenjualan extends CI_Model
             $this->db->group_by($group);
         }
         $dpp    = ($currency === 'valas') ? "SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))" : "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( fak.kurs_nominal as DECIMAL(20, 4)), 0) ";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0)"; 
-        $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( fak.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
+        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,IF(fak.kurs=1, 0, 2)) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0)"; 
+        $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(fak.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( fak.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,IF(fak.kurs=1, 0, 2)) * CAST(fak.tax_value as DECIMAL(20,4)),2) * CAST( fak.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
 
         $this->db->SELECT("fak.id, fak.tanggal, fak.no_faktur_internal, fak.no_sj, fak.tipe, fak.partner_id, fak.lunas,
                 IFNULL($dpp,0) as dpp_piutang,
@@ -155,8 +155,8 @@ class M_mutasipenjualan extends CI_Model
         }
        
         $dpp    = ($currency === 'valas') ? "" : "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0)";
-        $ppn    = ($currency === 'valas') ? "" : "ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
-        $total = ($currency === 'valas') ? "" : "IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0),0)";
+        $ppn    = ($currency === 'valas') ? "" : "ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
+        $total = ($currency === 'valas') ? "" : "IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0),0)";
 
         $this->db->SELECT("a.id, a.tanggal, a.no_faktur_internal, a.no_sj, a.tipe,
                 IFNULL($dpp,0) as dpp_diskon,
@@ -184,10 +184,10 @@ class M_mutasipenjualan extends CI_Model
         $this->db->where('appm.tipe <> ', 'retur');
         $this->db->where('appm.tipe <> ', 'koreksi');
         // $this->db->where('appm.tipe <> ', 'depo');
-        $this->db->SELECT("GROUP_CONCAT(app.no_pelunasan) as no_pelunasan,  GROUP_CONCAT(DATE_FORMAT(app.tanggal_transaksi, '%Y-%m-%d')) as tgl,app.partner_id as id_partner, GROUP_CONCAT(appm.no_bukti) as no_bukti,
+        $this->db->SELECT("GROUP_CONCAT(app.no_pelunasan) as no_pelunasan,  GROUP_CONCAT(DATE_FORMAT(app.tanggal_transaksi, '%Y-%m-%d')) as tgl,app.partner_id as id_partner, (appm.no_bukti) as no_bukti,
                             appf.faktur_id, appf.no_faktur,   sum(appf.pelunasan_rp) as total_pelunasan_rp, (appf.pelunasan_valas) as total_pelunasan_valas,app.status  ");
         $this->db->FROM('acc_pelunasan_piutang app');
-        $this->db->jOIN("acc_pelunasan_piutang_metode appm", "app.id = appm.pelunasan_piutang_id", "INNER");
+        $this->db->jOIN("(SELECT GROUP_CONCAT(no_bukti) as no_bukti, pelunasan_piutang_id, tipe FROM acc_pelunasan_piutang_metode GROUP BY pelunasan_piutang_id) as appm", "app.id = appm.pelunasan_piutang_id", "INNER");
         $this->db->jOIN("acc_pelunasan_piutang_faktur appf", "app.id = appf.pelunasan_piutang_id", "INNER");
         return $this->db->get_compiled_select();
     }
