@@ -94,13 +94,7 @@
                                                 <div class="col-xs-8 col-md-8">
                                                     <select class="form-control input-sm select2 trx_intern" name="trx_intern" id="trx_intern">
                                                         <option></option>
-                                                        <?php
-                                                        foreach ($trx_intern as $kry => $value) {
-                                                            ?>
-                                                            <option value="<?= $value ?>"><?= $value ?></option>
-                                                            <?php
-                                                        }
-                                                        ?>
+                                                         <option value="tarik_tunai">Tarik Tunai</option>
 
                                                     </select>
                                                 </div>

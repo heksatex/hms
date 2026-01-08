@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-            <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -131,18 +131,15 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label">Transaksi intern</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <select class="form-control input-sm select2 trx_intern edited" style="width: 100%;" name="trx_intern" id="trx_intern" disabled>
+                                                    <select class="form-control input-sm trx_intern edited" style="width: 100%;" name="trx_intern" id="trx_intern" disabled>
                                                         <option></option>
                                                         <?php
-                                                        foreach ($trx_intern as $kry => $value) {
-                                                            $selected = "";
-                                                            if ($value === $datas->transinfo)
-                                                                $selected = "selected";
-                                                            ?>
-                                                            <option value="<?= $value ?>" <?= $selected ?> ><?= $value ?></option>
-                                                            <?php
-                                                        }
+                                                        $selected = "";
+                                                        if ($datas->pindah === "1")
+                                                            $selected = "selected";
                                                         ?>
+                                                        <option value="tarik_tunai" <?= $selected ?>>Tarik Tunai</option>
+
                                                     </select>
                                                 </div>
                                             </div>
@@ -589,7 +586,7 @@ if ($datas->status == 'confirm') {
                             false
 
                             );
-                    
+
                     $(".btn-add-item").on("click", function (e) {
                         e.preventDefault();
                         no += 1;
@@ -599,7 +596,7 @@ if ($datas->status == 'confirm') {
 
                         setCurr();
                         setTglFormatDef(".tgl-def-format");
-                        $(".nominal"+no).on("blur", function () {
+                        $(".nominal" + no).on("blur", function () {
                             calculateTotal();
                         });
                         setCoaItem();
@@ -673,37 +670,37 @@ if ($datas->status == 'confirm') {
                     $(".total-nominal").on("click", function () {
                         calculateTotal();
                     });
-                    const getPartner = (()=>{
+                    const getPartner = (() => {
                         $("#partner").select2({
-                        placeholder: "Pilih",
-                        allowClear: true,
-                        ajax: {
-                            dataType: 'JSON',
-                            type: "GET",
-                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
-                            delay: 250,
-                            data: function (params) {
-                                return{
-                                    search: params.term,
-                                    jenis: "supplier"
-                                };
-                            },
-                            processResults: function (data) {
-                                var results = [];
-                                $.each(data.data, function (index, item) {
-                                    results.push({
-                                        id: item.id,
-                                        text: item.nama
+                            placeholder: "Pilih",
+                            allowClear: true,
+                            ajax: {
+                                dataType: 'JSON',
+                                type: "GET",
+                                url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                                delay: 250,
+                                data: function (params) {
+                                    return{
+                                        search: params.term,
+                                        jenis: "supplier"
+                                    };
+                                },
+                                processResults: function (data) {
+                                    var results = [];
+                                    $.each(data.data, function (index, item) {
+                                        results.push({
+                                            id: item.id,
+                                            text: item.nama
+                                        });
                                     });
-                                });
-                                return {
-                                    results: results
-                                };
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
+                                    return {
+                                        results: results
+                                    };
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                }
                             }
-                        }
-                    })
+                        })
                     })
 
                     $(".partner").on("change", function () {
