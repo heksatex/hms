@@ -367,6 +367,7 @@ class Kaskecilkeluar extends MY_Controller {
                 "partner_nama" => $this->input->post("partner_nama"),
                 "lain2" => $this->input->post("lain_lain"),
                 "transinfo" => $this->input->post("transaksi"),
+                "total_rp"=>0
             ];
             $this->_module->startTransaction();
             $model->setTables("acc_kas_kecil_keluar")->setWheres(["no_kkk" => $kode])->update($header);
