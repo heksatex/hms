@@ -538,8 +538,10 @@ class Bankkeluar extends MY_Controller {
             $nobg = $this->input->post("nobg");
             $model = new $this->m_global;
 
-            $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $ids])->delete();
-            $model->setTables("acc_bank_keluar")->setWheres(["no_bk" => $kode])->update($header);
+            $asalDetail = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $ids])->getData();
+            $model->delete();
+            $asal = $model->setTables("acc_bank_keluar")->setWheres(["no_bk" => $kode])->getDetail();
+            $model->update($header);
             $detail = [];
             if (count($kodeCoa) > 0) {
                 $kurs = $this->input->post("kurs");
@@ -582,8 +584,8 @@ class Bankkeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", json_decode($this->input->post("head"), true));
-            $log .= "\nDETAIL -> " . logArrayToString("; ", json_decode($this->input->post("detail"), true));
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$asal);
+            $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
@@ -695,7 +697,7 @@ class Bankkeluar extends MY_Controller {
 
             foreach ($detail as $keys => $value) {
                 $totals += $value->nominal;
-                $no = str_split(($key + 1), 3);
+                $no = str_split(($keys + 1), 3);
                 foreach ($no as $k => $vls) {
                     $vls = trim($vls);
                     $no[$k] = $vls;
@@ -716,12 +718,12 @@ class Bankkeluar extends MY_Controller {
                     $coa[$k] = $vls;
                 }
                 $kurs = str_split(number_format($value->kurs, 2), 9);
-                foreach ($coa as $k => $vls) {
+                foreach ($kurs as $k => $vls) {
                     $vls = trim($vls);
                     $kurs[$k] = $vls;
                 }
                 $curr = str_split($value->curr, 9);
-                foreach ($coa as $k => $vls) {
+                foreach ($curr as $k => $vls) {
                     $vls = trim($vls);
                     $curr[$k] = $vls;
                 }
@@ -740,20 +742,16 @@ class Bankkeluar extends MY_Controller {
                 $temp[] = count($nobg);
                 $counter = max($temp);
                 for ($i = 0; $i < $counter; $i++) {
-                    if (($counter - 1) === $i) {
-                        $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-                    }
+                    
                     $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
-                    $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 45, " ", STR_PAD_RIGHT) : str_pad("", 45, " ", STR_PAD_RIGHT);
+                    $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 46, " ", STR_PAD_RIGHT) : str_pad("", 46, " ", STR_PAD_RIGHT);
                     $line .= (isset($nobg[$i])) ? str_pad($nobg[$i], 20, " ", STR_PAD_RIGHT) : str_pad("", 20, " ", STR_PAD_RIGHT);
-                    $line .= (isset($coa[$i])) ? str_pad($coa[$i], 15, " ", STR_PAD_RIGHT) : str_pad("", 15, " ", STR_PAD_RIGHT);
-                    $line .= (isset($kurs[$i])) ? str_pad($kurs[$i], 10, " ", STR_PAD_LEFT) : str_pad("", 10, " ", STR_PAD_LEFT);
-                    $line .= (isset($curr[$i])) ? str_pad($curr[$i], 10, " ", STR_PAD_RIGHT) : str_pad("", 10, " ", STR_PAD_RIGHT);
+                    $line .= (isset($coa[$i])) ? str_pad($coa[$i], 15, " ", STR_PAD_BOTH) : str_pad("", 15, " ", STR_PAD_BOTH);
+                    $line .= (isset($kurs[$i])) ? str_pad("{$kurs[$i]}", 10, " ", STR_PAD_BOTH) : str_pad("", 10, " ", STR_PAD_BOTH);
+                    $line .= (isset($curr[$i])) ? str_pad("{$curr[$i]}", 10, " ", STR_PAD_BOTH) : str_pad("", 10, " ", STR_PAD_BOTH);
                     $line .= (isset($nominal[$i])) ? str_pad($nominal[$i], 33, " ", STR_PAD_LEFT) : str_pad("", 33, " ", STR_PAD_LEFT);
                     $printer->text($line . "\n");
-                    if (($counter - 1) === $i) {
-                        $printer->setUnderline(Printer::UNDERLINE_NONE);
-                    }
+                   
                 }
             }
             $printer->feed();
@@ -785,6 +783,7 @@ class Bankkeluar extends MY_Controller {
             $printer->text(str_pad("(___________)", 19, " ", STR_PAD_BOTH));
             $buff->write("\x0c");
             $datas = $connector->getData();
+//            log_message("error",$datas);
             $printer->close();
             $client = new GuzzleHttp\Client();
             $resp = $client->request("POST", $this->config->item('url_web_print'), [

@@ -467,7 +467,8 @@ class Girokeluar extends MY_Controller {
                     throw new \Exception("NO Cek / BG {$checkBG->no_bg} sudah terpakai pada Giro Keluar {$checkBG->no_gm}", 500);
                 }
             }
-            $model->setTables("acc_giro_keluar_detail")->setWheres(["no_gk" => $kode])->delete();
+            $asalDetail = $model->setTables("acc_giro_keluar_detail")->setWheres(["no_gk" => $kode])->getData();
+            $model->delete();
             $model->setTables("acc_giro_keluar")->setWheres(["no_gk" => $kode])->update($header);
 
             if (count($kodeCoa) > 0) {
@@ -508,8 +509,8 @@ class Girokeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", json_decode($this->input->post("head"), true));
-            $log .= "\nDETAIL -> " . logArrayToString("; ", json_decode($this->input->post("detail"), true));
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$dt);
+            $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);

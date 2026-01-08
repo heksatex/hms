@@ -98,7 +98,7 @@ class Kaskeluar extends MY_Controller {
             $list->setTables("acc_kas_keluar")->setOrder(["acc_kas_keluar.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_keluar.status", "left")
-                    ->setSearch(["no_kk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_keluar.status"])
+                    ->setSearch(["acc_kas_keluar.no_kk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_keluar.status"])
                     ->setOrders([null, "no_kk", "partner_nama", "acc_kas_keluar.tanggal", null, "total_rp", "acc_kas_keluar.status"])
                     ->setSelects(["acc_kas_keluar.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
             $no = $_POST['start'];
@@ -115,7 +115,7 @@ class Kaskeluar extends MY_Controller {
                 $list->setWheres(["acc_kas_keluar.no_kk LIKE" => "%{$nobukti}%"]);
             }
             if ($customer !== "") {
-                $list->setWheres(["partner_nama LIKE" => "%{$customer}%"]);
+                $list->setWhereRaw("(partner_nama LIKE '%{$customer}%' or lain2 LIKE '%{$customer}%')");
             }
             if ($uraian !== "") {
                 $list->setJoins("acc_kas_keluar_detail abkd", "abkd.kas_keluar_id = acc_kas_keluar.id")
@@ -274,8 +274,10 @@ class Kaskeluar extends MY_Controller {
             ];
             $this->_module->startTransaction();
 
-            $model->setTables("acc_kas_keluar")->setWheres(["no_kk" => $kode])->update($header);
-            $model->setTables("acc_kas_keluar_detail")->setWheres(["no_kk" => $kode])->delete();
+            $asal = $model->setTables("acc_kas_keluar")->setWheres(["no_kk" => $kode])->getDetail();
+            $model->update($header);
+            $asalDetail = $model->setTables("acc_kas_keluar_detail")->setWheres(["no_kk" => $kode])->getData();
+            $model->delete();
             $detail = [];
             if (count($kodeCoa) > 0) {
                 $kurs = $this->input->post("kurs");
@@ -308,8 +310,8 @@ class Kaskeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", json_decode($this->input->post("head"), true));
-            $log .= "\nDETAIL -> " . logArrayToString("; ", json_decode($this->input->post("detail"), true));
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$asal);
+            $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
