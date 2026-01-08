@@ -107,7 +107,7 @@
                 $uomLot = "";
                 $uom = "";
                 $dppKbn = (strtolower($head->jenis_ppn) !== "kbn") ? 5 : 4;
-                $taxx = ($head->tax > 0) ? 1 : 0;
+                $taxx = ($head->tax_id > 0) ? 1 : 0;
                 foreach ($detail as $key => $value) {
                     $subtotal += $value->jumlah;
                     $nopo = ($value->no_po !== "") ? "\r\n NO PO : {$value->no_po}" : "";
