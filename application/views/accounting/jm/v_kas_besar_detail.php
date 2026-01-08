@@ -1,8 +1,10 @@
 <?php
 $total = 0;
+$grandTotal = 0;
 $kredits = $data["kredit"];
 foreach ($kredits as $key => $value) {
     $total += $value->nominals;
+    $grandTotal += $value->nominals;
     ?>
     <tr>
         <td><?= $value->tanggal ?></td>
@@ -67,5 +69,33 @@ foreach ($kredits as $key => $value) {
         </tr>
         <?php
     }
+}
+if (count($kredits) > 0) {
+    ?>
+    <tr>
+        <td>&nbsp;</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="text-right">
+
+        </td>
+        <td></td>
+        <td><?= "Grand Total" ?></td>
+        <td class="text-right">
+            <?= number_format($grandTotal, 2) ?>
+        </td>
+    </tr>
+    <?php
 }
 ?>

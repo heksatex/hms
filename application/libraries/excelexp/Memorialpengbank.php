@@ -39,12 +39,12 @@ class Memorialpengbank {
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setSelects(["bkd.uraian,bkd.no_bk,bkd.tanggal,kurs"]);
-                    $model->setGroups(["bk.kode_coa","bkd.no_bk"], true)->setOrder(["bk.kode_coa","bkd.no_bk"], true);
+                    $model->setGroups(["bk.kode_coa", "bkd.no_bk"], true)->setOrder(["bk.kode_coa", "bkd.no_bk"], true);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
                     $model->setSelects(["transinfo as uraian,bkd.no_bk,bkd.tanggal,kurs"]);
-                    $model->setGroups(["bkd.no_bk"], true)->setOrder(["bkd.no_bk","bkd.kode_coa"], true);
+                    $model->setGroups(["bkd.no_bk"], true)->setOrder(["bkd.no_bk", "bkd.kode_coa"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
                 default :
@@ -64,12 +64,12 @@ class Memorialpengbank {
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setSelects(["transinfo as uraian,gkd.no_gk,gkd.tanggal,kurs"]);
-                    $model->setGroups(["gk.kode_coa","gkd.no_gk"], true)->setOrder(["gk.kode_coa","gkd.no_gk"], true);
+                    $model->setGroups(["gk.kode_coa", "gkd.no_gk"], true)->setOrder(["gk.kode_coa", "gkd.no_gk"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
                     $model->setSelects(["transinfo as uraian,gkd.no_gk,gkd.tanggal,kurs"]);
-                    $model->setGroups(["gkd.no_gk"], true)->setOrder(["gkd.no_gk","gkd.kode_coa"], true);
+                    $model->setGroups(["gkd.no_gk"], true)->setOrder(["gkd.no_gk", "gkd.kode_coa"], true);
                     $data["giro_debit"] = $model->getData();
                     break;
                 default :
@@ -147,7 +147,7 @@ class Memorialpengbank {
             $sheet->getStyle("D2:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$data["filter"]}";
             $url = "dist/storages/report/jurnal_memorial";
@@ -211,6 +211,8 @@ class Memorialpengbank {
                         $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("J{$row}", $totalBankKredit);
                         $row += 1;
+                        $totalBankKredit = 0;
+                        $totalBankValas = 0;
                     }
                 } else {
                     $row += 1;
@@ -218,6 +220,8 @@ class Memorialpengbank {
                     $sheet->setCellValue("G{$row}", $totalBankKredit);
                     $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                     $sheet->setCellValue("J{$row}", $totalBankKredit);
+                    $totalBankKredit = 0;
+                    $totalBankValas = 0;
                 }
             }
             $row += 1;
@@ -259,6 +263,8 @@ class Memorialpengbank {
                     $sheet->setCellValue("G{$row}", $totalGiroKredit);
                     $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                     $sheet->setCellValue("J{$row}", $totalGiroKredit);
+                    $totalGiroKredit = 0;
+                        $totalGiroValas = 0;
                 }
             }
 
@@ -269,12 +275,12 @@ class Memorialpengbank {
                 $sheet->setCellValue("I{$row}", "Grand Total");
                 $sheet->setCellValue("J{$row}", $grandTotal);
             }
-            
+
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("F2:F{$row}:")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
