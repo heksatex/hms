@@ -44,6 +44,7 @@ class Pelunasanpiutang extends MY_Controller
                 $row[] = '<a href="' . base_url('accounting/pelunasanpiutang/edit/' . $kode_encrypt) . '">' . $field->no_pelunasan . '</a>';
                 $row[] = date("Y-m-d", strtotime($field->tanggal_transaksi));
                 $row[] = $field->partner_nama;
+                $row[] = number_format($field->total_pelunasan,2);
                 $row[] = $field->nama_status;
 
                 $data[] = $row;
