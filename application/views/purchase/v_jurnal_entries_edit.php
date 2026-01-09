@@ -75,6 +75,17 @@
                                     </button>
                                     <?php
                                 }
+                                if ($jurnal->status === "unposted" && $jurnal->origin === "") {
+                                    ?>
+                                    <button class="btn btn-primary btn-sm" id="btn-import" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-file">&nbsp;Import </i>
+                                    </button>
+                                    <button class="btn btn-success btn-sm" id="btn-download-temp" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-download">&nbsp;Template </i>
+                                    </button>
+
+                                    <?php
+                                }
                                 ?>
                             </div>
                         </div>
@@ -288,6 +299,7 @@
         <footer class="main-footer">
             <?php
             $this->load->view("admin/_partials/footer_new.php");
+            $this->load->view("admin/_partials/modal.php");
             ?>
         </footer>
         <?php $this->load->view("admin/_partials/js.php") ?>
@@ -367,7 +379,7 @@
             });
             var no = <?= count($detail) ?>;
             $(function () {
-            setNominalCurrency();
+                setNominalCurrency();
                 $("#tbl-jurnal").on("click", ".btn-rmv-item", function () {
                     $(this).closest("tr").remove();
                     calculateTotal();
@@ -642,6 +654,74 @@
                         }
                     });
                 });
+
+                $("#btn-download-temp").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url("purchase/jurnalentries/download_template/{$id}"); ?>",
+                        type: "POST",
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        }, success: function (data) {
+                            unblockUI(function () {});
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.url;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+
+                $("#btn-import").on("click", function (e) {
+                    e.preventDefault();
+                    $("#tambah_data").modal({
+                        show: true,
+                        backdrop: 'static'
+                    });
+                    $(".tambah_data").html('<center><input type="file" id="file_upload" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></center>');
+                    $('.modal-title').text("Import Entries");
+                    $("#btn-tambah").on("click", function (es) {
+                        var file_data = $('#file_upload').prop('files')[0];
+                        if (file_data === undefined) {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', "File Belum dipilih", 'danger', function () {});
+                            }, 500);
+                            return;
+                        }
+                        var form_data = new FormData();
+                        form_data.append('file', file_data);
+                        $.ajax({
+                            url: "<?= base_url("purchase/jurnalentries/upload/{$id}"); ?>",
+                            data: form_data,
+                            type: 'post',
+                            dataType: "json",
+                            processData: false,
+                            contentType: false,
+                            beforeSend: function (xhr) {
+                                please_wait(function () {});
+                            },
+                            success: function (data) {
+                                location.reload();
+                            },
+                            error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                        });
+                    });
+                }
+                );
 
             });
             $(document).ready(function () {
