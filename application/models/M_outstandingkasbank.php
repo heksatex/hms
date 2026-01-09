@@ -7,7 +7,7 @@ class M_outstandingkasbank extends CI_Model
 {
     var $column_order = array(null, null, 'no_bukti', 'partner_nama', 'coa', 'tanggal', 'uraian', 'currency', 'kurs', 'total_rp', 'total_valas');
     var $column_search = array('no_bukti', 'tanggal', 'partner_nama', 'coa', 'currency', 'uraian','kurs', 'total_rp', 'total_valas');
-    var $order         = array('tanggal' => 'asc');
+    var $order         = array('tanggal' => 'asc', 'no_bukti' => 'asc');
 
     var $coa_kas = array('2112.01', '2112.02','1192.01', '1192.02', '1192.03', '1192.99');
     // var $coa_um = array('1192.01', '1192.02', '1192.03', '1192.99');
