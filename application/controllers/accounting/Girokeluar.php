@@ -140,9 +140,9 @@ class Girokeluar extends MY_Controller {
         $data["trx_intern"] = $this->trx_intern;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi",["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi", ["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
-        
+
         $this->load->view('accounting/v_giro_keluar_add', $data);
     }
 
@@ -199,7 +199,7 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -216,7 +216,7 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -334,7 +334,7 @@ class Girokeluar extends MY_Controller {
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi",["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi", ["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
             $data['id_dept'] = 'ACCGK';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -390,7 +390,7 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -407,7 +407,7 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -509,7 +509,7 @@ class Girokeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$dt);
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array) $dt);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
@@ -683,7 +683,7 @@ class Girokeluar extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_giro_keluar")->setJoins("acc_giro_keluar_detail", "acc_giro_keluar.id = giro_keluar_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_giro_keluar.*", "currency_kurs.currency,currency_kurs.kurs","giro_keluar_id"])
+                            ->setSelects(["acc_giro_keluar.*", "currency_kurs.currency,currency_kurs.kurs", "giro_keluar_id"])
                             ->setWheres(["acc_giro_keluar.no_gk" => $kode])->getDetail();
 
             if (!$head) {
@@ -731,9 +731,12 @@ class Girokeluar extends MY_Controller {
                                     ->setWheres(["giro_keluar_id" => $head->id])->getData();
 
                     foreach ($items as $key => $item) {
+                        $uraian = $item->bank;
+                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}":"";
+                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}":"";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "{$head->transinfo} - {$item->bank}",
+                            "nama" => "{$uraian}",
                             "reff_note" => "",
                             "partner" => ($head->partner_id ?? ""),
                             "kode_coa" => $item->kode_coa,
@@ -784,10 +787,10 @@ class Girokeluar extends MY_Controller {
 
                 default:
                     $this->validasiPin($pin, "Batal / Cancel Data Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
-                    
-                    $lunas =  $model->setTables("acc_giro_keluar_detail")->setWheres(["giro_keluar_id" => $head->id, "lunas" => 1])->getDetail();
-                    if($lunas) {
-                         throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
+
+                    $lunas = $model->setTables("acc_giro_keluar_detail")->setWheres(["giro_keluar_id" => $head->id, "lunas" => 1])->getDetail();
+                    if ($lunas) {
+                        throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
                     }
 
                     $checkCair = $model->setTables("acc_giro_keluar_detail")->setWheres(["giro_keluar_id" => $head->id, "cair" => 1])->getDetail();
