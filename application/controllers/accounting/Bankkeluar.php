@@ -872,9 +872,13 @@ class Bankkeluar extends MY_Controller {
                     $jurnalItems = [];
                     foreach ($items as $key => $item) {
                         $giro[] = $item->giro_keluar_detail_id;
+                        $uraian = $item->uraian;
+                        $uraian .= ($item->bank !== "") ? " - {$item->bank}":"";
+                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}":"";
+                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}":"";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "{$item->bank} {$item->no_rek}",
+                            "nama" => "{$uraian}",
                             "reff_note" => "",
                             "partner" => ($head->partner_id ?? ""),
                             "kode_coa" => $item->kode_coa,
