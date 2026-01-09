@@ -717,13 +717,13 @@ if ($datas->status == 'confirm') {
     const setNominalCurrency = (() => {
         $("input[data-type='currency']").on({
             keyup: function () {
-                formatCurrency($(this));
+                formatCurrency($(this),'',4);
             },
             drop: function () {
-                formatCurrency($(this));
+                formatCurrency($(this),'',4);
             },
             blur: function () {
-                formatCurrency($(this), "blur");
+                formatCurrency($(this), "blur",4);
             }
         });
     });
