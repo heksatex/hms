@@ -67,7 +67,7 @@
         return n.replace(/[^0-9-]|(?!^)-/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    const formatCurrency = ((input, blur) => {
+    const formatCurrency = ((input, blur, digit = 2) => {
         // appends $ to value, validates decimal side
         // and puts cursor back in right position.
 
@@ -109,7 +109,7 @@
             }
 
             // Limit decimal to only 2 digits
-            right_side = right_side.substring(0, 4);
+            right_side = right_side.substring(0, digit);
 
             // join number by .
             input_val = left_side + "." + right_side;

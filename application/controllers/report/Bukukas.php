@@ -244,6 +244,7 @@ class Bukukas extends MY_Controller {
             $noUrut = 0;
             $valass = ["usd" => ["debit" => 0, "kredit" => 0], "euro" => ["debit" => 0, "kredit" => 0]];
             foreach ($data as $key => $value) {
+                $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
                 $row += 1;
                 $showUrut = "";
                 $no_bukti = "";
@@ -269,7 +270,7 @@ class Bukukas extends MY_Controller {
                     $sheet->setCellValue("A{$row}", $showUrut);
                     $sheet->setCellValue("B{$row}", $dt);
                     $sheet->setCellValue("C{$row}", $no_bukti);
-                    $sheet->setCellValue("D{$row}", $value->uraian);
+                    $sheet->setCellValue("D{$row}", $partner.$value->uraian);
                     $sheet->setCellValue("E{$row}", $value->coa);
                     if (strtolower($value->nama_curr) === "usd") {
                         $valass["usd"]["debit"] += $debet;
