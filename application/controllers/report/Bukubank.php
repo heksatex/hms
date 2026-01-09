@@ -199,6 +199,7 @@ class Bukubank extends MY_Controller {
             $temp = "";
             $noUrut = 0;
             foreach ($data as $key => $value) {
+                $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] " ; 
                 $row += 1;
                 $showUrut = "";
                 $no_bukti = "";
@@ -223,7 +224,7 @@ class Bukubank extends MY_Controller {
                 $sheet->setCellValue("A{$row}", $showUrut);
                 $sheet->setCellValue("B{$row}", $dt);
                 $sheet->setCellValue("C{$row}", $no_bukti);
-                $sheet->setCellValue("D{$row}", $value->uraian);
+                $sheet->setCellValue("D{$row}", $partner.$value->uraian);
                 $sheet->setCellValue("E{$row}", $value->kode_coa);
                 $sheet->setCellValue("F{$row}", $debet);
                 $sheet->setCellValue("G{$row}", $kredit);
