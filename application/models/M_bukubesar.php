@@ -271,7 +271,7 @@ class M_bukubesar extends CI_Model
             $this->db->where($where);
         }
        
-        $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, IF(prt.nama is null or  prt.nama = '',  IF(je.reff_note ='',jei.nama,CONCAT('[',je.reff_note,']',' - ',jei.nama)), CONCAT('[',prt.nama,']',' ', jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))) as keterangan,,
+        $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, IF(prt.nama is null or  prt.nama = '',  IF(je.reff_note ='',jei.nama,CONCAT('[',je.reff_note,']', IF(jei.nama!= '', CONCAT(' - ', jei.nama), ' ' ))), CONCAT('[',prt.nama,']',' ', jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))) as keterangan,,
                             jei.kode_coa, coa.nama as nama_coa, jei.posisi,  if(jei.posisi = 'D',  jei.nominal, 0) as total_debit, if(jei.posisi = 'C', jei.nominal, 0) as total_credit");
         $this->db->from("acc_jurnal_entries je");
         $this->db->join("acc_jurnal_entries_items jei","jei.kode = je.kode","inner");
