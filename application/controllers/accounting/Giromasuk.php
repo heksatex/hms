@@ -733,9 +733,12 @@ class Giromasuk extends MY_Controller {
                     );
 
                     foreach ($items as $key => $item) {
+                        $uraian = $item->bank;
+                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}":"";
+                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}":"";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
-                            "nama" => "{$head->transinfo} - {$item->bank} ",
+                            "nama" => "{$uraian}",
                             "reff_note" => "",
                             "partner" => ($head->partner_id ?? ""),
                             "kode_coa" => $item->kode_coa,
