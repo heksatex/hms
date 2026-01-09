@@ -439,14 +439,14 @@ if ($datas->status == 'confirm') {
                     const elements = document.querySelectorAll('.nominal');
                     $.each(elements, function (idx, nomina) {
                         let ttl = $(nomina).val();
-                        total += parseInt(ttl.replace(/,/g, ""));
+                        total += parseFloat(ttl.replace(/,/g, ""));
                     });
                     if (total === NaN) {
                         $("#total_nominal").val();
                         return;
                     }
 
-                    $("#total_nominal").val(total);
+                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
                 });
                 const setNominalCurrency = (() => {
                     $("input[data-type='currency']").on({

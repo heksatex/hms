@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-            <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -248,8 +248,11 @@
 
                                                             </td>
                                                             <td class="text-bold">
-                                                                <input type="text" class="form-control input-sm text-right ftotal_nominal" value="<?= number_format($datas->total_rp, 2) ?>" readonly/>
-                                                                <input type="text" name="total_nominal" id="total_nominal" class="form-control input-sm text-right total_nominal" style="display : none" value="<?= $datas->total_rp ?>" readonly/>
+                                                                <input type="text" class="form-control input-sm text-right ftotal_nominal"
+                                                                       pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'value="<?= number_format($datas->total_rp, 2) ?>" readonly/>
+                                                                <input type="text" name="total_nominal" id="total_nominal" 
+                                                                       pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm text-right total_nominal"
+                                                                       style="display : none" value="<?= $datas->total_rp ?>" readonly/>
                                                             </td>
                                                         </tr>
                                                     </tfoot>
@@ -509,7 +512,7 @@ if ($datas->status == 'confirm') {
                 const elements = document.querySelectorAll('.nominal');
                 $.each(elements, function (idx, nomina) {
                     let ttl = $(nomina).val();
-                    total += parseInt(ttl.replace(/,/g, ""));
+                    total += parseFloat(ttl.replace(/,/g, ""));
                 });
                 if (total === NaN) {
                     $("#total_nominal").val();
@@ -517,6 +520,7 @@ if ($datas->status == 'confirm') {
                 }
 
                 $("#total_nominal").val(total);
+                formatCurrency($("#total_nominal"));
             });
 
             const setNominalCurrency = (() => {
@@ -784,37 +788,37 @@ if ($datas->status == 'confirm') {
                 $(".total-nominal").on("click", function () {
                     calculateTotal();
                 });
-                const getPartner = (()=>{
+                const getPartner = (() => {
                     $("#partner").select2({
-                    placeholder: "Pilih",
-                    allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
-                        type: "GET",
-                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term,
-                                jenis: "customer"
-                            };
-                        },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                results.push({
-                                    id: item.id,
-                                    text: item.nama
+                        placeholder: "Pilih",
+                        allowClear: true,
+                        ajax: {
+                            dataType: 'JSON',
+                            type: "GET",
+                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                            delay: 250,
+                            data: function (params) {
+                                return{
+                                    search: params.term,
+                                    jenis: "customer"
+                                };
+                            },
+                            processResults: function (data) {
+                                var results = [];
+                                $.each(data.data, function (index, item) {
+                                    results.push({
+                                        id: item.id,
+                                        text: item.nama
+                                    });
                                 });
-                            });
-                            return {
-                                results: results
-                            };
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
+                                return {
+                                    results: results
+                                };
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                            }
                         }
-                    }
-                })
+                    })
                 });
 
                 $(".partner").on("change", function () {
