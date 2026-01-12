@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-            <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -198,6 +198,7 @@
                                                                 <input type="text" class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2) ?>" disabled>
                                                                 <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
                                                                        style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
+                                                                <input type="hidden"   name="po_detail[]" value="<?= $value->po_detail_id ?>"/>
                                                             </td>
                                                         </tr>
                                                         <?php
@@ -461,7 +462,8 @@ if ($datas->status == 'confirm') {
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+                    $("#total_nominal").val(total);
+                    formatCurrency($("#total_nominal"));
                 });
                 const setNominalCurrency = (() => {
                     $("input[data-type='currency']").on({
@@ -642,37 +644,37 @@ if ($datas->status == 'confirm') {
                     });
 
 
-                    const getPartner = (()=>{
+                    const getPartner = (() => {
                         $("#partner").select2({
-                        placeholder: "Pilih",
-                        allowClear: true,
-                        ajax: {
-                            dataType: 'JSON',
-                            type: "GET",
-                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
-                            delay: 250,
-                            data: function (params) {
-                                return{
-                                    search: params.term,
-                                    jenis: "supplier"
-                                };
-                            },
-                            processResults: function (data) {
-                                var results = [];
-                                $.each(data.data, function (index, item) {
-                                    results.push({
-                                        id: item.id,
-                                        text: item.nama
+                            placeholder: "Pilih",
+                            allowClear: true,
+                            ajax: {
+                                dataType: 'JSON',
+                                type: "GET",
+                                url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                                delay: 250,
+                                data: function (params) {
+                                    return{
+                                        search: params.term,
+                                        jenis: "supplier"
+                                    };
+                                },
+                                processResults: function (data) {
+                                    var results = [];
+                                    $.each(data.data, function (index, item) {
+                                        results.push({
+                                            id: item.id,
+                                            text: item.nama
+                                        });
                                     });
-                                });
-                                return {
-                                    results: results
-                                };
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
+                                    return {
+                                        results: results
+                                    };
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                }
                             }
-                        }
-                    })
+                        })
                     });
                     $(".partner").on("change", function () {
                         var ttt = $(".partner").find(":selected");
