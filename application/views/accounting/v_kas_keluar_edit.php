@@ -760,9 +760,10 @@ if ($datas->status == 'confirm') {
                                 no += 1;
                                 var tmplt = $("template.kaskeluar-tmplt-fpt");
                                 var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
+                                var uraian = row.deskripsi + notes;
                                 $("#kaskeluar-detail tbody").append(isi_tmplt);
                                 $(".po" + no).val(row.id);
-                                $(".uraian" + no).val(row.deskripsi + notes);
+                                $(".uraian" + no).val(uraian.toUpperCase());
                                 $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.total));
                                 $(".kurs" + no).val(row.nilai_currency);
                                 $(".nourut" + no).html(no);
