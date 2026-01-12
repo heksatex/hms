@@ -648,7 +648,7 @@ class Bankkeluar extends MY_Controller {
             $buff->write("\x1bg" . chr(1));
             $printer->text(str_pad($head->nama_coa, 45, " ", STR_PAD_RIGHT));
             $printer->text(str_pad("", 1));
-            $customer = str_split(trim(preg_replace('/\s+/', ' ', "Dari : {$head->partner_nama}")), 33);
+            $customer = str_split(trim(preg_replace('/\s+/', ' ', "Kepada : {$head->partner_nama}")), 33);
             foreach ($customer as $key => $value) {
                 if ($key > 0) {
                     $printer->text(str_pad("", 84));

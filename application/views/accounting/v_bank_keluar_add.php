@@ -189,7 +189,7 @@
                         <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                             <option value=""></option>
                             <?php
-                            foreach ($coas as $key => $value) {
+                            foreach ($coa as $key => $value) {
                                 ?>
                                 <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
                                 <?php
