@@ -166,7 +166,7 @@ class Kaskeluar extends MY_Controller {
                     ->setJoins("currency_kurs", "currency_kurs.id = currency_id")
                     ->setJoins("purchase_order_detail pod", "pod.id = po_detail_id", "left")
                     ->setOrder(["tanggal" => "desc", "row_order" => "asc"])
-                    ->setSelects(["acd.no_kk,acd.tanggal,acd.kode_coa,acd.uraian,acd.kurs,acd.currency_id,acd.nominal"])
+                    ->setSelects(["acd.no_kk,acd.tanggal,acd.kode_coa,acd.uraian,acd.kurs,acd.currency_id,acd.nominal","po_detail_id"])
                     ->setSelects(["acc_coa.nama as nama_coa", "currency_kurs.currency as curr", "po_no_po"])
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
