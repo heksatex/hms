@@ -93,6 +93,20 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="form-group">
+                                            <div class="col-md-6 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">No SJ</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8">
+                                                    <input type="text" class="form-control input-sm no_sj" name="no_sj" id="no_sj">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-xs-12">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
                                     <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
@@ -184,7 +198,8 @@
                         type: "POST",
                         data: {
                             customer: $("#customer").val(),
-                            periode: $("#periode").val()
+                            periode: $("#periode").val(),
+                            no_sj: $("#no_sj").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -205,7 +220,7 @@
                         }
                     });
                 });
-                
+
                 const formrd = document.forms.namedItem("form-jm");
                 formrd.addEventListener(
                         "submit",
