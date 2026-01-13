@@ -9,6 +9,20 @@
             .select2-container--focus{
                 border:  1px solid #66afe9;
             }
+
+            #bankkeluar-detail.hides thead tr > *:nth-child(3),
+            #bankkeluar-detail.hides thead tr > *:nth-child(4){
+                display: none;
+            }
+
+            #bankkeluar-detail.hides tbody tr > *:nth-child(3),
+            #bankkeluar-detail.hides tbody tr > *:nth-child(4){
+                display: none;
+            }
+            #bankkeluar-detail.hides tfoot tr > *:nth-child(3),
+            #bankkeluar-detail.hides tfoot tr > *:nth-child(4){
+                display: none;
+            }
         </style>
         <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
@@ -116,7 +130,10 @@
                             </div>
                             <div class="box-footer">
                                 <div class="col-md-12 table-responsive over">
-                                    <table class="table table-condesed table-hover rlstable" width="100%" id="bankkeluar-detail" style="min-width: 105%">
+                                    <table class="table table-condesed table-hover rlstable hides" width="100%" id="bankkeluar-detail" style="min-width: 100%">
+                                        <caption>
+                                            <span id="bankrekshow" href="#" onclick="setbankrekshow()" style="color: blue">Show Bank</span>
+                                        </caption>
                                         <thead>
                                         <th class="style" style="width: 2%">No.</th>
                                         <th class="style" style="width: 12%">Uraian</th>
@@ -138,8 +155,13 @@
                                                 <td>
                                                     <button type="button" class="btn btn-success btn-sm btn-add-item"><i class="fa fa-plus-circle"></i></button>
                                                 </td>
-                                                <td colspan="9" class="text-right text-bold total-nominal">
-
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td colspan="6">
                                                 </td>
                                                 <td class="text-bold">
                                                     <input type="text" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="total_nominal" id="total_nominal" class="form-control input-sm text-right" value="0" readonly/>
@@ -165,10 +187,10 @@
                         <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm"/>
                     </td>
                     <td>
-                        <input type="text" name="bank[]" class="form-control bank:nourut input-sm" required/>
+                        <input type="text" name="bank[]" class="form-control bank_input bank:nourut input-sm" required/>
                     </td>
                     <td>
-                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm" required/>
+                        <input type="text" name="norek[]" class="form-control norek_input norek:nourut input-sm" required/>
                     </td>
                     <td>
                         <input type="text" name="nobg[]" class="form-control input-sm"/>
@@ -202,7 +224,7 @@
                     </td>
                     <td>
                         <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
-                           <!--<option value="1" selected>IDR</option>-->
+                            <!--<option value="1" selected>IDR</option>-->
                             <?php foreach ($curr as $key => $values) {
                                 ?>
                                 <option value="<?= $values->id ?>"><?= $values->currency ?></option>
@@ -230,10 +252,10 @@
                         <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm" value=""/>
                     </td>
                     <td>
-                        <input type="text" name="bank[]" class="form-control input-sm bank:nourut" value="" required/>
+                        <input type="text" name="bank[]" class="form-control bank_input input-sm bank:nourut" value="" required/>
                     </td>
                     <td>
-                        <input type="text" name="norek[]" class="form-control input-sm norek:nourut" value="" required/>
+                        <input type="text" name="norek[]" class="form-control norek_input input-sm norek:nourut" value="" required/>
                     </td>
                     <td>
                         <input type="text" name="nobg[]" class="form-control input-sm nobg:nourut" value=""/>
@@ -325,6 +347,17 @@
                 });
             });
 
+            var bankrekshow = false;
+            const setbankrekshow = (() => {
+                bankrekshow = !bankrekshow;
+                $("#bankkeluar-detail").toggleClass("hides");
+                if (bankrekshow) {
+                    $("#bankrekshow").html("Hide Bank");
+                    return;
+                }
+                $("#bankrekshow").html("Show Bank");
+            });
+
             const calculateTotal = (() => {
                 var total = 0;
                 const elements = document.querySelectorAll('.nominal');
@@ -337,38 +370,39 @@
                     return;
                 }
 
-               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+                $("#total_nominal").val(total);
+                formatCurrency($("#total_nominal"));
             });
 
             const setCurr = (() => {
                 $(".select2-curr").select2({
                     placeholder: "Pilih",
                     allowClear: true,
-//                    ajax: {
-//                        dataType: 'JSON',
-//                        type: "GET",
-//                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
-//                        delay: 250,
-//                        data: function (params) {
-//                            return{
-//                                search: params.term
-//                            };
-//                        },
-//                        processResults: function (data) {
-//                            var results = [];
-//                            $.each(data.data, function (index, item) {
-//                                results.push({
-//                                    id: item.id,
-//                                    text: item.currency
-//                                });
-//                            });
-//                            return {
-//                                results: results
-//                            };
-//                        },
-//                        error: function (xhr, ajaxOptions, thrownError) {
-//                        }
-//                    }
+    //                    ajax: {
+    //                        dataType: 'JSON',
+    //                        type: "GET",
+    //                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
+    //                        delay: 250,
+    //                        data: function (params) {
+    //                            return{
+    //                                search: params.term
+    //                            };
+    //                        },
+    //                        processResults: function (data) {
+    //                            var results = [];
+    //                            $.each(data.data, function (index, item) {
+    //                                results.push({
+    //                                    id: item.id,
+    //                                    text: item.currency
+    //                                });
+    //                            });
+    //                            return {
+    //                                results: results
+    //                            };
+    //                        },
+    //                        error: function (xhr, ajaxOptions, thrownError) {
+    //                        }
+    //                    }
                 });
             });
             var buktigiro = [];
@@ -405,6 +439,15 @@
                         $(".bank" + nourut).val(texts?.[1]);
                         $(".norek" + nourut).val(texts?.[2]);
 
+                    }
+                });
+                $(".no_acc").on("change", function () {
+                    var ttt = $(".no_acc").find(":selected");
+                    var acc = ttt.text();
+                    if (acc !== "") {
+                        const texts = acc.split(" - ");
+                        $(".bank_input").val(texts?.[1]);
+                        $(".norek_input").val(texts?.[2]);
                     }
                 });
                 lainInput(document.getElementById("lain_lain"), function () {

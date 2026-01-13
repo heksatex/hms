@@ -8,6 +8,20 @@
             .select2-container--focus{
                 border:  1px solid #66afe9;
             }
+
+            #bankkeluar-detail.hides thead tr > *:nth-child(3),
+            #bankkeluar-detail.hides thead tr > *:nth-child(4){
+                display: none;
+            }
+
+            #bankkeluar-detail.hides tbody tr > *:nth-child(3),
+            #bankkeluar-detail.hides tbody tr > *:nth-child(4){
+                display: none;
+            }
+            #bankkeluar-detail.hides tfoot tr > *:nth-child(3),
+            #bankkeluar-detail.hides tfoot tr > *:nth-child(4){
+                display: none;
+            }
         </style>
         <?php
         $this->load->view("admin/_partials/head.php");
@@ -167,7 +181,10 @@
                                     <div class="tab-content"><br>
                                         <div class="tab-pane active" id="tab_1" >
                                             <div class="table-responsive over">
-                                                <table class="table table-condesed table-hover rlstable" width="100%" id="bankkeluar-detail" style="min-width: 115%">
+                                                <table class="table table-condesed table-hover rlstable hides" width="100%" id="bankkeluar-detail" style="min-width: 100%">
+                                                    <caption>
+                                                        <span id="bankrekshow" href="#" onclick="setbankrekshow()" style="color: blue">Show Bank</span>
+                                                    </caption>
                                                     <thead>
                                                     <th class="style" style="width: 5px">No.</th>
                                                     <th class="style" style="width: 150px">Uraian</th>
@@ -195,10 +212,10 @@
                                                                     <input type="text" name="uraian[]" class="form-control uraian edited-read input-sm" value="<?= $value->uraian ?>" readonly/>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" name="bank[]" class="form-control bank edited-read input-sm" value="<?= $value->bank ?>" required readonly/>
+                                                                    <input type="text" name="bank[]" class="form-control bank_input edited-read input-sm" value="<?= $value->bank ?>" required readonly/>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" name="norek[]" class="form-control norek edited-read input-sm" value="<?= $value->no_rek ?>" required readonly/>
+                                                                    <input type="text" name="norek[]" class="form-control norek_input edited-read input-sm" value="<?= $value->no_rek ?>" required readonly/>
                                                                 </td>
                                                                 <td>
                                                                     <input type="text" name="nobg[]" class="form-control nobg edited-read input-sm" value="<?= $value->no_bg ?>" readonly/>
@@ -251,8 +268,13 @@
                                                             <td>
                                                                 <button class="btn btn-success btn-sm btn-add-item" style="display: none"><i class="fa fa-plus-circle"></i></button>
                                                             </td>
-                                                            <td colspan="9" class="text-right text-bold total-nominal">
-
+                                                            <td>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                            <td colspan="6">
                                                             </td>
                                                             <td class="text-bold">
                                                                 <input type="text" class="form-control input-sm text-right ftotal_nominal" value="<?= number_format($datas->total_rp, 2) ?>" readonly/>
@@ -333,10 +355,10 @@
                     <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm"/>
                 </td>
                 <td>
-                    <input type="text" name="bank[]" class="form-control bank:nourut input-sm bank" required/>
+                    <input type="text" name="bank[]" class="form-control bank_input bank:nourut input-sm bank" required/>
                 </td>
                 <td>
-                    <input type="text" name="norek[]" class="form-control norek:nourut input-sm" required/>
+                    <input type="text" name="norek[]" class="form-control norek_input norek:nourut input-sm" required/>
                 </td>
                 <td>
                     <input type="text" name="nobg[]" class="form-control input-sm"/>
@@ -391,10 +413,10 @@
                     <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm" value=""/>
                 </td>
                 <td>
-                    <input type="text" name="bank[]" class="form-control input-sm bank:nourut" value="" required/>
+                    <input type="text" name="bank[]" class="form-control bank_input input-sm bank:nourut" value="" required/>
                 </td>
                 <td>
-                    <input type="text" name="norek[]" class="form-control input-sm norek:nourut" value="" required/>
+                    <input type="text" name="norek[]" class="form-control norek_input input-sm norek:nourut" value="" required/>
                 </td>
                 <td>
                     <input type="text" name="nobg[]" class="form-control input-sm nobg:nourut" value=""/>
@@ -492,8 +514,21 @@ if ($datas->status == 'confirm') {
                     return;
                 }
 
-               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+                $("#total_nominal").val(total);
+                formatCurrency($("#total_nominal"));
             });
+
+            var bankrekshow = false;
+            const setbankrekshow = (() => {
+                bankrekshow = !bankrekshow;
+                $("#bankkeluar-detail").toggleClass("hides");
+                if (bankrekshow) {
+                    $("#bankrekshow").html("Hide Bank");
+                    return;
+                }
+                $("#bankrekshow").html("Show Bank");
+            });
+
 
             const setCoaItem = ((klas = "select2-coa") => {
                 $("." + klas).select2({
@@ -561,6 +596,16 @@ if ($datas->status == 'confirm') {
                         $(".bank" + nourut).val(texts?.[1]);
                         $(".norek" + nourut).val(texts?.[2]);
 
+                    }
+                });
+
+                $(".no_acc").on("change", function () {
+                    var ttt = $(".no_acc").find(":selected");
+                    var acc = ttt.text();
+                    if (acc !== "") {
+                        const texts = acc.split(" - ");
+                        $(".bank_input").val(texts?.[1]);
+                        $(".norek_input").val(texts?.[2]);
                     }
                 });
 
@@ -642,6 +687,7 @@ if ($datas->status == 'confirm') {
                         },
                         success: function (data) {
                             alert_notify(data.icon, data.message, data.type, function () {}, 500);
+                            window.location.href = "<?= base_url('accounting/bankkeluar/add') ?>";
                         },
                         complete: function (jqXHR, textStatus) {
                             unblockUI(function () {});
