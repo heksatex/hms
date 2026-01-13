@@ -75,6 +75,17 @@
                                     </button>
                                     <?php
                                 }
+                                if ($jurnal->status === "unposted" && $jurnal->origin === "") {
+                                    ?>
+                                    <button class="btn btn-primary btn-sm" id="btn-import" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-file">&nbsp;Import </i>
+                                    </button>
+                                    <button class="btn btn-success btn-sm" id="btn-download-temp" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-download">&nbsp;Template </i>
+                                    </button>
+
+                                    <?php
+                                }
                                 ?>
                             </div>
                         </div>
@@ -224,7 +235,7 @@
                                                                     </td>
                                                                     <td>
                                                                         <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
-                                                                               value="0">
+                                                                               value="0.00">
                                                                     </td>
                                                                     <?php
                                                                 } else {
@@ -232,7 +243,7 @@
                                                                     ?>
                                                                     <td>
                                                                         <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_d nominal_d_<?= $keys ?>" style="width: 120px" name="debet[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
-                                                                               value="0">
+                                                                               value="0.00">
                                                                     </td>
                                                                     <td>
                                                                         <input pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-row="<?= $keys ?>" class="form-control text-right input-sm newline nominal_k nominal_k_<?= $keys ?>" style="width: 120px" name="kredit[]" type="text" <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>
@@ -288,6 +299,7 @@
         <footer class="main-footer">
             <?php
             $this->load->view("admin/_partials/footer_new.php");
+            $this->load->view("admin/_partials/modal.php");
             ?>
         </footer>
         <?php $this->load->view("admin/_partials/js.php") ?>
@@ -367,7 +379,7 @@
             });
             var no = <?= count($detail) ?>;
             $(function () {
-            setNominalCurrency();
+                setNominalCurrency();
                 $("#tbl-jurnal").on("click", ".btn-rmv-item", function () {
                     $(this).closest("tr").remove();
                     calculateTotal();
@@ -381,11 +393,17 @@
 
                     $.each(debet, function (idx, nomina) {
                         let ttl = $(nomina).val().replace(/,/g, "");
-                        totalDebet += parseFloat(ttl);
+                        var parseF = parseFloat(ttl);
+                        totalDebet += parseFloat(parseF.toFixed(2));
+                        totalDebet = parseFloat(totalDebet.toFixed(2));
+//                        console.log("Kredit : "+totalDebet);
                     });
                     $.each(kredit, function (idx, nomina) {
                         let ttl = $(nomina).val().replace(/,/g, "");
-                        totalKredit += parseFloat(ttl);
+                         var parseF = parseFloat(ttl);
+                        totalKredit += parseFloat(parseF.toFixed(2));
+                        totalKredit = parseFloat(totalKredit.toFixed(2));
+//                        console.log("Kredit : "+totalKredit);
                     });
                     if (totalDebet === NaN) {
                         totalDebet = 0;
@@ -393,7 +411,8 @@
                     if (totalKredit === NaN) {
                         totalKredit = 0;
                     }
-
+                    
+                        
                     $(".total_debit").val(totalDebet);
                     $(".total_kredit").val(totalKredit);
                 });
@@ -642,6 +661,74 @@
                         }
                     });
                 });
+
+                $("#btn-download-temp").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url("accounting/jurnalentries/download_template/{$id}"); ?>",
+                        type: "POST",
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        }, success: function (data) {
+                            unblockUI(function () {});
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.url;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+
+                $("#btn-import").on("click", function (e) {
+                    e.preventDefault();
+                    $("#tambah_data").modal({
+                        show: true,
+                        backdrop: 'static'
+                    });
+                    $(".tambah_data").html('<center><input type="file" id="file_upload" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></center>');
+                    $('.modal-title').text("Import Entries");
+                    $("#btn-tambah").on("click", function (es) {
+                        var file_data = $('#file_upload').prop('files')[0];
+                        if (file_data === undefined) {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', "File Belum dipilih", 'danger', function () {});
+                            }, 500);
+                            return;
+                        }
+                        var form_data = new FormData();
+                        form_data.append('file', file_data);
+                        $.ajax({
+                            url: "<?= base_url("accounting/jurnalentries/upload/{$id}"); ?>",
+                            data: form_data,
+                            type: 'post',
+                            dataType: "json",
+                            processData: false,
+                            contentType: false,
+                            beforeSend: function (xhr) {
+                                please_wait(function () {});
+                            },
+                            success: function (data) {
+                                location.reload();
+                            },
+                            error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                        });
+                    });
+                }
+                );
 
             });
             $(document).ready(function () {
