@@ -114,7 +114,7 @@ class Bukupembelian extends MY_Controller
                             'kode_coa'    => $datas->account,
                             'nama_coa'    => $datas->nama_account,
                             'invoice_supp'=> $datas->no_invoice_supp,
-                            'tgl_sj'      => $datas->tanggal_sj,
+                            'tgl_sj'      => date("Y-m-d", strtotime($datas->tanggal_sj)),
                             'no_sj'       => $datas->no_sj_supp
             );
             $value_pph23 = 0;
@@ -204,7 +204,7 @@ class Bukupembelian extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('S' . $rowCount, $val['pph22']);
                 $object->getActiveSheet()->SetCellValue('T' . $rowCount, $val['kode_coa']);
                 $object->getActiveSheet()->SetCellValue('U' . $rowCount, $val['nama_coa']);
-                $object->getActiveSheet()->SetCellValue('P' . $rowCount, $val['reff_note']);
+                $object->getActiveSheet()->SetCellValue('V' . $rowCount, $val['reff_note']);
                 $object->getActiveSheet()->SetCellValue('W' . $rowCount, $val['no_sj']);
                 $object->getActiveSheet()->SetCellValue('X' . $rowCount, $val['tgl_sj']);
                 $object->getActiveSheet()->SetCellValue('y' . $rowCount, $val['invoice_supp']);
