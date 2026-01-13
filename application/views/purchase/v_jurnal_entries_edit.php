@@ -393,11 +393,17 @@
 
                     $.each(debet, function (idx, nomina) {
                         let ttl = $(nomina).val().replace(/,/g, "");
-                        totalDebet += parseFloat(ttl);
+                        var parseF = parseFloat(ttl);
+                        totalDebet += parseFloat(parseF.toFixed(2));
+                        totalDebet = parseFloat(totalDebet.toFixed(2));
+//                        console.log("Kredit : "+totalDebet);
                     });
                     $.each(kredit, function (idx, nomina) {
                         let ttl = $(nomina).val().replace(/,/g, "");
-                        totalKredit += parseFloat(ttl);
+                         var parseF = parseFloat(ttl);
+                        totalKredit += parseFloat(parseF.toFixed(2));
+                        totalKredit = parseFloat(totalKredit.toFixed(2));
+//                        console.log("Kredit : "+totalKredit);
                     });
                     if (totalDebet === NaN) {
                         totalDebet = 0;
@@ -405,7 +411,8 @@
                     if (totalKredit === NaN) {
                         totalKredit = 0;
                     }
-
+                    
+                        
                     $(".total_debit").val(totalDebet);
                     $(".total_kredit").val(totalKredit);
                 });
