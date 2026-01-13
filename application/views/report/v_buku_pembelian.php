@@ -153,6 +153,8 @@
                                                 <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
                                                 <th class='style bb ws'>RCV</th>
                                                 <th class='style bb ws'>PO</th>
+                                                <th class='style bb ws'>Faktur Pajak</th>
+                                                <th class='style bb ws'>Tanggal FP</th>
                                                 <th class='style bb ws' style="min-width: 150px">Uraian</th>
                                                 <th class='style bb ws'>Supplier</th>
                                                 <th class='style bb ws'>Gudang</th>
@@ -163,13 +165,18 @@
                                                 <th class='style bb ws text-right'>DPP</th>
                                                 <th class='style bb ws text-right'>PPN</th>
                                                 <th class='style bb ws text-right'>PPH23</th>
-                                                <th class='style bb ws'>Faktur Pajak</th>
-                                                <th class='style bb ws'>Tanggal FP</th>
+                                                <th class='style bb ws text-right'>PPH22</th>
+                                                <th class='style bb ws '>Kode CoA</th>
+                                                <th class='style bb ws '>Nama CoA</th>
+                                                <th class='style bb ws '>Reff Note</th>
+                                                <th class='style bb ws '>No Sj</th>
+                                                <th class='style bb ws '>Tgl SJ</th>
+                                                <th class='style bb ws '>No Inv Supplier</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="18">Tidak ada Data</td>
+                                                <td colspan="24">Tidak ada Data</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -326,6 +333,8 @@
                                     $("<td >").text(value.tanggal),
                                     $("<td>").text(value.rcv),
                                     $("<td>").text(value.no_po),
+                                    $("<td>").text(value.no_faktur_pajak),
+                                    $("<td>").text(value.tanggal_fk),
                                     $("<td style='min-width:100px;'>").text(value.uraian),
                                     $("<td>").text(value.nama_partner),
                                     $("<td>").text(value.departemen),
@@ -336,13 +345,18 @@
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.dpp.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.ppn.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.pph23.toFixed(4))),
-                                    $("<td>").text(value.no_faktur_pajak),
-                                    $("<td>").text(value.tanggal_fk),
+                                    $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.pph22.toFixed(4))),
+                                    $("<td>").text(value.kode_coa),
+                                    $("<td>").text(value.nama_coa),
+                                    $("<td>").text(value.reff_note),
+                                    $("<td>").text(value.no_sj),
+                                    $("<td>").text(value.tgl_sj),
+                                    $("<td>").text(value.ivoice_supplier),
                                 );
                                 tbody.append(tr);
                             });
                             if (empty == true) {
-                                var tr = $("<tr>").append($("<td colspan='17' >").text('Tidak ada Data'));
+                                var tr = $("<tr>").append($("<td colspan='24' >").text('Tidak ada Data'));
                                 tbody.append(tr);
                             }
                             $("#example1").append(tbody);
