@@ -269,6 +269,13 @@ class Jurnalentries extends MY_Controller {
                     $no++;
                     $db = str_replace(",", "", $debit[$key]);
                     $kr = str_replace(",", "", $kredit[$key]);
+                    $posisi = "D";
+                    if ($db > 0) {
+                        $nominalCurr = $db;
+                    } else {
+                        $nominalCurr = $kr;
+                        $posisi = "C";
+                    }
                     $itemUpdate[] = [
                         "kode_coa" => $value,
                         "kode" => $kode_decrypt,
@@ -277,9 +284,10 @@ class Jurnalentries extends MY_Controller {
                         "partner" => $partner[$key] ?? 0,
                         "kurs" => $kurs[$key],
                         "kode_mua" => $curr[$key],
-                        "nominal" => ($db > 0) ? $db : $kr,
+                        "nominal" => $nominalCurr * $kurs[$key],
                         "row_order" => $no,
-                        "posisi" => ($db > 0) ? "D" : "C"
+                        "posisi" => $posisi,
+                        "nominal_curr" => $nominalCurr
                     ];
                 }
                 $model->setTables("acc_jurnal_entries_items")->saveBatch($itemUpdate);
@@ -311,17 +319,19 @@ class Jurnalentries extends MY_Controller {
             $status = $this->input->post("status");
 
             $kode_decrypt = decrypt_url($id);
-            $jurnal = new $this->m_global;
+            $model = new $this->m_global;
             $update = ["status" => $status];
-            $kredit = str_replace(",", "", $this->input->post("kredit"));
-            $debit = str_replace(",", "", $this->input->post("debit"));
+//            $kredit = str_replace(",", "", $this->input->post("kredit"));
+//            $debit = str_replace(",", "", $this->input->post("debit"));
             if ($status === "posted") {
-                if (round($kredit, 4) !== round($debit, 4)) {
+                $getDataNominal = $model->setTables("acc_jurnal_entries_items")->setSelects(["sum(nominal) as total,posisi"])
+                                ->setWheres(["kode" => $kode_decrypt])->setGroups(["posisi"])->getData();
+                if (round(($getDataNominal[0]->total ?? 0), 2) !== round(($getDataNominal[1]->total ?? 0), 2)) {
                     throw new \Exception('Total Kredit dan Debit belum balance', 500);
                 }
                 $update = array_merge($update, ["tanggal_posting" => date("Y-m-d H:i:s")]);
             }
-            $jurnal->setTables("acc_jurnal_entries")->setWheres(["kode" => $kode_decrypt])->update($update);
+            $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $kode_decrypt])->update($update);
 
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'update', "update status ke {$status}", $username);
             $this->output->set_status_header(200)
@@ -500,8 +510,12 @@ class Jurnalentries extends MY_Controller {
             $jurnalItem = [];
             unset($data[0]);
             foreach ($data as $key => $value) {
-                $kredit = $value[5];
-                $debit = $value[4];
+                $nominal = $value[5];
+                $posisi = "C";
+                if ($value[4] > 0) {
+                    $nominal = $value[4];
+                    $posisi = "D";
+                }
                 $kurs = $value[6];
                 $jurnalItem[] = [
                     "kode_coa" => $value[3],
@@ -511,10 +525,10 @@ class Jurnalentries extends MY_Controller {
                     "partner" => 0,
                     "kurs" => $kurs,
                     "kode_mua" => $value[7],
-                    "nominal" => ($debit > 0) ? ($debit * $kurs) : ($kredit * $kurs),
-                    "nominal_curr" => ($debit > 0) ? $debit : $kredit,
+                    "nominal" => $nominal * $kurs,
+                    "nominal_curr" => $nominal,
                     "row_order" => $key++,
-                    "posisi" => ($debit > 0) ? "D" : "C"
+                    "posisi" => $posisi
                 ];
             }
             $model = new $this->m_global;
