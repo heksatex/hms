@@ -12,7 +12,13 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  * @author RONI
  */
 require FCPATH . 'vendor/autoload.php';
+require APPPATH . '/third_party/vendor/autoload.php';
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Mpdf\Mpdf;
 
 class Jurnalentries extends MY_Controller {
@@ -263,6 +269,13 @@ class Jurnalentries extends MY_Controller {
                     $no++;
                     $db = str_replace(",", "", $debit[$key]);
                     $kr = str_replace(",", "", $kredit[$key]);
+                    $posisi = "D";
+                    if ($db > 0) {
+                        $nominalCurr = $db;
+                    } else {
+                        $nominalCurr = $kr;
+                        $posisi = "C";
+                    }
                     $itemUpdate[] = [
                         "kode_coa" => $value,
                         "kode" => $kode_decrypt,
@@ -271,9 +284,10 @@ class Jurnalentries extends MY_Controller {
                         "partner" => $partner[$key] ?? 0,
                         "kurs" => $kurs[$key],
                         "kode_mua" => $curr[$key],
-                        "nominal" => ($db > 0) ? $db : $kr,
+                        "nominal" => $nominalCurr * $kurs[$key],
                         "row_order" => $no,
-                        "posisi" => ($db > 0) ? "D" : "C"
+                        "posisi" => $posisi,
+                        "nominal_curr" => $nominalCurr
                     ];
                 }
                 $model->setTables("acc_jurnal_entries_items")->saveBatch($itemUpdate);
@@ -305,17 +319,19 @@ class Jurnalentries extends MY_Controller {
             $status = $this->input->post("status");
 
             $kode_decrypt = decrypt_url($id);
-            $jurnal = new $this->m_global;
+            $model = new $this->m_global;
             $update = ["status" => $status];
-            $kredit = str_replace(",", "", $this->input->post("kredit"));
-            $debit = str_replace(",", "", $this->input->post("debit"));
+//            $kredit = str_replace(",", "", $this->input->post("kredit"));
+//            $debit = str_replace(",", "", $this->input->post("debit"));
             if ($status === "posted") {
-                if (round($kredit,4) !== round($debit,4)) {
+                $getDataNominal = $model->setTables("acc_jurnal_entries_items")->setSelects(["sum(nominal) as total,posisi"])
+                                ->setWheres(["kode" => $kode_decrypt])->setGroups(["posisi"])->getData();
+                if (round(($getDataNominal[0]->total ?? 0), 2) !== round(($getDataNominal[1]->total ?? 0), 2)) {
                     throw new \Exception('Total Kredit dan Debit belum balance', 500);
                 }
                 $update = array_merge($update, ["tanggal_posting" => date("Y-m-d H:i:s")]);
             }
-            $jurnal->setTables("acc_jurnal_entries")->setWheres(["kode" => $kode_decrypt])->update($update);
+            $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $kode_decrypt])->update($update);
 
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'update', "update status ke {$status}", $username);
             $this->output->set_status_header(200)
@@ -354,6 +370,7 @@ class Jurnalentries extends MY_Controller {
             $id = $this->input->post("ids");
             $kode = decrypt_url($id);
             $model = new $this->m_global;
+            $users = $this->session->userdata('nama');
             $data["jurnal"] = $model->setTables("acc_jurnal_entries je")->setJoins("mst_jurnal mj", "mj.kode = je.tipe")
                             ->setWheres(["je.kode" => $kode])->setSelects(["je.*", "mj.nama as jurnal_nama", "date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
             if (!$data["jurnal"]) {
@@ -370,6 +387,7 @@ class Jurnalentries extends MY_Controller {
             }
 
             $data["detail"] = $details->getData();
+            $data["user"] = $users;
 
             $html = $this->load->view("accounting/v_jurnal_entries_print", $data, true);
             $url = "dist/storages/print/jurnalentries";
@@ -385,7 +403,145 @@ class Jurnalentries extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array("url" => base_url($pathFile))));
         } catch (Exception $ex) {
-            log_message("error", $ex->getMessage());
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function download_template($id) {
+        try {
+            $kode_decrypt = decrypt_url($id);
+            $nm = str_replace("/", "_", $kode_decrypt);
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->removeSheetByIndex(0);
+            $FWorksheet = new Worksheet($spreadsheet, $nm);
+            $ExWorksheet = new Worksheet($spreadsheet, "Example");
+            $spreadsheet->addSheet($FWorksheet);
+            $spreadsheet->addSheet($ExWorksheet);
+            $sheetEx = $spreadsheet->setActiveSheetIndex(1);
+            $sheetF = $spreadsheet->setActiveSheetIndex(0);
+            $rowF = 1;
+            $sheetF->setCellValue("A{$rowF}", "No");
+            $sheetF->setCellValue("b{$rowF}", "Nama");
+            $sheetF->setCellValue("c{$rowF}", "Reff Note");
+            $sheetF->setCellValue("d{$rowF}", "kode coa");
+            $sheetF->setCellValue("e{$rowF}", "Debet");
+            $sheetF->setCellValue("f{$rowF}", "Kredit");
+            $sheetF->setCellValue("g{$rowF}", "Kurs");
+            $sheetF->setCellValue("h{$rowF}", "Mata Uang");
+
+            $rowEx = 1;
+            $sheetEx->setCellValue("A{$rowEx}", "No");
+            $sheetEx->setCellValue("b{$rowEx}", "Nama");
+            $sheetEx->setCellValue("c{$rowEx}", "Reff Note");
+            $sheetEx->setCellValue("d{$rowEx}", "kode coa");
+            $sheetEx->setCellValue("e{$rowEx}", "Debet");
+            $sheetEx->setCellValue("f{$rowEx}", "Kredit");
+            $sheetEx->setCellValue("g{$rowEx}", "Kurs");
+            $sheetEx->setCellValue("h{$rowEx}", "Mata Uang");
+
+            $rowEx += 1;
+            $sheetEx->setCellValue("A{$rowEx}", "1");
+            $sheetEx->setCellValue("b{$rowEx}", "Example 1");
+            $sheetEx->setCellValue("c{$rowEx}", "Example 1");
+            $sheetEx->setCellValue("d{$rowEx}", "00001.1");
+            $sheetEx->setCellValue("e{$rowEx}", "1000000");
+            $sheetEx->setCellValue("f{$rowEx}", "0");
+            $sheetEx->setCellValue("g{$rowEx}", "1");
+            $sheetEx->setCellValue("h{$rowEx}", "IDR");
+
+            $rowEx += 1;
+            $sheetEx->setCellValue("A{$rowEx}", "2");
+            $sheetEx->setCellValue("b{$rowEx}", "Example 2");
+            $sheetEx->setCellValue("c{$rowEx}", "Example 2");
+            $sheetEx->setCellValue("d{$rowEx}", "00001.1");
+            $sheetEx->setCellValue("e{$rowEx}", "56.25");
+            $sheetEx->setCellValue("f{$rowEx}", "0");
+            $sheetEx->setCellValue("g{$rowEx}", "15400");
+            $sheetEx->setCellValue("h{$rowEx}", "USD");
+
+            $filename = "template_{$nm}";
+            $url = "dist/storages/report/jurnalentries";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => "{$filename}",
+                        'type' => 'success', "url" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
+    }
+
+    public function upload($id) {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username'));
+            if (0 < $_FILES['file']['error']) {
+                throw new \exception($_FILES['file']['error'], 500);
+            }
+            if (!file_exists($_FILES['file']['tmp_name'][0])) {
+                throw new exception("File yang diimport gagal", 500);
+            }
+            $location = FCPATH . "dist/storages/report/jurnalentries/{$_FILES['file']['name']}";
+            move_uploaded_file($_FILES['file']['tmp_name'], $location);
+            $reader = new Xlsx();
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($location);
+
+            $kode_decrypt = decrypt_url($id);
+            $nm = str_replace("/", "_", $kode_decrypt);
+            $activeWorksheet = $spreadsheet->getSheetByName($nm);
+
+            if ($activeWorksheet === null) {
+                throw new exception("File tidak sesuai template", 500);
+            }
+            $highestRow = $activeWorksheet->getHighestRow();
+            if ($highestRow < 2) {
+                throw new exception("Data File masih kosong", 500);
+            }
+            $data = $activeWorksheet->toArray();
+            $jurnalItem = [];
+            unset($data[0]);
+            foreach ($data as $key => $value) {
+                $nominal = $value[5];
+                $posisi = "C";
+                if ($value[4] > 0) {
+                    $nominal = $value[4];
+                    $posisi = "D";
+                }
+                $kurs = $value[6];
+                $jurnalItem[] = [
+                    "kode_coa" => $value[3],
+                    "kode" => $kode_decrypt,
+                    "nama" => $value[1],
+                    "reff_note" => $value[2],
+                    "partner" => 0,
+                    "kurs" => $kurs,
+                    "kode_mua" => $value[7],
+                    "nominal" => $nominal * $kurs,
+                    "nominal_curr" => $nominal,
+                    "row_order" => $key++,
+                    "posisi" => $posisi
+                ];
+            }
+            $model = new $this->m_global;
+            $model->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItem);
+            $log = "data -> " . logArrayToString("; ", $jurnalItem);
+            $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 }
