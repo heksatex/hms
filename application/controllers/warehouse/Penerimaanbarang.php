@@ -2135,6 +2135,7 @@ class Penerimaanbarang extends MY_Controller {
             $reff_picking = '';
             $tanggal_transaksi = '';
             $tanggal_jt = '';
+            $tangal_sj  = '';
 
             //            $dept = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
             //            $head = $this->m_penerimaanBarang->get_data_by_code_print($kode, $dept_id);
@@ -2148,8 +2149,9 @@ class Penerimaanbarang extends MY_Controller {
                 $origin = $head->origin;
                 $tanggal = $head->tanggal;
                 $reff_picking = $head->reff_picking;
-                $tanggal_transaksi = $head->tanggal_transaksi;
+                $tanggal_transaksi = date("Y-m-d", strtotime($head->tanggal_transaksi));
                 $tanggal_jt = $head->tanggal_jt;
+                $tanggal_sj = date("Y-m-d", strtotime($head->tanggal_sj));
             }
             //            $nama_dept = strtoupper($dept['nama']);
             //            $printer->setTextSize(2, 2);
@@ -2168,9 +2170,9 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad(":{$head->no_sj}", 50));
             $printer->feed();
             $printer->text(str_pad("Tgl.Terima", 12));
-            $printer->text(str_pad(":{$head->tanggal_transaksi}", 50));
+            $printer->text(str_pad(":{$tanggal_transaksi}", 50));
             $printer->text(str_pad("Tgl.SJ", 12));
-            $printer->text(str_pad(":{$head->tanggal_sj}", 50));
+            $printer->text(str_pad(":{$tanggal_sj}", 50));
             $printer->feed();
             $printer->text(str_pad("Origin", 12));
             $printer->text(str_pad(":{$head->origin}", 50));
@@ -2310,7 +2312,7 @@ class Penerimaanbarang extends MY_Controller {
             $printer->feed();
 
             // kode pp
-            $printer->text(str_pad("kode PP : ", 70) . str_pad("Tgl.Cetak :" . date('Y-m-d H:i:s'), 50, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("kode PP : ", 70) . str_pad("Tgl.Cetak :" . date('Y-m-d'), 50, " ", STR_PAD_RIGHT));
             // $printer->text("Tgl.Cetak :" . date("Y-m-d H:i:s"));
             $printer->feed();
             $splitKodePP = str_split(($kodePP->kode_pp ?? ""), 70);

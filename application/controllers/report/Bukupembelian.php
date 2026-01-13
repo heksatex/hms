@@ -108,8 +108,14 @@ class Bukupembelian extends MY_Controller
                             'ppn'         =>(float) $datas->ppn,
                             'no_faktur_pajak'=>$datas->no_faktur_pajak,
                             'tanggal_fk'    =>$datas->tanggal_fk,
-                            'pph23'       => (float) $value_pph23
-
+                            'pph23'       => (float) $value_pph23,
+                            'pph22'       => ($datas->tax_id == 8 | $datas->tax_id == '8')? ($datas->dpp * 0.0030) : 0,  // u/ PPH22
+                            'reff_note'   => $datas->reff_note,
+                            'kode_coa'    => $datas->account,
+                            'nama_coa'    => $datas->nama_account,
+                            'invoice_supp'=> $datas->no_invoice_supp,
+                            'tgl_sj'      => $datas->tanggal_sj,
+                            'no_sj'       => $datas->no_sj_supp
             );
             $value_pph23 = 0;
         
@@ -147,7 +153,7 @@ class Bukupembelian extends MY_Controller
             $object->setActiveSheetIndex(0);
 
             //bold huruf
-            $object->getActiveSheet()->getStyle("A1:U5")->getFont()->setBold(true);
+            $object->getActiveSheet()->getStyle("A1:y5")->getFont()->setBold(true);
 
 
             // SET JUDUL
@@ -162,7 +168,7 @@ class Bukupembelian extends MY_Controller
 
 
             // header table
-            $table_head_columns  = array('No', 'No Invoice', 'Tgl dibuat', 'RCV', 'PO', 'Uraian', 'Supplier', 'Gudang', 'Qty', 'Uom Beli', 'Currency', 'Kurs', 'Harga', 'DPP', 'PPN', 'PPH23', 'No Faktur Pajak', 'Tgl FP');
+            $table_head_columns  = array('No', 'No Invoice', 'Tgl dibuat', 'RCV', 'PO','No Faktur Pajak', 'Tgl FP', 'Uraian', 'Supplier', 'Gudang', 'Qty', 'Uom Beli', 'Currency', 'Kurs', 'Harga', 'DPP', 'PPN', 'PPH23', 'PPH22', 'Kode CoA', 'Nama CoA', 'Reff Note', 'No SJ', 'Tgl SJ', 'Invoice Supplier');
 
             $column = 0;
             foreach ($table_head_columns as $field) {
@@ -182,27 +188,33 @@ class Bukupembelian extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('C' . $rowCount, $val['tanggal']);
                 $object->getActiveSheet()->SetCellValue('D' . $rowCount, $val['rcv']);
                 $object->getActiveSheet()->SetCellValue('E' . $rowCount, $val['no_po']);
-                $object->getActiveSheet()->SetCellValue('F' . $rowCount, $val['uraian']);
-                $object->getActiveSheet()->SetCellValue('G' . $rowCount, $val['nama_partner']);
-                $object->getActiveSheet()->SetCellValue('H' . $rowCount, $val['departemen']);
-                $object->getActiveSheet()->SetCellValue('I' . $rowCount, $val['qty_beli']);
-                $object->getActiveSheet()->SetCellValue('J' . $rowCount, $val['uom_beli']);
-                $object->getActiveSheet()->SetCellValue('K' . $rowCount, $val['currency']);
-                $object->getActiveSheet()->SetCellValue('L' . $rowCount, $val['kurs']);
-                $object->getActiveSheet()->SetCellValue('M' . $rowCount, $val['harga']);
-                $object->getActiveSheet()->SetCellValue('N' . $rowCount, $val['dpp']);
-                $object->getActiveSheet()->SetCellValue('O' . $rowCount, $val['ppn']);
-                $object->getActiveSheet()->SetCellValue('P' . $rowCount, $val['pph23']);
-                $object->getActiveSheet()->SetCellValue('Q' . $rowCount, $val['no_faktur_pajak']);
-                $object->getActiveSheet()->SetCellValue('R' . $rowCount, $val['tanggal_fk']);
+                $object->getActiveSheet()->SetCellValue('F' . $rowCount, $val['no_faktur_pajak']);
+                $object->getActiveSheet()->SetCellValue('G' . $rowCount, $val['tanggal_fk']);
+                $object->getActiveSheet()->SetCellValue('H' . $rowCount, $val['uraian']);
+                $object->getActiveSheet()->SetCellValue('I' . $rowCount, $val['nama_partner']);
+                $object->getActiveSheet()->SetCellValue('J' . $rowCount, $val['departemen']);
+                $object->getActiveSheet()->SetCellValue('K' . $rowCount, $val['qty_beli']);
+                $object->getActiveSheet()->SetCellValue('L' . $rowCount, $val['uom_beli']);
+                $object->getActiveSheet()->SetCellValue('M' . $rowCount, $val['currency']);
+                $object->getActiveSheet()->SetCellValue('N' . $rowCount, $val['kurs']);
+                $object->getActiveSheet()->SetCellValue('O' . $rowCount, $val['harga']);
+                $object->getActiveSheet()->SetCellValue('P' . $rowCount, $val['dpp']);
+                $object->getActiveSheet()->SetCellValue('Q' . $rowCount, $val['ppn']);
+                $object->getActiveSheet()->SetCellValue('R' . $rowCount, $val['pph23']);
+                $object->getActiveSheet()->SetCellValue('S' . $rowCount, $val['pph22']);
+                $object->getActiveSheet()->SetCellValue('T' . $rowCount, $val['kode_coa']);
+                $object->getActiveSheet()->SetCellValue('U' . $rowCount, $val['nama_coa']);
+                $object->getActiveSheet()->SetCellValue('P' . $rowCount, $val['reff_note']);
+                $object->getActiveSheet()->SetCellValue('W' . $rowCount, $val['no_sj']);
+                $object->getActiveSheet()->SetCellValue('X' . $rowCount, $val['tgl_sj']);
+                $object->getActiveSheet()->SetCellValue('y' . $rowCount, $val['invoice_supp']);
 
-                $object->getActiveSheet()->getStyle('I'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('L'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('M'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle('N'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $object->getActiveSheet()->getStyle('k'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $object->getActiveSheet()->getStyle('O'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $object->getActiveSheet()->getStyle('Q'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $object->getActiveSheet()->getStyle('P'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-
+                $object->getActiveSheet()->getStyle('R'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $object->getActiveSheet()->getStyle('S'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
                 $rowCount++;
             }
 
