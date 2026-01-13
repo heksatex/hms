@@ -55,13 +55,23 @@ class M_bukupembelian extends CI_Model
                             IFNULL(invd.qty_beli * invd.harga_satuan * inv.nilai_matauang, 0) AS dpp,
                             IFNULL((invd.qty_beli * invd.harga_satuan * inv.nilai_matauang) * 11/12 * invd.amount_tax, 0) AS ppn,
                             pph23,
-                            inv.no_faktur_pajak,
-                            inv.tanggal_fk");
+                            inv.no_faktur_pajak,                            
+                            inv.tanggal_fk,
+                            inv.no_invoice_supp,
+                            inv.no_sj_supp,
+                            inv.tanggal_sj,
+                            invd.reff_note,
+                            invd.account,
+                            coa.nama as nama_account,
+                            invd.tax_id
+                            ");
         $this->db->from("invoice inv");
         $this->db->JOIN("invoice_detail invd", "inv.id = invd.invoice_id","INNER");
         $this->db->JOIN("currency_kurs c", "inv.matauang = c.id", "LEFT");
         $this->db->JOIN("partner p","p.id  = inv.id_supplier","LEFT");
-        $this->db->JOIN("(
+        $this->db->JOIN("acc_coa as coa", "coa.kode_coa = invd.account", "left");
+        $this->db->JOIN("
+        (
                         SELECT
                             po_no_po, 
                             kode_produk, 
