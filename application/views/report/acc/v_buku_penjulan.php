@@ -159,6 +159,7 @@
                                             <tr>
                                                 <th class="style bb ws no">No. </th>
                                                 <th class='style bb ws'>No Faktur</th>
+                                                <th class='style bb ws'>No Inv Eks</th>
                                                 <th class='style bb ws'>No SJ</th>
                                                 <th class='style bb ws'>Faktur Pajak</th>
                                                 <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
@@ -194,6 +195,7 @@
             <tr>
                 <th class="style bb ws no">No. </th>
                 <th class='style bb ws'>No Faktur</th>
+                <th class='style bb ws'>No Inv Eks</th>
                 <th class='style bb ws'>No SJ</th>
                 <th class='style bb ws'>Faktur Pajak</th>
                 <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
@@ -204,9 +206,9 @@
                 <th class='style bb ws'>Curr</th>
                 <th class='style bb ws text-right'>Qty</th>
                 <th class='style bb ws text-right'>Kurs</th>
-                <th class='style bb ws text-right'>Harga $</th>
+                <th class='style bb ws text-right'>Harga Vls</th>
                 <th class='style bb ws text-right'>Harga Rp</th>
-                <th class='style bb ws text-right'>Jumlah $</th>
+                <th class='style bb ws text-right'>Jumlah Vls</th>
                 <th class='style bb ws text-right'>Jumlah Rp</th>
                 <th class='style bb ws text-right'>Ppn</th>
                 <th class='style bb ws text-right'>Total Rp</th>
@@ -217,6 +219,7 @@
             <tr>
                 <th class="style bb ws no">No. </th>
                 <th class='style bb ws'>No Faktur</th>
+                <th class='style bb ws'>No Inv Eks</th>
                 <th class='style bb ws'>No SJ</th>
                 <th class='style bb ws'>Faktur Pajak</th>
                 <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
