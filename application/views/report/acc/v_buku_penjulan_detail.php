@@ -19,6 +19,7 @@ if ($posisi !== "bks") {
         <tr>
             <td><?= $no ?></td>
             <td><?= $value->no_faktur_internal ?></td>
+             <td><?= $value->no_inv_ekspor ?></td>
             <td><?= $value->no_sj ?></td>
             <td><?= $value->no_faktur_pajak ?></td>
             <td><?= $value->tanggal ?></td>
@@ -38,6 +39,7 @@ if ($posisi !== "bks") {
             if ($value->kode_coa !== $data[$key + 1]->kode_coa) {
                 ?>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -68,6 +70,7 @@ if ($posisi !== "bks") {
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                 </tr>
                 <?php
                 $total = 0;
@@ -76,6 +79,7 @@ if ($posisi !== "bks") {
         } else {
             ?>
             <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -107,7 +111,8 @@ if ($posisi !== "bks") {
         $GrandtotalPpn += $ppn;
         $qty = explode("/ ", $value->nama);
         $qtys = (count($qty) > 1) ? end($qty) : "";
-        $nama = (count($qty) > 1) ? "{$value->uraian} {$value->warna}" : "";
+        $nama = (count($qty) > 1) ? "{$value->uraian}" : "";
+        $nama.=($value->warna === "") ? "" : "/{$value->warna}";
         $totalanItem = ($value->qty) ? number_format($JumlahRp, 2) : number_format($value->nominal, 2);
         $hargaRp = 0;
         $hargaValas = 0;
@@ -127,6 +132,7 @@ if ($posisi !== "bks") {
         <tr>
             <td><?= $no ?></td>
             <td><?= $value->no_faktur_internal ?></td>
+             <td><?= $value->no_inv_ekspor ?></td>
             <td><?= $value->no_sj ?></td>
             <td><?= $value->no_faktur_pajak ?></td>
             <td><?= $value->tanggal ?></td>
@@ -149,6 +155,7 @@ if ($posisi !== "bks") {
             if ($value->kode_coa !== $data[$key + 1]->kode_coa) {
                 ?>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -179,6 +186,7 @@ if ($posisi !== "bks") {
         } else {
             ?>
             <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>

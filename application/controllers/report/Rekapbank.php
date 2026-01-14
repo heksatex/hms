@@ -17,6 +17,7 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Rekapbank extends MY_Controller {
 
@@ -117,7 +118,8 @@ class Rekapbank extends MY_Controller {
             $sheet->setCellValue("D{$row}", 'Tanggal');
             $sheet->setCellValue("E{$row}", 'Kepada');
             $sheet->setCellValue("F{$row}", 'Uraian');
-            $sheet->setCellValue("G{$row}", 'Total');
+            $sheet->setCellValue("G{$row}", 'No Coa');
+            $sheet->setCellValue("H{$row}", 'Total');
             $no = 0;
             $total = 0;
             foreach ($data as $key => $value) {
@@ -130,13 +132,15 @@ class Rekapbank extends MY_Controller {
                 $sheet->setCellValue("D{$row}", date("Y-m-d", strtotime($value->tanggal)));
                 $sheet->setCellValue("E{$row}", ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama);
                 $sheet->setCellValue("F{$row}", ($value->uraian === "") ? $value->transinfo : $value->uraian);
-                $sheet->setCellValue("G{$row}", $value->nominal);
+                $sheet->setCellValue("G{$row}", $value->kode_coa);
+                $sheet->setCellValue("H{$row}", $value->nominal);
             }
             if ($total > 0) {
                 $row += 1;
-                $sheet->setCellValue("F{$row}", "Total");
-                $sheet->setCellValue("G{$row}", $total);
+                $sheet->setCellValue("G{$row}", "Total");
+                $sheet->setCellValue("H{$row}", $total);
             }
+            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $writer = new Xlsx($spreadsheet);

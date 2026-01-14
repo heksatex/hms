@@ -20,6 +20,7 @@ use Cache\Adapter\Apcu\ApcuCachePool;
 use Cache\Bridge\SimpleCache\SimpleCacheBridge;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Rekapgiro extends MY_Controller {
 
@@ -118,7 +119,8 @@ class Rekapgiro extends MY_Controller {
             $sheet->setCellValue("G{$row}", 'Tgl.JT');
             $sheet->setCellValue("H{$row}", 'Kpd/Dari');
             $sheet->setCellValue("I{$row}", 'Uraian');
-            $sheet->setCellValue("J{$row}", 'Nominal');
+            $sheet->setCellValue("J{$row}", 'No Coa');
+            $sheet->setCellValue("K{$row}", 'Nominal');
             $no = 0;
             $total = 0;
             foreach ($data as $key => $value) {
@@ -134,13 +136,15 @@ class Rekapgiro extends MY_Controller {
                 $sheet->setCellValue("G{$row}", date("Y-m-d",strtotime($value->tgl_jt)));
                 $sheet->setCellValue("H{$row}", ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama);
                 $sheet->setCellValue("I{$row}", $value->transinfo);
-                $sheet->setCellValue("J{$row}", $value->nominal);
+                $sheet->setCellValue("J{$row}", $value->kode_coa);
+                $sheet->setCellValue("K{$row}", $value->nominal);
             }
             if($total > 0 ) {
                 $row += 1;
-                $sheet->setCellValue("I{$row}", "Total");
-                $sheet->setCellValue("J{$row}", $total);
+                $sheet->setCellValue("J{$row}", "Total");
+                $sheet->setCellValue("K{$row}", $total);
             }
+            $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $writer = new Xlsx($spreadsheet);
