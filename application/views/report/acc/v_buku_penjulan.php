@@ -4,21 +4,21 @@
         <?php $this->load->view("admin/_partials/head.php") ?>
         <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
         <style type="text/css">
-           h3 {
-            display: block !important;
-            text-align: center !important;
-        }
+            h3 {
+                display: block !important;
+                text-align: center !important;
+            }
 
-        .divListviewHead table {
-            display: block;
-            height: calc(97vh - 250px);
-            overflow-x: auto;
-        }
+            .divListviewHead table {
+                display: block;
+                height: calc(97vh - 250px);
+                overflow-x: auto;
+            }
 
-        .ws {
-            white-space: nowrap;
-        }
-        table tbody tr td {
+            .ws {
+                white-space: nowrap;
+            }
+            table tbody tr td {
                 padding: 0px 5px 0px 5px !important;
             }
         </style>
@@ -65,6 +65,7 @@
                                                         <select class="form-control input-sm select2" name="posisi" id="posisi">
                                                             <option value="d">Debet</option>
                                                             <option value="c" selected>Kredit</option>
+                                                            <option value="bks">BK Sales</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -102,14 +103,14 @@
                                             <div class="panel-body" style="padding: 5px">
                                                 <div class="form-group">
                                                     <div class="col-md-6">
-<!--                                                        <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-4">
-                                                                <label class="form-label">Department</label>
-                                                            </div>
-                                                            <div class="col-xs-8 col-md-8">
-                                                                <select type="text" class="form-control input-sm" name="departemen" id="departemen"></select>
-                                                            </div>
-                                                        </div>-->
+                                                        <!--                                                        <div class="col-md-12 col-xs-12">
+                                                                                                                    <div class="col-xs-4">
+                                                                                                                        <label class="form-label">Department</label>
+                                                                                                                    </div>
+                                                                                                                    <div class="col-xs-8 col-md-8">
+                                                                                                                        <select type="text" class="form-control input-sm" name="departemen" id="departemen"></select>
+                                                                                                                    </div>
+                                                                                                                </div>-->
 
                                                         <div class="col-md-12 col-xs-12">
                                                             <div class="col-xs-4">
@@ -131,18 +132,18 @@
                                                                 <input type="text" class="form-control" name="uraian" id="uraian">
                                                             </div>
                                                         </div>
-<!--                                                        <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-3">
-                                                                <label class="form-label">Faktur pajak</label>
-                                                            </div>
-                                                            <div class="col-xs-9 col-md-9">
-                                                               <select class="form-control input-sm" name="faktur" id="faktur">
-                                                                   <option value=''>All</option>
-                                                                <option value='ada'>Ada</option>
-                                                                <option value='tidak'>Tidak</option>
-                                                            </select>
-                                                            </div>
-                                                        </div>-->
+                                                        <!--                                                        <div class="col-md-12 col-xs-12">
+                                                                                                                    <div class="col-xs-3">
+                                                                                                                        <label class="form-label">Faktur pajak</label>
+                                                                                                                    </div>
+                                                                                                                    <div class="col-xs-9 col-md-9">
+                                                                                                                       <select class="form-control input-sm" name="faktur" id="faktur">
+                                                                                                                           <option value=''>All</option>
+                                                                                                                        <option value='ada'>Ada</option>
+                                                                                                                        <option value='tidak'>Tidak</option>
+                                                                                                                    </select>
+                                                                                                                    </div>
+                                                                                                                </div>-->
                                                     </div>
                                                 </div>
                                             </div>
@@ -150,11 +151,11 @@
                                     </div>
                                 </div>
                             </form>
-                            
+
                             <div class="col-xs-12 table-responsive example1 divListviewHead">
                                 <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
                                     <table id="tbl-penjualan" class="table table-condesed table-hover" border="0">
-                                        <thead>
+                                        <thead id="tHead">
                                             <tr>
                                                 <th class="style bb ws no">No. </th>
                                                 <th class='style bb ws'>No Faktur</th>
@@ -183,12 +184,55 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </section>
             </div>
         </div>
+        <template class="bks">
+            <tr>
+                <th class="style bb ws no">No. </th>
+                <th class='style bb ws'>No Faktur</th>
+                <th class='style bb ws'>No SJ</th>
+                <th class='style bb ws'>Faktur Pajak</th>
+                <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
+                <th class='style bb ws' style="min-width: 150px">Nama</th>
+                <th class='style bb ws'>Customer</th>
+                <th class='style bb ws'>COA</th>
+                <th class='style bb ws text-left'>Jenis Ppn</th>
+                <th class='style bb ws'>Curr</th>
+                <th class='style bb ws text-right'>Qty</th>
+                <th class='style bb ws text-right'>Kurs</th>
+                <th class='style bb ws text-right'>Harga $</th>
+                <th class='style bb ws text-right'>Harga Rp</th>
+                <th class='style bb ws text-right'>Jumlah $</th>
+                <th class='style bb ws text-right'>Jumlah Rp</th>
+                <th class='style bb ws text-right'>Ppn</th>
+                <th class='style bb ws text-right'>Total Rp</th>
+            </tr>
+        </template>
+
+        <template class="std">
+            <tr>
+                <th class="style bb ws no">No. </th>
+                <th class='style bb ws'>No Faktur</th>
+                <th class='style bb ws'>No SJ</th>
+                <th class='style bb ws'>Faktur Pajak</th>
+                <th class='style bb ws' style="min-width: 100px">Tgl dibuat</th>
+                <th class='style bb ws' style="min-width: 150px">Nama</th>
+                <th class='style bb ws'>Customer</th>
+                <th class='style bb ws'>COA</th>
+                <th class='style bb ws text-left'>Jenis Ppn</th>
+                <th class='style bb ws'>Curr</th>
+                <th class='style bb ws text-right'>Kurs</th>
+                <th class='style bb ws text-right'>Qty</th>
+                <th class='style bb ws text-right'>Harga</th>
+                <th class='style bb ws text-right'>Total</th>
+            </tr>
+        </template>
+
+
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script>
@@ -280,7 +324,7 @@
                         }
                     }
                 });
-                
+
                 $("#search").on("click", function () {
                     $.ajax({
                         url: "<?= base_url('report/bukupenjualan/search') ?>",
@@ -290,12 +334,20 @@
                             customer: $("#customer").val(),
                             uraian: $("#uraian").val(),
                             faktur: $("#faktur").val(),
-                            posisi:$("#posisi").val()
+                            posisi: $("#posisi").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
 
                             }));
+                            var posisi = $("#posisi").val();
+                            if (posisi === "bks") {
+                                var tmplt = $("template.bks");
+                                $("#tHead").html(tmplt.html());
+                            } else {
+                                var tmplt = $("template.std");
+                                $("#tHead").html(tmplt.html());
+                            }
                         },
                         success: ((data) => {
                             $("#tBody").html(data.data);
@@ -312,7 +364,7 @@
                         }
                     });
                 });
-                
+
                 const formrd = document.forms.namedItem("form-search");
                 formrd.addEventListener(
                         "submit",
