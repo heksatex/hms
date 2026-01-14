@@ -32,7 +32,7 @@
             <?php
         }
         ?>
-            <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -446,7 +446,8 @@ if ($datas->status == 'confirm') {
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
+                    $("#total_nominal").val(total);
+                    formatCurrency($("#total_nominal"), "blur");
                 });
                 const setNominalCurrency = (() => {
                     $("input[data-type='currency']").on({
@@ -574,7 +575,11 @@ if ($datas->status == 'confirm') {
                     },
                             false
                             );
-
+                    $(".nominal").keyup(function (ev) {
+                        if (ev.keyCode === 13) {
+                            $(".btn-add-item").trigger("click");
+                        }
+                    });
                     $(".btn-add-item").on("click", function (e) {
                         e.preventDefault();
                         no += 1;
@@ -666,37 +671,37 @@ if ($datas->status == 'confirm') {
                     });
 
 
-                    const getPartner = (()=>{
+                    const getPartner = (() => {
                         $("#partner").select2({
-                        placeholder: "Pilih",
-                        allowClear: true,
-                        ajax: {
-                            dataType: 'JSON',
-                            type: "GET",
-                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
-                            delay: 250,
-                            data: function (params) {
-                                return{
-                                    search: params.term,
-                                    jenis: "customer"
-                                };
-                            },
-                            processResults: function (data) {
-                                var results = [];
-                                $.each(data.data, function (index, item) {
-                                    results.push({
-                                        id: item.id,
-                                        text: item.nama
+                            placeholder: "Pilih",
+                            allowClear: true,
+                            ajax: {
+                                dataType: 'JSON',
+                                type: "GET",
+                                url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                                delay: 250,
+                                data: function (params) {
+                                    return{
+                                        search: params.term,
+                                        jenis: "customer"
+                                    };
+                                },
+                                processResults: function (data) {
+                                    var results = [];
+                                    $.each(data.data, function (index, item) {
+                                        results.push({
+                                            id: item.id,
+                                            text: item.nama
+                                        });
                                     });
-                                });
-                                return {
-                                    results: results
-                                };
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
+                                    return {
+                                        results: results
+                                    };
+                                },
+                                error: function (xhr, ajaxOptions, thrownError) {
+                                }
                             }
-                        }
-                    })
+                        })
                     });
                     $(".partner").on("change", function () {
                         var ttt = $(".partner").find(":selected");

@@ -463,7 +463,7 @@ if ($datas->status == 'confirm') {
                     }
 
                     $("#total_nominal").val(total);
-                    formatCurrency($("#total_nominal"),"blur");
+                    formatCurrency($("#total_nominal"), "blur");
                 });
                 const setNominalCurrency = (() => {
                     $("input[data-type='currency']").on({
@@ -562,6 +562,11 @@ if ($datas->status == 'confirm') {
                             false
                             );
 
+                    $(".nominal").keyup(function (ev) {
+                        if (ev.keyCode === 13) {
+                            $(".btn-add-item").trigger("click");
+                        }
+                    });
                     $(".btn-add-item").on("click", function (e) {
                         e.preventDefault();
                         no += 1;

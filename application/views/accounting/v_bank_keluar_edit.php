@@ -395,7 +395,7 @@
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" class="form-control input-sm nominal nominal:norut text-right" value="0" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' required/>
+                    <input type="text" name="nominal[]" class="form-control input-sm nominal nominal:nourut text-right" value="0" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' required/>
                     <input type="hidden" name="giro_keluar_detail[]" class="form-control"/>
                 </td>
             </tr>
@@ -748,6 +748,11 @@ if ($datas->status == 'confirm') {
                 $(".nominal").on("blur", function () {
                     calculateTotal();
                 });
+                $(".nominal").keyup(function (ev) {
+                        if (ev.keyCode === 13) {
+                            $(".btn-add-item").trigger("click");
+                        }
+                    });
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;

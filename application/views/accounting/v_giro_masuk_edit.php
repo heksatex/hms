@@ -563,7 +563,12 @@ if ($datas->status == 'confirm') {
                         false
 
                         );
-                
+                $(".nominal").keyup(function (ev) {
+                        if (ev.keyCode === 13) {
+                            $(".btn-add-item").trigger("click");
+                        }
+                    });
+                    
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
