@@ -262,6 +262,10 @@ class Giromundur extends MY_Controller {
                 $sheet->setCellValue("H{$row}", $saldo);
             }
 
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+
             $tanggal = $this->input->post("tanggal");
 //            $writer = new Xlsx($spreadsheet);
             $nm = str_replace(".", "-", $nm);
