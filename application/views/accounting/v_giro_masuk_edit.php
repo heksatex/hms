@@ -436,7 +436,7 @@ if ($datas->status == 'confirm') {
                     return;
                 }
 
-               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
             });
 
             $(function () {
