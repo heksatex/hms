@@ -28,7 +28,7 @@ foreach ($data as $key => $value) {
             if ($values->total_piutang_rp === $values->piutang_rp) {
                 $labelStatus = "Unpaid";
             } else {
-                $labelStatus = "Partiality paid";
+                $labelStatus = "Partially paid";
             }
             $df = $values->payment_term - $values->hari;
             if ($df <= 1) {
