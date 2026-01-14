@@ -532,7 +532,8 @@ class Jurnalentries extends MY_Controller {
                 ];
             }
             $model = new $this->m_global;
-            $model->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItem);
+            $model->setTables("acc_jurnal_entries_items")->setWheres(["kode"=>$kode_decrypt])->delete();
+            $model->saveBatch($jurnalItem);
             $log = "data -> " . logArrayToString("; ", $jurnalItem);
             $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
             $this->output->set_status_header(200)
