@@ -6,6 +6,19 @@
             #btn-edit,#btn-cancel,#btn-print,.btn-save,#btn-confirm {
                 display: none;
             }
+            #bankmasuk-detail.hides thead tr > *:nth-child(3),
+            #bankmasuk-detail.hides thead tr > *:nth-child(4){
+                display: none;
+            }
+
+            #bankmasuk-detail.hides tbody tr > *:nth-child(3),
+            #bankmasuk-detail.hides tbody tr > *:nth-child(4){
+                display: none;
+            }
+            #bankmasuk-detail.hides tfoot tr > *:nth-child(3),
+            #bankmasuk-detail.hides tfoot tr > *:nth-child(4){
+                display: none;
+            }
         </style>
         <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
@@ -116,7 +129,10 @@
                             </div>
                             <div class="box-footer">
                                 <div class="col-md-12 table-responsive over">
-                                    <table class="table table-condesed table-hover rlstable" width="100%" id="bankmasuk-detail" style="min-width: 110%">
+                                    <table class="table table-condesed table-hover rlstable hides" width="100%" id="bankmasuk-detail" style="min-width: 100%">
+                                        <caption>
+                                            <span id="bankrekshow" href="#" onclick="setbankrekshow()" style="color: blue">Show Bank</span>
+                                        </caption>
                                         <thead>
                                         <th class="style" style="width: 5px">No.</th>
                                         <th class="style" style="width: 150px">Uraian</th>
@@ -137,7 +153,14 @@
                                                 <td>
                                                     <button type="button" class="btn btn-success btn-sm btn-add-item"><i class="fa fa-plus-circle"></i></button>
                                                 </td>
-                                                <td colspan="8" class="text-right text-bold total-nominal">
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td class="text-right text-bold total-nominal">
 
                                                 </td>
                                                 <td class="text-bold">
@@ -164,10 +187,10 @@
                         <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm"/>
                     </td>
                     <td>
-                        <input type="text" name="bank[]" class="form-control bank:nourut input-sm" required/>
+                        <input type="text" name="bank[]" class="form-control bank_input bank:nourut input-sm" required/>
                     </td>
                     <td>
-                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm"/>
+                        <input type="text" name="norek[]" class="form-control norek_input norek:nourut input-sm"/>
                     </td>
                     <td>
                         <input type="text" name="nobg[]" class="form-control input-sm"/>
@@ -215,10 +238,10 @@
                         <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm" value=""/>
                     </td>
                     <td>
-                        <input type="text" name="bank[]" class="form-control bank:nourut input-sm" value="" required/>
+                        <input type="text" name="bank[]" class="form-control bank_input bank:nourut input-sm" value="" required/>
                     </td>
                     <td>
-                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm" value=""/>
+                        <input type="text" name="norek[]" class="form-control norek_input norek:nourut input-sm" value=""/>
                     </td>
                     <td>
                         <input type="text" name="nobg[]" class="form-control nobg:nourut input-sm" value=""/>
@@ -268,6 +291,16 @@
                     }
                 });
             });
+            var bankrekshow = false;
+            const setbankrekshow = (() => {
+                bankrekshow = !bankrekshow;
+                $("#bankmasuk-detail").toggleClass("hides");
+                if (bankrekshow) {
+                    $("#bankrekshow").html("Hide Bank");
+                    return;
+                }
+                $("#bankrekshow").html("Show Bank");
+            });
             const setCoaItem = ((klas = "select2-coa") => {
                 $("." + klas).select2({
                     placeholder: "Pilih Coa",
@@ -313,9 +346,9 @@
                     return;
                 }
 
-               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+                $("#total_nominal").val(total);
+                formatCurrency($("#total_nominal"));
             });
-
             const setCurr = (() => {
                 $(".select2-curr").select2({
                     placeholder: "Pilih",
@@ -378,7 +411,6 @@
                         const texts = acc.split(" - ");
                         $(".bank" + no).val(texts?.[1]);
                         $(".norek" + no).val(texts?.[2]);
-
                     }
                 });
                 setNominalCurrency();
@@ -392,7 +424,6 @@
                     e.preventDefault();
                     $(".btn-save").trigger("click");
                 });
-
 //                $(".btn-add-item-tf").on("click", function (e) {
 //                    e.preventDefault();
 //                    $("#tambah_data").modal({
@@ -428,7 +459,15 @@
                     allowClear: true,
                     placeholder: "Pilih"
                 });
-
+                $(".no_acc").on("change", function () {
+                    var ttt = $(".no_acc").find(":selected");
+                    var acc = ttt.text();
+                    if (acc !== "") {
+                        const texts = acc.split(" - ");
+                        $(".bank_input").val(texts?.[1]);
+                        $(".norek_input").val(texts?.[2]);
+                    }
+                });
                 $(".btn-add-item").on("click", function (e) {
                     no += 1;
                     e.preventDefault();
@@ -451,7 +490,7 @@
                     $(".uraian" + no).focus();
                     $(".nourut" + no).html(no);
                     setNominalCurrency();
-                    $(".tglcair"+no).val(tglHeader);
+                    $(".tglcair" + no).val(tglHeader);
                 });
                 $("#bankmasuk-detail").on("click", ".btn-rmv-item", function () {
                     $(this).closest("tr").remove();
@@ -460,7 +499,6 @@
                     var ttt = $(".partner").find(":selected");
                     $("#lain_lain").val("");
                     $("#partner_name").val(ttt.text());
-
                 });
                 $("#partner").select2({
                     placeholder: "Pilih",
@@ -524,18 +562,15 @@
                         });
                     }
                 });
-                
                 const previewNo = ((tgl) => {
                     $.post("<?= base_url('accounting/bankkeluar/preview_no') ?>", {kode: "BBMH", tanggal: tgl}, function (data) {
                         $("#no").html(data.data);
                     });
                 });
-                
                 previewNo($("#tanggal").val());
-                $("#tanggal").on("blur",function(){
+                $("#tanggal").on("blur", function () {
                     previewNo($("#tanggal").val());
                 });
-
             });
             const addToTable = ((data, url) => {
                 $.ajax({

@@ -95,7 +95,7 @@ class Kaskeluar extends MY_Controller {
         try {
             $data = array();
             $list = new $this->m_global;
-            $list->setTables("acc_kas_keluar")->setOrder(["acc_kas_keluar.tanggal" => "desc"])
+            $list->setTables("acc_kas_keluar")->setOrder(["acc_kas_keluar.create_date" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_keluar.status", "left")
                     ->setSearch(["acc_kas_keluar.no_kk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_keluar.status"])

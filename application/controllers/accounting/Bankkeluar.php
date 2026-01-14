@@ -79,7 +79,7 @@ class Bankkeluar extends MY_Controller {
         try {
             $data = array();
             $list = new $this->m_global;
-            $list->setTables("acc_bank_keluar")->setOrder(["acc_bank_keluar.tanggal" => "desc"])
+            $list->setTables("acc_bank_keluar")->setOrder(["acc_bank_keluar.create_date" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_bank_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_bank_keluar.status", "left")
                     ->setSearch(["no_bk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo"])
