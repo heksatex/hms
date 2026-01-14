@@ -64,7 +64,7 @@
                                                         <div class="form-group">
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-3">
-                                                                    <label class="form-label">Customer</label>
+                                                                    <label class="form-label">Supplier</label>
                                                                 </div>
                                                                 <div class="col-xs-9 col-md-9">
                                                                     <input type="text" class="form-control" name="customer" id="customer">

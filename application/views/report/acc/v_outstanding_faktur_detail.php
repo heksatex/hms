@@ -44,24 +44,23 @@ foreach ($data as $key => $value) {
             <td><?= $values->no_sj ?></td>
             <td><?= $values->tanggal ?></td>
             <td class='text-right' ><?= "{$values->hari}" ?></td>
+            <td class='text-right' ><?= $values->payment_term ?></td>
             <td class='text-right' ><span class="<?= $labelClass ?>"><?= "{$labelStatus}" ?></span></td>
             <td class='text-right' ><?= number_format($values->total_piutang_rp, 2) ?></td>
             <td class='text-right' ><?= number_format($values->piutang_rp, 2) ?></td>
             <td class='text-right' ><?= number_format($values->total_piutang_valas, 2) ?></td>
             <td class='text-right' ><?= number_format($values->piutang_valas, 2) ?></td>
-            <td class='text-right' ><?= $values->payment_term ?></td>
         </tr>
         <?php
         $no++;
     }
     ?>
     <tr>
-        <td colspan="6" class="text-right style_space" ><b>Total :</b></td>
+        <td colspan="7" class="text-right style_space" ><b>Total :</b></td>
         <td class="text-right style_space" ><b><?= number_format($total_piutang_rp, 2) ?></b></td>
         <td class="text-right style_space" ><b><?= number_format($piutang_rp, 2) ?></b></td>
         <td class="text-right style_space" ><b><?= number_format($total_piutang_valas, 2) ?></b></td>
         <td class="text-right style_space" ><b><?= number_format($piutang_valas, 2) ?></b></td>
-        <td class="style_space" ><b></b></td>
     </tr>
     <?php
 }
