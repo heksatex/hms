@@ -49,7 +49,7 @@
                                                         <?php
                                                         foreach ($coa as $key => $value) {
                                                             ?>
-                                                            <option value="<?= $value->kode_coa ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
+                                                            <option value="<?= $value->kode_coa ?>" <?= ($key ===0) ? "selected":"" ?>><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
                                                             <?php
                                                         }
                                                         ?>
@@ -478,6 +478,8 @@
                         });
                     }
                 });
+                
+                previewNo($("#coa_name").val(),$("#tanggal").val());
 
             });
 
