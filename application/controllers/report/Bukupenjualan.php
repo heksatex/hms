@@ -57,7 +57,7 @@ class Bukupenjualan extends MY_Controller {
                     ->setJoins("faktur_jurnal", "(jei.kode = jurnal_kode and jurnal_order = jei.row_order)", "left")
                     ->setJoins("acc_faktur_penjualan_detail fjd", "fjd.id = faktur_jurnal.faktur_detail_id", "left")
                     ->setJoins("acc_coa ac", "ac.kode_coa = jei.kode_coa", "left")
-                    ->setSelects(["fp.no_faktur_internal,fp.no_faktur_pajak,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa", "fjd.harga,fjd.qty,fjd.uom,jenis_ppn,uraian,warna,fjd.pajak", ""])
+                    ->setSelects(["fp.no_faktur_internal,fp.no_faktur_pajak,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa", "fjd.harga,fjd.qty,fjd.uom,jenis_ppn,uraian,warna,fjd.pajak,no_inv_ekspor", ""])
                     ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"
                             ,])
                     ->setOrder(["jei.kode_coa" => "asc", "no_faktur_internal" => "asc", "uraian" => "asc"]);
@@ -130,6 +130,7 @@ class Bukupenjualan extends MY_Controller {
             if (!empty($fakturPajak)) {
                 $filter .= "Mempunyai Faktur Pajak : {$fakturPajak}";
             }
+            $posisis = ($posisi === "bks") ? "BK - Sales" : "";
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setCellValue("A1", 'Periode');
@@ -139,28 +140,29 @@ class Bukupenjualan extends MY_Controller {
             $row = 4;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'No Faktur');
-            $sheet->setCellValue("C{$row}", 'No SJ');
-            $sheet->setCellValue("D{$row}", 'Faktur Pajak');
-            $sheet->setCellValue("E{$row}", 'Tanggal');
-            $sheet->setCellValue("F{$row}", 'Nama');
-            $sheet->setCellValue("G{$row}", 'Customer');
-            $sheet->setCellValue("H{$row}", 'Coa');
-            $sheet->setCellValue("i{$row}", 'Nama Coa');
-            $sheet->setCellValue("j{$row}", 'Jenis Ppn');
-            $sheet->setCellValue("k{$row}", 'Curr');
-            $sheet->setCellValue("l{$row}", 'Kurs');
-            $sheet->setCellValue("m{$row}", 'Qty');
-            $sheet->setCellValue("n{$row}", 'Uom');
+            $sheet->setCellValue("C{$row}", 'No Inv Eks');
+            $sheet->setCellValue("D{$row}", 'No SJ');
+            $sheet->setCellValue("E{$row}", 'Faktur Pajak');
+            $sheet->setCellValue("F{$row}", 'Tanggal');
+            $sheet->setCellValue("G{$row}", 'Nama');
+            $sheet->setCellValue("H{$row}", 'Customer');
+            $sheet->setCellValue("i{$row}", 'Coa');
+            $sheet->setCellValue("j{$row}", 'Nama Coa');
+            $sheet->setCellValue("k{$row}", 'Jenis Ppn');
+            $sheet->setCellValue("l{$row}", 'Curr');
+            $sheet->setCellValue("m{$row}", 'Kurs');
+            $sheet->setCellValue("n{$row}", 'Qty');
+            $sheet->setCellValue("o{$row}", 'Uom');
             if ($posisi !== "bks") {
-                $sheet->setCellValue("o{$row}", 'Harga');
-                $sheet->setCellValue("p{$row}", 'Total Harga');
+                $sheet->setCellValue("p{$row}", 'Harga');
+                $sheet->setCellValue("q{$row}", 'Total Harga');
             } else {
-                $sheet->setCellValue("o{$row}", 'Harga $');
-                $sheet->setCellValue("p{$row}", 'Harga Rp');
-                $sheet->setCellValue("q{$row}", 'Jumlah $');
-                $sheet->setCellValue("r{$row}", 'Jumlah Rp');
-                $sheet->setCellValue("s{$row}", 'Ppn');
-                $sheet->setCellValue("t{$row}", 'Total Rp');
+                $sheet->setCellValue("p{$row}", 'Harga Vls');
+                $sheet->setCellValue("q{$row}", 'Harga Rp');
+                $sheet->setCellValue("r{$row}", 'Jumlah Vls');
+                $sheet->setCellValue("s{$row}", 'Jumlah Rp');
+                $sheet->setCellValue("t{$row}", 'Ppn');
+                $sheet->setCellValue("u{$row}", 'Total Rp');
             }
             $no = 0;
             $grandTotal = 0;
@@ -183,7 +185,8 @@ class Bukupenjualan extends MY_Controller {
                     $qu = explode(" ", $qtys);
                     $q = $qu[0] ?? "";
                     $u = $qu[1] ?? "";
-                    $nama = "{$value->uraian} {$value->warna}";
+                    $nama = "{$value->uraian}";
+                    $nama.=($value->warna === "") ? "" : "/{$value->warna}";
                 }
                 $hargaRp = 0;
                 $hargaValas = 0;
@@ -194,21 +197,22 @@ class Bukupenjualan extends MY_Controller {
                 $GrandtotalPpn += $ppn;
                 $sheet->setCellValue("A{$row}", $no);
                 $sheet->setCellValue("B{$row}", $value->no_faktur_internal);
-                $sheet->setCellValue("C{$row}", $value->no_sj);
-                $sheet->setCellValue("d{$row}", $value->no_faktur_pajak);
-                $sheet->setCellValue("e{$row}", $value->tanggal);
-                $sheet->setCellValue("f{$row}", $nama);
-                $sheet->setCellValue("g{$row}", $value->partner_nama);
-                $sheet->setCellValue("h{$row}", $value->kode_coa);
-                $sheet->setCellValue("i{$row}", $value->coa);
-                $sheet->setCellValue("j{$row}", $value->jenis_ppn);
-                $sheet->setCellValue("k{$row}", $value->kode_mua);
-                $sheet->setCellValue("l{$row}", $value->kurs);
-                $sheet->setCellValue("m{$row}", ($value->qty) ? $value->qty : $q);
-                $sheet->setCellValue("n{$row}", ($value->qty) ? $value->uom : $u);
+                $sheet->setCellValue("c{$row}", $value->no_inv_ekspor);
+                $sheet->setCellValue("d{$row}", $value->no_sj);
+                $sheet->setCellValue("e{$row}", $value->no_faktur_pajak);
+                $sheet->setCellValue("f{$row}", $value->tanggal);
+                $sheet->setCellValue("g{$row}", $nama);
+                $sheet->setCellValue("h{$row}", $value->partner_nama);
+                $sheet->setCellValue("i{$row}", $value->kode_coa);
+                $sheet->setCellValue("j{$row}", $value->coa);
+                $sheet->setCellValue("k{$row}", $value->jenis_ppn);
+                $sheet->setCellValue("l{$row}", $value->kode_mua);
+                $sheet->setCellValue("m{$row}", $value->kurs);
+                $sheet->setCellValue("n{$row}", ($value->qty) ? $value->qty : $q);
+                $sheet->setCellValue("o{$row}", ($value->qty) ? $value->uom : $u);
                 if ($posisi !== "bks") {
-                    $sheet->setCellValue("o{$row}", $value->harga);
-                    $sheet->setCellValue("p{$row}", ($value->qty) ? $harga : $value->nominal);
+                    $sheet->setCellValue("p{$row}", $value->harga);
+                    $sheet->setCellValue("q{$row}", ($value->qty) ? $harga : $value->nominal);
                     $hargaRp = $value->harga;
                 } else {
                     if ($value->kurs > 1) {
@@ -221,25 +225,25 @@ class Bukupenjualan extends MY_Controller {
                     $totalHarga += $harga;
                     $grandTotal += $TotalRp;
                     $total += $TotalRp;
-                    $sheet->setCellValue("o{$row}", $hargaValas);
-                    $sheet->setCellValue("p{$row}", $hargaRp);
-                    $sheet->setCellValue("q{$row}", $JumlahValas);
-                    $sheet->setCellValue("r{$row}", $harga);
-                    $sheet->setCellValue("s{$row}", $ppn);
-                    $sheet->setCellValue("t{$row}", $TotalRp);
+                    $sheet->setCellValue("p{$row}", $hargaValas);
+                    $sheet->setCellValue("q{$row}", $hargaRp);
+                    $sheet->setCellValue("r{$row}", $JumlahValas);
+                    $sheet->setCellValue("s{$row}", $harga);
+                    $sheet->setCellValue("t{$row}", $ppn);
+                    $sheet->setCellValue("u{$row}", $TotalRp);
                 }
                 if (isset($data[$key + 1])) {
                     if ($value->kode_coa !== $data[$key + 1]->kode_coa) {
                         $row += 1;
-                        $sheet->setCellValue("h{$row}", $value->kode_coa);
-                        $sheet->setCellValue("i{$row}", "Total {$value->coa}");
+                        $sheet->setCellValue("i{$row}", $value->kode_coa);
+                        $sheet->setCellValue("j{$row}", "Total {$value->coa}");
                         if ($posisi !== "bks") {
-                            $sheet->setCellValue("p{$row}", ($value->qty) ? $totalHarga : $total);
+                            $sheet->setCellValue("q{$row}", ($value->qty) ? $totalHarga : $total);
                         } else {
-                            $sheet->setCellValue("q{$row}", $JumlahValas);
-                            $sheet->setCellValue("r{$row}", $hargaRp);
-                            $sheet->setCellValue("s{$row}", $ppn);
-                            $sheet->setCellValue("t{$row}", $total);
+                            $sheet->setCellValue("r{$row}", $JumlahValas);
+                            $sheet->setCellValue("s{$row}", $hargaRp);
+                            $sheet->setCellValue("t{$row}", $ppn);
+                            $sheet->setCellValue("u{$row}", $total);
                         }
                         $total = 0;
                         $totalHarga = 0;
@@ -250,15 +254,15 @@ class Bukupenjualan extends MY_Controller {
                     }
                 } else {
                     $row += 1;
-                    $sheet->setCellValue("h{$row}", $value->kode_coa);
-                    $sheet->setCellValue("i{$row}", "Total {$value->coa}");
+                    $sheet->setCellValue("i{$row}", $value->kode_coa);
+                    $sheet->setCellValue("j{$row}", "Total {$value->coa}");
                     if ($posisi !== "bks") {
-                        $sheet->setCellValue("p{$row}", ($value->qty) ? $totalHarga : $total);
+                        $sheet->setCellValue("q{$row}", ($value->qty) ? $totalHarga : $total);
                     } else {
-                        $sheet->setCellValue("q{$row}", $JumlahValas);
-                        $sheet->setCellValue("r{$row}", $hargaRp);
-                        $sheet->setCellValue("s{$row}", $ppn);
-                        $sheet->setCellValue("t{$row}", $total);
+                        $sheet->setCellValue("r{$row}", $JumlahValas);
+                        $sheet->setCellValue("s{$row}", $hargaRp);
+                        $sheet->setCellValue("t{$row}", $ppn);
+                        $sheet->setCellValue("u{$row}", $total);
                     }
                     $total = 0;
                     $totalHarga = 0;
@@ -268,20 +272,20 @@ class Bukupenjualan extends MY_Controller {
                     $totalPpn = 0;
                 }
             }
-            $sheet->getStyle("C2:C{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-            $sheet->getStyle("L2:L{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("d2:d{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
             $sheet->getStyle("m2:m{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            $sheet->getStyle("o2:o{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("n2:n{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("p2:p{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("q2:q{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             if ($posisi === "bks") {
-                $sheet->getStyle("q2:q{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
                 $sheet->getStyle("r2:r{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
                 $sheet->getStyle("s2:s{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
                 $sheet->getStyle("t2:t{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                $sheet->getStyle("u2:u{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             }
 
 //            $writer = new Xlsx($spreadsheet);
-            $filename = "Buku Penjualan {$tanggal}";
+            $filename = "Buku Penjualan {$tanggal} {$posisis}";
             $url = "dist/storages/report/acc";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);

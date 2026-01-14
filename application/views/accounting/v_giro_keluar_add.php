@@ -325,7 +325,7 @@
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
                 });
 
                 $(".btn-add-item").on("click", function (e) {
