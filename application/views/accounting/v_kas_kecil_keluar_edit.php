@@ -596,6 +596,7 @@ if ($datas->status == 'confirm') {
                             },
                             success: function (data) {
                                 alert_notify(data.icon, data.message, data.type, function () {}, 500);
+                                window.location.href = "<?= base_url('accounting/kaskecilkeluar/add') ?>";
                             },
                             complete: function (jqXHR, textStatus) {
                                 unblockUI(function () {});

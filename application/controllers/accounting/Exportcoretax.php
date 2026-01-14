@@ -59,6 +59,7 @@ class Exportcoretax extends MY_Controller {
 
             $periode = $this->input->post("periode");
             $customer = $this->input->post("customer");
+            $nosj = $this->input->post("no_sj");
 
             $periodes = explode(" - ", $periode);
             if (count($periodes) < 2) {
@@ -67,8 +68,11 @@ class Exportcoretax extends MY_Controller {
             $tanggalAwal = date("Y-m-d", strtotime($periodes[0]));
             $tanggalAkhir = date("Y-m-d", strtotime($periodes[1]));
             $wheres = ["tanggal >=" => $tanggalAwal, "tanggal <=" => $tanggalAkhir, "partner_id" => $customer, "status" => "confirm"];
+            if ($nosj !== "") {
+                $wheres = array_merge($wheres, ["no_sj LIKE" => "%{$nosj}%"]);
+            }
             $this->data->setTables("acc_faktur_penjualan fp")->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
-                    ->setOrder(["no_sj" => "asc","uraian" => "asc","warna" => "asc"])->setWheres($wheres)
+                    ->setOrder(["no_sj" => "asc", "uraian" => "asc", "warna" => "asc"])->setWheres($wheres)
                     ->setSelects(["no_sj", "tanggal", "tax_value", "kurs_nominal", "fpd.*"]);
         } catch (Exception $ex) {
             throw $ex;
@@ -185,7 +189,7 @@ class Exportcoretax extends MY_Controller {
                 $dpplainDikon = ($value->diskon * 11 / 12);
                 $rowFD += 1;
                 $uraian = $value->uraian;
-                $uraian .=($value->warna === "") ? "":"/{$value->warna}";
+                $uraian .= ($value->warna === "") ? "" : "/{$value->warna}";
                 $baris = ($tempSj === $value->no_sj) ? $baris : $baris + 1;
                 $sheetFD->setCellValue("A{$rowFD}", $baris);
                 $sheetFD->setCellValue("b{$rowFD}", "A");

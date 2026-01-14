@@ -8,6 +8,19 @@
             .select2-container--focus{
                 border:  1px solid #66afe9;
             }
+            #bankmasuk-detail.hides thead tr > *:nth-child(3),
+            #bankmasuk-detail.hides thead tr > *:nth-child(4){
+                display: none;
+            }
+
+            #bankmasuk-detail.hides tbody tr > *:nth-child(3),
+            #bankmasuk-detail.hides tbody tr > *:nth-child(4){
+                display: none;
+            }
+            #bankmasuk-detail.hides tfoot tr > *:nth-child(3),
+            #bankmasuk-detail.hides tfoot tr > *:nth-child(4){
+                display: none;
+            }
         </style>
         <?php
         $this->load->view("admin/_partials/head.php");
@@ -169,12 +182,15 @@
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="table-responsive over">
-                                                <table class="table table-condesed table-hover rlstable" width="100%" id="bankmasuk-detail" style="min-width: 105%">
+                                                <table class="table table-condesed table-hover rlstable hides" width="100%" id="bankmasuk-detail" style="min-width: 100%">
+                                                    <caption>
+                                                        <span id="bankrekshow" href="#" onclick="setbankrekshow()" style="color: blue">Show Bank</span>
+                                                    </caption>
                                                     <thead>
                                                     <th class="style" style="width: 5px">No.</th>
                                                     <th class="style" style="width: 150px">Uraian</th>
-                                                    <th class="style" style="width: 130px">Bank</th>
-                                                    <th class="style" style="width: 120px">No Rek</th>
+                                                    <th class="style hides" style="width: 130px">Bank</th>
+                                                    <th class="style hides" style="width: 120px">No Rek</th>
                                                     <th class="style" style="width: 120px">No.Cek/BG</th>
                                                     <th class="style" style="width: 140px">Tgl Cair</th>
                                                     <th class="style" style="width: 110px">No.Acc(Kredit)</th>
@@ -196,10 +212,10 @@
                                                                     <input type="text" name="uraian[]" class="form-control uraian edited-read input-sm" value="<?= $value->uraian ?? "" ?>" readonly/>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" name="bank[]" class="form-control bank edited-read input-sm" value="<?= $value->bank ?>" required readonly/>
+                                                                    <input type="text" name="bank[]" class="form-control bank_input bank edited-read input-sm" value="<?= $value->bank ?>" required readonly/>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" name="norek[]" class="form-control norek edited-read input-sm" value="<?= $value->no_rek ?>" readonly/>
+                                                                    <input type="text" name="norek[]" class="form-control norek_input norek edited-read input-sm" value="<?= $value->no_rek ?>" readonly/>
                                                                 </td>
                                                                 <td>
                                                                     <input type="text" name="nobg[]" class="form-control nobg edited-read input-sm" value="<?= $value->no_bg ?>" readonly/>
@@ -244,7 +260,14 @@
                                                             <td>
                                                                 <button class="btn btn-success btn-sm btn-add-item" style="display: none"><i class="fa fa-plus-circle"></i></button>
                                                             </td>
-                                                            <td colspan="8" class="text-right text-bold total-nominal">
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td class="text-right text-bold total-nominal">
 
                                                             </td>
                                                             <td class="text-bold">
@@ -328,10 +351,10 @@
                     <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm"/>
                 </td>
                 <td>
-                    <input type="text" name="bank[]" class="form-control bank bank:nourut input-sm" required/>
+                    <input type="text" name="bank[]" class="form-control bank bank_input bank:nourut input-sm" required/>
                 </td>
                 <td>
-                    <input type="text" name="norek[]" class="form-control norek norek:nourut input-sm"/>
+                    <input type="text" name="norek[]" class="form-control norek norek_input norek:nourut input-sm"/>
                 </td>
                 <td>
                     <input type="text" name="nobg[]" class="form-control input-sm"/>
@@ -380,10 +403,10 @@
                     <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm" value=""/>
                 </td>
                 <td>
-                    <input type="text" name="bank[]" class="form-control bank:nourut input-sm" value="" required/>
+                    <input type="text" name="bank[]" class="form-control bank_input bank:nourut input-sm" value="" required/>
                 </td>
                 <td>
-                    <input type="text" name="norek[]" class="form-control norek:nourut input-sm" value=""/>
+                    <input type="text" name="norek[]" class="form-control norek_input norek:nourut input-sm" value=""/>
                 </td>
                 <td>
                     <input type="text" name="nobg[]" class="form-control nobg:nourut input-sm" value=""/>
@@ -460,6 +483,17 @@ if ($datas->status == 'confirm') {
 //                        }
 //                    }
                 });
+            });
+
+            var bankrekshow = false;
+            const setbankrekshow = (() => {
+                bankrekshow = !bankrekshow;
+                $("#bankmasuk-detail").toggleClass("hides");
+                if (bankrekshow) {
+                    $("#bankrekshow").html("Hide Bank");
+                    return;
+                }
+                $("#bankrekshow").html("Show Bank");
             });
 
             const setCoaItem = ((klas = "select2-coa") => {
@@ -607,6 +641,7 @@ if ($datas->status == 'confirm') {
                         },
                         success: function (data) {
                             alert_notify(data.icon, data.message, data.type, function () {}, 500);
+                            window.location.href = "<?= base_url('accounting/bankmasuk/add') ?>";
                         },
                         complete: function (jqXHR, textStatus) {
                             unblockUI(function () {});
@@ -827,9 +862,17 @@ if ($datas->status == 'confirm') {
                     $("#partner_name").val(ttt.text());
                 });
 
-//                $(".no_acc").on("change", function () {
-//                    setBank();
-//                });
+                $(".no_acc").on("change", function () {
+                    var ttt = $(".no_acc").find(":selected");
+                    var acc = ttt.text();
+                    if (acc !== "") {
+                        const texts = acc.split(" - ");
+                        $(".bank_input").val(texts?.[1]);
+                        $(".norek_input").val(texts?.[2]);
+
+                    }
+                });
+
 
                 $(document).on('focus', '.select2', function (e) {
                     if (e.originalEvent) {
