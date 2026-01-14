@@ -20,6 +20,7 @@ use Cache\Adapter\Apcu\ApcuCachePool;
 use Cache\Bridge\SimpleCache\SimpleCacheBridge;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Rekapgiro extends MY_Controller {
 
@@ -141,6 +142,7 @@ class Rekapgiro extends MY_Controller {
                 $sheet->setCellValue("I{$row}", "Total");
                 $sheet->setCellValue("J{$row}", $total);
             }
+            $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $writer = new Xlsx($spreadsheet);
