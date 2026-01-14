@@ -106,7 +106,7 @@
                                         <tr>
                                             <th class="no">No</th>
                                             <th>No Kas Masuk</th>
-                                            <th>Supplier</th>
+                                            <th>Customer</th>
                                             <th>Tanggal</th>
                                             <th>No ACC (Debet)</th>
                                             <th>Total</th>

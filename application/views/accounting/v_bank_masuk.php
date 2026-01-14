@@ -106,7 +106,7 @@
                                         <tr>
                                             <th class="no">No</th>
                                             <th>No Giro Masuk</th>
-                                            <th>Supplier</th>
+                                            <th>Customer</th>
                                             <th>Tanggal</th>
                                             <th>No ACC (Debit)</th>
                                             <th>Transinfo</th>
