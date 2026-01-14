@@ -88,7 +88,7 @@ class Bukukas extends MY_Controller {
 
             $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")
-                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa", "partner_nama,lain2,nama_curr,kurs"])
+                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa", "partner_nama,lain2,nama_curr,kurs,acc_coa.kode_coa"])
                     ->setOrder(["tanggal" => "asc", "no_bukti" => "asc", "uraian" => "asc"]);
             return $model;
         } catch (Exception $ex) {
@@ -289,7 +289,7 @@ class Bukukas extends MY_Controller {
                     $sheet->setCellValue("B{$row}", $dt);
                     $sheet->setCellValue("C{$row}", $no_bukti);
                     $sheet->setCellValue("D{$row}", $value->uraian);
-                    $sheet->setCellValue("E{$row}", $value->coa);
+                    $sheet->setCellValue("E{$row}", $value->kode_coa);
                     $sheet->setCellValue("F{$row}", $debet);
                     $sheet->setCellValue("G{$row}", $kredit);
                     $sheet->setCellValue("H{$row}", $saldos);
