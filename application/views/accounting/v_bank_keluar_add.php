@@ -371,7 +371,7 @@
                 }
 
                 $("#total_nominal").val(total);
-                formatCurrency($("#total_nominal"));
+                formatCurrency($("#total_nominal"),"blur");
             });
 
             const setCurr = (() => {

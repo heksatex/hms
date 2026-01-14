@@ -436,7 +436,7 @@ if ($datas->status == 'confirm') {
                     return;
                 }
 
-               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
             });
 
             $(function () {
@@ -563,7 +563,12 @@ if ($datas->status == 'confirm') {
                         false
 
                         );
-                
+                $(".nominal").keyup(function (ev) {
+                        if (ev.keyCode === 13) {
+                            $(".btn-add-item").trigger("click");
+                        }
+                    });
+                    
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;

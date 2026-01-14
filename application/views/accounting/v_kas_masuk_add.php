@@ -503,7 +503,7 @@
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"));
+                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
                 });
                 const formdo = document.forms.namedItem("form-acc-kasmasuk");
                 formdo.addEventListener(
