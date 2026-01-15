@@ -566,13 +566,25 @@ class Giromasuk extends MY_Controller {
             $printer->text(str_pad("BUKTI GIRO MASUK (BGM)", 20));
             $buff->write("\x1bF" . chr(0));
             $printer->feed();
+            $printer->text(str_pad("", 25));
+            $buff->write("\x1bg" . chr(1));
+            $printer->text(str_pad($head->nama_coa, 45, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("", 1));
+            $customer = str_split(trim(preg_replace('/\s+/', ' ', "Dari : {$head->partner_nama}")), 33);
+            foreach ($customer as $key => $value) {
+                if ($key > 0) {
+                    $printer->text(str_pad("", 84));
+                }
+                $printer->text(str_pad(trim($value), 33, " ", STR_PAD_RIGHT));
+            }
+            $printer->feed();
             $buff->write("\x1bM");
             $printer->text(str_pad("", 30));
             $buff->write("\x1bg" . chr(1));
             $printer->text(str_pad("No Acc (Debet) : {$head->kode_coa}", 30));
             $printer->text(str_pad("", 16));
-            $customer = str_split(trim(preg_replace('/\s+/', ' ', "Dari : {$head->partner_nama}")), 33);
-            foreach ($customer as $key => $value) {
+            $lain2 = str_split(trim(preg_replace('/\s+/', ' ', "LAIN-LAIN :{$head->lain2}")), 33);
+            foreach ($lain2 as $key => $value) {
                 if ($key > 0) {
                     $printer->text(str_pad("", 86));
                 }
