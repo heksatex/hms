@@ -541,6 +541,7 @@
                                     $(".btn-add-item").trigger("click");
                                 }
                             });
+                            setCoaItem("select2-coa" + no);
                         });
                         if (pajak > 0) {
                             no += 1;
@@ -564,13 +565,14 @@
                                     $(".btn-add-item").trigger("click");
                                 }
                             });
+                            setCoaItem("select2-coa" + no);
                         }
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
-                            setCoaItem();
+//                            setCoaItem();
                             setNominalCurrency();
                         }, 100);
 
