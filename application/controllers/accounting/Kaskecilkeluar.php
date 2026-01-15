@@ -12,9 +12,11 @@ defined('BASEPATH') OR exit('No Direct Script Acces Allowed');
  * @author RONI
  */
 require FCPATH . 'vendor/autoload.php';
+require_once APPPATH . '/third_party/vendor/autoload.php';
 
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
+use Mpdf\Mpdf;
 
 class Kaskecilkeluar extends MY_Controller {
 
@@ -756,4 +758,45 @@ class Kaskecilkeluar extends MY_Controller {
             $this->session->unset_userdata('pin');
         }
     }
+    
+    public function print_pdf() {
+        try {
+            $id = $this->input->post("id");
+            $kode = decrypt_url($id);
+            $model = new $this->m_global;
+
+            $head = $model->setTables("acc_kas_kecil_keluar")->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_kecil_keluar.kode_coa")
+                            ->setSelects(["acc_kas_kecil_keluar.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setWheres(["no_kkk" => $kode])->getDetail();
+            if (!$head) {
+                throw new \exception("Data No Kas Kecil Keluar {$kode} tidak ditemukan", 500);
+            }
+            $data["detail"] = $model->setTables("acc_kas_kecil_keluar_detail")
+                            ->setJoins("currency_kurs", "currency_kurs.id = currency_id")
+                            ->setWheres(["kas_kecil_keluar_id" => $head->id])
+                            ->setSelects(["acc_kas_kecil_keluar_detail.*", "currency_kurs.currency as curr"])->getData();
+            $data["head"] = $head;
+            $html = $this->load->view("print/acc/v_kas_kecil_keluar_print", $data, true);
+            $url = "dist/storages/print/kas";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
+            $mpdf->autoPageBreak = true;
+            $mpdf->WriteHTML($html);
+            $filename = str_replace("/", "-", $data["head"]->no_kkk);
+            $pathFile = "{$url}/{$filename}.pdf";
+            $mpdf->Output(FCPATH . $pathFile, "F");
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+    
+    
 }

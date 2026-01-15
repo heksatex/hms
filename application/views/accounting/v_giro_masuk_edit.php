@@ -2,7 +2,7 @@
 <html>
     <head>
         <style>
-            #btn-cancel,#btn-simpan,#btn-print,.btn-save {
+            #btn-cancel,#btn-simpan,#btn-print,.btn-save,#btn-print-pdf {
                 display: none;
             }
             .select2-container--focus{
@@ -25,14 +25,14 @@
                 #btn-edit{
                     display: none;
                 }
-                #btn-print {
+                #btn-print,#btn-print-pdf {
                     display:inline;
                 }
             </style>
             <?php
         }
         ?>
-    <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
+        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -70,6 +70,9 @@
                                         </button>
                                     <?php }
                                     ?>
+                                    <button class="btn btn-primary btn-sm" type="button" id="btn-print-pdf" data-ids="<?= $id ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-print"></i>&nbsp;Print PDF
+                                    </button>
                                 </div>
                                 <input type="hidden" value="<?= $datas->id ?>" name="ids">
                             </div>
@@ -436,7 +439,8 @@ if ($datas->status == 'confirm') {
                     return;
                 }
 
-               $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
+                $("#total_nominal").val(total);
+                formatCurrency($("#total_nominal"), "blur");
             });
 
             $(function () {
@@ -564,11 +568,11 @@ if ($datas->status == 'confirm') {
 
                         );
                 $(".nominal").keyup(function (ev) {
-                        if (ev.keyCode === 13) {
-                            $(".btn-add-item").trigger("click");
-                        }
-                    });
-                    
+                    if (ev.keyCode === 13) {
+                        $(".btn-add-item").trigger("click");
+                    }
+                });
+
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
@@ -578,7 +582,7 @@ if ($datas->status == 'confirm') {
                     setCoaItem();
                     setCurr();
                     setTglFormatDef(".tgl-def-format");
-                    $(".nominal"+no).on("blur", function () {
+                    $(".nominal" + no).on("blur", function () {
                         calculateTotal();
                     });
 
@@ -655,38 +659,38 @@ if ($datas->status == 'confirm') {
                 $(".total-nominal").on("click", function () {
                     calculateTotal();
                 });
-                const getPartner = (()=>{
+                const getPartner = (() => {
                     $("#partner").select2({
-                    placeholder: "Pilih",
-                    allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
-                        type: "GET",
-                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term,
-                                jenis: "customer"
-                            };
-                        },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                results.push({
-                                    id: item.id,
-                                    text: item.nama
+                        placeholder: "Pilih",
+                        allowClear: true,
+                        ajax: {
+                            dataType: 'JSON',
+                            type: "GET",
+                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                            delay: 250,
+                            data: function (params) {
+                                return{
+                                    search: params.term,
+                                    jenis: "customer"
+                                };
+                            },
+                            processResults: function (data) {
+                                var results = [];
+                                $.each(data.data, function (index, item) {
+                                    results.push({
+                                        id: item.id,
+                                        text: item.nama
+                                    });
                                 });
-                            });
-                            return {
-                                results: results
-                            };
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
+                                return {
+                                    results: results
+                                };
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                            }
                         }
-                    }
+                    });
                 });
-                })
 
                 $(".partner").on("change", function () {
                     var ttt = $(".partner").find(":selected");
@@ -705,6 +709,32 @@ if ($datas->status == 'confirm') {
                         });
                     }
                 });
+
+                $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url('accounting/giromasuk/print_pdf/') ?>",
+                        type: "POST",
+                        data: {
+                            id: "<?= $id ?>"
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        success: function (data) {
+                            unblockUI(function () {});
+                            window.open(data.url, "_blank").focus();
+
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+
             });
 
             $(document).ready(function () {

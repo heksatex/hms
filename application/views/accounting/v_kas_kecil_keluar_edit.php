@@ -2,7 +2,7 @@
 <html>
     <head>
         <style>
-            #btn-cancel,#btn-simpan,#btn-print {
+            #btn-cancel,#btn-simpan,#btn-print,#btn-print-pdf {
                 display: none;
             }
             .select2-container--focus{
@@ -25,7 +25,7 @@
                 #btn-edit{
                     display: none;
                 }
-                #btn-print {
+                #btn-print,#btn-print-pdf {
                     display:inline;
                 }
             </style>
@@ -71,6 +71,9 @@
                                         </button>
                                     <?php }
                                     ?>
+                                    <button class="btn btn-primary btn-sm" type="button" id="btn-print-pdf" data-ids="<?= $id ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-print"></i>&nbsp;Print PDF
+                                    </button>
                                 </div>
                             </div>
                             <div class="box-body">
@@ -625,6 +628,31 @@ if ($datas->status == 'confirm') {
                             });
                         }
                     });
+                    
+                    $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url('accounting/kaskecilkeluar/print_pdf/') ?>",
+                        type: "POST",
+                        data: {
+                            id: "<?= $id ?>"
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        success: function (data) {
+                            unblockUI(function () {});
+                            window.open(data.url, "_blank").focus();
+
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
 
                 });
 

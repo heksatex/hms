@@ -49,7 +49,7 @@
                                                         <?php
                                                         foreach ($coa as $key => $value) {
                                                             ?>
-                                                            <option value="<?= $value->kode_coa ?>" <?= ($key ===0) ? "selected":"" ?>><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
+                                                            <option value="<?= $value->kode_coa ?>" <?= ($key === 0) ? "selected" : "" ?>><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
                                                             <?php
                                                         }
                                                         ?>
@@ -193,7 +193,7 @@
                     <input class="fpt fpt:nourut" type="hidden">
                 </td>
                 <td>
-                    <select class="form-control input-sm select2-coa select2-coa:nourut" style="width:100%" name="kode_coa[]" required>
+                    <select class="form-control input-sm select2-coa:nourut" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
 
                     </select>
@@ -367,13 +367,13 @@
                     var coa = txtt.at(-1);
                     $("#coa_name").val(coa);
                     if (txtt.length > 1) {
-                        previewNo(coa,$("#tanggal").val());
+                        previewNo(coa, $("#tanggal").val());
                     }
                 });
-                $("#tanggal").on("blur",function(){
-                    previewNo($("#coa_name").val(),$("#tanggal").val());
+                $("#tanggal").on("blur", function () {
+                    previewNo($("#coa_name").val(), $("#tanggal").val());
                 });
-                
+
                 const previewNo = ((coa, tgl) => {
                     $.post("<?= base_url('accounting/kaskeluar/preview_no') ?>", {coa_name: coa, tanggal: tgl}, function (data) {
                         $("#no").html(data.data);
@@ -464,7 +464,8 @@
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
+                    $("#total_nominal").val(total);
+                    formatCurrency($("#total_nominal"), "blur");
                 });
 
                 $(document).on('focus', '.select2', function (e) {
@@ -478,8 +479,8 @@
                         });
                     }
                 });
-                
-                previewNo($("#coa_name").val(),$("#tanggal").val());
+
+                previewNo($("#coa_name").val(), $("#tanggal").val());
 
             });
 
@@ -513,8 +514,11 @@
                         please_wait(function () {});
                     },
                     success: function (data) {
+                        var pajak = 0.00;
                         $.each(data.data, function (idx, row) {
                             var notes = "";
+                            var pjk = parseFloat(row.pajak);
+                            pajak += pjk;
                             if (row.reff_note !== "")
                                 notes = " - " + row.reff_note;
                             no += 1;
@@ -537,13 +541,38 @@
                                     $(".btn-add-item").trigger("click");
                                 }
                             });
+                            setCoaItem("select2-coa" + no);
                         });
+                        if (pajak > 0) {
+                            no += 1;
+                            var tmplt = $("template.kaskeluar-tmplt-fpt");
+                            var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
+                            $("#kaskeluar-detail tbody").append(isi_tmplt);
+                            $(".po" + no).val(data.data[0].id);
+                            $(".uraian" + no).val("PPN");
+                            $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(pajak));
+                            $(".kurs" + no).val(data.data[0].nilai_currency);
+                            $(".nourut" + no).html(no);
+                            $(".fpt" + no).val(data.data[0].no_po);
+                            var newOption = new Option(data.ppn?.value, data.ppn?.value, false, false);
+                            $(".select2-coa" + no).append(newOption);
+                            $(".select2-coa" + no).val(data.ppn?.value).trigger('change');
+                            $(".nominal" + no).on("blur", function () {
+                                calculateTotal();
+                            });
+                            $(".nominal" + no).keyup(function (ev) {
+                                if (ev.keyCode === 13) {
+                                    $(".btn-add-item").trigger("click");
+                                }
+                            });
+                            setCoaItem("select2-coa" + no);
+                        }
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
-                            setCoaItem();
+//                            setCoaItem();
                             setNominalCurrency();
                         }, 100);
 
