@@ -72,95 +72,143 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                        <div class="col-md-2 col-xs-12">
-                                            <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
+                                            <div class="col-md-6 col-xs-12">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <label class="form-label">Supplier</label>
+                                                        </div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <select name="supplier" class="form-control select2" id="supplier" style="width: 100%" >
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-xs-12 table-responsive">
+                                <table id="tbl-po" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="no">No</th>
+                                            <th>No PO</th>
+                                            <th>Supplier</th>
+                                            <th>Tanggal Order</th>
+                                            <th>Tanggal Dokumen</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
-                        <div class="col-xs-12 table-responsive">
-                            <table id="tbl-po" class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th class="no">No</th>
-                                        <th>No PO</th>
-                                        <th>Supplier</th>
-                                        <th>Tanggal Order</th>
-                                        <th>Tanggal Dokumen</th>
-                                        <th>Total</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
+                        <!-- /.box-body -->
                     </div>
-                    <!-- /.box-body -->
+                </section>
             </div>
-        </section>
-    </div>
-</div>
-<?php $this->load->view("admin/_partials/js.php") ?>
-<script>
-    $(function () {
+        </div>
+        <?php $this->load->view("admin/_partials/js.php") ?>
+        <script>
+            $(function () {
 
-        //* Show collapse advanced search
-        $('#advancedSearch').on('shown.bs.collapse', function () {
-            $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
-        });
+                //* Show collapse advanced search
+                $('#advancedSearch').on('shown.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+                });
 
-        //* Hide collapse advanced search
-        $('#advancedSearch').on('hidden.bs.collapse', function () {
-            $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
-        });
+                //* Hide collapse advanced search
+                $('#advancedSearch').on('hidden.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+                });
 
-        $(".select2").select2({
-            allowClear: true,
-            placeholder: "Pilih"
-        });
+                $(".select2").select2({
+                    allowClear: true,
+                    placeholder: "Pilih"
+                });
 
+                $("#supplier").select2({
+                    placeholder: "Pilih",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term,
+                                jenis: "supplier"
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    id: item.id,
+                                    text: item.nama
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                        }
+                    }
+                });
 
-        const table = $("#tbl-po").DataTable({
-            "iDisplayLength": 50,
-            "processing": true,
-            "serverSide": true,
-            "order": [],
-            "scrollX":true,
-            "scrollY":"calc(85vh - 250px)",
-            "paging": true,
-            "lengthChange": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
-            "stateSave":false,
-            "ajax": {
-                "url": "<?php echo site_url('purchase/purchaseorder/list_data') ?>",
-                "type": "POST",
-                "data": function (d) {
-                    d.nama_produk = $("#nama_produk").val();
-                    d.status = $("#status").val();
-                    d.level = "<?= $user->level ?>";
-                }
-            },
-            "columnDefs": [
-                {
-                    "targets": [0],
-                    "orderable": false
-                }
-            ],
-            "createdRow": function (row, data, dataIndex) {
-                if (data[6].toLowerCase() === "cancel") {
-                    $(row).addClass('cancelPL');
-                }
-            }
-        });
-        $("#search").on("click", function () {
-            table.ajax.reload();
-        });
+                const table = $("#tbl-po").DataTable({
+                    "iDisplayLength": 50,
+                    "processing": true,
+                    "serverSide": true,
+                    "order": [],
+                    "scrollX": true,
+                    "scrollY": "calc(85vh - 250px)",
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": false,
+                    "stateSave": false,
+                    "ajax": {
+                        "url": "<?php echo site_url('purchase/purchaseorder/list_data') ?>",
+                        "type": "POST",
+                        "data": function (d) {
+                            d.nama_produk = $("#nama_produk").val();
+                            d.status = $("#status").val();
+                            d.level = "<?= $user->level ?>";
+                            d.supplier = $("#supplier").val();
+                        }
+                    },
+                    "columnDefs": [
+                        {
+                            "targets": [0],
+                            "orderable": false
+                        }
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        if (data[6].toLowerCase() === "cancel") {
+                            $(row).addClass('cancelPL');
+                        }
+                    }
+                });
+                $("#search").on("click", function () {
+                    table.ajax.reload();
+                });
 
-    });
-</script>
-</body>
+            });
+        </script>
+    </body>
 </html>

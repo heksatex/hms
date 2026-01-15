@@ -71,6 +71,7 @@ class Requestforquotation extends MY_Controller {
             }
             $prd = ($_GET["produk"] ?? "");
             $stt = ($_GET["stt"] ?? '');
+            $spl = ($_GET["supplier"] ?? '');
             $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)
                     ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
             if ($prd !== "") {
@@ -78,6 +79,9 @@ class Requestforquotation extends MY_Controller {
             }
             if ($stt !== "") {
                 $model1->setWhereIn("po.status", explode(",", $stt));
+            }
+            if ($spl !== "") {
+                $model1->setWheres(["po.supplier" => $spl]);
             }
             if (strtolower($level) === "direksi") {
                 $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
@@ -87,7 +91,7 @@ class Requestforquotation extends MY_Controller {
 
             $nextPage = $model1->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po) . "?produk={$prd}&stt={$stt}");
+                $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po) . "?produk={$prd}&stt={$stt}&supplier={$spl}");
             }
 
             $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true)
@@ -97,6 +101,9 @@ class Requestforquotation extends MY_Controller {
             }
             if ($stt !== "") {
                 $model1->setWhereIn("po.status", explode(",", $stt));
+            }
+            if ($spl !== "") {
+                $model1->setWheres(["po.supplier" => $spl]);
             }
 
             if (strtolower($level) === "direksi") {
@@ -108,7 +115,7 @@ class Requestforquotation extends MY_Controller {
             $prevPage = $model1->getDetail();
 
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}");
+                $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}&supplier={$spl}");
             }
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
@@ -131,6 +138,7 @@ class Requestforquotation extends MY_Controller {
             $level = $this->session->userdata('nama')['level'] ?? "";
             $jenis = $this->input->post("jenis");
             $status = $this->input->post("status");
+            $supplier = $this->input->post("supplier");
             $nama_produk = $this->input->post("nama_produk");
             $statuss = "";
             $data = array();
@@ -156,7 +164,8 @@ class Requestforquotation extends MY_Controller {
                 }
             }
 
-
+            if ($supplier !== "")
+                $list->setWheres(["po.supplier" => $supplier]);
 
             if ($nama_produk !== "")
                 $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
@@ -171,10 +180,9 @@ class Requestforquotation extends MY_Controller {
                     $status .= " ({$field->poe_status})";
                 }
                 if (strtolower($level) === "direksi") {
-                    if(strpos(strtolower($status), "waiting") !== false) {
+                    if (strpos(strtolower($status), "waiting") !== false) {
                         
-                    }
-                    else {
+                    } else {
                         continue;
                     }
                     $poenc = encrypt_url($field->no_po);
@@ -183,7 +191,7 @@ class Requestforquotation extends MY_Controller {
 
                 $data [] = [
                     $no,
-                    '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '?produk=' . $nama_produk . '&stt=' . $statuss . '">' . $field->no_po . '</a>',
+                    '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '?produk=' . $nama_produk . '&stt=' . $statuss . '&supplier=' . $supplier . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->create_date,
                     number_format($field->total, 4) . " " . ( ($field->total === null) ? "" : $field->curr_kode),

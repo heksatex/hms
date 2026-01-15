@@ -62,6 +62,7 @@ class Fpt extends MY_Controller {
             }
             $prd = ($_GET["produk"] ?? "");
             $stt = ($_GET["stt"] ?? '');
+            $spl = ($_GET["supplier"] ?? '');
             $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "FPT"], true)
                             ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
             if($prd !== "") {
@@ -70,9 +71,12 @@ class Fpt extends MY_Controller {
             if($stt !== "") {
                 $model1->setWhereIn("po.status", explode(",",$stt));
             }
+            if ($spl !== "") {
+                $model1->setWheres(["po.supplier" => $spl]);
+            }
             $nextPage = $model1->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/fpt/edit/" . encrypt_url($nextPage->no_po). "?produk={$prd}&stt={$stt}");
+                $data["next_page"] = base_url("purchase/fpt/edit/" . encrypt_url($nextPage->no_po). "?produk={$prd}&stt={$stt}&supplier={$spl}");
             }
 
             $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "FPT"], true)
@@ -83,10 +87,12 @@ class Fpt extends MY_Controller {
             if($stt !== "") {
                 $model1->setWhereIn("po.status", explode(",",$stt));
             }
-            
+            if ($spl !== "") {
+                $model1->setWheres(["po.supplier" => $spl]);
+            }
             $prevPage = $model1->getDetail();
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/fpt/edit/" . encrypt_url($prevPage->no_po));
+                $data["prev_page"] = base_url("purchase/fpt/edit/" . encrypt_url($prevPage->no_po)."?produk={$prd}&stt={$stt}&supplier={$spl}");
             }
 
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
