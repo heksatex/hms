@@ -599,14 +599,15 @@ class Kaskeluar extends MY_Controller {
             $model = new $this->m_global;
             $data = $model->setTables("purchase_order_detail")->setJoins("purchase_order", "purchase_order.id = po_id")
                             ->setJoins("currency_kurs", "currency_kurs.id = purchase_order.currency")
-                            ->setSelects(["purchase_order_detail.total,purchase_order_detail.deskripsi,purchase_order_detail.id,purchase_order_detail.reff_note",
+                            ->setSelects(["purchase_order_detail.total,purchase_order_detail.deskripsi,purchase_order_detail.id,purchase_order_detail.reff_note,pajak",
                                 "purchase_order.nilai_currency", "purchase_order.no_po"])
                             ->setSelects(["purchase_order.currency as po_curr", "currency_kurs.currency as curr"])
                             ->setWhereIn("po_no_po", $no)->setOrder(["po_no_po" => "asc"])->getData();
 
+            $ppn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_default_ppn"])->getDetail();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data)));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data,"ppn"=>$ppn)));
         } catch (Exception $ex) {
 
             $this->output->set_status_header($ex->getCode() ?? 500)

@@ -328,7 +328,7 @@
                         <input class="fpt fpt:nourut" type="hidden">
                     </td>
                     <td>
-                        <select class="form-control input-sm select2-coa coa_:nourut" style="width:100%" name="kode_coa[]" required>
+                        <select class="form-control input-sm select2-coa select2-coa:nourut" style="width:100%" name="kode_coa[]" required>
                             <option value=""></option>
                         </select>
                     </td>
@@ -751,31 +751,31 @@ if ($datas->status == 'confirm') {
                             });
                         }
                     });
-                    
-                    $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
-                    $.ajax({
-                        url: "<?= base_url('accounting/kaskeluar/print_pdf/') ?>",
-                        type: "POST",
-                        data: {
-                            id: "<?= $id ?>"
-                        },
-                        beforeSend: function (xhr) {
-                            please_wait(function () {});
-                        },
-                        success: function (data) {
-                            unblockUI(function () {});
-                            window.open(data.url, "_blank").focus();
 
-                        },
-                        error: function (req, error) {
-                            unblockUI(function () {
-                                setTimeout(function () {
-                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                                }, 500);
-                            });
-                        }
+                    $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
+                        $.ajax({
+                            url: "<?= base_url('accounting/kaskeluar/print_pdf/') ?>",
+                            type: "POST",
+                            data: {
+                                id: "<?= $id ?>"
+                            },
+                            beforeSend: function (xhr) {
+                                please_wait(function () {});
+                            },
+                            success: function (data) {
+                                unblockUI(function () {});
+                                window.open(data.url, "_blank").focus();
+
+                            },
+                            error: function (req, error) {
+                                unblockUI(function () {
+                                    setTimeout(function () {
+                                        alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                    }, 500);
+                                });
+                            }
+                        });
                     });
-                });
 
                 });
                 const addToTable = ((data) => {
@@ -789,7 +789,10 @@ if ($datas->status == 'confirm') {
                             please_wait(function () {});
                         },
                         success: function (data) {
+                            var pajak = 0.00;
                             $.each(data.data, function (idx, row) {
+                                var pjk = parseFloat(row.pajak);
+                                pajak += pjk;
                                 var notes = "";
                                 if (row.reff_note !== "")
                                     notes = " - " + row.reff_note;
@@ -804,7 +807,6 @@ if ($datas->status == 'confirm') {
                                 $(".kurs" + no).val(row.nilai_currency);
                                 $(".nourut" + no).html(no);
                                 $(".fpt" + no).val(row.no_po);
-                                setCoaItem();
                                 gentransaksi();
                                 $(".nominal" + no).on("blur", function () {
                                     calculateTotal();
@@ -815,10 +817,36 @@ if ($datas->status == 'confirm') {
                                     }
                                 });
                             });
+                            if (pajak > 0) {
+                                no += 1;
+                                var tmplt = $("template.kaskeluar-tmplt-fpt");
+                                var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
+                                $("#kaskeluar-detail tbody").append(isi_tmplt);
+                                $(".po" + no).val(data.data[0].id);
+                                $(".uraian" + no).val("PPN");
+                                $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(pajak));
+                                $(".kurs" + no).val(data.data[0].nilai_currency);
+                                $(".nourut" + no).html(no);
+                                $(".fpt" + no).val(data.data[0].no_po);
+                                var newOption = new Option(data.ppn?.value, data.ppn?.value, false, false);
+                                $(".select2-coa" + no).append(newOption);
+                                $(".select2-coa" + no).val(data.ppn?.value).trigger('change');
+//                                setCoaItem("select2-coa" + no);
+//                            $(".select2-coa" + no).select2().select2("val", "1193.05");
+                                $(".nominal" + no).on("blur", function () {
+                                    calculateTotal();
+                                });
+                                $(".nominal" + no).keyup(function (ev) {
+                                    if (ev.keyCode === 13) {
+                                        $(".btn-add-item").trigger("click");
+                                    }
+                                });
+                            }
                         },
                         complete: function (jqXHR, textStatus) {
                             unblockUI(function () {
                                 setCurr();
+                                setCoaItem();
                                 $(".total-nominal").trigger("click");
                                 setNominalCurrency();
                             }, 100);
