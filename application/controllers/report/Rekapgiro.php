@@ -144,7 +144,7 @@ class Rekapgiro extends MY_Controller {
                 $sheet->setCellValue("J{$row}", "Total");
                 $sheet->setCellValue("K{$row}", $total);
             }
-            $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("K2:K{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $writer = new Xlsx($spreadsheet);
