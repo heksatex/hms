@@ -12,9 +12,11 @@ defined('BASEPATH') OR exit('No Direct Script Acces Allowed');
  * @author RONI
  */
 require FCPATH . 'vendor/autoload.php';
+require_once APPPATH . '/third_party/vendor/autoload.php';
 
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
+use Mpdf\Mpdf;
 
 class Kaskeluar extends MY_Controller {
 
@@ -597,14 +599,15 @@ class Kaskeluar extends MY_Controller {
             $model = new $this->m_global;
             $data = $model->setTables("purchase_order_detail")->setJoins("purchase_order", "purchase_order.id = po_id")
                             ->setJoins("currency_kurs", "currency_kurs.id = purchase_order.currency")
-                            ->setSelects(["purchase_order_detail.total,purchase_order_detail.deskripsi,purchase_order_detail.id,purchase_order_detail.reff_note",
+                            ->setSelects(["purchase_order_detail.total,purchase_order_detail.deskripsi,purchase_order_detail.id,purchase_order_detail.reff_note,pajak",
                                 "purchase_order.nilai_currency", "purchase_order.no_po"])
                             ->setSelects(["purchase_order.currency as po_curr", "currency_kurs.currency as curr"])
                             ->setWhereIn("po_no_po", $no)->setOrder(["po_no_po" => "asc"])->getData();
 
+            $ppn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_default_ppn"])->getDetail();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data)));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data,"ppn"=>$ppn)));
         } catch (Exception $ex) {
 
             $this->output->set_status_header($ex->getCode() ?? 500)
@@ -951,6 +954,45 @@ class Kaskeluar extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "pin" => $pin)));
         } finally {
             $this->_module->unlock_tabel();
+        }
+    }
+    
+    public function print_pdf() {
+        try {
+            $id = $this->input->post("id");
+            $kode = decrypt_url($id);
+            $model = new $this->m_global;
+
+            $head = $model->setTables("acc_kas_keluar")->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_keluar.kode_coa")
+                            ->setSelects(["acc_kas_keluar.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setWheres(["no_kk" => $kode])->getDetail();
+            if (!$head) {
+                throw new \exception("Data No Kas Keluar {$kode} tidak ditemukan", 500);
+            }
+            $data["detail"] = $model->setTables("acc_kas_keluar_detail")
+                            ->setJoins("currency_kurs", "currency_kurs.id = currency_id")
+                            ->setWheres(["kas_keluar_id" => $head->id])
+                            ->setSelects(["acc_kas_keluar_detail.*", "currency_kurs.currency as curr"])->getData();
+            $data["head"] = $head;
+            $html = $this->load->view("print/acc/v_kas_keluar_print", $data, true);
+            $url = "dist/storages/print/kas";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $mpdf = new Mpdf(['tempDir' => FCPATH . 'tmp']);
+            $mpdf->autoPageBreak = true;
+            $mpdf->WriteHTML($html);
+            $filename = str_replace("/", "-", $data["head"]->no_kk);
+            $pathFile = "{$url}/{$filename}.pdf";
+            $mpdf->Output(FCPATH . $pathFile, "F");
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
