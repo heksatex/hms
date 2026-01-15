@@ -35,6 +35,8 @@ class Jurnalentries extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'JNE';
+        $model = new $this->m_global;
+        $data["jurnal"] = $model->setTables("mst_jurnal")->setSelects(["kode","nama"])->setOrder(["nama"=>"asc"])->getData();
         $this->load->view('purchase/v_jurnal_entries', $data);
     }
 
@@ -77,6 +79,15 @@ class Jurnalentries extends MY_Controller {
                     ->setSearch(["acc_jurnal_entries.kode", "periode", "origin", "reff_note", "mst_jurnal.nama"])
                     ->setOrders([null, "acc_jurnal_entries.kode", "mst_jurnal.nama", "tanggal_dibuat", "periode", "origin", "reff_note", "status"])
                     ->setSelects(["acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat", "nama_status", "mst_jurnal.nama as nama_jurnal"]);
+            if($this->input->post("kode") !== "") {
+                $list->setWheres(["acc_jurnal_entries.kode LIKE"=>"%".$this->input->post('kode')."%"]);
+            }
+            if($this->input->post("jurnal") !== "") {
+                $list->setWheres(["acc_jurnal_entries.tipe"=>$this->input->post('jurnal')]);
+            }
+            if($this->input->post("status") !== "") {
+                $list->setWheres(["acc_jurnal_entries.status"=>$this->input->post("status")]);
+            }
             foreach ($list->getData() as $key => $field) {
                 $kode_encrypt = encrypt_url($field->kode);
                 $no++;
