@@ -893,7 +893,7 @@ if ($datas->status == 'confirm') {
 
                 $("#btn-print-pdf").off("click").unbind("click").on("click", function () {
                     $.ajax({
-                        url: "<?= base_url('sales/bankmasuk/print_pdf/') ?>",
+                        url: "<?= base_url('accounting/bankmasuk/print_pdf/') ?>",
                         type: "POST",
                         data: {
                             id: "<?= $id ?>"
