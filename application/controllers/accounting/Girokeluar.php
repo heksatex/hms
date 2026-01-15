@@ -574,18 +574,33 @@ class Girokeluar extends MY_Controller {
             $printer->text(str_pad("BUKTI GIRO KELUAR (BGK)", 20));
             $buff->write("\x1bF" . chr(0));
             $printer->feed();
+            $printer->text(str_pad("", 25));
+            $buff->write("\x1bg" . chr(1));
+            $printer->text(str_pad($head->nama_coa, 45, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("", 1));
+            $customer = str_split(trim(preg_replace('/\s+/', ' ', "Kepada : {$head->partner_nama}")), 33);
+            foreach ($customer as $key => $value) {
+                if ($key > 0) {
+                    $printer->text(str_pad("", 84));
+                }
+                $printer->text(str_pad(trim($value), 33, " ", STR_PAD_RIGHT));
+            }
+            $printer->feed();
             $buff->write("\x1bM");
             $printer->text(str_pad("", 30));
             $buff->write("\x1bg" . chr(1));
             $printer->text(str_pad("No Acc (Kredit) : {$head->kode_coa}", 30));
             $printer->text(str_pad("", 16));
-            $customer = str_split(trim(preg_replace('/\s+/', ' ', "Kepada : {$head->partner_nama}")), 33);
-            foreach ($customer as $key => $value) {
+
+            $lain2 = str_split(trim(preg_replace('/\s+/', ' ', "LAIN-LAIN :{$head->lain2}")), 33);
+
+            foreach ($lain2 as $key => $value) {
                 if ($key > 0) {
                     $printer->text(str_pad("", 86));
                 }
                 $printer->text(str_pad(trim($value), 33, " ", STR_PAD_RIGHT));
             }
+            $printer->feed();
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("Untuk transaksi : {$head->transinfo}", 120));
@@ -734,8 +749,8 @@ class Girokeluar extends MY_Controller {
 
                     foreach ($items as $key => $item) {
                         $uraian = $item->bank;
-                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}":"";
-                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}":"";
+                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
+                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -864,7 +879,7 @@ class Girokeluar extends MY_Controller {
             $this->session->unset_userdata('pin');
         }
     }
-    
+
     public function print_pdf() {
         try {
             $id = $this->input->post("id");
@@ -872,7 +887,7 @@ class Girokeluar extends MY_Controller {
             $model = new $this->m_global;
 
             $head = $model->setTables("acc_giro_keluar")->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_keluar.kode_coa")
-                            ->setSelects(["acc_giro_keluar.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setSelects(["acc_giro_keluar.*", "acc_coa.nama as nama_coa", "date(tanggal) as tanggal"])
                             ->setWheres(["no_gk" => $kode])->getDetail();
             if (!$head) {
                 throw new \exception("Data No Giro Keluar {$kode} tidak ditemukan", 500);
