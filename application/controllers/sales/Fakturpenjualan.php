@@ -20,6 +20,7 @@ use Mpdf\Mpdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Fakturpenjualan extends MY_Controller {
 
@@ -189,7 +190,7 @@ class Fakturpenjualan extends MY_Controller {
             $model = new $this->m_global;
             $model->setTables("acc_faktur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_faktur_penjualan.status", "left")
                     ->setOrder(["acc_faktur_penjualan.tanggal" => "desc"])->setSearch(["no_faktur", "no_faktur_pajak", "no_sj", "partner_nama", "no_faktur_internal"])
-                    ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "tipe", "marketing_nama", "partner_nama"])
+                    ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "tipe", "marketing_nama", "partner_nama", "grand_total", "ppn"])
                     ->setSelects(["acc_faktur_penjualan.*", "nama_status"])
                     ->setSelects(["CASE When (status <> 'confirm') then 'Belum Lunas' "
                         . "WHEN (piutang_rp = 0) then 'Lunas' "
@@ -236,6 +237,8 @@ class Fakturpenjualan extends MY_Controller {
                     $value->tipe,
                     $value->marketing_nama,
                     $value->partner_nama,
+                    number_format($value->grand_total * $value->kurs_nominal, 2),
+                    number_format($value->ppn * $value->kurs_nominal, 2),
                     number_format($value->total_piutang_rp, 2),
                     $value->lunas,
                     $value->nama_status,
@@ -293,8 +296,10 @@ class Fakturpenjualan extends MY_Controller {
             $sheet->setCellValue("F{$row}", 'Tipe');
             $sheet->setCellValue("g{$row}", 'Marketing');
             $sheet->setCellValue("h{$row}", 'Customer');
-            $sheet->setCellValue("i{$row}", 'Total');
-            $sheet->setCellValue("j{$row}", 'Pelunasan');
+            $sheet->setCellValue("i{$row}", 'Dpp');
+            $sheet->setCellValue("J{$row}", 'Ppn');
+            $sheet->setCellValue("K{$row}", 'Total');
+            $sheet->setCellValue("l{$row}", 'Pelunasan');
             $no = 0;
             foreach ($data as $key => $value) {
                 $row++;
@@ -307,9 +312,15 @@ class Fakturpenjualan extends MY_Controller {
                 $sheet->setCellValue("F{$row}", $value->tipe);
                 $sheet->setCellValue("G{$row}", $value->marketing_nama);
                 $sheet->setCellValue("H{$row}", $value->partner_nama);
-                $sheet->setCellValue("I{$row}", $value->total_piutang_rp);
-                $sheet->setCellValue("j{$row}", $value->lunas);
+                $sheet->setCellValue("I{$row}", $value->grand_total * $value->kurs_nominal);
+                $sheet->setCellValue("j{$row}", $value->ppn * $value->kurs_nominal);
+                $sheet->setCellValue("k{$row}", $value->total_piutang_rp);
+                $sheet->setCellValue("l{$row}", $value->lunas);
             }
+            $sheet->getStyle("I2:i{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("j2:j{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("k2:k{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+
             $writer = new Xlsx($spreadsheet);
             $filename = "Faktur Penjualan per tanggal " . date("Y-m-d");
             $url = "dist/storages/report/fakturpenjualan";
@@ -716,7 +727,7 @@ class Fakturpenjualan extends MY_Controller {
                         $header["diskon_ppn"] = round($ppn_diskon, 2);
                         $header["ppn"] = round($pajak, 2);
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"], 2);
-                        
+
                         $header["total_piutang_valas"] = round($header["final_total"], 2);
                         $header["piutang_valas"] = round($header["final_total"], 2);
                     } else {
