@@ -135,7 +135,9 @@
                                             <th>Tipe</th>
                                             <th>Marketing</th>
                                             <th>Customer</th>
-                                            <th>Total</th>
+                                            <th class="text-right">Dpp</th>
+                                            <th class="text-right">Ppn</th>
+                                            <th class="text-right">Total</th>
                                             <th>Pelunasan</th>
                                             <th>Status</th>
                                         </tr>
@@ -178,8 +180,14 @@
                     },
                     columnDefs: [
                         {
-                            "targets": [0, 8, 9, 10],
+                            "targets": [0, 10, 11, 12],
                             "orderable": false
+                        },
+                        {
+                            targets: [8,9,10],
+                            createdCell: function(td, cellData, rowData, row, col) {
+                                 $(td).addClass('text-right');
+                            }
                         }
                     ],
                     dom: 'Bfrtip',
