@@ -91,9 +91,26 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div class="col-md-2 col-xs-12">
-                                                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
+                                            <div class="col-md-6 col-xs-12">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <label class="form-label">Supplier</label>
+                                                        </div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <select name="supplier" class="form-control select2" id="supplier" style="width: 100%" >
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -134,6 +151,36 @@
                     allowClear: true,
                     placeholder: "Pilih"
                 });
+                $("#supplier").select2({
+                    placeholder: "Pilih",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term,
+                                jenis: "supplier"
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    id: item.id,
+                                    text: item.nama
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                        }
+                    }
+                });
 <?php
 if (strtolower($level) === 'direksi') {
     ?>
@@ -158,6 +205,7 @@ if (strtolower($level) === 'direksi') {
                                 d.jenis = "RFQ";
                                 d.nama_produk = $("#nama_produk").val();
                                 d.status = $("#status").val();
+                                d.supplier = $("#supplier").val();
                             }
                         },
                         "columnDefs": [
@@ -207,6 +255,7 @@ if (strtolower($level) === 'direksi') {
                                 d.jenis = "RFQ";
                                 d.nama_produk = $("#nama_produk").val();
                                 d.status = $("#status").val();
+                                d.supplier = $("#supplier").val();
                             }
                         },
                         "columnDefs": [

@@ -75,6 +75,7 @@ class Purchaseorder extends MY_Controller {
             }
             $prd = ($_GET["produk"] ?? "");
             $stt = ($_GET["stt"] ?? '');
+            $spl = ($_GET["supplier"] ?? '');
             $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)//, "po.supplier" => $data["po"]->supplier
                     ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
                     ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
@@ -85,9 +86,12 @@ class Purchaseorder extends MY_Controller {
             if ($stt !== "") {
                 $model1->setWhereIn("po.status", explode(",", $stt));
             }
+            if ($spl !== "") {
+                $model1->setWheres(["po.supplier" => $spl]);
+            }
             $nextPage = $model1->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($nextPage->no_po) . "?produk={$prd}&stt={$stt}");
+                $data["next_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($nextPage->no_po) . "?produk={$prd}&stt={$stt}&supplier={$spl}");
             }
             $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true) //, "po.supplier" => $data["po"]->supplier
                     ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
@@ -98,10 +102,12 @@ class Purchaseorder extends MY_Controller {
             if ($stt !== "") {
                 $model1->setWhereIn("po.status", explode(",", $stt));
             }
-
+            if ($spl !== "") {
+                $model1->setWheres(["po.supplier" => $spl]);
+            }
             $prevPage = $model1->getDetail();
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}");
+                $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po) . "?produk={$prd}&stt={$stt}&supplier={$spl}");
             }
 
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
@@ -132,6 +138,7 @@ class Purchaseorder extends MY_Controller {
             $data = array();
             $status = $this->input->post("status");
             $nama_produk = $this->input->post("nama_produk");
+            $supplier = $this->input->post("supplier");
             $level = $this->input->post("level");
             $showCancel = $this->input->post("statusCancel");
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "order_date", "create_date", "po.status"])
@@ -155,6 +162,9 @@ class Purchaseorder extends MY_Controller {
                 $list->setWhereIn("po.status", $status);
                 $statuss = implode(",", $status);
             }
+            
+            if ($supplier !== "")
+                $list->setWheres(["po.supplier" => $supplier]);
 
             if ($nama_produk !== "")
                 $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
@@ -168,7 +178,7 @@ class Purchaseorder extends MY_Controller {
                 }
                 $data [] = [
                     $no,
-                    '<a href="' . base_url('purchase/purchaseorder/edit/' . encrypt_url($field->no_po)) . '?produk=' . $nama_produk . '&stt=' . $statuss . '">' . $field->no_po . '</a>',
+                    '<a href="' . base_url('purchase/purchaseorder/edit/' . encrypt_url($field->no_po)) . '?produk=' . $nama_produk . '&stt=' . $statuss . '&supplier=' . $supplier . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->order_date,
                     $field->create_date,
