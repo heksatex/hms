@@ -122,7 +122,7 @@
                                                     <label class="form-label">Supplier</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input class="form-control" value="<?= $inv->supplier ?>" disabled>
+                                                    <input class="form-control input-sm" value="<?= $inv->supplier ?>" disabled>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -130,7 +130,7 @@
                                                     <label class="form-label">Origin</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input class="form-control" value="<?= $inv->origin ?>" disabled>
+                                                    <input class="form-control input-sm" value="<?= $inv->origin ?>" disabled>
                                                     <input type="hidden" class="form-control pull-right input-sm" name="origin" value="<?= $inv->origin ?>" readonly> 
                                                 </div>
                                             </div>
@@ -139,7 +139,7 @@
                                                     <label class="form-label">Tgl dibuat</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input class="form-control" value="<?= date("Y-m-d H:i:s", strtotime($inv->created_at)) ?>" disabled>
+                                                    <input class="form-control input-sm" value="<?= date("Y-m-d H:i:s", strtotime($inv->created_at)) ?>" disabled>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -147,7 +147,7 @@
                                                     <label class="form-label">No PO</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input class="form-control" value="<?= $inv->no_po ?>" disabled>
+                                                    <input class="form-control input-sm" value="<?= $inv->no_po ?>" disabled>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -193,6 +193,23 @@
 
                                                 </div>
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Account Credit</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <select class="form-control select2" name="default_coa" id="default_coa">
+                                                        <?php
+                                                        foreach ($coa_hutang as $key => $value) {
+                                                            ?>
+                                                            <option value="<?= $value->kode_coa ?>" <?= ($inv->coa_hutang_dagang === $value->kode_coa) ? "selected" : "" ?> 
+                                                                    <?= ($inv->status === "draft") ? "" : "disabled" ?>><?= "{$value->kode_coa} - {$value->nama}" ?></option>
+                                                                    <?php
+                                                                }
+                                                                ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -211,10 +228,10 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <div class="input-group tgl-def-format">
-                                                         <input type="text" class="form-control pull-right input-sm" name="tanggal_invoice_supp" value="<?= $inv->tanggal_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                        <input type="text" class="form-control pull-right input-sm" name="tanggal_invoice_supp" value="<?= $inv->tanggal_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
                                                         <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
                                                     </div>
-                                                    
+
                                                 </div>
                                                 <button type="submit" id="form-inv-submit" style="display: none"></button>
                                             </div>
@@ -232,10 +249,10 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <div class="input-group tgl-def-format">
-                                                         <input type="text" class="form-control pull-right input-sm" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                        <input type="text" class="form-control pull-right input-sm" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
                                                         <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
                                                     </div>
-                                                   
+
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -255,7 +272,7 @@
                                                         <input type="text" class="form-control pull-right input-sm" id="tanggal_fk" name="tanggal_fk" value="<?= $inv->tanggal_fk ?>" <?= ($inv->status === 'cancel') ? 'readonly' : "" ?>> 
                                                         <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
                                                     </div>
-                                                    
+
                                                 </div>
                                             </div>
                                         </div>  
@@ -279,7 +296,7 @@
                                                     <th >Produk</th>
                                                     <!--<th>Deskripsi</th>-->
                                                     <th>Reff Note</th>
-                                                    <th>Account</th>
+                                                    <th>Account Debit</th>
                                                     <th>Qty Beli</th>
                                                     <th>UOM</th>
                                                     <th>Harga Satuan</th>
@@ -300,7 +317,7 @@
                                                             foreach ($invDetail as $key => $value) {
                                                                 $taxe = 0;
                                                                 $base = 0;
-                                                                $jumlah = round($value->harga_satuan * $value->qty_beli,2);
+                                                                $jumlah = round($value->harga_satuan * $value->qty_beli, 2);
                                                                 $subtotal1 += $jumlah;
                                                                 $totalDiskon += $value->diskon;
                                                                 if ($setting !== null && $value->dpp_tax === "1") {
@@ -422,7 +439,7 @@
                                                                     </td>
                                                                     <td class="td-pph23">
                                                                         <input type="checkbox" class="check-pph23" data-toggle="tooltip" data-original-title="Pph23"
-                                                                               value="<?= $value->id ?>" <?= ((int)$value->pph23) ? "checked":"" ?>   <?= ($inv->status === 'cancel') ? 'disabled' : "" ?>>
+                                                                               value="<?= $value->id ?>" <?= ((int) $value->pph23) ? "checked" : "" ?>   <?= ($inv->status === 'cancel') ? 'disabled' : "" ?>>
                                                                     </td>
                                                                 </tr>
                                                                 <?php
@@ -476,10 +493,10 @@
 
                                                                                 </td>
                                                                                 <td>
-                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($v->base,2) : round($v->base,2), 4) ?>
+                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($v->base, 2) : round($v->base, 2), 4) ?>
                                                                                 </td>
                                                                                 <td>
-                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($v->nominal,2) : round($v->nominal,2), 4) ?>
+                                                                                    <?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($v->nominal, 2) : round($v->nominal, 2), 4) ?>
                                                                                 </td>
                                                                             </tr>
                                                                             <?php
@@ -496,15 +513,15 @@
                                                         <table class="table table-condesed table-hover rlstable  over">
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 1</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($subtotal1,2) : round($subtotal1,2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($subtotal1, 2) : round($subtotal1, 2), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right">Diskon</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($totalDiskon,2) : round($totalDiskon,2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($totalDiskon, 2) : round($totalDiskon, 2), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($subtotal2,2) : round($subtotal2,2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($subtotal2, 2) : round($subtotal2, 2), 4) ?></td>
                                                             </tr>
                                                             <?php if ($setting !== null) {
                                                                 ?>
@@ -512,7 +529,7 @@
                                                                     <td class="style text-right">DPP Nilai Lain</td>
                                                                     <td class="style totalan"> 
                                                                         <input name="dpplain" type="hidden" value="1">
-                                                                        <strong><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round((($subtotal1 - $totalDiskon) * 11) / 12,2) : round((($subtotal1 - $totalDiskon) * 11) / 12,2), 4) ?>
+                                                                        <strong><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round((($subtotal1 - $totalDiskon) * 11) / 12, 2) : round((($subtotal1 - $totalDiskon) * 11) / 12, 2), 4) ?>
                                                                         </strong>
                                                                     </td>
                                                                 </tr>
@@ -520,11 +537,11 @@
                                                             ?>
                                                             <tr>
                                                                 <td class="text-right">Tax</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($totalTax,2) : round($totalTax,2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($totalTax, 2) : round($totalTax, 2), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round(($subtotal2 + $totalTax),2) : round($subtotal2 + $totalTax,2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round(($subtotal2 + $totalTax), 2) : round($subtotal2 + $totalTax, 2), 4) ?></td>
                                                             </tr>
                                                         </table>
                                                     </div>
@@ -804,7 +821,7 @@
                         url: "<?= base_url('purchase/invoice/update_pph23/' . $id) ?>",
                         type: "POST",
                         data: {
-                            pph23: this.checked ? 1:0,
+                            pph23: this.checked ? 1 : 0,
                             ids: $(this).val()
                         },
                         beforeSend: function (xhr) {

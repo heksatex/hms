@@ -119,7 +119,7 @@ class Bukubank extends MY_Controller {
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
             $model->setTables("acc_bank_masuk km")->setJoins("acc_bank_masuk_detail kmd", "bank_masuk_id = km.id")
-                    ->setSelects(["km.no_bm as no_bukti,date(km.tanggal) as tanggal,'D' as posisi,nominal,kmd.kode_coa,partner_nama,lain2"])
+                    ->setSelects(["km.no_bm as no_bukti,date(km.tanggal) as tanggal,'D' as posisi,nominal,kmd.kode_coa,partner_nama,lain2,kmd.id"])
                     ->setSelects(["if(kmd.uraian = '',transinfo,kmd.uraian) as uraian"])->setWheres(["status"=>"confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(km.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(km.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
@@ -130,7 +130,7 @@ class Bukubank extends MY_Controller {
             $queryKasMasuk = $model->getQuery();
 
             $model->setTables("acc_bank_keluar kk")->setJoins("acc_bank_keluar_detail kkd", "bank_keluar_id = kk.id")
-                    ->setSelects(["kk.no_bk as no_bukti,date(kk.tanggal) as tanggal,'K' as posisi,nominal,kkd.kode_coa,partner_nama,lain2"])
+                    ->setSelects(["kk.no_bk as no_bukti,date(kk.tanggal) as tanggal,'C' as posisi,nominal,kkd.kode_coa,partner_nama,lain2,kkd.id"])
                     ->setSelects(["if(kkd.uraian = '',transinfo,kkd.uraian) as uraian"])->setWheres(["status"=>"confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(kk.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(kk.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
@@ -141,7 +141,7 @@ class Bukubank extends MY_Controller {
             $queryKasKeluar = $model->getQuery();
 
             $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
-            $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")->setOrder(["tanggal"=>"asc","no_bukti"=>"asc","kas.kode_coa"=>"asc"])
+            $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")->setOrder(["tanggal"=>"asc","posisi"=>"desc","no_bukti"=>"asc","kas.id"=>"asc"])
                     ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa,partner_nama,lain2,kas.kode_coa"]);
             return $model;
         } catch (Exception $ex) {
