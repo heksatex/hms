@@ -100,6 +100,11 @@ class Invoice extends MY_Controller {
             if ($datas === null) {
                 throw new \Exception();
             }
+            if ($datas->coa_hutang_dagang === "") {
+                $coahut = $model3->setTables("setting")->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
+                $datas->coa_hutang_dagang = (!$coahut) ? "" : $coahut->value;
+            }
+            $data["coa_hutang"] = $model3->setTables("acc_coa")->setSelects(["kode_coa,nama"])->setWheres(["level" => 5, "jenis_transaksi" => "utang"])->getData();
             $data["taxss"] = $tax->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $data["inv"] = $datas;
             $data['mms'] = $this->_module->get_data_mms_for_log_history('PINV');
@@ -124,7 +129,7 @@ class Invoice extends MY_Controller {
             $model = new $this->m_global;
             $dt = $this->input->post("tanggal_fk");
             $update = [
-                "tanggal_fk" =>$dt,
+                "tanggal_fk" => $dt,
                 "no_faktur_pajak" => $this->input->post("pajak")
             ];
             $model->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update($update);
@@ -141,7 +146,7 @@ class Invoice extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
-    
+
     public function update_pph23($id) {
         try {
             $kode_decrypt = decrypt_url($id);
@@ -150,7 +155,7 @@ class Invoice extends MY_Controller {
             $model = new $this->m_global;
             $pph23 = $this->input->post("pph23");
             $ids = $this->input->post("ids");
-            $model->setTables("invoice_detail")->setWheres(["id" => $ids])->update(["pph23"=>$pph23]);
+            $model->setTables("invoice_detail")->setWheres(["id" => $ids])->update(["pph23" => $pph23]);
             $log = "Update PPh 23 {$pph23}";
 
             $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
@@ -214,7 +219,7 @@ class Invoice extends MY_Controller {
             $periode = $this->input->post("periode");
             $tanggal_fk = $this->input->post("tanggal_fk");
             $noFP = $this->input->post("no_faktur_pajak");
-            
+            $coaDagang = $this->input->post("default_coa");
             $item = [];
             $totals = 0.00;
             $diskons = 0.00;
@@ -225,31 +230,31 @@ class Invoice extends MY_Controller {
             $model->setTables("tax");
             foreach ($harga as $key => $value) {
                 $item[] = ["id" => $key, "harga_satuan" => $value, "account" => $coa[$key], "tax_id" => $tax[$key], 'amount_tax' => $amount_tax[$key], "diskon" => $dsk[$key]];
-                $total = round($qty_beli[$key] * $value,2);
+                $total = round($qty_beli[$key] * $value, 2);
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 $taxe = 0;
                 if ($dpplain === "1") {
-                    $taxe += round(((($total - $diskon) * 11) / 12) * $amount_tax[$key],2);
+                    $taxe += round(((($total - $diskon) * 11) / 12) * $amount_tax[$key], 2);
                 } else {
-                    $taxe += round(($total - $diskon) * $amount_tax[$key],2);
+                    $taxe += round(($total - $diskon) * $amount_tax[$key], 2);
                 }
 
                 if ($tax_lain[$key] !== "0") {
                     $dataTax = $model->setWhereIn("id", explode(",", $tax_lain[$key]), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
                     foreach ($dataTax as $kkk => $datas) {
                         if ($dpplain === "1" && $datas->dpp === "1") {
-                            $taxe += round(((($total - $diskon) * 11) / 12) * $datas->amount,2);
+                            $taxe += round(((($total - $diskon) * 11) / 12) * $datas->amount, 2);
                         } else {
-                            $taxe += round(($total - $diskon) * $datas->amount,2);
+                            $taxe += round(($total - $diskon) * $datas->amount, 2);
                         }
                     }
                 }
                 $taxes += $taxe;
             }
             if ($dpplain === "1") {
-                $nilaiDppLain = round((($totals - $diskons) * 11) / 12,2);
+                $nilaiDppLain = round((($totals - $diskons) * 11) / 12, 2);
             }
             $grandTotal = ($totals - $diskons) + $taxes;
             if ($matauang > 1) {
@@ -285,8 +290,9 @@ class Invoice extends MY_Controller {
                 "hutang_valas" => $hutangvalas,
                 "hutang_rp" => round($hutangrp),
                 "total_valas" => $grandTotal,
-                "no_faktur_pajak"=>$noFP,
-                "tanggal_fk"=>$tanggal_fk
+                "no_faktur_pajak" => $noFP,
+                "tanggal_fk" => $tanggal_fk,
+                "coa_hutang_dagang" => $coaDagang
             ];
             $head->setTables('invoice')->setWheres(["id" => $kode_decrypt])
                     ->update($dataUpdate);
@@ -335,6 +341,10 @@ class Invoice extends MY_Controller {
                     . "currency_kurs READ,currency READ,tax READ,invoice_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ";
             $this->_module->lock_tabel($lock);
             $jurnalData = [];
+            $dataHead = $head->setTables("invoice")->setWheres(["id" => $kode_decrypt])->getDetail();
+            if (!$dataHead) {
+                throw new \Exception('Data Invoice Tidak sesuai', 500);
+            }
             if ($status === 'cancel') {
                 $cekJurnal = clone $head;
 
@@ -393,20 +403,20 @@ class Invoice extends MY_Controller {
                 $pajakLain = [];
                 $checkDpp = $dataItems[0]->dpp_lain > 0;
                 if (count($dataItems) > 0) {
-                    $updateInv["hutang_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang,2);
-                    $updateInv["total_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang,2);
-                    $updateInv["dpp_lain_rp"] = round($dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang,2);
+                    $updateInv["hutang_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang, 2);
+                    $updateInv["total_rp"] = round($dataItems[0]->total_invoice * $dataItems[0]->nilai_matauang, 2);
+                    $updateInv["dpp_lain_rp"] = round($dataItems[0]->dpp_lain * $dataItems[0]->nilai_matauang, 2);
                     if ($dataItems[0]->nilai_matauang > 1) {
-                        $updateInv["total_valas"] = round($dataItems[0]->total_invoice,2); //
-                        $updateInv["hutang_valas"] = round($updateInv["total_valas"],2);
-                        $updateInv["dpp_lain_valas"] = round($dataItems[0]->dpp_lain,2);
+                        $updateInv["total_valas"] = round($dataItems[0]->total_invoice, 2); //
+                        $updateInv["hutang_valas"] = round($updateInv["total_valas"], 2);
+                        $updateInv["dpp_lain_valas"] = round($dataItems[0]->dpp_lain, 2);
                     }
                 }
                 foreach ($dataItems as $key => $value) {
                     if ($value->account === null || $value->account === "") {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
                     }
-                    $nominal = (round($value->harga_satuan * $value->qty_beli,2) - $value->diskon);
+                    $nominal = (round($value->harga_satuan * $value->qty_beli, 2) - $value->diskon);
                     $item = array(
                         "kode" => $jurnal,
                         "nama" => "[{$value->kode_produk}] {$value->nama_produk} (" . number_format($value->qty_beli, 2) . " {$value->uom_beli})",
@@ -451,13 +461,13 @@ class Invoice extends MY_Controller {
                         $taxx = 0;
                         $base = 0;
                         if ($checkDpp && $value->dpp_tax === "1") {
-                            $base = round(($value->nominal * 11) / 12,2);
-                            $taxx = round($base * $value->amount,2);
+                            $base = round(($value->nominal * 11) / 12, 2);
+                            $taxx = round($base * $value->amount, 2);
                         } else {
-                            $base = round($value->nominal,2);
-                            $taxx = round($base * $value->amount,2);
+                            $base = round($value->nominal, 2);
+                            $taxx = round($base * $value->amount, 2);
                         }
-                        $taxNominal = round($taxx * $dataItems[0]->nilai_matauang,2);
+                        $taxNominal = round($taxx * $dataItems[0]->nilai_matauang, 2);
                         $taxName = explode(",", $value->tax_nama);
                         if (isset($dataPajak[$value->ket_tax])) {
                             $dataPajak[$value->ket_tax]["nominal_curr"] += $taxx;
@@ -486,14 +496,14 @@ class Invoice extends MY_Controller {
                                 $taxx = 0;
                                 $base = 0;
                                 if ($checkDpp && $datass->dpp === "1") {
-                                    $base = round(($value->nominal * 11) / 12,2);
-                                    $taxx = round($base * $datass->amount,2);
+                                    $base = round(($value->nominal * 11) / 12, 2);
+                                    $taxx = round($base * $datass->amount, 2);
                                 } else {
-                                    $base = round($value->nominal,2);
-                                    $taxx = round($base * $datass->amount,2);
+                                    $base = round($value->nominal, 2);
+                                    $taxx = round($base * $datass->amount, 2);
                                 }
 
-                                $taxNominal = round(($taxx * $dataItems[0]->nilai_matauang),2);
+                                $taxNominal = round(($taxx * $dataItems[0]->nilai_matauang), 2);
                                 if (isset($dataPajak[$datass->ket])) {
                                     $dataPajak[$datass->ket]["nominal_curr"] += $taxx;
                                     $dataPajak[$datass->ket]["nominal"] += $taxNominal;
@@ -525,13 +535,17 @@ class Invoice extends MY_Controller {
                         $jurnalItemsLog[] = $vv;
                     }
                 }
-                $defaultPpn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
+                if ($dataHead->coa_hutang_dagang === "") {
+                    $defaultPpn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
+                    $dataHead->coa_hutang_dagang = $defaultPpn->value ?? 0;
+                }
+
                 $item = array(
                     "kode" => $jurnal,
                     "nama" => "",
                     "reff_note" => "",
                     "partner" => $dataItems[0]->id_supplier,
-                    "kode_coa" => ($defaultPpn->value ?? 0),
+                    "kode_coa" => $dataHead->coa_hutang_dagang,
                     "posisi" => "C",
                     "nominal_curr" => $totalNominal + $tax,
                     "kurs" => $dataItems[0]->kurs,
