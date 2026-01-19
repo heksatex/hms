@@ -63,7 +63,7 @@ class Bukukaskecil extends MY_Controller {
             $model = new $this->m_global;
             $model->setTables("acc_kas_kecil_masuk km")->setJoins("acc_kas_kecil_masuk_detail kmd", "kas_kecil_masuk_id = km.id")
                     ->setJoins("currency_kurs ck", "ck.id = currency_id", "left")
-                    ->setSelects(["km.no_kkm as no_bukti,date(km.tanggal) as tanggal,kmd.uraian,'D' as posisi,nominal,kmd.kode_coa,partner_nama,lain2,ck.currency as nama_curr,kmd.kurs"])
+                    ->setSelects(["km.no_kkm as no_bukti,date(km.tanggal) as tanggal,kmd.uraian,'D' as posisi,nominal,kmd.kode_coa,partner_nama,lain2,ck.currency as nama_curr,kmd.kurs,kmd.id"])
                     ->setWheres(["status" => "confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(km.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(km.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
@@ -75,7 +75,7 @@ class Bukukaskecil extends MY_Controller {
 
             $model->setTables("acc_kas_kecil_keluar kk")->setJoins("acc_kas_kecil_keluar_detail kkd", "kas_kecil_keluar_id = kk.id")
                     ->setJoins("currency_kurs ck", "ck.id = currency_id", "left")
-                    ->setSelects(["kk.no_kkk as no_bukti,date(kk.tanggal) as tanggal,kkd.uraian,'K' as posisi,nominal,kkd.kode_coa,partner_nama,lain2,ck.currency as nama_curr,kkd.kurs"])
+                    ->setSelects(["kk.no_kkk as no_bukti,date(kk.tanggal) as tanggal,kkd.uraian,'K' as posisi,nominal,kkd.kode_coa,partner_nama,lain2,ck.currency as nama_curr,kkd.kurs,kkd.id"])
                     ->setWheres(["status" => "confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(kk.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(kk.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
@@ -88,7 +88,7 @@ class Bukukaskecil extends MY_Controller {
             $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")
                     ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa", "partner_nama,lain2,nama_curr,kurs"])
-                    ->setOrder(["tanggal" => "asc", "no_bukti" => "asc", "uraian" => "asc"]);
+                    ->setOrder(["tanggal" => "asc","posisi"=>"desc", "no_bukti" => "asc", "kas.id"=>"asc"]);
             return $model;
         } catch (Exception $ex) {
             throw $ex;
