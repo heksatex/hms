@@ -156,7 +156,7 @@ class Requestforquotation extends MY_Controller {
                 if ($jenis !== "FPT")
                     $list->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
                 if (gettype($status) === 'string')
-                    $list->setWhereRaw("po.status in ('draft','waiting_approval')");
+                    $list->setWhereRaw("po.status in ('draft','waiting_approval','exception')  or poe.status in ('waiting_approve') ");
                 else
                 if (count($status) > 0) {
                     $list->setWhereIn("po.status", $status);
