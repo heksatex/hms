@@ -17,6 +17,9 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mpdf\Mpdf;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Kaskeluar extends MY_Controller {
 
@@ -65,7 +68,7 @@ class Kaskeluar extends MY_Controller {
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_keluar_add', $data);
     }
-    
+
     public function preview_no() {
         try {
             $coaName = $this->input->post("coa_name");
@@ -93,9 +96,8 @@ class Kaskeluar extends MY_Controller {
         }
     }
 
-    public function list_data() {
+    protected function _list_data() {
         try {
-            $data = array();
             $list = new $this->m_global;
             $list->setTables("acc_kas_keluar")->setOrder(["acc_kas_keluar.create_date" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_keluar.kode_coa", "left")
@@ -103,7 +105,6 @@ class Kaskeluar extends MY_Controller {
                     ->setSearch(["acc_kas_keluar.no_kk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_keluar.status"])
                     ->setOrders([null, "no_kk", "partner_nama", "acc_kas_keluar.tanggal", null, "total_rp", "acc_kas_keluar.status"])
                     ->setSelects(["acc_kas_keluar.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
-            $no = $_POST['start'];
             $tanggal = $this->input->post("tanggal");
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
@@ -123,6 +124,86 @@ class Kaskeluar extends MY_Controller {
                 $list->setJoins("acc_kas_keluar_detail abkd", "abkd.kas_keluar_id = acc_kas_keluar.id")
                         ->setGroups(["kas_keluar_id"])->setWheres(["abkd.uraian LIKE" => "%{$uraian}%"]);
             }
+            return $list;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function ekspor() {
+        try {
+            $tanggal = $this->input->post("tanggal");
+            $nobukti = $this->input->post("no_bukti");
+            $customers = $this->input->post("customer");
+            $uraian = $this->input->post("uraian");
+            $filter = "Filter : ";
+            if ($tanggal !== "") {
+                $filter .= "Tanggal : {$tanggal}; ";
+            }
+            if ($nobukti !== "") {
+                $filter .= "No Bukti : {$nobukti}; ";
+            }
+            if ($customers !== "") {
+                $filter .= "Supplier : {$customers}; ";
+            }
+            if ($uraian !== "") {
+                $filter .= "Uraian : {$uraian}; ";
+            }
+
+            $data = $this->_list_data();
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue("A1", $filter);
+            $row = 3;
+            $sheet->setCellValue("A{$row}", 'No');
+            $sheet->setCellValue("B{$row}", 'No Bukti');
+            $sheet->setCellValue("C{$row}", 'Supplier');
+            $sheet->setCellValue("D{$row}", 'Tanggal');
+            $sheet->setCellValue("E{$row}", 'No Acc');
+            $sheet->setCellValue("F{$row}", 'Transinfo');
+            $sheet->setCellValue("G{$row}", 'Total');
+            $sheet->setCellValue("H{$row}", 'Status');
+            $noUrut = 0;
+            foreach ($data->getData() as $key => $field) {
+                $row += 1;
+                $noUrut += 1;
+                $customer = ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama;
+                $sheet->setCellValue("A{$row}", $noUrut);
+                $sheet->setCellValue("B{$row}", $field->no_kk);
+                $sheet->setCellValue("C{$row}", $customer);
+                $sheet->setCellValue("D{$row}", date("Y-m-d", strtotime($field->tanggal)));
+                $sheet->setCellValue("E{$row}", $field->kode_coa);
+                $sheet->setCellValue("F{$row}", $field->transinfo);
+                $sheet->setCellValue("G{$row}", $field->total_rp);
+                $sheet->setCellValue("H{$row}", $field->status);
+            }
+            if ($noUrut > 0) {
+                $sheet->getStyle("G4:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            }
+            $filename = "Kas Keluar " . date("Y-m-d");
+            $url = "dist/storages/report/bankgirokas";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
+    }
+
+    public function list_data() {
+        try {
+            $data = array();
+            $no = $_POST['start'];
+            $list = $this->_list_data();
+
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_kk);
                 $no++;
@@ -168,7 +249,7 @@ class Kaskeluar extends MY_Controller {
                     ->setJoins("currency_kurs", "currency_kurs.id = currency_id")
                     ->setJoins("purchase_order_detail pod", "pod.id = po_detail_id", "left")
                     ->setOrder(["tanggal" => "desc", "row_order" => "asc"])
-                    ->setSelects(["acd.no_kk,acd.tanggal,acd.kode_coa,acd.uraian,acd.kurs,acd.currency_id,acd.nominal","po_detail_id"])
+                    ->setSelects(["acd.no_kk,acd.tanggal,acd.kode_coa,acd.uraian,acd.kurs,acd.currency_id,acd.nominal", "po_detail_id"])
                     ->setSelects(["acc_coa.nama as nama_coa", "currency_kurs.currency as curr", "po_no_po"])
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
@@ -312,7 +393,7 @@ class Kaskeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$asal);
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array) $asal);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
@@ -607,7 +688,7 @@ class Kaskeluar extends MY_Controller {
             $ppn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_default_ppn"])->getDetail();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data,"ppn"=>$ppn)));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data, "ppn" => $ppn)));
         } catch (Exception $ex) {
 
             $this->output->set_status_header($ex->getCode() ?? 500)
@@ -680,16 +761,13 @@ class Kaskeluar extends MY_Controller {
             $lain2 = str_split(trim(preg_replace('/\s+/', ' ', "LAIN-LAIN :{$head->lain2}")), 33);
 
             foreach ($lain2 as $key => $value) {
-//                $buff->write("\x1bE" . chr(1));
                 if ($key > 0) {
                     $printer->text(str_pad("", 86));
                 }
                 $printer->text(str_pad(trim($value), 33, " ", STR_PAD_RIGHT));
-//                $buff->write("\x1bF" . chr(0));
             }
 
             $printer->feed();
-//            $printer->selectPrintMode();
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("Untuk transaksi : {$head->transinfo}", 118));
@@ -924,12 +1002,12 @@ class Kaskeluar extends MY_Controller {
 
                 default:
                     $this->validasiPin($pin, "Batal / Cancel Data Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
-                    
-                    $lunas =  $model->setTables("acc_kas_keluar_detail")->setWheres(["kas_keluar_id" => $head->id, "lunas" => 1])->getDetail();
-                    if($lunas) {
-                         throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
+
+                    $lunas = $model->setTables("acc_kas_keluar_detail")->setWheres(["kas_keluar_id" => $head->id, "lunas" => 1])->getDetail();
+                    if ($lunas) {
+                        throw new \exception("Tidak Bisa Cancel / Batal. Item sudah sudah masuk pelunasan", 500);
                     }
-                    
+
                     $poId = $model->setTables("acc_kas_keluar_detail")->setSelects(["GROUP_CONCAT(po_detail_id) as gids"])->setWheres(["kas_keluar_id" => $head->id])
                             ->getDetail();
                     if ($poId->gids !== null) {
@@ -956,7 +1034,7 @@ class Kaskeluar extends MY_Controller {
             $this->_module->unlock_tabel();
         }
     }
-    
+
     public function print_pdf() {
         try {
             $id = $this->input->post("id");
@@ -964,7 +1042,7 @@ class Kaskeluar extends MY_Controller {
             $model = new $this->m_global;
 
             $head = $model->setTables("acc_kas_keluar")->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_keluar.kode_coa")
-                            ->setSelects(["acc_kas_keluar.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setSelects(["acc_kas_keluar.*", "acc_coa.nama as nama_coa", "date(tanggal) as tanggal"])
                             ->setWheres(["no_kk" => $kode])->getDetail();
             if (!$head) {
                 throw new \exception("Data No Kas Keluar {$kode} tidak ditemukan", 500);

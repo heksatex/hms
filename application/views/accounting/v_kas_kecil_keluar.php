@@ -70,29 +70,39 @@
                                                                     <input type="text" class="form-control" name="customer" id="customer">
                                                                 </div>
                                                             </div>
-<!--                                                            <div class="col-md-12 col-xs-12">
+                                                            <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-3">
                                                                     <label class="form-label">Uraian</label>
                                                                 </div>
                                                                 <div class="col-xs-9 col-md-9">
                                                                     <input type="text" class="form-control" name="uraian" id="uraian">
                                                                 </div>
-                                                            </div>-->
+                                                            </div>
 
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <button type="button" class="btn btn-success btn-sm" id="search"><i class="fa fa-search"></i> Cari</button>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <div class="col-md-12 col-xs-12">
+                                                                    <button type="button" class="btn btn-success btn-sm" id="search"><i class="fa fa-search"></i> Cari</button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div class="col-md-12 col-xs-12">
+                                                                    <button type="button" class="btn btn-warning btn-sm" id="reset">Reset</button>
+                                                                    <button type="reset" class="btn btn-warning btn-sm reset hide"></button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                        <div class="form-group">
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <button type="button" class="btn btn-warning btn-sm" id="reset">Reset</button>
-                                                                <button type="reset" class="btn btn-warning btn-sm reset hide"></button>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <div class="col-md-12 col-xs-12">
+                                                                    <button type="button" class="btn btn-default btn-sm" id="export"><i class="fa fa-file"></i> Ekspor </button>
+                                                                </div>
                                                             </div>
                                                         </div>
+
                                                     </div>
                                                 </form>
                                             </div>
@@ -105,7 +115,7 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>No Kas Keluar</th>
+                                            <th>No Bukti</th>
                                             <th>Supplier</th>
                                             <th>Tanggal</th>
                                             <th>No ACC (Kredit)</th>
@@ -145,7 +155,7 @@
                             d.tanggal = tanggal;
                             d.customer = $("#customer").val();
                             d.no_bukti = $("#no_bukti").val();
-                            d.uraian = "";
+                            d.uraian = $("#uraian").val();
                         }
                     },
                     columnDefs: [
@@ -168,7 +178,41 @@
                     table.ajax.reload();
                 });
 
+                $("#export").on("click", function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: "<?= base_url('accounting/kaskecilkeluar/ekspor/') ?>",
+                        type: "POST",
+                        data: {
+                            tanggal: $("#tanggal").val(),
+                            customer: $("#customer").val(),
+                            no_bukti: $("#no_bukti").val(),
+                            uraian: $("#uraian").val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        success: function (data) {
+                            unblockUI(function () {});
+//                            window.open(data.url, "_blank").focus();
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
 
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+                
                 $('#tanggal').daterangepicker({
 //                    autoUpdateInput: false,
                     endDate: moment().startOf('day'),
