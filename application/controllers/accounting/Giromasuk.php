@@ -17,6 +17,9 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mpdf\Mpdf;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Giromasuk extends MY_Controller {
 
@@ -70,9 +73,8 @@ class Giromasuk extends MY_Controller {
         $this->load->view('accounting/v_giro_masuk', $data);
     }
 
-    public function list_data() {
+    protected function _list_data() {
         try {
-            $data = array();
             $list = new $this->m_global;
             $list->setTables("acc_giro_masuk")->setOrder(["acc_giro_masuk.create_date" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_masuk.kode_coa", "left")
@@ -80,12 +82,9 @@ class Giromasuk extends MY_Controller {
                     ->setSearch(["no_gm", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_giro_masuk.status"])
                     ->setOrders([null, "no_gm", "partner_nama", "acc_giro_masuk.tanggal", null, null, "total_rp", "acc_giro_masuk.status"])
                     ->setSelects(["acc_giro_masuk.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
-
-            $no = $_POST['start'];
             $tanggal = $this->input->post("tanggal");
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
-            $uraian = $this->input->post("uraian");
 
             if ($tanggal !== "") {
                 $tanggals = explode(" - ", $tanggal);
@@ -95,12 +94,84 @@ class Giromasuk extends MY_Controller {
                 $list->setWheres(["acc_giro_masuk.no_gm LIKE" => "%{$nobukti}%"]);
             }
             if ($customer !== "") {
-                $list->setWheres(["partner_nama LIKE" => "%{$customer}%"]);
+                $list->setWhereRaw("(partner_nama LIKE '%{$customer}%' or lain2 LIKE '%{$customer}%')");
             }
-            if ($uraian !== "") {
-                $list->setJoins("acc_giro_masuk_detail abkd", "abkd.giro_masuk_id = acc_giro_masuk.id")
-                        ->setGroups(["giro_masuk_id"])->setWheres(["abkd.uraian LIKE" => "%{$uraian}%"]);
+            return $list;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+    
+    public function ekspor() {
+        try {
+            $tanggal = $this->input->post("tanggal");
+            $nobukti = $this->input->post("no_bukti");
+            $customers = $this->input->post("customer");
+            $filter = "Filter : ";
+            if ($tanggal !== "") {
+                $filter .= "Tanggal : {$tanggal}; ";
             }
+            if ($nobukti !== "") {
+                $filter .= "No Bukti : {$nobukti}; ";
+            }
+            if ($customers !== "") {
+                $filter .= "Customer : {$customers}; ";
+            }
+            
+            $data = $this->_list_data();
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue("A1", $filter);
+            $row = 3;
+            $sheet->setCellValue("A{$row}", 'No');
+            $sheet->setCellValue("B{$row}", 'No Bukti');
+            $sheet->setCellValue("C{$row}", 'Customer');
+            $sheet->setCellValue("D{$row}", 'Tanggal');
+            $sheet->setCellValue("E{$row}", 'No Acc');
+            $sheet->setCellValue("F{$row}", 'Transinfo');
+            $sheet->setCellValue("G{$row}", 'Total');
+            $sheet->setCellValue("H{$row}", 'Status');
+            $noUrut = 0;
+            foreach ($data->getData() as $key => $field) {
+                $row += 1;
+                $noUrut += 1;
+                $customer = ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama;
+                $sheet->setCellValue("A{$row}", $noUrut);
+                $sheet->setCellValue("B{$row}", $field->no_gm);
+                $sheet->setCellValue("C{$row}", $customer);
+                $sheet->setCellValue("D{$row}", date("Y-m-d", strtotime($field->tanggal)));
+                $sheet->setCellValue("E{$row}", $field->kode_coa);
+                $sheet->setCellValue("F{$row}", $field->transinfo);
+                $sheet->setCellValue("G{$row}", $field->total_rp);
+                $sheet->setCellValue("H{$row}", $field->status);
+            }
+            if($noUrut > 0) {
+                $sheet->getStyle("G4:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            }
+            $filename = "Giro Masuk ".date("Y-m-d");
+            $url = "dist/storages/report/bankgirokas";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
+    }
+
+    public function list_data() {
+        try {
+            $data = array();
+            $no = $_POST['start'];
+            $list = $this->_list_data();
+
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_gm);
                 $no++;
@@ -137,7 +208,7 @@ class Giromasuk extends MY_Controller {
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi", ["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
-        
+
         $this->load->view('accounting/v_giro_masuk_add', $data);
     }
 
@@ -503,7 +574,7 @@ class Giromasuk extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$dt);
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array) $dt);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
@@ -748,8 +819,8 @@ class Giromasuk extends MY_Controller {
 
                     foreach ($items as $key => $item) {
                         $uraian = $item->bank;
-                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}":"";
-                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}":"";
+                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
+                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -853,7 +924,7 @@ class Giromasuk extends MY_Controller {
             $this->session->unset_userdata('pin');
         }
     }
-    
+
     public function print_pdf() {
         try {
             $id = $this->input->post("id");
@@ -861,7 +932,7 @@ class Giromasuk extends MY_Controller {
             $model = new $this->m_global;
 
             $head = $model->setTables("acc_giro_masuk")->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_masuk.kode_coa")
-                            ->setSelects(["acc_giro_masuk.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setSelects(["acc_giro_masuk.*", "acc_coa.nama as nama_coa", "date(tanggal) as tanggal"])
                             ->setWheres(["no_gm" => $kode])->getDetail();
             if (!$head) {
                 throw new \exception("Data No Giro Masuk {$kode} tidak ditemukan", 500);
