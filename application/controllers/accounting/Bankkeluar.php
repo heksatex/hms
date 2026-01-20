@@ -952,12 +952,14 @@ class Bankkeluar extends MY_Controller {
                         "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => "{$partner}"];
 
                     $jurnalItems = [];
+                    $nominal_rp = 0;
                     foreach ($items as $key => $item) {
                         $giro[] = $item->giro_keluar_detail_id;
                         $uraian = $item->uraian;
                         $uraian .= ($item->bank !== "") ? " - {$item->bank}":"";
                         $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}":"";
                         $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}":"";
+                        $nominal_rp += ($item->nominal * $item->kurs);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -980,10 +982,10 @@ class Bankkeluar extends MY_Controller {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "C",
-                        "nominal_curr" => $head->total_rp,
-                        "kurs" => $items[0]->kurs,
-                        "kode_mua" => $head->currency,
-                        "nominal" => ($head->total_rp * $items[0]->kurs),
+                        "nominal_curr" => $nominal_rp,
+                        "kurs" => 1,
+                        "kode_mua" => "IDR",
+                        "nominal" => $nominal_rp,
                         "row_order" => (count($jurnalItems) + 1)
                     );
                     if ($head->jurnal !== "") {

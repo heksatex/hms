@@ -954,6 +954,7 @@ class Bankmasuk extends MY_Controller {
                         "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => "{$partner}"];
 
                     $jurnalItems = [];
+                    $nominal_rp = 0;
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
                         "nama" => "{$head->transinfo}",
@@ -961,10 +962,10 @@ class Bankmasuk extends MY_Controller {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "D",
-                        "nominal_curr" => $head->total_rp,
-                        "kurs" => $items[0]->kurs,
-                        "kode_mua" => $head->currency,
-                        "nominal" => ($head->total_rp * $items[0]->kurs),
+                        "nominal_curr" => 0,
+                        "kurs" => 1,
+                        "kode_mua" => "IDR",
+                        "nominal" => 0,
                         "row_order" => 1
                     );
 
@@ -974,6 +975,7 @@ class Bankmasuk extends MY_Controller {
                         $uraian .= ($item->bank !== "") ? " - {$item->bank}" : "";
                         $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
                         $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
+                        $nominal_rp += ($item->nominal * $item->kurs);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -988,7 +990,8 @@ class Bankmasuk extends MY_Controller {
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
-
+                    $jurnalItems[0]["nominal_curr"] = $nominal_rp;
+                    $jurnalItems[0]["nominal"] = $nominal_rp;
                     if ($head->jurnal !== "") {
                         $jurnalDB->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
                         $jurnalDB->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();

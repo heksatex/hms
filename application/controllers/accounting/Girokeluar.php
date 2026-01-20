@@ -818,11 +818,12 @@ public function ekspor() {
                     $items = $model->setTables("acc_giro_keluar_detail")->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
                                     ->setSelects(["acc_giro_keluar_detail.*", "currency_kurs.currency"])
                                     ->setWheres(["giro_keluar_id" => $head->id])->getData();
-
+                    $nominal_rp = 0;
                     foreach ($items as $key => $item) {
                         $uraian = $item->bank;
                         $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
                         $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
+                        $nominal_rp += ($item->nominal * $item->kurs);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -845,10 +846,10 @@ public function ekspor() {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "C",
-                        "nominal_curr" => $head->total_rp,
-                        "kurs" => $items[0]->kurs,
-                        "kode_mua" => $head->currency,
-                        "nominal" => ($head->total_rp * $items[0]->kurs),
+                        "nominal_curr" => $nominal_rp,
+                        "kurs" => 1,
+                        "kode_mua" => "IDR",
+                        "nominal" => $nominal_rp,
                         "row_order" => (count($jurnalItems) + 1)
                     );
 
