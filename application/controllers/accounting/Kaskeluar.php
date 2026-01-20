@@ -938,13 +938,14 @@ class Kaskeluar extends MY_Controller {
                     $valas = false;
                     if (strpos($kode, "KKVH") !== false)
                         $valas = true;
-
+                    $nominal_rp = 0;
                     foreach ($items as $key => $item) {
                         $textKurs = "";
                         if ($valas)
                             $textKurs = " ({$item->nominal}{$item->currency} kurs : " . number_format($item->kurs, 2) . ")";
 
                         $poid [] = $item->po_detail_id;
+                        $nominal_rp += ($item->nominal * $item->kurs);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$item->uraian}{$textKurs}",
@@ -969,10 +970,10 @@ class Kaskeluar extends MY_Controller {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "C",
-                        "nominal_curr" => $head->total_rp,
-                        "kurs" => $items[0]->kurs,
-                        "kode_mua" => $head->currency,
-                        "nominal" => ($head->total_rp * $items[0]->kurs),
+                        "nominal_curr" => $nominal_rp,
+                        "kurs" => 1,
+                        "kode_mua" => "IDR",
+                        "nominal" => $nominal_rp,
                         "row_order" => (count($jurnalItems) + 1)
                     );
 

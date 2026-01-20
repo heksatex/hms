@@ -811,16 +811,17 @@ class Giromasuk extends MY_Controller {
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "D",
                         "nominal_curr" => $head->total_rp,
-                        "kurs" => $items[0]->kurs,
-                        "kode_mua" => $head->currency,
+                        "kurs" => 1,
+                        "kode_mua" => "IDR",
                         "nominal" => ($head->total_rp * $items[0]->kurs),
                         "row_order" => 1
                     );
-
+                    $nominal_rp = 0;
                     foreach ($items as $key => $item) {
                         $uraian = $item->bank;
                         $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
                         $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
+                        $nominal_rp += ($item->nominal * $item->kurs);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -835,7 +836,8 @@ class Giromasuk extends MY_Controller {
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
-
+                    $jurnalItems[0]["nominal_curr"] = $nominal_rp;
+                    $jurnalItems[0]["nominal"] = $nominal_rp;
                     if ($head->jurnal !== "") {
                         $jurnalDB->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
                         $jurnalDB->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();

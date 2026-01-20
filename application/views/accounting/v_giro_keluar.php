@@ -89,7 +89,7 @@
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <div class="col-md-12 col-xs-12">
-                                                                    <button type="button" class="btn btn-default btn-sm" id="export"><i class="fa fa-file"></i> Ekspor </button>
+                                                                    <button type="button" class="btn btn-default btn-sm" id="export"><i class="fa fa-file-excel-o" style="color: green;"></i> Ekspor </button>
                                                                 </div>
                                                             </div>
                                                         </div>
