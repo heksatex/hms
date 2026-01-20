@@ -1209,7 +1209,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->from('(' . $union_sql . ') as sub');
         $this->db->order_by('tgl', 'asc');
         $this->db->order_by('no_bukti', 'asc');
-        $this->db->order_by('debit', 'desc');
+        $this->db->order_by('credit', 'desc');
         // $this->db->order_by('credit','asc');
         $query = $this->db->get();
         return $query->result();
