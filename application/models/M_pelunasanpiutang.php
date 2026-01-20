@@ -830,7 +830,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select('no_pelunasan, IFNULL(sum(total_rp),0) as sum_rp, ifnull(sum(total_valas),0) as sum_valas');
+        $this->db->select('no_pelunasan, currency_id, kurs, IFNULL(sum(total_rp),0) as sum_rp, ifnull(sum(total_valas),0) as sum_valas');
         $this->db->from('acc_pelunasan_piutang_metode');
         $query = $this->db->get();
         return $query->row();
