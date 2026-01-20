@@ -135,28 +135,39 @@
     <!-- === SPLIT MODE === -->
     <div id="row-split" class="container-fluid" style="display:none">
 
-        <div class="row form-group">
+        <!-- <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">CoA</label>
             <div class="col-lg-4 col-md-8 col-12">
                 <select class="form-control input-sm select-coa" name="CoA_head" id="CoA_head"></select>
             </div>
-        </div>
+        </div> -->
 
-        <div class="row form-group">
+        <!-- <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">Target Nominal</label>
-            <div class="col-lg-4 col-md-8 col-12">
-                <input type="text" class="form-control input-sm text-right formatAngka" name="nominal_head" id="nominal_head" data-decimal="2" readonly>
+            <div class="col-lg-4 col-md-8 col-12"> -->
+        <!-- <input type="hidden" class="form-control input-sm text-right formatAngka" name="nominal_head" id="nominal_head" data-decimal="2" readonly> -->
+        <!-- </div>
+        </div> -->
+        <div class="row form-group">
+            <label class="col-lg-4 col-md-4 col-12">Nominal (Jurnal)</label>
+            <div class="col-lg-1 col-md-6 col-12">
+                <input type="text" class="form-control input-sm" name="posisi_credit" id="posisi_credit" value="C" readonly >
+            </div>
+            <div class="col-lg-3 col-md-6 col-12">
+                <input type="text" class="form-control input-sm text-right formatAngka" name="nominal_credit" id="nominal_credit" data-decimal="2" readonly>
             </div>
         </div>
         <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">Nominal (Jurnal)</label>
             <div class="col-lg-1 col-md-6 col-12">
-                <input type="text" class="form-control input-sm" name="posisi_head" id="posisi_head" readonly>
+                <input type="text" class="form-control input-sm" name="posisi_debit" value="D"  id="posisi_debit" readonly>
             </div>
             <div class="col-lg-3 col-md-6 col-12">
-                <input type="text" class="form-control input-sm text-right formatAngka" name="nominal_jurnal" id="nominal_jurnal" data-decimal="2" readonly>
+                <input type="text" class="form-control input-sm text-right formatAngka" name="nominal_debit" id="nominal_debit" data-decimal="2" readonly>
             </div>
         </div>
+
+
 
         <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">Nominal (Non Jurnal)</label>
@@ -171,6 +182,27 @@
                 <input type="text" class="form-control input-sm text-right formatAngka" name="total_nominal_head" id="total_nominal_head" data-decimal="2" readonly>
             </div>
         </div> -->
+
+        <label><b>Koreksi</b></label>
+        <div class="table-responsive">
+            <table class="table table-condesed table-hover rlstable " id="tabel-koreksi-head">
+                <thead>
+                    <tr>
+                        <th class="style bb" style="width:25%">COA</th>
+                        <th class="style bb" style="width:25%">Nominal</th>
+                        <th class="style bb" style="width:10%">Posisi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><select class="form-control input-sm select-coa" name="CoA_head" id="CoA_head"></select></td>
+                        <td><input type="text" class="form-control input-sm text-right formatAngka" name="nominal_head" id="nominal_head" data-decimal="2" readonly></td>
+                        <td><input type="text" class="form-control input-sm" name="posisi_head" id="posisi_head" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
 
         <label><b>Detail Koreksi</b></label>
         <div class="table-responsive">
@@ -526,8 +558,12 @@
                     <input type="checkbox" name="alat_pelunasan[]" class="alat-pelunasan" disabled>
                 </td>
 
+              
                 <td>
-                  <input type="text" name="posisi_item[]" class="form-control input-sm posisi_item" value="${posisi_item}" readonly>  
+                    <select name="posisi_item[]" class="form-control input-sm posisi_item">
+                        <option value="D">D</option>
+                        <option value="C">C</option>
+                    </select>
                 </td>
 
                 <td class="text-center">
@@ -536,6 +572,10 @@
             </tr>`);
 
         $('#tabel-koreksi tbody').append(row);
+        if (posisi_item === 'D' || posisi_item === 'C') {
+            row.find('.posisi_item').val(posisi_item);
+        }
+
         initSelectKoreksi();
         // initSelectCoa();
         // initSelectKoreksi(row.find(".koreksi-select"));
@@ -683,6 +723,7 @@
         let coaField = row.find('td:eq(2)'); // kolom COA
         // let posisiField = row.find('td:eq(5)'); // kolom posisi
         let checkbox = row.find('.alat-pelunasan');
+        let setposisiField = row.find('td:eq(5)');
         let posisiField = row.find('.posisi_item');
         // simpan data get_coa
         row.attr("data-get-coa", get_coa);
@@ -708,9 +749,14 @@
         if (get_coa === 'false') {
             // HAPUS select & ganti input text kosong
             coaField.html(`<select type="text" name="coa-select[]" class="form-control input-sm coa-select" disabled><select>`);
+            setposisiField.html('<input type="text"  name="posisi_item[]" class="form-control input-sm posisi_item" readonly>');
             posisiField.val('');
         } else {
             // Kembalikan menjadi select2 (load ulang)
+            setposisiField.html(`<select name="posisi_item[]" class="form-control input-sm posisi_item">
+                                    <option value="D">D</option>
+                                    <option value="C">C</option>
+                                </select>`);
             posisiField.val(posisi_item);
             coaField.html(`<div class="input-group">
                         <select name="coa[]" class="form-control coa-select" data-tipe="coa" style="width:100%">  </select>
@@ -825,51 +871,171 @@
     });
 
 
+    // function hitungTotal() {
+
+    //     let total_jurnal = 0; // get_coa = true
+    //     let total_non = 0; // get_coa = false
+    //     let total = 0;
+    //     let total_posisi1 = 0;
+    //     let total_posisi2 = 0;
+    //     let head_val = $("#nominal_head").val();
+    //     let head2_val = $("#nominal_head2").val();
+    //     let head = parseFloat(unformatNumber(head_val)) || 0;
+    //     let head2 = parseFloat(unformatNumber(head2_val)) || 0;
+
+    //     $("#tabel-koreksi tbody tr").each(function() {
+
+    //         let row = $(this);
+    //         let nominal = parseFloat(unformatNumber(row.find(".nominal-input").val())) || 0;
+    //         let posisi = row.find(".posisi_item").val();
+
+    //         let dataKoreksi = row.find(".koreksi-select").select2("data")[0];
+    //         let get_coa = dataKoreksi?.get_coa;
+
+    //         // Fallback untuk baris lama
+    //         if (get_coa === undefined) {
+    //             get_coa = row.find(".koreksi-select option:selected").data("get-coa") || "false";
+    //         }
+
+    //         if (get_coa === "true" || get_coa === true) {
+    //             if (posisi === 'D') {
+    //                 (head_val === 'D') ? total_posisi1 += nominal: total_posisi2 += nominal;
+    //             } else { // C
+    //                 (head_val === 'C') ? total_posisi1 += nominal: total_posisi2 += nominal;
+    //             }
+    //             // total_jurnal += nominal;
+    //         } else {
+    //             total_non += nominal;
+    //         }
+
+    //         total += nominal;
+
+    //         // console.log("get_coa:", get_coa, " nominal:", nominal);
+    //     });
+
+    //     let sisa = head - total;
+
+    //     // Tampilkan total
+    //     $("#nominal_head").text(
+    //         total.toLocaleString("en-US", {
+    //             minimumFractionDigits: 2,
+    //             maximumFractionDigits: 2
+    //         })
+    //     );
+
+
+    //     // TAMPILKAN HASILNYA
+    //     $("#nominal_jurnal").val(
+    //         total_posisi1.toLocaleString("en-US", {
+    //             minimumFractionDigits: 2,
+    //             maximumFractionDigits: 2
+    //         })
+    //     );
+
+    //     $("#nominal_jurnal2").val(
+    //         total_posisi2.toLocaleString("en-US", {
+    //             minimumFractionDigits: 2,
+    //             maximumFractionDigits: 2
+    //         })
+    //     );
+
+    //     $("#nominal_non").val(
+    //         total_non.toLocaleString("en-US", {
+    //             minimumFractionDigits: 2,
+    //             maximumFractionDigits: 2
+    //         })
+    //     );
+
+    //     // Tampilkan sisa
+    //     $("#sisa_nominal").text(
+    //         sisa.toLocaleString("en-US", {
+    //             minimumFractionDigits: 2,
+    //             maximumFractionDigits: 2
+    //         })
+    //     );
+
+    //     // Opsional → beri warna jika minus atau pas
+    //     if (sisa < 0) {
+    //         $("#sisa_nominal").css("color", "red");
+    //     } else if (sisa === 0) {
+    //         $("#sisa_nominal").css("color", "green");
+    //     } else {
+    //         $("#sisa_nominal").css("color", "black");
+    //     }
+    // }
+
     function hitungTotal() {
 
-        let total_jurnal = 0; // get_coa = true
-        let total_non = 0; // get_coa = false
-        let total = 0;
+        let total_jurnal_1 = 0; // sesuai posisi_head
+        let total_jurnal_2 = 0; // sesuai posisi_head2
+        let total_non = 0;
+        let total_all = 0;
+
+        let posisi_credit = $("#posisi_credit").val(); // contoh: C
+        let posisi_debit  = $("#posisi_debit").val(); // contoh: D
+        let head_posisi   = $("#posisi_head").val() // D/C
         let head = parseFloat(unformatNumber($("#nominal_head").val())) || 0;
 
         $("#tabel-koreksi tbody tr").each(function() {
 
             let row = $(this);
             let nominal = parseFloat(unformatNumber(row.find(".nominal-input").val())) || 0;
+            let posisi_item = row.find(".posisi_item").val();
+
+            if (nominal <= 0) return;
+
+            total_all += nominal;
 
             let dataKoreksi = row.find(".koreksi-select").select2("data")[0];
             let get_coa = dataKoreksi?.get_coa;
 
-            // Fallback untuk baris lama
+            // fallback legacy
             if (get_coa === undefined) {
                 get_coa = row.find(".koreksi-select option:selected").data("get-coa") || "false";
             }
 
-            if (get_coa === "true" || get_coa === true) {
-                total_jurnal += nominal;
+            if (get_coa === true || get_coa === "true") {
+
+                if (posisi_item === posisi_credit) {
+                    total_jurnal_1 += nominal;
+                } else if (posisi_item === posisi_debit) {
+                    total_jurnal_2 += nominal;
+                }
+
+             
+
             } else {
                 total_non += nominal;
             }
-
-            total += nominal;
-
-            // console.log("get_coa:", get_coa, " nominal:", nominal);
         });
 
-        let sisa = head - total;
+        if (head_posisi === posisi_credit) {
+            total_jurnal_1 += head;
+        } else if (head_posisi === posisi_debit) {
+            total_jurnal_2 += head;
+        }
 
-        // Tampilkan total
-        $("#total_nominal").text(
-            total.toLocaleString("en-US", {
+        let sisa = head - total_all;
+        
+
+        // // ====== SET VALUE ======
+        // $("#nominal_jurnal").val(formatNumber(total_jurnal_1));
+        // $("#nominal_jurnal2").val(formatNumber(total_jurnal_2));
+        // $("#nominal_non").val(formatNumber(total_non));
+
+        // $("#total_nominal").text(formatNumber(total_all));
+        // $("#sisa_nominal").text(formatNumber(sisa));
+
+        //     // TAMPILKAN HASILNYA
+        $("#nominal_credit").val(
+            total_jurnal_1.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             })
         );
 
-
-        // TAMPILKAN HASILNYA
-        $("#nominal_jurnal").val(
-            total_jurnal.toLocaleString("en-US", {
+        $("#nominal_debit").val(
+            total_jurnal_2.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             })
@@ -890,7 +1056,7 @@
             })
         );
 
-        // Opsional → beri warna jika minus atau pas
+        // ====== WARNA SISA ======
         if (sisa < 0) {
             $("#sisa_nominal").css("color", "red");
         } else if (sisa === 0) {
@@ -899,6 +1065,10 @@
             $("#sisa_nominal").css("color", "black");
         }
     }
+
+    $(document).on('change', '.posisi_item', function() {
+        hitungTotal();
+    });
 
 
     function hitungTotal1() {
@@ -1130,8 +1300,8 @@
                 }
 
                 if (nominal_head_val !== total_items) {
-                    alert_notify('fa fa-warning', 'Nominal tidak sama !', 'danger', function() {});
-                    return;
+                    // alert_notify('fa fa-warning', 'Nominal tidak sama !', 'danger', function() {});
+                    // return;
                 }
 
 
@@ -1186,9 +1356,10 @@
 
                 payload.coa_head = $("#CoA_head").val();
                 payload.posisi_head = $("#posisi_head").val();
-                payload.nominal_jurnal = parseFloat(unformatNumber($("#nominal_jurnal").val())) || 0;
-                payload.nominal_non = parseFloat(unformatNumber($("#nominal_non").val())) || 0;
                 payload.nominal_head = parseFloat(unformatNumber($("#nominal_head").val())) || 0;
+                payload.nominal_credit = parseFloat(unformatNumber($("#nominal_credit").val())) || 0;
+                payload.nominal_debit = parseFloat(unformatNumber($("#nominal_debit").val())) || 0;
+                payload.nominal_non = parseFloat(unformatNumber($("#nominal_non").val())) || 0;
                 payload.detail = JSON.stringify(detail); // <-- KIRIM ARRAY SPLIT KE BACKEND
             }
 
