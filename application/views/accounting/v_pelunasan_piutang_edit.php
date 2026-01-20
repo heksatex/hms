@@ -226,7 +226,7 @@
                                                             <th class="style bb text-right">Pelunasan (Valas)</th>
                                                             <th class="style bb " style="max-width:60px;">Status</th>
                                                             <!-- <th class="style bb " style="max-width:50px;">Lebih</th> -->
-                                                            <th class="style bb" style="min-width:70px;">#</th>
+                                                            <th class="style bb" style="width:70px;">#</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
