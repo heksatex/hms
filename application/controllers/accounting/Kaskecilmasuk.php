@@ -719,6 +719,7 @@ class Kaskecilmasuk extends MY_Controller {
                                     ->setSelects(["acc_kas_kecil_masuk_detail.*", "currency_kurs.currency"])
                                     ->setWheres(["kas_kecil_masuk_id" => $head->id])->getData();
                     $info = ($head->transinfo === "") ? "" : "{$head->transinfo} - ";
+                    $nominal_rp = 0;
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
                         "nama" => "Kas Kecil Masuk",
@@ -727,13 +728,14 @@ class Kaskecilmasuk extends MY_Controller {
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "D",
                         "nominal_curr" => $head->total_rp,
-                        "kurs" => $items[0]->kurs,
-                        "kode_mua" => $head->currency,
+                        "kurs" => 1,
+                        "kode_mua" => "IDR",
                         "nominal" => ($head->total_rp * $items[0]->kurs),
                         "row_order" => 1
                     );
 
                     foreach ($items as $key => $item) {
+                         $nominal_rp += ($item->nominal * $item->kurs);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$info}{$item->uraian}",
@@ -748,7 +750,8 @@ class Kaskecilmasuk extends MY_Controller {
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
-
+                    $jurnalItems[0]["nominal_curr"] = $nominal_rp;
+                    $jurnalItems[0]["nominal"] = $nominal_rp;
                     if ($head->jurnal !== "") {
                         $jurnalDB->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
                         $jurnalDB->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();

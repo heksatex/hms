@@ -732,8 +732,9 @@ class Kaskecilkeluar extends MY_Controller {
                                     ->setSelects(["acc_kas_kecil_keluar_detail.*", "currency_kurs.currency"])
                                     ->setWheres(["kas_kecil_keluar_id" => $head->id])->getData();
                    $info = ($head->transinfo === "") ? "":"{$head->transinfo} - ";
-                           
+                           $nominal_rp = 0;
                     foreach ($items as $key => $item) {
+                        $nominal_rp += ($item->nominal * $item->kurs);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$info}{$item->uraian}",
@@ -755,10 +756,10 @@ class Kaskecilkeluar extends MY_Controller {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "C",
-                        "nominal_curr" => $head->total_rp,
-                        "kurs" => $items[0]->kurs,
-                        "kode_mua" => $head->currency,
-                        "nominal" => ($head->total_rp * $items[0]->kurs),
+                        "nominal_curr" => $nominal_rp,
+                        "kurs" => 1,
+                        "kode_mua" => "IDR",
+                        "nominal" => $nominal_rp,
                         "row_order" => (count($jurnalItems) + 1)
                     );
 
