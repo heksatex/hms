@@ -44,7 +44,7 @@ class Pelunasanpiutang extends MY_Controller
                 $row[] = '<a href="' . base_url('accounting/pelunasanpiutang/edit/' . $kode_encrypt) . '">' . $field->no_pelunasan . '</a>';
                 $row[] = date("Y-m-d", strtotime($field->tanggal_transaksi));
                 $row[] = $field->partner_nama;
-                $row[] = number_format($field->total_pelunasan,2);
+                $row[] = number_format($field->total_pelunasan, 2);
                 $row[] = $field->nama_status;
 
                 $data[] = $row;
@@ -923,14 +923,14 @@ class Pelunasanpiutang extends MY_Controller
             $type    = $this->input->post("type"); // kas,um, retur=''
 
             if (isset($_POST['start']) && isset($_POST['draw'])) {
-                if($type === 'depo'){
+                if ($type === 'depo') {
                     $list = $this->m_pelunasanpiutang->get_datatables5($partner);
                     $recordsTotal   =  $this->m_pelunasanpiutang->count_all5($partner);
-                    $recordsFiltered= $this->m_pelunasanpiutang->count_filtered5($partner);
+                    $recordsFiltered = $this->m_pelunasanpiutang->count_filtered5($partner);
                 } else {
                     $list           = $this->m_pelunasanpiutang->get_datatables3($partner, $type);
                     $recordsTotal   = $this->m_pelunasanpiutang->count_all3($partner, $type);
-                    $recordsFiltered= $this->m_pelunasanpiutang->count_filtered3($partner, $type);
+                    $recordsFiltered = $this->m_pelunasanpiutang->count_filtered3($partner, $type);
                 }
                 $data = array();
                 $no = $_POST['start'];
@@ -1095,11 +1095,11 @@ class Pelunasanpiutang extends MY_Controller
                         // get data metode pelunasan 
                         if ($type == 'retur') {
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_retur_by_id($cek->partner_id, ['no_bukti' => $no_bukti_ex]);
-                        } else if ($type === 'depo'){
+                        } else if ($type === 'depo') {
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_deposit_by_id($cek->partner_id, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
                         } else {
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_by_id($cek->partner_id, $type, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
-                            
+
                             $data_update = [
                                 'no_pelunasan'      => $no_pelunasan,
                                 'tanggal_transaksi' => $dt->tanggal,
@@ -1161,7 +1161,7 @@ class Pelunasanpiutang extends MY_Controller
                         //     $type_ket = 'Deposit';
                         // } else {
                         // }
-                        
+
                         $type_ket = '';
                         foreach ($this->metodePelunasan as $metodeItems) {
                             if ($metodeItems['id'] == $type) {
@@ -1414,6 +1414,8 @@ class Pelunasanpiutang extends MY_Controller
             $get_tot2 = $this->m_pelunasanpiutang->get_total_metode_pelunasan_by_no(['no_pelunasan' => $no_pelunasan, 'tipe' => 'koreksi']);
             $rupiah = $get_tot2->sum_rp;
             $valas  = $get_tot2->sum_valas;
+            $curr_id = $get_tot2->currency_id;
+            $kurs   = $get_tot2->kurs;
             $pelunasan_valas_update = 0;
             $pelunasan_rp_update    = 0;
             foreach ($list_inv as $li) {
@@ -1425,14 +1427,19 @@ class Pelunasanpiutang extends MY_Controller
                 if ($sisa_piutang_rp > 0 or $sisa_piutang_valas > 0) {
 
                     if ($li->total_piutang_rp > 0) {
-                        $pelunasan_rp_update = $sisa_piutang_rp - $sisa_rupiah;
-                        $sisa_rupiah  = 0;
+                        if($curr_id != $li->currency_id){
+                            $pelunasan_valas_update = 0;
+                            $pelunasan_rp_update    = 0;
+                        } else {
+                            $pelunasan_rp_update = $sisa_piutang_rp - $sisa_piutang_valas * $kurs;
+                        }
+                        // $sisa_rupiah  = 0;
                     }
 
-                    if ($li->total_piutang_valas > 0) {
-                        $pelunasan_valas_update = $sisa_piutang_valas - $sisa_valas;
-                        $sisa_valas  = 0;
-                    }
+                    // if ($li->total_piutang_valas > 0) {
+                    //     $pelunasan_valas_update = $sisa_piutang_valas - $sisa_valas;
+                    //     $sisa_valas  = 0;
+                    // }
 
                     $status_bayar = 'partial';
 
@@ -1442,6 +1449,8 @@ class Pelunasanpiutang extends MY_Controller
                         'pelunasan_valas' => $pelunasan_valas_update,
                         'status_bayar'  => $status_bayar
                     );
+                    $pelunasan_valas_update = 0;
+                    $pelunasan_rp_update    = 0;
 
                     array_push($tmp_update, $data_update);
                     $status_bayar = '';
@@ -1803,11 +1812,11 @@ class Pelunasanpiutang extends MY_Controller
                             throw new \Exception('Data Info Summary tidak ditemukan ', 200);
                         }
 
-                        
 
-                        if($get_sum->selisih < 0){
+
+                        if ($get_sum->selisih < 0) {
                             $koreksi_tanda = "-";
-                        } else{
+                        } else {
                             $koreksi_tanda = "+";
                         }
 
@@ -1837,10 +1846,10 @@ class Pelunasanpiutang extends MY_Controller
                             $coa     = "";
                             $alat    = "";
 
-                            if($alat_pelunasan == "true"){
+                            if ($alat_pelunasan == "true") {
                                 // getsummary except id
-                                $get_sum_k = $this->m_pelunasanpiutang->get_list_summary_koreksi_by_id2(["no_pelunasan" => $no_pelunasan, "pelunasan_summary_id <> "=> $id_summary, "alat_pelunasan" => "true"])->row();
-                                if(isset($get_sum_k)){
+                                $get_sum_k = $this->m_pelunasanpiutang->get_list_summary_koreksi_by_id2(["no_pelunasan" => $no_pelunasan, "pelunasan_summary_id <> " => $id_summary, "alat_pelunasan" => "true"])->row();
+                                if (isset($get_sum_k)) {
                                     throw new \Exception('Alat Pelunasan Deposit sudah ada pada Pelunasan ini  ', 200);
                                 }
                             }
@@ -1851,9 +1860,9 @@ class Pelunasanpiutang extends MY_Controller
                                 throw new \Exception('Data Koreksi tidak ditemukan', 200);
                             }
 
-                            if($get_sum->selisih < 0){
+                            if ($get_sum->selisih < 0) {
                                 $koreksi_tanda = "-";
-                            } else{
+                            } else {
                                 $koreksi_tanda = "+";
                             }
 
@@ -1939,9 +1948,13 @@ class Pelunasanpiutang extends MY_Controller
 
                             $coa_head     = $this->input->post("coa_head");
                             $posisi_head  = $this->input->post("posisi_head");
-                            $nominal_jurnal = $this->input->post("nominal_jurnal");
+                            $nominal_head = $this->input->post("nominal_head");
+                            $nominal_credit = $this->input->post("nominal_credit");
+                            $nominal_debit = $this->input->post("nominal_debit");
+                            $nominal_non = $this->input->post("nominal_non");
+                          
                             // $nominal_head = $this->input->post("nominal_head");
-
+ 
                             $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $coa_head]);
                             $data[] = array(
                                 'pelunasan_piutang_id'  => $cek->id,
@@ -1950,7 +1963,7 @@ class Pelunasanpiutang extends MY_Controller
                                 'posisi'                => $posisi_head,
                                 'kode_coa'              => $coa_head,
                                 'nama_coa'              => $get_coa->nama ?? '',
-                                'nominal'               => ($nominal_jurnal),
+                                'nominal'               => ($nominal_head),
                                 'head'                  => 'true',
                                 'koreksi_id'            => '',
                                 'faktur_id'             => 0,
@@ -1976,10 +1989,10 @@ class Pelunasanpiutang extends MY_Controller
                                     $nama_coa = $get_coa->nama ?? '';
                                 }
 
-                                if($d['checkbox_alat'] === 'true'){
+                                if ($d['checkbox_alat'] === 'true') {
                                     // getsummary except id
-                                    $get_sum_k = $this->m_pelunasanpiutang->get_list_summary_koreksi_by_id2(["no_pelunasan" => $no_pelunasan, "pelunasan_summary_id <> "=> $id_summary, "alat_pelunasan" => "true"])->row();
-                                    if(isset($get_sum_k)){
+                                    $get_sum_k = $this->m_pelunasanpiutang->get_list_summary_koreksi_by_id2(["no_pelunasan" => $no_pelunasan, "pelunasan_summary_id <> " => $id_summary, "alat_pelunasan" => "true"])->row();
+                                    if (isset($get_sum_k)) {
                                         throw new \Exception('Alat Pelunasan Deposit sudah ada pada Pelunasan ini  ', 200);
                                     }
                                 }
@@ -2008,7 +2021,7 @@ class Pelunasanpiutang extends MY_Controller
 
                             // var_dump($data);
 
-                            $log_edit_items = 'Koreksi Info ' . $get_sum->tipe_currency . " Mode " . $mode . "  <br> Head <br> CoA : " . $coa_head . " Posisi : " . $posisi_head . " Nominal Jurnal: " . $nominal_jurnal . " <br> Items " . $log_tmp;
+                            $log_edit_items = 'Koreksi Info ' . $get_sum->tipe_currency . " Mode " . $mode . "  <br> Head <br> CoA : " . $coa_head . " Posisi : " . $posisi_head . " Nominal : " . $nominal_head . " <br> Items " . $log_tmp;
 
                             $insert = $this->m_pelunasanpiutang->insert_data_pelunasan_piutang_summary_koreksi($data);
                             if (!empty($insert)) {
@@ -2521,19 +2534,43 @@ class Pelunasanpiutang extends MY_Controller
 
                         $cek_inv = $this->m_pelunasanpiutang->cek_faktur_input_by_kode(['no_pelunasan' => $no_pelunasan]);
                         if ($cek_inv->num_rows()) {
-                            if ($cek_inv->num_rows() > 1) {
-                                throw new \Exception('faktur harus diplih 1 !', 200);
-                            } else {
-                                $data_inv = $cek_inv->row();
-                                if ($data_inv->currency_id == 1) { // IDR
+                            // if ($cek_inv->num_rows() > 1) {
+                            //     throw new \Exception('faktur harus dipilih 1 !', 200);
+                            // } else {
+                            // }
+                            $currency_ids   = [];
+                            $currency_name  = '';
+                            $value_valas    = 0;
+
+                            foreach ($cek_inv->result() as $ci) {
+
+                                if ($ci->currency_id == 1) {
                                     throw new \Exception('Currency Faktur tidak boleh IDR !', 200);
                                 }
-                                $currency_id = $data_inv->currency_id;
-                                $currency_name = $data_inv->currency;
-                                $value_valas  = $data_inv->sisa_piutang_valas;
+                                $currency_ids[] = $ci->currency_id;
+                                $currency_name  = $ci->currency;
+                                $value_valas   += $ci->sisa_piutang_valas;
                             }
+
+                            // $data_inv = $cek_inv->row();
+                            // if ($data_inv->currency_id == 1) { // IDR
+                            //     throw new \Exception('Currency Faktur tidak boleh IDR !', 200);
+                            // }
+
+                            // $currency_id = $data_inv->currency_id;
+                            // $currency_name = $data_inv->currency;
+                            // $value_valas  = $data_inv->sisa_piutang_valas;
+                            $currency_ids = array_unique($currency_ids);
+                            if (count($currency_ids) > 1) {
+                                throw new \Exception(
+                                    'Currency faktur tidak boleh berbeda-beda dalam satu pelunasan !',
+                                    200
+                                );
+                            }
+                            $currency_id = $currency_ids[0];
+
                         } else {
-                            throw new \Exception('Faktur harus diplih dulu !', 200);
+                            throw new \Exception('Faktur harus dipilih dulu !', 200);
                         }
 
                         // cek metode pelunasan tipe 
@@ -2768,7 +2805,7 @@ class Pelunasanpiutang extends MY_Controller
                             'kode' => $jurnal,
                             'tanggal_dibuat' => $tgl_transaksi,
                             'tanggal_posting' => $tgl,
-                            'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                            'periode'       => date("Y/m", strtotime($tgl_transaksi)),
                             'origin'        => $no_pelunasan,
                             'status'        => 'posted',
                             'tipe'          => $kodeJurnal,
@@ -2851,7 +2888,7 @@ class Pelunasanpiutang extends MY_Controller
                         $total_credit  = 0;
                         $total_debit   = 0;
 
-                        if(!isset($gs->mode)){
+                        if (!isset($gs->mode)) {
                             throw new \Exception('Koreksi Masih kosong ' . $gs->tipe_currency . ' ! ', 422);
                         }
 
@@ -2875,7 +2912,7 @@ class Pelunasanpiutang extends MY_Controller
                                                 'kode' => $jurnal,
                                                 'tanggal_dibuat' => $tgl_transaksi,
                                                 'tanggal_posting' => $tgl,
-                                                'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                                                'periode'       => date("Y/m", strtotime($tgl_transaksi)),
                                                 'origin'        => $no_pelunasan,
                                                 'status'        => 'posted',
                                                 'tipe'          => $kodeJurnal,
@@ -2932,7 +2969,7 @@ class Pelunasanpiutang extends MY_Controller
                                                         'kode' => $jurnal,
                                                         'tanggal_dibuat' => $tgl_transaksi,
                                                         'tanggal_posting' => $tgl,
-                                                        'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                                                        'periode'       => date("Y/m", strtotime($tgl_transaksi)),
                                                         'origin'        => $no_pelunasan,
                                                         'status'        => 'posted',
                                                         'tipe'          => $kodeJurnal,
@@ -3000,7 +3037,7 @@ class Pelunasanpiutang extends MY_Controller
                                                         'kode' => $jurnal,
                                                         'tanggal_dibuat' => $tgl_transaksi,
                                                         'tanggal_posting' => $tgl,
-                                                        'periode'       => date("y/m", strtotime($tgl_transaksi)),
+                                                        'periode'       => date("Y/m", strtotime($tgl_transaksi)),
                                                         'origin'        => $no_pelunasan,
                                                         'status'        => 'posted',
                                                         'tipe'          => $kodeJurnal,
@@ -3040,10 +3077,10 @@ class Pelunasanpiutang extends MY_Controller
                             }
                         }
 
-                        if($gs->mode === "split") {
-                            if ((float) round(abs($gs->selisih), 2) != (float) round($total_nominal_items, 2)) {
-                                throw new \Exception('Nominal Koreksi ' . $gs->tipe_currency . ' tidak sama antara Header dan Item koreksi', 422);
-                            }
+                        if ($gs->mode === "split") {
+                            // if ((float) round(abs($gs->selisih), 2) != (float) round($total_nominal_items, 2)) {
+                            //     throw new \Exception('Nominal Koreksi ' . $gs->tipe_currency . ' tidak sama antara Header dan Item koreksi', 422);
+                            // }
 
                         }
 
@@ -3287,7 +3324,7 @@ class Pelunasanpiutang extends MY_Controller
                         if (!isset($cek_mt_koreksi)) {
                             throw new \Exception('Koreksi Kurs Bulan tidak ditemukan !', 200);
                         }
-                    } else if($mt->tipe2 == 'depo'){
+                    } else if ($mt->tipe2 == 'depo') {
                         $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('depo', ['acc_pelunasan_piutang.status' => 'done', 'acc_pelunasan_piutang.no_pelunasan' => $mt->no_bukti, 'acc_pelunasan_piutang_summary_koreksi.id' => $mt->id_bukti, 'acc_pelunasan_piutang_summary_koreksi.lunas' => 0]);
                         if (isset($cek_mt)) {
                             if ((float) $cek_mt->total_rp == (float) $mt->total_rp && (float) $cek_mt->total_valas == (float) $mt->total_valas) {
@@ -3303,7 +3340,6 @@ class Pelunasanpiutang extends MY_Controller
                         } else {
                             throw new \Exception('Metode Pelunasan Deposit Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                         }
-                        
                     } else {
                         throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas/Retur/Deposit  !', 200);
                     }
@@ -3509,13 +3545,12 @@ class Pelunasanpiutang extends MY_Controller
                             $data_sum = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
                             foreach ($data_sum as $row) {
                                 foreach ($this->m_pelunasanpiutang->get_list_summary_koreksi_by_id($no_pelunasan, $row->id) as $items) {
-                                    if($items->koreksi_id === 'deposit' && $items->lunas == 1) {
+                                    if ($items->koreksi_id === 'deposit' && $items->lunas == 1) {
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah terpakai oleh Pelunasan .", 200);
                                     }
-                                    if($items->koreksi_id === 'deposit' && $items->lunas == 3) {
+                                    if ($items->koreksi_id === 'deposit' && $items->lunas == 3) {
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah di Nonaktifkan / Refund .", 200);
                                     }
-
                                 }
                             }
 

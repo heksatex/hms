@@ -711,22 +711,137 @@ class M_bukubesarpembantupiutang extends CI_Model
         $total_m_koreksi  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
 
 
-        $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, 
+        $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  CONCAT('Koreksi : ', GROUP_CONCAT(ack.nama_koreksi SEPARATOR ', '), 
             COALESCE((SELECT GROUP_CONCAT(CONCAT(' - Curr : ' ,currency,' - Kurs : ',kurs, ' - Valas : ', total_valas)) FROM acc_pelunasan_piutang_metode appm Where appm.pelunasan_piutang_id = app.id AND appm.tipe = 'koreksi') , ''),
             IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', apps.kurs), 
                 CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id))
-            ))  as uraian,($total_m_koreksi) AS total_koreksi,
-                        (CASE 
-                            WHEN apps.selisih < 0 THEN
-                                 ABS($total_m_koreksi)
-                            ELSE 0 
-                        END) AS debit,
-                        (CASE 
+            ))  as uraian,
+                        CASE
                             WHEN apps.selisih > 0 THEN
-                                 ABS($total_m_koreksi)
-                            ELSE 0 
-                        END) AS credit,
+                                /* D - C */
+                                SUM(
+                                    CASE WHEN appsk.posisi = 'D'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+                                -
+                                SUM(
+                                    CASE WHEN appsk.posisi = 'C'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+
+                            WHEN apps.selisih < 0 THEN
+                                /* C - D */
+                                SUM(
+                                    CASE WHEN appsk.posisi = 'C'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+                                -
+                                SUM(
+                                    CASE WHEN appsk.posisi = 'D'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+                            ELSE 0
+                        END AS total_koreksi,
+                   
+                        CASE
+                            WHEN (
+                                CASE
+                                    WHEN apps.selisih < 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN apps.selisih > 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            ) > 0
+                            THEN ABS(
+                                CASE
+                                    WHEN apps.selisih < 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN apps.selisih > 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            )
+                            ELSE 0
+                        END AS debit,
+                        CASE
+                        WHEN (
+                                CASE
+                                    WHEN apps.selisih < 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN apps.selisih > 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            ) < 0
+                            THEN ABS(
+                                CASE
+                                    WHEN apps.selisih < 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN apps.selisih > 0 THEN
+                                        SUM(CASE WHEN appsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN appsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            )
+                            ELSE 0
+                        END AS credit,
                         app.status, 'plp' as link,
                         0 as dpp,
                         0 as ppn,
@@ -739,6 +854,16 @@ class M_bukubesarpembantupiutang extends CI_Model
         return $this->db->get_compiled_select();
     }
 
+    //  CASE 
+    //                         WHEN SUM(CASE WHEN total_koreksi IS NOT NULL THEN 1 ELSE 0 END) > 0
+    //                             AND SUM(debit) + SUM(credit) > 0
+    //                         THEN
+    //                             SUM(debit) - SUM(credit)
+    //                         ELSE
+    //                             SUM(total_koreksi)
+    //                     END AS total_koreksi,
+
+
 
     function get_saldo_koreksi(array $where = [], string $group = '',  string $currency = '')
     {
@@ -746,13 +871,13 @@ class M_bukubesarpembantupiutang extends CI_Model
         $where_normal = ['apps.mode' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency' => $where_tipe_cur, 'ack.koreksi_bb' => 'true'];
         $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, '', $currency);
         $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency' => $where_tipe_cur,  'appsk.head' => 'false', 'appsk.alat_pelunasan' => 'false', 'ack.koreksi_bb' => 'true'];
-        $sub_query_split  = $this->get_saldo_koreksi_split($where_split, '', $currency);
+        $sub_query_split  = $this->get_saldo_koreksi_split($where_split, 'app.partner_id', $currency);
 
         if (count($where) > 0) {
             $this->db->where($where);
         }
         if ($group) {
-            $this->db->group_by($group);
+            $this->db->group_by($group, FALSE);
         }
 
         $this->db->select("
@@ -762,7 +887,9 @@ class M_bukubesarpembantupiutang extends CI_Model
                         (tanggal_transaksi) AS tgl,
                         (id_partner)      AS id_partner,
                         (uraian)          AS uraian,
+
                         SUM(total_koreksi)   AS total_koreksi,
+
                         SUM(debit)           AS debit,
                         SUM(credit)          AS credit,
                         (status)          AS status,
@@ -961,7 +1088,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $subquery_pelunasan     = $this->get_saldo_pelunasan($where_pelunasan, 'app.partner_id', $currency);
         $subquery_retur         = $this->get_saldo_retur($where_retur, 'app.partner_id', $currency);
         $subquery_um            = $this->get_saldo_um($where_um, 'app.partner_id', $currency);
-        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'id_partner', $currency);
+        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, "id_partner", $currency);
         $subquery_refund        = $this->get_saldo_refund($where_kas_um, 'partner_id', $currency);
         // $subquery_deposit       = $this->get_saldo_deposit($where_deposit, 'app.partner_id', $currency);
         // $subquery_deposit_pel   = $this->get_saldo_deposit($where_deposit_pel, 'app.partner_id', $currency);
