@@ -225,6 +225,15 @@ class Requestforquotation extends MY_Controller {
                     'required' => '{field} Harus dipilih',
                     "regex_match" => "{field} harus berupa number / desimal"
                 ]
+            ],
+            [
+                'field' => 'supplier',
+                'label' => 'Supplier',
+                'rules' => ['required','regex_match[/^[1-9][0-9]*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                     "regex_match" => "{field} Harus dipilih."
+                ]
             ]
         ];
 
