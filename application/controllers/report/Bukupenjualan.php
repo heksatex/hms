@@ -170,7 +170,7 @@ class Bukupenjualan extends MY_Controller {
             $totalHarga = 0;
             $totalHargaValas = 0;
             $totalPpn = 0;
-            $GrandtotalPpn = 0;
+            $GrandtotalRp = 0;
 
             foreach ($data as $key => $value) {
                 $harga = ($value->harga * $value->qty) * $value->kurs;
@@ -186,7 +186,7 @@ class Bukupenjualan extends MY_Controller {
                     $q = $qu[0] ?? "";
                     $u = $qu[1] ?? "";
                     $nama = "{$value->uraian}";
-                    $nama.=($value->warna === "") ? "" : "/{$value->warna}";
+                    $nama .= ($value->warna === "") ? "" : "/{$value->warna}";
                 }
                 $hargaRp = 0;
                 $hargaValas = 0;
@@ -194,7 +194,7 @@ class Bukupenjualan extends MY_Controller {
                 $ppn = $value->pajak * $value->kurs;
                 $totalPpn += $ppn;
                 $TotalRp = $harga + $ppn;
-                $GrandtotalPpn += $ppn;
+                $GrandtotalRp += $harga;
                 $sheet->setCellValue("A{$row}", $no);
                 $sheet->setCellValue("B{$row}", $value->no_faktur_internal);
                 $sheet->setCellValue("c{$row}", $value->no_inv_ekspor);
@@ -271,6 +271,15 @@ class Bukupenjualan extends MY_Controller {
                     $JumlahRp = 0;
                     $totalPpn = 0;
                 }
+            }
+
+            if ($GrandtotalRp > 0) {
+                $row += 1;
+                $sheet->setCellValue("j{$row}", "Grand Total Rp");
+               if ($posisi === "bks") 
+                $sheet->setCellValue("u{$row}", $GrandtotalRp);
+                else
+                 $sheet->setCellValue("q{$row}", $GrandtotalRp); 
             }
             $sheet->getStyle("d2:d{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
             $sheet->getStyle("m2:m{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);

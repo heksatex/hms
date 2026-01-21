@@ -193,8 +193,10 @@ class Fakturpenjualan extends MY_Controller {
                     ->setOrders([null, "no_faktur", "no_faktur_pajak", "tanggal", "no_sj", "tipe", "marketing_nama", "partner_nama", "grand_total", "ppn"])
                     ->setSelects(["acc_faktur_penjualan.*", "nama_status"])
                     ->setSelects(["CASE When (status <> 'confirm') then 'Belum Lunas' "
-                        . "WHEN (piutang_rp = 0) then 'Lunas' "
-                        . "When (piutang_rp = total_piutang_rp) then 'Belum Lunas' "
+                        . "WHEN (lunas = 1) then 'Lunas' "
+                        . "When (piutang_rp <> total_piutang_rp and lunas = 1) then 'Lunas' "
+                        . "When (piutang_rp = total_piutang_rp and lunas = 0) then 'Belum Lunas' "
+                        . "When (piutang_rp <> total_piutang_rp and lunas = 1) then 'Lunas' "
                         . "Else 'Lunas Sebagian' End as lunas"]);
             $tanggal = $this->input->post("tanggal");
             $marketing = $this->input->post("marketing");
@@ -228,6 +230,13 @@ class Fakturpenjualan extends MY_Controller {
                 $no += 1;
                 $kode_encrypt = encrypt_url($value->no_faktur);
                 $fk = ($value->no_faktur_internal === '') ? 'Belum diisi' : $value->no_faktur_internal;
+                $sjs = explode("/", $value->no_sj);
+                $dpp = $value->grand_total * $value->kurs_nominal;
+                $ppn = $value->ppn * $value->kurs_nominal;
+                if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
+                    $dpp = 0;
+                    $ppn = 0;
+                }
                 $data [] = [
                     $no,
                     "<a href='" . base_url("sales/fakturpenjualan/edit/{$kode_encrypt}") . "'>{$fk}</a>",
@@ -237,8 +246,8 @@ class Fakturpenjualan extends MY_Controller {
                     $value->tipe,
                     $value->marketing_nama,
                     $value->partner_nama,
-                    number_format($value->grand_total * $value->kurs_nominal, 2),
-                    number_format($value->ppn * $value->kurs_nominal, 2),
+                    number_format($dpp, 2),
+                    number_format($ppn, 2),
                     number_format($value->total_piutang_rp, 2),
                     $value->lunas,
                     $value->nama_status,
