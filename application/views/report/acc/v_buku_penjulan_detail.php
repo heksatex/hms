@@ -19,7 +19,7 @@ if ($posisi !== "bks") {
         <tr>
             <td><?= $no ?></td>
             <td><?= $value->no_faktur_internal ?></td>
-             <td><?= $value->no_inv_ekspor ?></td>
+            <td><?= $value->no_inv_ekspor ?></td>
             <td><?= $value->no_sj ?></td>
             <td><?= $value->no_faktur_pajak ?></td>
             <td><?= $value->tanggal ?></td>
@@ -102,17 +102,17 @@ if ($posisi !== "bks") {
 } else {
     $totalHargaValas = 0;
     $totalPpn = 0;
-    $GrandtotalPpn = 0;
+    $GrandtotalRp = 0;
     foreach ($data as $key => $value) {
         $no++;
         $JumlahRp = ($value->qty * $value->harga) * $value->kurs;
         $ppn = $value->pajak * $value->kurs;
         $totalPpn += $ppn;
-        $GrandtotalPpn += $ppn;
+        $GrandtotalRp += $JumlahRp;
         $qty = explode("/ ", $value->nama);
         $qtys = (count($qty) > 1) ? end($qty) : "";
         $nama = (count($qty) > 1) ? "{$value->uraian}" : "";
-        $nama.=($value->warna === "") ? "" : "/{$value->warna}";
+        $nama .= ($value->warna === "") ? "" : "/{$value->warna}";
         $totalanItem = ($value->qty) ? number_format($JumlahRp, 2) : number_format($value->nominal, 2);
         $hargaRp = 0;
         $hargaValas = 0;
@@ -132,7 +132,7 @@ if ($posisi !== "bks") {
         <tr>
             <td><?= $no ?></td>
             <td><?= $value->no_faktur_internal ?></td>
-             <td><?= $value->no_inv_ekspor ?></td>
+            <td><?= $value->no_inv_ekspor ?></td>
             <td><?= $value->no_sj ?></td>
             <td><?= $value->no_faktur_pajak ?></td>
             <td><?= $value->tanggal ?></td>
@@ -208,6 +208,36 @@ if ($posisi !== "bks") {
             </tr>
             <?php
         }
+    }
+    if ($GrandtotalRp > 0) {
+        ?>
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+            </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="text-bold"><?= "Grand Total Rp" ?></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="text-right"></td>
+            <td style="text-align: right;"></td>
+            <td style="text-align: right;"></td>
+            <td style="text-align: right;"></td>
+            <td style="text-align: right;"></td>
+            <td style="text-align: right;"></td>
+            <td style="text-align: right;" class="text-bold"><?= number_format($GrandtotalRp, 2) ?></td>
+        </tr>
+        <?php
     }
 }
 ?>
