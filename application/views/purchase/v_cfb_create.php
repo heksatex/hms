@@ -143,6 +143,8 @@
     $(function () {
         var uomStock = "0";
         $(".uom_beli").select2({
+            tags: true,
+            dropdownParent: $("#tambah_data"),
             allowClear: true,
             placeholder: "Satuan Beli",
             ajax: {
@@ -177,7 +179,7 @@
         $(".uom_beli").on("select2:open", function () {
             var row = $(this).attr("data-uom");
             uomStock = row;
-        })
+        });
 
         $(".uom_beli").on("select2:select", function () {
             var row = $(this).attr("data-row");
@@ -195,6 +197,8 @@
 
 
         $("#supplier").select2({
+            tags: true,
+            dropdownParent: $("#tambah_data"),
             allowClear: true,
             placeholder: "Supplier",
             ajax: {
@@ -237,5 +241,7 @@
         },
                 false
                 );
+
+
     });
 </script>
