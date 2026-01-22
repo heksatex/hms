@@ -653,7 +653,7 @@ public function ekspor() {
             $customer = str_split(trim(preg_replace('/\s+/', ' ', "Kepada : {$head->partner_nama}")), 33);
             foreach ($customer as $key => $value) {
                 if ($key > 0) {
-                    $printer->text(str_pad("", 84));
+                    $printer->text(str_pad("", 86));
                 }
                 $printer->text(str_pad(trim($value), 33, " ", STR_PAD_RIGHT));
             }
