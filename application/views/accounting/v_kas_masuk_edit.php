@@ -791,10 +791,11 @@ if ($datas->status == 'confirm') {
 
                                 var tmplt = $("template.kasmasuk-tmplt-tunai");
                                 var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
+                                var uraian = "Dari " + row.bank + " " + row.no_rek + " CEK/BG : " + row.no_bg;
                                 $("#kasmasuk-detail tbody").append(isi_tmplt);
                                 $("#transaksi").val(transaksi.join(","));
                                 $(".giro_keluar_detail" + no).val(row.id);
-                                $(".uraian" + no).val(row.no_gk);
+                                $(".uraian" + no).val(uraian.toUpperCase());
                                 $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.nominal));
                                 $(".kurs" + no).val(row.kurs);
                                 $(".nourut" + no).html(no);

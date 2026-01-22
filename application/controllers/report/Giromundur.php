@@ -162,7 +162,7 @@ class Giromundur extends MY_Controller {
                 $table = "(({$queryGiroMasuk}) union all ({$queryBankMasuk}) union all ({$queryGiroKeluar})) as giromundur";
             }
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = giromundur.kode_coa", "left")
-                    ->setOrder(["uraian" => "asc", "no_bg" => "asc", "tanggal" => "asc",])
+                    ->setOrder(["uraian" => "asc", "no_bg" => "asc", "tanggal" => "asc", "no_bukti" => "desc"])
                     ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(giromundur.kode_coa,'-',acc_coa.nama) as coa,no_bg"]);
             return $model;
         } catch (Exception $ex) {
