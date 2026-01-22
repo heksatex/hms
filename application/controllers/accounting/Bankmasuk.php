@@ -737,7 +737,7 @@ class Bankmasuk extends MY_Controller {
             $customer = str_split(trim(preg_replace('/\s+/', ' ', "Dari : {$head->partner_nama}")), 33);
             foreach ($customer as $key => $value) {
                 if ($key > 0) {
-                    $printer->text(str_pad("", 84));
+                    $printer->text(str_pad("", 86));
                 }
                 $printer->text(str_pad(trim($value), 33, " ", STR_PAD_RIGHT));
             }
@@ -783,7 +783,7 @@ class Bankmasuk extends MY_Controller {
             $no = 0;
             foreach ($detail as $keys => $value) {
                 $totals += $value->nominal;
-                $no = str_split(($key + 1), 4);
+                $no = str_split(($keys + 1), 4);
                 foreach ($no as $k => $vls) {
                     $vls = trim($vls);
                     $no[$k] = $vls;
