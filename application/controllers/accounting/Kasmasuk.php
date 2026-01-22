@@ -697,7 +697,7 @@ class Kasmasuk extends MY_Controller {
             $customer = str_split(trim(preg_replace('/\s+/', ' ', "Dari : {$head->partner_nama}")), 33);
             foreach ($customer as $key => $value) {
                 if ($key > 0) {
-                    $printer->text(str_pad("", 84));
+                    $printer->text(str_pad("", 86));
                 }
                 $printer->text(str_pad(trim($value), 33, " ", STR_PAD_RIGHT));
             }
@@ -857,7 +857,7 @@ class Kasmasuk extends MY_Controller {
                         foreach ($checkGiro as $key => $value) {
                             $nogk[] = $value->no_gk;
                             switch (true) {
-                                case $value->no_bk2 != "":
+                                case ($value->no_bk2 != "" && $kode !== $value->no_bk2):
                                     throw new \exception("Data Giro {$value->no_gk} Sudah mempunyai no Kas Masuk {$value->no_bk2}", 500);
                                     break;
                                 case $value->nominal < 1:
