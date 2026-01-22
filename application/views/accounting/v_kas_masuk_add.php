@@ -47,7 +47,7 @@
                                                         <?php
                                                         foreach ($coa as $key => $value) {
                                                             ?>
-                                                            <option value="<?= $value->kode_coa ?>" <?= ($key ===0) ? "selected":"" ?> ><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
+                                                            <option value="<?= $value->kode_coa ?>" <?= ($key === 0) ? "selected" : "" ?> ><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
                                                             <?php
                                                         }
                                                         ?>
@@ -321,10 +321,11 @@
                             }
                             var tmplt = $("template.kaskeluar-tmplt-tunai");
                             var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
+                            var uraian = "Dari " + row.bank + " " + row.no_rek + " CEK/BG : " + row.no_bg;
                             $("#kasmasuk-detail tbody").append(isi_tmplt);
                             $("#transaksi").val(transaksi.join(","));
                             $(".giro_keluar_detail" + no).val(row.id);
-                            $(".uraian" + no).val(row.no_gk);
+                            $(".uraian" + no).val(uraian.toUpperCase());
                             $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.nominal));
                             $(".kurs" + no).val(row.kurs);
                             $(".nourut" + no).html(no);
@@ -389,12 +390,12 @@
                     var coa = txtt.at(-1);
                     $("#coa_name").val(coa);
                     if (txtt.length > 1) {
-                        previewNo(coa,$("#tanggal").val());
+                        previewNo(coa, $("#tanggal").val());
                     }
                 });
-                
-                $("#tanggal").on("blur",function(){
-                    previewNo($("#coa_name").val(),$("#tanggal").val());
+
+                $("#tanggal").on("blur", function () {
+                    previewNo($("#coa_name").val(), $("#tanggal").val());
                 });
 
                 const previewNo = ((coa, tgl) => {
@@ -503,7 +504,8 @@
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
+                    $("#total_nominal").val(total);
+                    formatCurrency($("#total_nominal"), "blur");
                 });
                 const formdo = document.forms.namedItem("form-acc-kasmasuk");
                 formdo.addEventListener(
@@ -537,8 +539,8 @@
                         });
                     }
                 });
-                
-                previewNo($("#coa_name").val(),$("#tanggal").val());
+
+                previewNo($("#coa_name").val(), $("#tanggal").val());
 
             });
             $(document).ready(function () {
