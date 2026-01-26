@@ -49,8 +49,8 @@ class Login extends CI_Controller {
 //                                ->setOrder(["row_order" => "asc"])->getData();
                 $menu = $modelMenu->setTables("main_menu_sub")->setJoins("(select username,main_menu_sub_kode from user_priv where user_priv.username = '{$username}') as aa ", "on kode = aa.main_menu_sub_kode", "left")
                                 ->setSelects(["inisial_class,kode,link_menu,username,dept_id"])->setOrder(["row_order" => "asc"])->getData();
-                $mainMenu = $modelMenu->setTables("main_menu mm")->setJoins("user_priv up","up.main_menu_kode=mm.kode")
-                        ->setSelects(["DISTINCT(mm.nama), mm.kode, mm.inisial_class"])->setWheres(["up.username"=>$username])->setOrder(["mm.row_order"=>"asc"])->getData();
+                $mainMenu = $modelMenu->setTables("main_menu mm")->setJoins("user_priv up", "up.main_menu_kode=mm.kode")
+                                ->setSelects(["DISTINCT(mm.nama), mm.kode, mm.inisial_class"])->setWheres(["up.username" => $username])->setOrder(["mm.row_order" => "asc"])->getData();
                 $textMainMenu = serialize($mainMenu);
                 $text = serialize($menu);
                 $data_session = array(
@@ -65,10 +65,12 @@ class Login extends CI_Controller {
                 if ($printer) {
                     $this->session->set_userdata(["printer" => $printer->printer]);
                 }
+                $this->log_login();
                 $this->output->set_status_header(200)
                         ->set_content_type('application/json', 'utf-8')
                         ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
             } catch (Exception $ex) {
+                $this->log_login($ex->getMessage());
                 $this->output->set_status_header(500)
                         ->set_content_type('application/json', 'utf-8')
                         ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -77,6 +79,7 @@ class Login extends CI_Controller {
         }
         if (!empty($cek)) {
             if (!$cek->aktif) {
+                $this->log_login("Status User Tidak aktif");
                 $this->session->set_flashdata('gagal', 'Status User Tidak aktif');
                 redirect(base_url("login"));
             }
@@ -88,9 +91,9 @@ class Login extends CI_Controller {
 //                            ->setOrder(["row_order" => "asc"])->getData();
             $menu = $modelMenu->setTables("main_menu_sub")->setJoins("(select username,main_menu_sub_kode from user_priv where user_priv.username = '{$username}') as aa ", "on kode = aa.main_menu_sub_kode", "left")
                             ->setSelects(["inisial_class,kode,link_menu,username,dept_id"])->setOrder(["row_order" => "asc"])->getData();
-            $mainMenu = $modelMenu->setTables("main_menu mm")->setJoins("user_priv up","up.main_menu_kode=mm.kode")
-                        ->setSelects(["DISTINCT(mm.nama), mm.kode, mm.inisial_class"])->setWheres(["up.username"=>$username])->setOrder(["mm.row_order"=>"asc"])->getData();
-                $textMainMenu = serialize($mainMenu);
+            $mainMenu = $modelMenu->setTables("main_menu mm")->setJoins("user_priv up", "up.main_menu_kode=mm.kode")
+                            ->setSelects(["DISTINCT(mm.nama), mm.kode, mm.inisial_class"])->setWheres(["up.username" => $username])->setOrder(["mm.row_order" => "asc"])->getData();
+            $textMainMenu = serialize($mainMenu);
             $text = serialize($menu);
             $data_session = array(
                 'username' => $username,
@@ -106,9 +109,11 @@ class Login extends CI_Controller {
             if ($printer) {
                 $this->session->set_userdata(["printer" => $printer->printer]);
             }
+            $this->log_login();
             redirect(base_url($row['inisial_class']));
         } else {
             //login gagal;
+            $this->log_login("Username atau Password Salah");
             $this->session->set_flashdata('gagal', 'Username atau Password Salah !');
             redirect(base_url("login"));
         }
@@ -117,6 +122,17 @@ class Login extends CI_Controller {
     function logout() {
         $this->session->sess_destroy();
         redirect(base_url('login'));
+    }
+
+    protected function log_login($note = "Sukses Login") {
+        try {
+            $username = $this->input->post('username');
+            $ip = getClientIP();
+            $model = new $this->m_global;
+            $model->setTables("log_login")->save(["username" => $username, "ip" => $ip, "note" => $note,"created_at"=>date("Y-m-d H:i:s")]);
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+        }
     }
 }
 
