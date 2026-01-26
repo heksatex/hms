@@ -32,7 +32,8 @@
                                             <th>Usename</th>
                                             <th>IP</th>
                                             <th>Waktu</th>
-                                            <th>Note</th>             
+                                            <th>Note</th>  
+                                            <th>Platform</th>  
                                         </tr>
                                     </thead>
                                 </table>
@@ -63,7 +64,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 4],
+                            "targets": [0, 4,5],
                             "orderable": false
                         }
                     ]
