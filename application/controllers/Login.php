@@ -128,8 +128,12 @@ class Login extends CI_Controller {
         try {
             $username = $this->input->post('username');
             $ip = getClientIP();
+            $browsers = getBrowser();
+            $browserName = ($browsers["name"] ?? "");
+            $browserVrs = ($browsers["version"] ?? "");
+            $browserpltr = ($browsers["platform"] ?? "");
             $model = new $this->m_global;
-            $model->setTables("log_login")->save(["username" => $username, "ip" => $ip, "note" => $note,"created_at"=>date("Y-m-d H:i:s")]);
+            $model->setTables("log_login")->save(["username" => $username, "ip" => $ip, "note" => $note, "created_at" => date("Y-m-d H:i:s"), "browser" =>"{$browserName} {$browserVrs} / {$browserpltr}"]);
         } catch (Exception $ex) {
             log_message("error", json_encode($ex));
         }

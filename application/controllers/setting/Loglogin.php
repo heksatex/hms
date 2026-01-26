@@ -32,7 +32,7 @@ class Loglogin extends MY_Controller {
             $no = $_POST['start'];
             $model = new $this->m_global;
             $model->setTables("log_login")->setOrders([null, "username", "ip", "created_at"])
-                    ->setSearch(["username", "ip", "note"])
+                    ->setSearch(["username", "ip", "note","browser"])
                     ->setOrder(["created_at" => "desc"]);
             foreach ($model->getData() as $field) {
                 $no++;
@@ -41,7 +41,8 @@ class Loglogin extends MY_Controller {
                     $field->username,
                     $field->ip,
                     $field->created_at,
-                    $field->note
+                    $field->note,
+                    $field->browser
                 ];
             }
             echo json_encode(array("draw" => $_POST['draw'],
