@@ -1427,7 +1427,7 @@ class Pelunasanpiutang extends MY_Controller
                 if ($sisa_piutang_rp > 0 or $sisa_piutang_valas > 0) {
 
                     if ($li->total_piutang_rp > 0) {
-                        if($curr_id != $li->currency_id){
+                        if ($curr_id != $li->currency_id) {
                             $pelunasan_valas_update = 0;
                             $pelunasan_rp_update    = 0;
                         } else {
@@ -1952,9 +1952,9 @@ class Pelunasanpiutang extends MY_Controller
                             $nominal_credit = $this->input->post("nominal_credit");
                             $nominal_debit = $this->input->post("nominal_debit");
                             $nominal_non = $this->input->post("nominal_non");
-                          
+
                             // $nominal_head = $this->input->post("nominal_head");
- 
+
                             $get_coa = $this->m_pelunasanhutang->get_coa_by_kode(['kode_coa' => $coa_head]);
                             $data[] = array(
                                 'pelunasan_piutang_id'  => $cek->id,
@@ -2407,9 +2407,29 @@ class Pelunasanpiutang extends MY_Controller
                                 }
                             }
 
-                            $update = $this->m_pelunasanpiutang->update_pelunasan_faktur_by_kode($tmp_update, $no_pelunasan);
+
+                            $result2 = $this->hitung_summary($no_pelunasan);
+                            if (!empty($result2)) {
+                                throw new \Exception('Summary Gagal di update !', 200);
+                            }
                         } else {
-                            throw new \Exception('Metode Pelunasan Masih Kosong !', 200);
+                            $debit_note_true = 'no';
+                            $data_sum = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
+                            foreach ($data_sum as $row) {
+                                foreach ($this->m_pelunasanpiutang->get_list_summary_koreksi_by_id($no_pelunasan, $row->id) as $items) {
+                                    if ($items->koreksi_id === 'debit_note') {
+                                        if ($items->koreksi_id === 'debit_note') {
+                                            $debit_note_true = 'yes';
+                                        }
+                                    }
+                                }
+                            }
+                            if ($debit_note_true === 'no') {
+                                throw new \Exception('Metode Pelunasan Masih Kosong !', 200);
+                            }
+                            if ($debit_note_true === 'yes') {
+                                $update = $this->m_pelunasanpiutang->update_pelunasan_faktur_by_kode($tmp_update, $no_pelunasan);
+                            }
                         }
 
 
@@ -2425,10 +2445,7 @@ class Pelunasanpiutang extends MY_Controller
                         // load in library
                         $this->_module->gen_history_ip($sub_menu, $username, $data_history);
 
-                        $result2 = $this->hitung_summary($no_pelunasan);
-                        if (!empty($result2)) {
-                            throw new \Exception('Summary Gagal di update !', 200);
-                        }
+
 
                         $callback = array('status' => 'success', 'message' => 'Data Berhasil diubah', 'icon' => 'fa fa-check', 'type' => 'success');
                     }
@@ -2568,7 +2585,6 @@ class Pelunasanpiutang extends MY_Controller
                                 );
                             }
                             $currency_id = $currency_ids[0];
-
                         } else {
                             throw new \Exception('Faktur harus dipilih dulu !', 200);
                         }
@@ -2702,10 +2718,33 @@ class Pelunasanpiutang extends MY_Controller
                 throw new \Exception('Data Supplier Kosonsg', 409);
             }
 
+            $deposit_true = 'no';
+            $debit_note_true = 'no';
+            $data_sum = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
+            foreach ($data_sum as $row) {
+                foreach ($this->m_pelunasanpiutang->get_list_summary_koreksi_by_id($no_pelunasan, $row->id) as $items) {
+                    if ($items->koreksi_id === 'deposit') {
+                        if ($items->koreksi_id === 'deposit' && $items->lunas != 0) {
+                            throw new \Exception("Pelunasan tidak bisa Confirm. Koreksi Deposit Gagal.", 200);
+                        }
+                        if ($items->koreksi_id === 'deposit' && $items->alat_pelunasan != 'true') {
+                            throw new \Exception("Pelunasan tidak bisa Confirm. Koreksi Deposit bukan jadi alat pelunasan .", 200);
+                        }
+                        $deposit_true = 'yes';
+                    }
+                    if($items->koreksi_id === 'debit_note') {
+                        $debit_note_true = 'yes';
+                    }
+                }
+            }
+
+
             // cek data faktur
             $result = $this->m_pelunasanpiutang->get_data_faktur_by_code($no_pelunasan);
             if (!$result) {
-                throw new \Exception('Data Faktur yang akan dilunasi masih Kosong ', 409);
+                if ($deposit_true == 'no') {
+                    throw new \Exception('Data Faktur yang akan dilunasi masih Kosong ', 409);
+                }
             }
 
             $currency_faktur = null;
@@ -2713,7 +2752,9 @@ class Pelunasanpiutang extends MY_Controller
             // cek data pelunasan
             $result2 = $this->m_pelunasanpiutang->get_data_metode_by_code($no_pelunasan);
             if (!$result2) {
-                throw new \Exception('Data Metode Pelunasan masih Kosong ', 409);
+                if($debit_note_true == 'no'){
+                    throw new \Exception('Data Metode Pelunasan masih Kosong ', 409);
+                }
             }
 
 
@@ -2765,10 +2806,10 @@ class Pelunasanpiutang extends MY_Controller
             // $data_update3 =  array();
             $metode_pl = $cek_mt->row();
             $jurnal   = '';
-            $data_summary = 'invalid';
             $create_jurnal = false;
+            $data_summary = 'invalid';
 
-            if ($metode_pl->tipe == 'um') { // kebentuk jurnal
+            if (!empty($metode_pl->tipe) && $metode_pl->tipe === 'um') {// kebentuk jurnal
 
                 // cek selisih rupiah
                 $get_selisih = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
@@ -2920,25 +2961,28 @@ class Pelunasanpiutang extends MY_Controller
                                             );
                                         }
 
-                                        if (!$gk->kode_coa || !$gk->nama_coa) {
-                                            $coaPosisi  = ($gk->posisi === 'D') ? "Debit" : "Credit";
-                                            throw new \Exception('CoA ' . $coaPosisi . ' belum dipilih', 422);
-                                        }
+                                        $kode_coa_head   =  $gk->kode_coa;
+                                        $posisi_coa_head =  $gk->posisi;
 
-                                        $items_entries[] = array(
-                                            'kode'          => $jurnal,
-                                            'nama'          => 'Koreksi',
-                                            'reff_note'     => 'Pelunasan Piutang',
-                                            'partner'       => $cek->partner_id, // partner_id
-                                            'kode_coa'      => $gk->kode_coa,
-                                            'posisi'        => $gk->posisi,
-                                            'nominal_curr'  => abs($gk->nominal),
-                                            'kurs'          => $gs->kurs,
-                                            'kode_mua'      => $gs->currency,
-                                            'nominal'       => abs($gk->nominal * $gs->kurs),
-                                            'row_order'     => $row_items
-                                        );
-                                        $row_items++;
+                                        // if (!$gk->kode_coa || !$gk->nama_coa) {
+                                        //     $coaPosisi  = ($gk->posisi === 'D') ? "Debit" : "Credit";
+                                        //     throw new \Exception('CoA ' . $coaPosisi . ' belum dipilih', 422);
+                                        // }
+
+                                        // $items_entries[] = array(
+                                        //     'kode'          => $jurnal,
+                                        //     'nama'          => 'Koreksi',
+                                        //     'reff_note'     => 'Pelunasan Piutang',
+                                        //     'partner'       => $cek->partner_id, // partner_id
+                                        //     'kode_coa'      => $gk->kode_coa,
+                                        //     'posisi'        => $gk->posisi,
+                                        //     'nominal_curr'  => abs($gk->nominal),
+                                        //     'kurs'          => $gs->kurs,
+                                        //     'kode_mua'      => $gs->currency,
+                                        //     'nominal'       => abs($gk->nominal * $gs->kurs),
+                                        //     'row_order'     => $row_items
+                                        // );
+                                        // $row_items++;
                                     }
                                     ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
                                     $nominal_head = $nominal_head + abs($gk->nominal);
@@ -2996,6 +3040,28 @@ class Pelunasanpiutang extends MY_Controller
                                                         'row_order'     => $row_items
                                                     );
                                                     $row_items++;
+
+                                                    if(empty($kode_coa_head)){
+                                                        throw new \Exception('CoA Head tidak kosong !', 422);
+                                                    }
+
+                                                    // item lawannya dengan coa HEAD
+                                                    $items_entries[] = array(
+                                                        'kode'          => $jurnal,
+                                                        'nama'          => 'Koreksi ',
+                                                        'reff_note'     => 'Pelunasan Piutang',
+                                                        'partner'       => $cek->partner_id, // partner_id
+                                                        'kode_coa'      => $kode_coa_head,
+                                                        'posisi'        => ($gk->posisi === 'D') ? 'C' : 'D',
+                                                        'nominal_curr'  => abs($gk->nominal),
+                                                        'kurs'          => $gs->kurs,
+                                                        'kode_mua'      => $gs->currency,
+                                                        'nominal'       => abs($gk->nominal * $gs->kurs),
+                                                        'row_order'     => $row_items
+                                                    );
+                                                    $row_items++;
+
+
                                                 }
                                             }
                                             ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
@@ -3197,155 +3263,155 @@ class Pelunasanpiutang extends MY_Controller
                 }
             }
 
-
-            if ($data_summary == 'invalid') {
+            if ($data_summary == 'invalid' && $deposit_true == 'no') {
                 throw new \Exception('Data Summary / Info  tidak Valid !', 200);
             }
 
+            if ($deposit_true == 'no') {
+                // var_dump($data_update);
+                if (!empty($tmp_update)) {
+                    $update = $this->m_pelunasanpiutang->update_faktur_by_kode($tmp_update);
+                    if ($update !== "" && $debit_note_true === 'no' && empty($metode_pl)) { // hanya untuk debit note full
+                        throw new \Exception('Gagal Update Faktur Nominal, Tidak ada data yang di perbaharui !', 200);
+                    }
 
-            // var_dump($data_update);
-            if (!empty($tmp_update)) {
-                $update = $this->m_pelunasanpiutang->update_faktur_by_kode($tmp_update);
-                if ($update !== "") {
-                    throw new \Exception('Gagal Update Faktur Nominal, Tidak ada data yang di perbaharui !', 200);
-                }
+                    $data_update = [];
+                    $tmp_update  = [];
 
-                $data_update = [];
-                $tmp_update  = [];
+                    $get_inv = $this->m_pelunasanpiutang->get_data_faktur_by_code($no_pelunasan);
+                    foreach ($get_inv as $gi) {
 
-                $get_inv = $this->m_pelunasanpiutang->get_data_faktur_by_code($no_pelunasan);
-                foreach ($get_inv as $gi) {
-
-                    $getInv = $this->m_pelunasanpiutang->get_faktur_by_kode(['no_faktur_internal' => $gi->no_faktur, 'lunas' => 0, 'faktur.id' => $gi->faktur_id])->row();
-                    if (isset($getInv)) {
-                        if ((float)$getInv->sisa_piutang_rp == 0 and (float) $getInv->sisa_piutang_valas == 0) {
-                            $data_update = array(
-                                'id'  => $gi->faktur_id,
-                                'lunas'   => 1
-                            );
-                            array_push($tmp_update, $data_update);
-                        } else {
-                            if ($gi->status_bayar == 'lunas') {
+                        $getInv = $this->m_pelunasanpiutang->get_faktur_by_kode(['no_faktur_internal' => $gi->no_faktur, 'lunas' => 0, 'faktur.id' => $gi->faktur_id])->row();
+                        if (isset($getInv)) {
+                            if ((float)$getInv->sisa_piutang_rp == 0 and (float) $getInv->sisa_piutang_valas == 0) {
                                 $data_update = array(
                                     'id'  => $gi->faktur_id,
                                     'lunas'   => 1
                                 );
                                 array_push($tmp_update, $data_update);
+                            } else {
+                                if ($gi->status_bayar == 'lunas') {
+                                    $data_update = array(
+                                        'id'  => $gi->faktur_id,
+                                        'lunas'   => 1
+                                    );
+                                    array_push($tmp_update, $data_update);
+                                }
+                                if ($gi->status_bayar == 'belum_bayar' || empty($gi->status_bayar)) {
+                                    throw new \Exception('Data Faktur ' . $gi->no_faktur . ' belum ada pelunasan !', 200);
+                                }
                             }
-                            if ($gi->status_bayar == 'belum_bayar' || empty($gi->status_bayar)) {
-                                throw new \Exception('Data Faktur ' . $gi->no_faktur . ' belum ada pelunasan !', 200);
-                            }
+                        } else {
+                            throw new \Exception('Data Faktur ' . $gi->no_faktur . ' tidak Valid / Sudah Lunas!', 200);
+                        }
+                    }
+
+                    if ($tmp_update) {
+                        $update_inv = $this->m_pelunasanpiutang->update_faktur_by_kode($tmp_update);
+                        if ($update_inv !== "") {
+                            throw new \Exception('Gagal Update Faktur Status Lunas, Tidak ada data yang di perbaharui !' . json_encode($tmp_update), 200);
+                        }
+                    }
+                } else {
+                    throw new \Exception('Tidak ada Data Faktur  di Pelunasan ini !', 200);
+                }
+            }
+
+            $data_update = [];
+            $tmp_update = [];
+
+            $list_mt  = $this->m_pelunasanpiutang->get_data_metode_by_code($no_pelunasan);
+            $total    = 0;
+            foreach ($list_mt as $mt) {
+                ($mt->currency === 'IDR') ? $total = $mt->total_rp : $total = $mt->total_valas;
+                if ($mt->tipe2 == 'bank') { // bank masuk detail
+                    $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('bank', ['acc_bank_masuk.status' => 'confirm', 'acc_bank_masuk.no_bm' => $mt->no_bukti, 'acc_bank_masuk_detail.id' => $mt->id_bukti, 'acc_bank_masuk_detail.lunas' => 0]);
+                    if (isset($cek_mt)) {
+                        if ((float) $cek_mt->nominal == (float) $total) {
+                            $data_update = array(
+                                'id'  => $mt->id_bukti,
+                                'lunas'   => 1
+                            );
+                            array_push($tmp_update, $data_update);
+                            // $tmp_update =  array();
+                        } else {
+                            throw new \Exception('Nominal Metode Pelunasan Bank Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                         }
                     } else {
-                        throw new \Exception('Data Faktur ' . $gi->no_faktur . ' tidak Valid / Sudah Lunas!', 200);
+                        throw new \Exception('Metode Pelunasan Bank Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                     }
-                }
-
-                if ($tmp_update) {
-                    $update_inv = $this->m_pelunasanpiutang->update_faktur_by_kode($tmp_update);
-                    if ($update_inv !== "") {
-                        throw new \Exception('Gagal Update Faktur Status Lunas, Tidak ada data yang di perbaharui !' . json_encode($tmp_update), 200);
-                    }
-                }
-
-                $data_update = [];
-                $tmp_update = [];
-
-                $list_mt  = $this->m_pelunasanpiutang->get_data_metode_by_code($no_pelunasan);
-                $total    = 0;
-                foreach ($list_mt as $mt) {
-                    ($mt->currency === 'IDR') ? $total = $mt->total_rp : $total = $mt->total_valas;
-                    if ($mt->tipe2 == 'bank') { // bank masuk detail
-                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('bank', ['acc_bank_masuk.status' => 'confirm', 'acc_bank_masuk.no_bm' => $mt->no_bukti, 'acc_bank_masuk_detail.id' => $mt->id_bukti, 'acc_bank_masuk_detail.lunas' => 0]);
-                        if (isset($cek_mt)) {
-                            if ((float) $cek_mt->nominal == (float) $total) {
-                                $data_update = array(
-                                    'id'  => $mt->id_bukti,
-                                    'lunas'   => 1
-                                );
-                                array_push($tmp_update, $data_update);
-                                // $tmp_update =  array();
-                            } else {
-                                throw new \Exception('Nominal Metode Pelunasan Bank Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                            }
+                } else if ($mt->tipe2 == 'giro') { // giro masuk detail
+                    $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('giro', ['acc_giro_masuk.status' => 'confirm', 'acc_giro_masuk.no_gm' => $mt->no_bukti, 'acc_giro_masuk_detail.id' => $mt->id_bukti, 'acc_giro_masuk_detail.lunas' => 0]);
+                    if (isset($cek_mt)) {
+                        if ((float) $cek_mt->nominal == (float) $total) {
+                            $data_update2 = array(
+                                'id'  => $mt->id_bukti,
+                                'lunas'   => 1
+                            );
+                            array_push($tmp_update2, $data_update2);
+                            // $tmp_update2 =  array();
                         } else {
-                            throw new \Exception('Metode Pelunasan Bank Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                        }
-                    } else if ($mt->tipe2 == 'giro') { // giro masuk detail
-                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('giro', ['acc_giro_masuk.status' => 'confirm', 'acc_giro_masuk.no_gm' => $mt->no_bukti, 'acc_giro_masuk_detail.id' => $mt->id_bukti, 'acc_giro_masuk_detail.lunas' => 0]);
-                        if (isset($cek_mt)) {
-                            if ((float) $cek_mt->nominal == (float) $total) {
-                                $data_update2 = array(
-                                    'id'  => $mt->id_bukti,
-                                    'lunas'   => 1
-                                );
-                                array_push($tmp_update2, $data_update2);
-                                // $tmp_update2 =  array();
-                            } else {
-                                throw new \Exception('Nominal Metode Pelunasan Giro  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                            }
-                        } else {
-                            throw new \Exception('Metode Pelunasan Giro Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                        }
-                    } else if ($mt->tipe2 == 'kas') { // kas masuk detail'
-                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('kas', ['acc_kas_masuk.status' => 'confirm', 'acc_kas_masuk.no_km' => $mt->no_bukti, 'acc_kas_masuk_detail.id' => $mt->id_bukti, 'acc_kas_masuk_detail.lunas' => 0]);
-                        if (isset($cek_mt)) {
-                            if ((float) $cek_mt->nominal == (float) $total) {
-                                $data_update3 = array(
-                                    'id'  => $mt->id_bukti,
-                                    'lunas'   => 1
-                                );
-                                $tmp_update3 =  array();
-                                array_push($tmp_update3, $data_update3);
-                            } else {
-                                throw new \Exception('Nominal Metode Pelunasan Kas  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                            }
-                        } else {
-                            throw new \Exception('Metode Pelunasan Kas Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                        }
-                    } else if ($mt->tipe2 == 'retur') { //invoice retur
-                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('retur', ['status' => 'confirm', 'no_retur' => $mt->no_bukti, 'id' => $mt->id_bukti, 'lunas' => 0]);
-                        if (isset($cek_mt)) {
-                            if ((float) $cek_mt->total_rp == (float) $mt->total_rp && (float) $cek_mt->total_valas == (float) $mt->total_valas) {
-                                $data_update4 = array(
-                                    'id'  => $mt->id_bukti,
-                                    'lunas'   => 1
-                                );
-                                $tmp_update4 =  array();
-                                array_push($tmp_update4, $data_update4);
-                            } else {
-                                throw new \Exception('Nominal Metode Pelunasan Retur  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                            }
-                        } else {
-                            throw new \Exception('Metode Pelunasan Retur Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                        }
-                    } else if ($mt->tipe2 == 'koreksi') { //kurs bulan
-                        $cek_mt_koreksi = $this->m_pelunasanpiutang->cek_metode_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_bukti' => $mt->no_bukti, 'id_bukti' => $mt->id_bukti]);
-                        if (!isset($cek_mt_koreksi)) {
-                            throw new \Exception('Koreksi Kurs Bulan tidak ditemukan !', 200);
-                        }
-                    } else if ($mt->tipe2 == 'depo') {
-                        $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('depo', ['acc_pelunasan_piutang.status' => 'done', 'acc_pelunasan_piutang.no_pelunasan' => $mt->no_bukti, 'acc_pelunasan_piutang_summary_koreksi.id' => $mt->id_bukti, 'acc_pelunasan_piutang_summary_koreksi.lunas' => 0]);
-                        if (isset($cek_mt)) {
-                            if ((float) $cek_mt->total_rp == (float) $mt->total_rp && (float) $cek_mt->total_valas == (float) $mt->total_valas) {
-                                $data_update5 = array(
-                                    'id'  => $mt->id_bukti,
-                                    'lunas'   => 1
-                                );
-                                $tmp_update5 =  array();
-                                array_push($tmp_update5, $data_update5);
-                            } else {
-                                throw new \Exception('Nominal Metode Pelunasan Deposit  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
-                            }
-                        } else {
-                            throw new \Exception('Metode Pelunasan Deposit Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                            throw new \Exception('Nominal Metode Pelunasan Giro  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                         }
                     } else {
-                        throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas/Retur/Deposit  !', 200);
+                        throw new \Exception('Metode Pelunasan Giro Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                     }
+                } else if ($mt->tipe2 == 'kas') { // kas masuk detail'
+                    $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('kas', ['acc_kas_masuk.status' => 'confirm', 'acc_kas_masuk.no_km' => $mt->no_bukti, 'acc_kas_masuk_detail.id' => $mt->id_bukti, 'acc_kas_masuk_detail.lunas' => 0]);
+                    if (isset($cek_mt)) {
+                        if ((float) $cek_mt->nominal == (float) $total) {
+                            $data_update3 = array(
+                                'id'  => $mt->id_bukti,
+                                'lunas'   => 1
+                            );
+                            $tmp_update3 =  array();
+                            array_push($tmp_update3, $data_update3);
+                        } else {
+                            throw new \Exception('Nominal Metode Pelunasan Kas  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                        }
+                    } else {
+                        throw new \Exception('Metode Pelunasan Kas Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                    }
+                } else if ($mt->tipe2 == 'retur') { //invoice retur
+                    $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('retur', ['status' => 'confirm', 'no_retur' => $mt->no_bukti, 'id' => $mt->id_bukti, 'lunas' => 0]);
+                    if (isset($cek_mt)) {
+                        if ((float) $cek_mt->total_rp == (float) $mt->total_rp && (float) $cek_mt->total_valas == (float) $mt->total_valas) {
+                            $data_update4 = array(
+                                'id'  => $mt->id_bukti,
+                                'lunas'   => 1
+                            );
+                            $tmp_update4 =  array();
+                            array_push($tmp_update4, $data_update4);
+                        } else {
+                            throw new \Exception('Nominal Metode Pelunasan Retur  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                        }
+                    } else {
+                        throw new \Exception('Metode Pelunasan Retur Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                    }
+                } else if ($mt->tipe2 == 'koreksi') { //kurs bulan
+                    $cek_mt_koreksi = $this->m_pelunasanpiutang->cek_metode_input_by_kode(['no_pelunasan' => $no_pelunasan, 'no_bukti' => $mt->no_bukti, 'id_bukti' => $mt->id_bukti]);
+                    if (!isset($cek_mt_koreksi)) {
+                        throw new \Exception('Koreksi Kurs Bulan tidak ditemukan !', 200);
+                    }
+                } else if ($mt->tipe2 == 'depo') {
+                    $cek_mt = $this->m_pelunasanpiutang->cek_data_metode_valid_by_code('depo', ['acc_pelunasan_piutang.status' => 'done', 'acc_pelunasan_piutang.no_pelunasan' => $mt->no_bukti, 'acc_pelunasan_piutang_summary_koreksi.id' => $mt->id_bukti, 'acc_pelunasan_piutang_summary_koreksi.lunas' => 0]);
+                    if (isset($cek_mt)) {
+                        if ((float) $cek_mt->total_rp == (float) $mt->total_rp && (float) $cek_mt->total_valas == (float) $mt->total_valas) {
+                            $data_update5 = array(
+                                'id'  => $mt->id_bukti,
+                                'lunas'   => 1
+                            );
+                            $tmp_update5 =  array();
+                            array_push($tmp_update5, $data_update5);
+                        } else {
+                            throw new \Exception('Nominal Metode Pelunasan Deposit  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                        }
+                    } else {
+                        throw new \Exception('Metode Pelunasan Deposit Tidak Valid <br> No. ' . $mt->no_bukti, 200);
+                    }
+                } else {
+                    throw new \Exception('Confirm Gagal, Metode Pelunasan Selain dari Giro/Bank/Kas/Retur/Deposit  !', 200);
                 }
-            } else {
-                throw new \Exception('Tidak ada Data Faktur  di Pelunasan ini !', 200);
             }
 
 

@@ -1222,8 +1222,8 @@
                         $.each(data.record, function(key, value) {
 
                             empty = false;
-                            if(value.tipe_currency === 'Valas'){
-                                $mu  = (value.currency != '') ? value.tipe_currency +  `<br><div><small>${value.currency} - ${formatNumber(value.kurs)}</small></div>` : value.tipe_currency;
+                            if (value.tipe_currency === 'Valas') {
+                                $mu = (value.currency != '') ? value.tipe_currency + `<br><div><small>${value.currency} - ${formatNumber(value.kurs)}</small></div>` : value.tipe_currency;
                             } else {
                                 $mu = value.tipe_currency;
                             }
@@ -1648,10 +1648,10 @@
 
                 // ====================== Mode NORMAL ===========================
                 if (mode == 'normal') {
-                    if(value.alat_pelunasan === 'true'){
-                        $alat  = " <br> Alat Pelunasan : Ya";
+                    if (value.alat_pelunasan === 'true') {
+                        $alat = " <br> Alat Pelunasan : Ya";
                         $wrapper.append(koreksiNama).append($alat);
-                    }else {
+                    } else {
                         $wrapper.append(koreksiNama).append($coaInfo);
                     }
                     loadCoaInfo(value.id, $coaInfo.find('small')); // ambil text via ajax/func lama
@@ -1677,7 +1677,7 @@
                     updateCoaButton();
                 }
 
-               
+
                 return {
                     wrapper: $wrapper,
                     button: $tdButton
@@ -1914,6 +1914,17 @@
                 });
 
             }
+
+            $('#tambah_data').on('shown.bs.modal', function() {
+                $(this).find('select.select2, select.select-coa, select.coa-select').each(function() {
+                    if (!$(this).hasClass('select2-hidden-accessible')) {
+                        $(this).select2({
+                            width: '100%',
+                            dropdownParent: $('#tambah_data')
+                        });
+                    }
+                });
+            });
 
             $(document).on("click", ".detail-sj", function(e) {
                 e.preventDefault();
