@@ -1662,9 +1662,10 @@
                     let content = "";
                     $.each(coaList, function(index, item) {
                         content += `<b>${item.head == 'true' ? 'Head' : 'Item  : ' +item.koreksi_text}</b><br>
-                        ${item.posisi != '' ? item.posisi : ''}
+                        ${item.head == 'true' && item.posisi != '' ? '' : item.posisi}
+                        
                         ${item.faktur_id != 0 ? 'No Faktur :  '+item.no_faktur :  item.kode_coa + ' - '+ item.nama_coa}<br>
-                        Nominal: ${formatNumber(item.nominal)}
+                        ${item.head == 'true' ? '' : 'Nominal  : ' +formatNumber(item.nominal)}
                         ${item.alat_pelunasan ==='true' ? '<br> Alat Pelunasan : Ya ' : ""}<br>
                         <hr>`;
                     });

@@ -159,7 +159,7 @@
         <!-- </div>
         </div> -->
         <div class="row form-group">
-            <label class="col-lg-4 col-md-4 col-12">Nominal (Jurnal)</label>
+            <label class="col-lg-4 col-md-4 col-12">Total (D) </label>
             <div class="col-lg-1 col-md-6 col-12">
                 <input type="text" class="form-control input-sm" name="posisi_credit" id="posisi_credit" value="C" readonly>
             </div>
@@ -168,7 +168,7 @@
             </div>
         </div>
         <div class="row form-group">
-            <label class="col-lg-4 col-md-4 col-12">Nominal (Jurnal)</label>
+            <label class="col-lg-4 col-md-4 col-12">Total (C) </label>
             <div class="col-lg-1 col-md-6 col-12">
                 <input type="text" class="form-control input-sm" name="posisi_debit" value="D" id="posisi_debit" readonly>
             </div>
@@ -180,7 +180,7 @@
 
 
         <div class="row form-group">
-            <label class="col-lg-4 col-md-4 col-12">Nominal (Non Jurnal)</label>
+            <label class="col-lg-4 col-md-4 col-12">Total (Non Jurnal)</label>
             <div class="col-lg-4 col-md-8 col-12">
                 <input type="text" class="form-control input-sm text-right formatAngka" name="nominal_non" id="nominal_non" data-decimal="2" readonly>
             </div>
