@@ -17,6 +17,7 @@ class Pelunasanpiutang extends MY_Controller
         $this->load->model("m_deliveryorder");
         $this->load->model("m_Picklist");
         $this->load->library("token");
+        $this->load->helper("money");
     }
 
     public function index()
@@ -2381,11 +2382,11 @@ class Pelunasanpiutang extends MY_Controller
                             $rupiah = $get_tot->sum_rp ?? 0;
                             $valas  = $get_tot->sum_valas ?? 0;
 
-                            if (( round((float) $get_piutang_fak->total_pelunasan_rp,2) + round((float) $pelunasan_rp,2)) > round((float) $rupiah,2)) {
+                            if ((money_to_int($get_piutang_fak->total_pelunasan_rp) + money_to_int($pelunasan_rp)) > money_to_int($rupiah)) {
                                 throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Total Pelunasan (Rp) ', 200);
                             }
 
-                            if ((round((float) $get_piutang_fak->total_pelunasan_valas,2) + round((float) $pelunasan_valas,2))  > round((float)  $valas,2)) {
+                            if ((money_to_int($get_piutang_fak->total_pelunasan_valas) + money_to_int($pelunasan_valas))  > money_to_int($valas)) {
                                 throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Total Pelunasan (Valas) ', 200);
                             }
 
@@ -2406,7 +2407,7 @@ class Pelunasanpiutang extends MY_Controller
                                     }
                                 }
                             }
-                            
+
                             $update = $this->m_pelunasanpiutang->update_pelunasan_faktur_by_kode($tmp_update, $no_pelunasan);
 
                             $result2 = $this->hitung_summary($no_pelunasan);
@@ -2755,8 +2756,8 @@ class Pelunasanpiutang extends MY_Controller
             // cek data pelunasan
             $result2 = $this->m_pelunasanpiutang->get_data_metode_by_code($no_pelunasan);
             $has_metode = !empty($result2);
-            if ( !$has_metode && !($debit_note_true === 'yes' && $has_faktur)) {
-                throw new \Exception( 'Data Metode Pelunasan masih Kosong', 409);
+            if (!$has_metode && !($debit_note_true === 'yes' && $has_faktur)) {
+                throw new \Exception('Data Metode Pelunasan masih Kosong', 409);
             }
 
             // Ambil mata uang faktur
