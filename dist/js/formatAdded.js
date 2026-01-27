@@ -1,14 +1,33 @@
-function formatNumber(value, maxDecimals, locale = "en-US", prefix = "") {
-    if (!value) return "";
+
+function formatNumber(value, maxDecimals, locale = "en-US", prefix = "", allowMinus = false) {
+    if (value === null || value === undefined) return "";
+
+    value = value.toString();
+
+    // ======================================
+    // KUNCI UTAMA:
+    // Jika minus TIDAK diizinkan → HAPUS SEMUA
+    // ======================================
+    if (!allowMinus) {
+        value = value.replace(/-/g, "");
+    }
 
     const formatter = new Intl.NumberFormat(locale);
     const decimalSeparator = (1.1).toLocaleString(locale).substring(1, 2);
 
-    // hanya angka / decimal
-    let regex = new RegExp(`[^0-9${decimalSeparator}-]`, "g");
+    // ===============================
+    // DETEKSI MINUS DI DEPAN SAJA
+    // ===============================
+    let isNegative = false;
+    if (allowMinus && value.startsWith("-")) {
+        isNegative = true;
+    }
+
+    // buang semua kecuali angka & decimal
+    let regex = new RegExp(`[^0-9${decimalSeparator}]`, "g");
     let clean = value.replace(regex, "");
 
-    // ubah separator sesuai locale
+    // locale decimal → "."
     if (decimalSeparator !== ".") {
         clean = clean.replace(decimalSeparator, ".");
     }
@@ -21,31 +40,39 @@ function formatNumber(value, maxDecimals, locale = "en-US", prefix = "") {
             clean.substring(firstDot + 1).replace(/\./g, "");
     }
 
-    // jika user baru ketik titik (contoh "12.")
+    // ===============================
+    // KASUS USER BARU KETIK "-"
+    // ===============================
+    if (allowMinus && isNegative && clean === "") {
+        return prefix + "-";
+    }
+
+    // user ketik "."
+    if (clean === ".") {
+        return prefix + (isNegative ? "-" : "") + "0" + decimalSeparator;
+    }
+
+    // user ketik "12."
     if (clean.endsWith(".")) {
         let intPart = clean.slice(0, -1) || "0";
-        return prefix + formatter.format(intPart) + decimalSeparator;
+        let formatted = formatter.format(parseInt(intPart));
+        return prefix + (isNegative ? "-" : "") + formatted + decimalSeparator;
     }
 
     let numberValue = parseFloat(clean);
     if (isNaN(numberValue)) return prefix;
 
-    // pisahkan decimal tanpa rounding dulu
     let parts = clean.split(".");
-    let intPart = parts[0];
-    let decPart = parts[1];
+    let intPart = formatter.format(parseInt(parts[0] || 0));
 
-    intPart = formatter.format(parseInt(intPart || 0));
-
-    // jika ada desimal → batasi jumlah sesuai maxDecimals
-    if (decPart !== undefined) {
-        decPart = decPart.substring(0, maxDecimals);
-        return prefix + intPart + decimalSeparator + decPart;
+    if (parts[1] !== undefined) {
+        let decPart = parts[1].substring(0, maxDecimals);
+        return prefix + (isNegative ? "-" : "") + intPart + decimalSeparator + decPart;
     }
 
-    // belum ada desimal saat input
-    return prefix + intPart;
+    return prefix + (isNegative ? "-" : "") + intPart;
 }
+
 
 
 // ===============================================================
@@ -55,6 +82,7 @@ function bindFormatAngka(context = document) {
 
     context.querySelectorAll(".formatAngka").forEach(input => {
 
+        const allowMinus = input.dataset.allowMinus === "true";
         const maxDecimals = parseInt(input.dataset.decimal || 2);
         const locale = input.dataset.locale || "en-US";
         const prefix = input.dataset.prefix && input.dataset.prefix !== "false"
@@ -63,13 +91,13 @@ function bindFormatAngka(context = document) {
 
         // format awal jika sudah ada value
         if (input.value) {
-            input.value = formatNumber(input.value, maxDecimals, locale, prefix);
+            input.value = formatNumber(input.value, maxDecimals, locale, prefix, allowMinus);
 
             // 🔥 khusus input readonly → langsung paksa tampil decimal lengkap
             if (input.readOnly) {
                 let num = parseFloat(unformatNumber(input.value));
                 if (!isNaN(num)) {
-                    input.value = formatNumber(num.toFixed(maxDecimals), maxDecimals, locale, prefix);
+                    input.value = formatNumber(num.toFixed(maxDecimals), maxDecimals, locale, prefix, allowMinus);
                 }
             }
         }
@@ -79,7 +107,7 @@ function bindFormatAngka(context = document) {
             let start = this.selectionStart;
             let oldLength = this.value.length;
 
-            this.value = formatNumber(this.value, maxDecimals, locale, prefix);
+            this.value = formatNumber(this.value, maxDecimals, locale, prefix, allowMinus);
 
             let newLength = this.value.length;
             this.setSelectionRange(start + (newLength - oldLength), start + (newLength - oldLength));
@@ -89,7 +117,7 @@ function bindFormatAngka(context = document) {
         input.addEventListener("paste", function (e) {
             e.preventDefault();
             let pasted = (e.clipboardData || window.clipboardData).getData("text");
-            this.value = formatNumber(pasted, maxDecimals, locale, prefix);
+            this.value = formatNumber(pasted, maxDecimals, locale, prefix, allowMinus);
         });
 
         // 🔥 saat blur baru dipaksa 2 decimal
@@ -101,7 +129,7 @@ function bindFormatAngka(context = document) {
             if (isNaN(num)) return;
 
             this.value = parseFloat(num).toFixed(maxDecimals); // paksa trailing zero
-            this.value = formatNumber(this.value, maxDecimals, locale, prefix);
+            this.value = formatNumber(this.value, maxDecimals, locale, prefix, allowMinus);
         });
     });
 }
