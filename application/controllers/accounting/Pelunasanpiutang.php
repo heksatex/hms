@@ -2406,7 +2406,8 @@ class Pelunasanpiutang extends MY_Controller
                                     }
                                 }
                             }
-
+                            
+                            $update = $this->m_pelunasanpiutang->update_pelunasan_faktur_by_kode($tmp_update, $no_pelunasan);
 
                             $result2 = $this->hitung_summary($no_pelunasan);
                             if (!empty($result2)) {
