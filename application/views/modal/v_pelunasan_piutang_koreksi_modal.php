@@ -2,9 +2,9 @@
     /* Dropdown */
     .select2-results__option {
         white-space: nowrap !important;
-        overflow-x: auto !important;
+        /* overflow-x: auto !important; */
         text-overflow: clip !important;
-        -webkit-overflow-scrolling: touch;
+        /* -webkit-overflow-scrolling: touch; */
     }
 
     /* Selected element */
@@ -24,13 +24,18 @@
         /* hilangkan batas maksimum */
     }
 
+    .select2-results {
+        max-height: 250px !important;
+        overflow-y: auto !important;
+    }
+
 
     /* Agar tampilan dropdown tidak melebar terlalu jauh di HP */
     @media screen and (max-width: 768px) {
         .select2-container--open .select2-dropdown {
-            width: 100% !important;
+            width: 80% !important;
             max-width: 100% !important;
-            overflow-x: auto !important;
+            /* overflow-x: auto !important; */
         }
     }
 
@@ -42,6 +47,11 @@
     .input-error,
     .select2-error .select2-selection {
         border: 2px solid #e74c3c !important;
+    }
+
+    #tambah_data .modal-body {
+        max-height: calc(100vh - 150px);
+        overflow-y: auto;
     }
 
     tfoot td {
@@ -151,7 +161,7 @@
         <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">Nominal (Jurnal)</label>
             <div class="col-lg-1 col-md-6 col-12">
-                <input type="text" class="form-control input-sm" name="posisi_credit" id="posisi_credit" value="C" readonly >
+                <input type="text" class="form-control input-sm" name="posisi_credit" id="posisi_credit" value="C" readonly>
             </div>
             <div class="col-lg-3 col-md-6 col-12">
                 <input type="text" class="form-control input-sm text-right formatAngka" name="nominal_credit" id="nominal_credit" data-decimal="2" readonly>
@@ -160,7 +170,7 @@
         <div class="row form-group">
             <label class="col-lg-4 col-md-4 col-12">Nominal (Jurnal)</label>
             <div class="col-lg-1 col-md-6 col-12">
-                <input type="text" class="form-control input-sm" name="posisi_debit" value="D"  id="posisi_debit" readonly>
+                <input type="text" class="form-control input-sm" name="posisi_debit" value="D" id="posisi_debit" readonly>
             </div>
             <div class="col-lg-3 col-md-6 col-12">
                 <input type="text" class="form-control input-sm text-right formatAngka" name="nominal_debit" id="nominal_debit" data-decimal="2" readonly>
@@ -243,23 +253,24 @@
         </div>
 
         <button type="button" class="btn btn-success btn-xs" id="addRow">+ Tambah Baris</button>
+    </div>
 
 </form>
 
 
 
 <script type="text/javascript">
-    $(document).on('focus', '.select2', function(e) {
-        if (e.originalEvent) {
-            var s2element = $(this).siblings('select');
-            s2element.select2('open');
+    // $(document).on('focus', '.select2', function(e) {
+    //     if (e.originalEvent) {
+    //         var s2element = $(this).siblings('select');
+    //         s2element.select2('open');
 
-            // Set focus back to select2 element on closing.
-            s2element.on('select2:closing', function(e) {
-                s2element.select2('focus');
-            });
-        }
-    });
+    //         // Set focus back to select2 element on closing.
+    //         s2element.on('select2:closing', function(e) {
+    //             s2element.select2('focus');
+    //         });
+    //     }
+    // });
 
     // $("#row-split").css("display","none");
     // $("#row-normal").css("display","none");
@@ -380,6 +391,7 @@
         let no_pelunasan = "<?php echo $no_pelunasan; ?>";
         target.select2({
             placeholder: "Pilih Faktur",
+            dropdownParent: $('#tambah_data'),
             allowClear: true,
             ajax: {
                 url: "<?php echo base_url(); ?>accounting/pelunasanpiutang/get_list_faktur",
@@ -410,6 +422,7 @@
         target.select2({
             allowClear: true,
             placeholder: "Pilih",
+            dropdownParent: $('#tambah_data'),
             ajax: {
                 dataType: 'JSON',
                 type: "POST",
@@ -637,6 +650,7 @@
         $('.koreksi-select').select2({
             allowClear: true,
             placeholder: "Pilih Koreksi",
+            dropdownParent: $('#tambah_data'),
             ajax: {
                 url: "<?php echo base_url(); ?>accounting/pelunasanpiutang/get_list_koreksi_select2",
                 type: "POST",
@@ -685,6 +699,7 @@
         $el.select2({
             allowClear: true,
             placeholder: "Pilih CoA",
+            dropdownParent: $('#tambah_data'),
             ajax: {
                 dataType: 'JSON',
                 type: "POST",
@@ -840,6 +855,7 @@
         $el.select2({
             allowClear: true,
             placeholder: "Pilih",
+            dropdownParent: $('#tambah_data'),
             ajax: {
                 dataType: 'JSON',
                 type: "POST",
@@ -972,8 +988,8 @@
         let total_all = 0;
 
         let posisi_credit = $("#posisi_credit").val(); // contoh: C
-        let posisi_debit  = $("#posisi_debit").val(); // contoh: D
-        let head_posisi   = $("#posisi_head").val() // D/C
+        let posisi_debit = $("#posisi_debit").val(); // contoh: D
+        let head_posisi = $("#posisi_head").val() // D/C
         let head = parseFloat(unformatNumber($("#nominal_head").val())) || 0;
 
         $("#tabel-koreksi tbody tr").each(function() {
@@ -1002,7 +1018,7 @@
                     total_jurnal_2 += nominal;
                 }
 
-             
+
 
             } else {
                 total_non += nominal;
@@ -1016,7 +1032,7 @@
         }
 
         let sisa = head - total_all;
-        
+
 
         // // ====== SET VALUE ======
         // $("#nominal_jurnal").val(formatNumber(total_jurnal_1));
@@ -1228,7 +1244,6 @@
 
 
 
-
                 $("#tabel-koreksi tbody tr").each(function(index) {
                     let row = $(this);
 
@@ -1260,7 +1275,6 @@
                     // alert(coa.val());
                     // alert(get_coa);
                     if ((get_coa === "true" || get_coa === true) && (!coa.val() || coa.val() === "" || coa.val() === null)) {
-                        alert('masuk');
                         pesan = `Baris ${index+1}: COA harus dipilih`;
                         valid = false;
                         row.find(".coa-select").next('.select2').addClass("select2-error");
