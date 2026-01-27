@@ -2732,7 +2732,7 @@ class Pelunasanpiutang extends MY_Controller
                         }
                         $deposit_true = 'yes';
                     }
-                    if($items->koreksi_id === 'debit_note') {
+                    if ($items->koreksi_id === 'debit_note') {
                         $debit_note_true = 'yes';
                     }
                 }
@@ -2747,16 +2747,16 @@ class Pelunasanpiutang extends MY_Controller
                 }
             }
 
+            $has_faktur = !empty($result); // dari get_data_faktur_by_code
+
             $currency_faktur = null;
 
             // cek data pelunasan
             $result2 = $this->m_pelunasanpiutang->get_data_metode_by_code($no_pelunasan);
-            if (!$result2) {
-                if($debit_note_true == 'no'){
-                    throw new \Exception('Data Metode Pelunasan masih Kosong ', 409);
-                }
+            $has_metode = !empty($result2);
+            if ( !$has_metode && !($debit_note_true === 'yes' && $has_faktur)) {
+                throw new \Exception( 'Data Metode Pelunasan masih Kosong', 409);
             }
-
 
             // Ambil mata uang faktur
             foreach ($result as $inv) {
@@ -2809,7 +2809,7 @@ class Pelunasanpiutang extends MY_Controller
             $create_jurnal = false;
             $data_summary = 'invalid';
 
-            if (!empty($metode_pl->tipe) && $metode_pl->tipe === 'um') {// kebentuk jurnal
+            if (!empty($metode_pl->tipe) && $metode_pl->tipe === 'um') { // kebentuk jurnal
 
                 // cek selisih rupiah
                 $get_selisih = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
@@ -3041,7 +3041,7 @@ class Pelunasanpiutang extends MY_Controller
                                                     );
                                                     $row_items++;
 
-                                                    if(empty($kode_coa_head)){
+                                                    if (empty($kode_coa_head)) {
                                                         throw new \Exception('CoA Head tidak kosong !', 422);
                                                     }
 
@@ -3060,8 +3060,6 @@ class Pelunasanpiutang extends MY_Controller
                                                         'row_order'     => $row_items
                                                     );
                                                     $row_items++;
-
-
                                                 }
                                             }
                                             ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
@@ -3263,15 +3261,15 @@ class Pelunasanpiutang extends MY_Controller
                 }
             }
 
-            if ($data_summary == 'invalid' && $deposit_true == 'no') {
+            if ($data_summary == 'invalid' && $has_faktur) {
                 throw new \Exception('Data Summary / Info  tidak Valid !', 200);
             }
 
-            if ($deposit_true == 'no') {
+            if ($has_faktur) {
                 // var_dump($data_update);
                 if (!empty($tmp_update)) {
                     $update = $this->m_pelunasanpiutang->update_faktur_by_kode($tmp_update);
-                    if ($update !== "" && $debit_note_true === 'no' && empty($metode_pl)) { // hanya untuk debit note full
+                    if ($update !== "" && $debit_note_true === 'no' && !$has_metode) { // hanya untuk debit note full
                         throw new \Exception('Gagal Update Faktur Nominal, Tidak ada data yang di perbaharui !', 200);
                     }
 
