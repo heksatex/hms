@@ -2381,11 +2381,11 @@ class Pelunasanpiutang extends MY_Controller
                             $rupiah = $get_tot->sum_rp ?? 0;
                             $valas  = $get_tot->sum_valas ?? 0;
 
-                            if (((float) $get_piutang_fak->total_pelunasan_rp + (float) $pelunasan_rp) > (float) $rupiah) {
+                            if (( round((float) $get_piutang_fak->total_pelunasan_rp,2) + round((float) $pelunasan_rp,2)) > round((float) $rupiah,2)) {
                                 throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Total Pelunasan (Rp) ', 200);
                             }
 
-                            if (((float) $get_piutang_fak->total_pelunasan_valas + (float) $pelunasan_valas)  > (float)  $valas) {
+                            if ((round((float) $get_piutang_fak->total_pelunasan_valas,2) + round((float) $pelunasan_valas,2))  > round((float)  $valas,2)) {
                                 throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Total Pelunasan (Valas) ', 200);
                             }
 
