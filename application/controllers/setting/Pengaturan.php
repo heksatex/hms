@@ -50,9 +50,9 @@ class Pengaturan extends MY_Controller {
             exit();
         } catch (Exception $ex) {
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $recordsTotal,
-                "recordsFiltered" => $recordsFiltered,
-                "data" => $data,
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => [],
             ));
         }
     }

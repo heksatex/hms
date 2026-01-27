@@ -488,12 +488,35 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->where('appm.tipe <> ', 'retur');
         $this->db->where('appm.tipe <> ', 'koreksi');
         $this->db->where('appm.tipe <> ', 'depo');
-        $this->db->SELECT("app.id as id_bukti,app.id as id_bukti_ecr, app.no_pelunasan as no_bukti, app.tanggal_transaksi as tgl, app.partner_id as id_partner, CONCAT('Pelunasan: ', (SELECT GROUP_CONCAT(no_faktur) as group_faktur FROM acc_pelunasan_piutang_faktur WHERE pelunasan_piutang_id = app.id),' - ', 
-            
-            IF('$currency' = 'valas', 
-                CONCAT(GROUP_CONCAT(appm.no_bukti), ' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), '  Kurs: ', appm.kurs, ' '), 
-                GROUP_CONCAT(appm.no_bukti)
-            )) as uraian, IFNULL(SUM(CAST( abs($total) AS DECIMAL(20,2))),0) as total_pelunasan,   0 as debit , IFNULL(SUM(CAST( abs($total) AS DECIMAL(20,2))),0) as credit, app.status, 'plp' as link, 
+        $this->db->SELECT("app.id as id_bukti,app.id as id_bukti_ecr, app.no_pelunasan as no_bukti, app.tanggal_transaksi as tgl, app.partner_id as id_partner, 
+            CONCAT(
+                'Pelunasan',
+                IF(
+                    (SELECT COUNT(*) 
+                    FROM acc_pelunasan_piutang_faktur 
+                    WHERE pelunasan_piutang_id = app.id) > 0,
+                    CONCAT(
+                        ': ',
+                        (SELECT GROUP_CONCAT(no_faktur SEPARATOR ', ')
+                        FROM acc_pelunasan_piutang_faktur
+                        WHERE pelunasan_piutang_id = app.id)
+                    ),
+                    ''
+                ),
+                ' - ',
+                IF(
+                    '$currency' = 'valas',
+                    CONCAT(
+                        GROUP_CONCAT(appm.no_bukti),
+                        ' Curr: ',
+                        (SELECT currency FROM currency_kurs WHERE id = currency_id),
+                        ' Kurs: ',
+                        appm.kurs
+                    ),
+                    GROUP_CONCAT(appm.no_bukti)
+                )
+            ) AS uraian,
+              IFNULL(SUM(CAST( abs($total) AS DECIMAL(20,2))),0) as total_pelunasan,   0 as debit , IFNULL(SUM(CAST( abs($total) AS DECIMAL(20,2))),0) as credit, app.status, 'plp' as link, 
             0 as dpp,
             0 as ppn,
             0 as total_dpp_ppn ");
