@@ -1,6 +1,6 @@
 <?php
 
-defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
+defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
@@ -21,11 +21,13 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Mpdf\Mpdf;
 
-class Jurnalentries extends MY_Controller {
+class Jurnalentries extends MY_Controller
+{
 
     //put your code here
-    public function __construct() {
-        parent:: __construct();
+    public function __construct()
+    {
+        parent::__construct();
         $this->is_loggedin();
         $this->load->model("m_global");
         $this->load->model('_module');
@@ -33,12 +35,16 @@ class Jurnalentries extends MY_Controller {
         $this->load->library("token");
     }
 
-    public function index() {
+    public function index()
+    {
         $data['id_dept'] = 'JNE';
+        $model = new $this->m_global;
+        $data["jurnal"] = $model->setTables("mst_jurnal")->setSelects(["kode","nama"])->setOrder(["nama"=>"asc"])->getData();
         $this->load->view('accounting/v_jurnal_entries', $data);
     }
 
-    public function get_periode() {
+    public function get_periode()
+    {
         try {
             $model = new $this->m_global;
             $model->setTables("acc_periode")->setSelects(["periode"]);
@@ -48,16 +54,17 @@ class Jurnalentries extends MY_Controller {
             $_POST['length'] = 50;
             $_POST['start'] = 0;
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array("data" => $model->getData())));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array("data" => $model->getData())));
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array("message" => $ex->getMessage())));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array("message" => $ex->getMessage())));
         }
     }
 
-    public function add() {
+    public function add()
+    {
         $data['id_dept'] = 'JNE';
         $model = new $this->m_global;
 
@@ -65,41 +72,53 @@ class Jurnalentries extends MY_Controller {
         $this->load->view('accounting/v_jurnal_entries_add', $data);
     }
 
-    public function data() {
+    public function data()
+    {
         try {
             $data = array();
             $list = new $this->m_global;
             $no = $_POST['start'];
 
             $list->setTables("acc_jurnal_entries")->setOrder(["tanggal_dibuat" => "desc"])
-                    ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
-                    ->setJoins("mst_status", "mst_status.kode = acc_jurnal_entries.status", "left")
-                    ->setSearch(["acc_jurnal_entries.kode", "periode", "origin", "reff_note", "mst_jurnal.nama"])
-                    ->setOrders([null, "acc_jurnal_entries.kode", "mst_jurnal.nama", "tanggal_dibuat", "periode", "origin", "reff_note", "status"])
-                    ->setSelects(["acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat", "nama_status", "mst_jurnal.nama as nama_jurnal"]);
+                ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
+                ->setJoins("mst_status", "mst_status.kode = acc_jurnal_entries.status", "left")
+                ->setSearch(["acc_jurnal_entries.kode", "periode", "origin", "reff_note", "mst_jurnal.nama"])
+                ->setOrders([null, "acc_jurnal_entries.kode", "mst_jurnal.nama", "tanggal_dibuat", "periode", "origin", "reff_note", "status"])
+                ->setSelects(["acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat", "nama_status", "mst_jurnal.nama as nama_jurnal"]);
+            if ($this->input->post("kode") !== "") {
+                $list->setWheres(["acc_jurnal_entries.kode LIKE" => "%" . $this->input->post('kode') . "%"]);
+            }
+            if ($this->input->post("jurnal") !== "") {
+                $list->setWheres(["acc_jurnal_entries.tipe" => $this->input->post('jurnal')]);
+            }
+            if ($this->input->post("status") !== "") {
+                $list->setWheres(["acc_jurnal_entries.status" => $this->input->post("status")]);
+            }
             foreach ($list->getData() as $key => $field) {
                 $kode_encrypt = encrypt_url($field->kode);
                 $no++;
-                $data [] = array(
+                $data[] = array(
                     $no,
-                    '<a href="' . base_url('accounting/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
+                    '<a href="' . base_url('purchase/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
                     $field->nama_jurnal,
                     $field->tanggal_dibuat,
-//                    $field->tanggal_posting,
+                    //                    $field->tanggal_posting,
                     $field->periode,
                     $field->origin,
                     $field->reff_note,
                     $field->nama_status ?? $field->status,
                 );
             }
-            echo json_encode(array("draw" => $_POST['draw'],
+            echo json_encode(array(
+                "draw" => $_POST['draw'],
                 "recordsTotal" => $list->getDataCountAll(),
                 "recordsFiltered" => $list->getDataCountFiltered(),
                 "data" => $data,
             ));
             exit();
         } catch (Exception $ex) {
-            echo json_encode(array("draw" => $_POST['draw'],
+            echo json_encode(array(
+                "draw" => $_POST['draw'],
                 "recordsTotal" => 0,
                 "recordsFiltered" => 0,
                 "data" => [],
@@ -107,7 +126,8 @@ class Jurnalentries extends MY_Controller {
         }
     }
 
-    public function simpan() {
+    public function simpan()
+    {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
@@ -140,12 +160,12 @@ class Jurnalentries extends MY_Controller {
 
             $this->_module->startTransaction();
             if (!$kode = $this->token->noUrut("jurnal_acc_{$jurnal}", date('ym', strtotime($tanggal)), true)->generate(strtoupper($jurnal), '/%03d')
-                            ->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal)) . "/"))->get()) {
+                ->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . getRomawi(date('m', strtotime($tanggal)) . "/"))->get()) {
                 throw new \Exception("No Jurnal tidak terbuat", 500);
             }
             $input = [
                 "tanggal_dibuat" => $tanggal,
-//                "periode" => $periode,
+                //                "periode" => $periode,
                 "origin" => "",
                 "reff_note" => $refnote,
                 "tipe" => $jurnal,
@@ -161,17 +181,18 @@ class Jurnalentries extends MY_Controller {
             $this->_module->gen_history_new($sub_menu, $kode, 'create', "DATA -> " . logArrayToString("; ", $input), $username);
             $url = site_url("accounting/jurnalentries/edit/" . encrypt_url($kode));
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         try {
             $kode_decrypt = decrypt_url($id);
             $data['id_dept'] = 'JNE';
@@ -180,32 +201,33 @@ class Jurnalentries extends MY_Controller {
             $detail = clone $head;
             $data["curr"] = $head->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $data["jurnal"] = $head->setTables("acc_jurnal_entries")
-                            ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
-                            ->setWheres(["acc_jurnal_entries.kode" => $kode_decrypt])
-                            ->setSelects(["mst_jurnal.nama as nama_jurnal", "acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
+                ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
+                ->setWheres(["acc_jurnal_entries.kode" => $kode_decrypt])
+                ->setSelects(["mst_jurnal.nama as nama_jurnal", "acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
             if ($data["jurnal"] === null) {
                 throw new \Exception();
             }
             $details = $detail->setTables("acc_jurnal_entries_items jei")
-                    ->setJoins("partner", "partner.id = jei.partner", "left")
-                    ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
-                    ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
-                    //->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
-                    ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
-                    ->setWheres(["je.kode" => $kode_decrypt]);
+                ->setJoins("partner", "partner.id = jei.partner", "left")
+                ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
+                ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
+                //->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
+                ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
+                ->setWheres(["je.kode" => $kode_decrypt]);
             if ($data["jurnal"]->origin !== "") {
                 $details->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"]);
             }
             $data["detail"] = $details->getData();
             $data["coas"] = $detail->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+                ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
             $this->load->view('accounting/v_jurnal_entries_edit', $data);
         } catch (Exception $ex) {
             return show_404();
         }
     }
 
-    public function update($id) {
+    public function update($id)
+    {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
@@ -215,7 +237,8 @@ class Jurnalentries extends MY_Controller {
             $origin = $this->input->post("origin");
             $periode = $this->input->post("periode");
             $model = new $this->m_global;
-            $headUpdate = ["reff_note" => $refnote,
+            $headUpdate = [
+                "reff_note" => $refnote,
                 "origin" => $origin ?? "",
                 "periode" => $periode
             ];
@@ -245,14 +268,14 @@ class Jurnalentries extends MY_Controller {
                             "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
-//                    [
-//                        'field' => 'kode_coa[]',
-//                        'label' => 'Account',
-//                        'rules' => ['trim', 'required'],
-//                        'errors' => [
-//                            'required' => '{field} Pada Item harus diisi'
-//                        ]
-//                    ]
+                    //                    [
+                    //                        'field' => 'kode_coa[]',
+                    //                        'label' => 'Account',
+                    //                        'rules' => ['trim', 'required'],
+                    //                        'errors' => [
+                    //                            'required' => '{field} Pada Item harus diisi'
+                    //                        ]
+                    //                    ]
                 ]);
                 if ($this->form_validation->run() == FALSE) {
                     throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
@@ -299,18 +322,19 @@ class Jurnalentries extends MY_Controller {
             $log .= "\nDetail -> " . logArrayToString("; ", $itemUpdate);
             $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             log_message("error", json_encode($ex));
             $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
-    public function update_status() {
+    public function update_status()
+    {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
@@ -321,11 +345,11 @@ class Jurnalentries extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $model = new $this->m_global;
             $update = ["status" => $status];
-//            $kredit = str_replace(",", "", $this->input->post("kredit"));
-//            $debit = str_replace(",", "", $this->input->post("debit"));
+            //            $kredit = str_replace(",", "", $this->input->post("kredit"));
+            //            $debit = str_replace(",", "", $this->input->post("debit"));
             if ($status === "posted") {
                 $getDataNominal = $model->setTables("acc_jurnal_entries_items")->setSelects(["sum(nominal) as total,posisi"])
-                                ->setWheres(["kode" => $kode_decrypt])->setGroups(["posisi"])->getData();
+                    ->setWheres(["kode" => $kode_decrypt])->setGroups(["posisi"])->getData();
                 if (round(($getDataNominal[0]->total ?? 0), 2) !== round(($getDataNominal[1]->total ?? 0), 2)) {
                     throw new \Exception('Total Kredit dan Debit belum balance', 500);
                 }
@@ -335,16 +359,17 @@ class Jurnalentries extends MY_Controller {
 
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'update', "update status ke {$status}", $username);
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => [])));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => [])));
         }
     }
 
-    public function getcoa() {
+    public function getcoa()
+    {
         try {
             $search = $this->input->post("search");
             $coa = new $this->m_global;
@@ -356,32 +381,33 @@ class Jurnalentries extends MY_Controller {
 
             $data = $coa->setTables("acc_coa")->setSearch(["kode_coa", "nama"])->setWheres(["level" => 5])->setOrder(['kode_coa' => "asc"])->setSelects(['kode_coa', 'nama'])->getData();
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => $data)));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => $data)));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => [])));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => [])));
         }
     }
 
-    public function print() {
+    public function print()
+    {
         try {
             $id = $this->input->post("ids");
             $kode = decrypt_url($id);
             $model = new $this->m_global;
             $users = $this->session->userdata('nama');
             $data["jurnal"] = $model->setTables("acc_jurnal_entries je")->setJoins("mst_jurnal mj", "mj.kode = je.tipe")
-                            ->setWheres(["je.kode" => $kode])->setSelects(["je.*", "mj.nama as jurnal_nama", "date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
+                ->setWheres(["je.kode" => $kode])->setSelects(["je.*", "mj.nama as jurnal_nama", "date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
             if (!$data["jurnal"]) {
                 throw new \exception("Data Jurnal Entries {$kode} tidak ditemukan", 500);
             }
             $details = $model->setTables("acc_jurnal_entries_items jei")
-                    ->setJoins("partner", "partner.id = jei.partner", "left")
-                    ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
-                    ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
-                    ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
-                    ->setWheres(["je.kode" => $kode]);
+                ->setJoins("partner", "partner.id = jei.partner", "left")
+                ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
+                ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
+                ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
+                ->setWheres(["je.kode" => $kode]);
             if ($data["jurnal"]->origin !== "") {
                 $details->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"]);
             }
@@ -400,16 +426,17 @@ class Jurnalentries extends MY_Controller {
             $pathFile = "{$url}/{$filename}.pdf";
             $mpdf->Output(FCPATH . $pathFile, "F");
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array("url" => base_url($pathFile))));
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
-    public function download_template($id) {
+    public function download_template($id)
+    {
         try {
             $kode_decrypt = decrypt_url($id);
             $nm = str_replace("/", "_", $kode_decrypt);
@@ -469,17 +496,23 @@ class Jurnalentries extends MY_Controller {
             $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
             $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => "{$filename}",
-                        'type' => 'success', "url" => base_url($url . '/' . $filename . '.xlsx'))));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array(
+                    'message' => 'Berhasil Export',
+                    'icon' => 'fa fa-check',
+                    'text_name' => "{$filename}",
+                    'type' => 'success',
+                    "url" => base_url($url . '/' . $filename . '.xlsx')
+                )));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 
-    public function upload($id) {
+    public function upload($id)
+    {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
@@ -532,17 +565,17 @@ class Jurnalentries extends MY_Controller {
                 ];
             }
             $model = new $this->m_global;
-            $model->setTables("acc_jurnal_entries_items")->setWheres(["kode"=>$kode_decrypt])->delete();
+            $model->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $kode_decrypt])->delete();
             $model->saveBatch($jurnalItem);
             $log = "data -> " . logArrayToString("; ", $jurnalItem);
             $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 }
