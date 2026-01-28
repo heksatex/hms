@@ -228,6 +228,35 @@ class Kursakhirbulan extends MY_Controller {
         }
     }
 
+    protected function _updateDeposit() {
+        try {
+            $bulans = explode("-", $this->input->post("bulan"));
+            $kurs = str_replace(",", "", $this->input->post("kurs"));
+            $model = new $this->m_global;
+            $update = [];
+            $data = $model->setTables("acc_pelunasan_piutang app")->setJoins("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id")
+                            ->setJoins("acc_pelunasan_piutang_summary_koreksi appsk", "apps.id = appsk.pelunasan_summary_id")
+                            ->setWheres([
+                                "YEAR(app.tanggal_transaksi)" => $bulans[0],
+                                "MONTH(app.tanggal_transaksi)" => $bulans[1],
+                                "appsk.lunas" => 0,
+                                "appsk.alat_pelunasan" => "true",
+                                "appsk.koreksi_id" => "deposit",
+                                "app.status" => "done",
+                                "apps.tipe_currency" => "Valas"
+                            ])->setSelects(["apps.id"])->getData();
+            foreach ($data as $key => $value) {
+                $update[] = ["kurs_akhir" => $kurs, "id" => $value->id];
+            }                
+
+            if(count($update) > 0) {
+                $model->setTables("acc_pelunasan_piutang_summary apps")->updateBatch($update, "id");
+            }
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
     protected function _updatekas() {
         try {
             $bulans = explode("-", $this->input->post("bulan"));
@@ -378,7 +407,8 @@ class Kursakhirbulan extends MY_Controller {
             $tanggal = date("Y-m-t H:i:s", strtotime("{$check->bulan}-01"));
             $lock = "token_increment WRITE,main_menu_sub READ, log_history WRITE,acc_kurs_akhir_bulan WRITE,acc_jurnal_entries WRITE,picklist_detail WRITE,acc_jurnal_entries_items WRITE,"
                     . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
-                    . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ";
+                    . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ,"
+                    . "acc_pelunasan_piutang app READ,acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_jurnal_entries je WRITE,acc_jurnal_entries_items jei WRITE";
             $this->_module->lock_tabel($lock);
             $coa = $this->_getSaldo();
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
@@ -439,6 +469,7 @@ class Kursakhirbulan extends MY_Controller {
             }
             $model->setTables("acc_jurnal_entries_items")->saveBatch($entriesDetail);
             $this->_updatekas();
+            $this->_updateDeposit();
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }

@@ -1194,8 +1194,8 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("appsk.id, app.no_pelunasan as no_bukti, app.partner_id, app.partner_nama, app.tanggal_transaksi as tanggal, apps.currency_id, apps.currency, apps.kurs, 
-                            IF(apps.currency = 'IDR', appsk.nominal, appsk.nominal * apps.kurs)  as total_rp, 
+        $this->db->select("appsk.id, app.no_pelunasan as no_bukti, app.partner_id, app.partner_nama, app.tanggal_transaksi as tanggal, apps.currency_id, apps.currency,(CASE WHEN apps.kurs_akhir is not NULL and apps.kurs_akhir > 0 THEN apps.kurs_akhir ELSE apps.kurs END) as kurs, 
+                            IF(apps.currency = 'IDR', appsk.nominal, appsk.nominal * (CASE WHEN apps.kurs_akhir is not NULL and apps.kurs_akhir > 0 THEN apps.kurs_akhir ELSE apps.kurs END))  as total_rp, 
                             IF(apps.currency != 'IDR', appsk.nominal, 0) as total_valas, 'depo' as tipe2, 'Deposit' as uraian");
         $this->db->from("acc_pelunasan_piutang app");
         $this->db->join("acc_pelunasan_piutang_summary apps ", "apps.pelunasan_piutang_id = app.id", "INNER");
