@@ -132,7 +132,7 @@ class Fakturpenjualan extends MY_Controller {
         "non_kbn" => "non KBN",
         "tunai" => "Tunai",
         "ekspor" => "Ekspor",
-        "sampel" => "Sampel"
+        "sample" => "Sample"
     ];
 
     public function index() {
