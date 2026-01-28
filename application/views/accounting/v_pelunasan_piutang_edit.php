@@ -1223,7 +1223,7 @@
 
                             empty = false;
                             if (value.tipe_currency === 'Valas') {
-                                $mu = (value.currency != '') ? value.tipe_currency + `<br><div><small>${value.currency} - ${formatNumber(value.kurs)}</small></div>` : value.tipe_currency;
+                                $mu = (value.currency != '') ? value.tipe_currency + `<br><div><small>${value.currency} - ${formatNumber(value.kurs)} <br> ${(value.kurs_akhir > 0) ? 'Kurs Akhir : '+ formatNumber(value.kurs_akhir): ''}</small></div>` : value.tipe_currency;
                             } else {
                                 $mu = value.tipe_currency;
                             }
