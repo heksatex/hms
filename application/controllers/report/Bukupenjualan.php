@@ -50,22 +50,26 @@ class Bukupenjualan extends MY_Controller {
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
             $coaPemb = $model->setTables("setting")->setWheres(["setting_name" => "selisih_pembulatan_penjualan"])->setSelects(["value"])->getDetail();
-            $model->setTables("acc_faktur_penjualan fp")
-//                    ->setJoins("acc_faktur_penjualan_detail fpd", "fp.id = faktur_id")
-                    ->setJoins("acc_jurnal_entries je", "je.kode = fp.jurnal")
-                    ->setJoins("acc_jurnal_entries_items jei", "jei.kode = je.kode")
-                    ->setJoins("faktur_jurnal", "(jei.kode = jurnal_kode and jurnal_order = jei.row_order)", "left")
-                    ->setJoins("acc_faktur_penjualan_detail fjd", "fjd.id = faktur_jurnal.faktur_detail_id", "left")
-                    ->setJoins("acc_coa ac", "ac.kode_coa = jei.kode_coa", "left")
+
+            if ($posisi === "bks") {
+                $model->setTables("acc_faktur_penjualan fp")
+                        ->setJoins("acc_faktur_penjualan_detail fjd", "fp.id = fjd.faktur_id")
+                        ->setJoins("faktur_jurnal fj", "fj.faktur_detail_id = fjd.id", "left")
+                        ->setJoins("acc_jurnal_entries_items jei", "(jei.kode = fj.jurnal_kode and jei.row_order = jurnal_order)", "left")
+                        ->setWhereRaw("jei.kode_coa REGEXP '^[4,8]'");
+            } else {
+                $model->setTables("acc_faktur_penjualan fp")
+                        ->setJoins("acc_jurnal_entries je", "je.kode = fp.jurnal")
+                        ->setJoins("acc_jurnal_entries_items jei", "jei.kode = je.kode")
+                        ->setJoins("faktur_jurnal", "(jei.kode = jurnal_kode and jurnal_order = jei.row_order)", "left")
+                        ->setJoins("acc_faktur_penjualan_detail fjd", "fjd.id = faktur_jurnal.faktur_detail_id", "left")
+                        ->setWheres(["jei.posisi" => strtoupper($posisi)]);
+            }
+            $model->setJoins("acc_coa ac", "ac.kode_coa = jei.kode_coa", "left")
                     ->setSelects(["fp.no_faktur_internal,fp.no_faktur_pajak,no_sj,fp.tanggal", "partner_nama", "jei.*", "ac.nama as coa", "fjd.harga,fjd.qty,fjd.uom,jenis_ppn,uraian,warna,fjd.pajak,no_inv_ekspor", ""])
                     ->setWheres(["date(fp.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(fp.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])), "fp.status" => "confirm"
                             ,])
                     ->setOrder(["jei.kode_coa" => "asc", "no_faktur_internal" => "asc", "uraian" => "asc"]);
-            if ($posisi === "bks") {
-                $model->setWhereRaw("jei.kode_coa REGEXP '^[4,8]'");
-            } else {
-                $model->setWheres(["jei.posisi" => strtoupper($posisi)]);
-            }
 
             if ($uraian !== "") {
                 $model->setWhereRaw("(uraian LIKE '%{$uraian}%' or warna LIKE '%{$uraian}%')");
@@ -276,10 +280,10 @@ class Bukupenjualan extends MY_Controller {
             if ($GrandtotalRp > 0) {
                 $row += 1;
                 $sheet->setCellValue("j{$row}", "Grand Total Rp");
-               if ($posisi === "bks") 
-                $sheet->setCellValue("u{$row}", $GrandtotalRp);
+                if ($posisi === "bks")
+                    $sheet->setCellValue("u{$row}", $GrandtotalRp);
                 else
-                 $sheet->setCellValue("q{$row}", $GrandtotalRp); 
+                    $sheet->setCellValue("q{$row}", $GrandtotalRp);
             }
             $sheet->getStyle("d2:d{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
             $sheet->getStyle("m2:m{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
