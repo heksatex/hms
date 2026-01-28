@@ -2722,6 +2722,7 @@ class Pelunasanpiutang extends MY_Controller
 
             $deposit_true = 'no';
             $debit_note_true = 'no';
+            $deposit_alat = 'no';
             $data_sum = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
             foreach ($data_sum as $row) {
                 foreach ($this->m_pelunasanpiutang->get_list_summary_koreksi_by_id($no_pelunasan, $row->id) as $items) {
@@ -2729,8 +2730,8 @@ class Pelunasanpiutang extends MY_Controller
                         if ($items->koreksi_id === 'deposit' && $items->lunas != 0) {
                             throw new \Exception("Pelunasan tidak bisa Confirm. Koreksi Deposit Gagal.", 200);
                         }
-                        if ($items->koreksi_id === 'deposit' && $items->alat_pelunasan != 'true') {
-                            throw new \Exception("Pelunasan tidak bisa Confirm. Koreksi Deposit bukan jadi alat pelunasan .", 200);
+                        if ($items->koreksi_id === 'deposit' && $items->alat_pelunasan == 'true') {
+                            $deposit_alat = 'yes';
                         }
                         $deposit_true = 'yes';
                     }
@@ -2738,6 +2739,10 @@ class Pelunasanpiutang extends MY_Controller
                         $debit_note_true = 'yes';
                     }
                 }
+            }
+
+            if($deposit_true == 'yes' && $deposit_alat == 'no' ) {
+               throw new \Exception("Pelunasan tidak bisa Confirm. Koreksi Deposit bukan jadi alat pelunasan .", 200);
             }
 
 
@@ -2775,12 +2780,14 @@ class Pelunasanpiutang extends MY_Controller
             foreach ($result2 as $mt) {
                 $currency_metode = strtoupper(trim($mt->currency));
 
-                // Jika faktur valas (bukan IDR) dan metode juga valas tapi beda → tidak boleh
-                if ($currency_faktur !== 'IDR' && $currency_metode !== 'IDR' && $currency_faktur !== $currency_metode) {
-                    throw new \Exception(
-                        "Invoice dengan mata uang {$currency_faktur} tidak boleh dibayar dengan mata uang {$currency_metode} !",
-                        422
-                    );
+                if ($result) {
+                    // Jika faktur valas (bukan IDR) dan metode juga valas tapi beda → tidak boleh
+                    if ($currency_faktur !== 'IDR' && $currency_metode !== 'IDR' && $currency_faktur !== $currency_metode) {
+                        throw new \Exception(
+                            "Invoice dengan mata uang {$currency_faktur} tidak boleh dibayar dengan mata uang {$currency_metode} !",
+                            422
+                        );
+                    }
                 }
             }
 
@@ -3616,6 +3623,10 @@ class Pelunasanpiutang extends MY_Controller
                                     }
                                     if ($items->koreksi_id === 'deposit' && $items->lunas == 3) {
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah di Nonaktifkan / Refund .", 200);
+                                    }
+
+                                    if($items->koreksi_id === 'deposit' && $row->kurs_akhir > 0) {
+                                        throw new \Exception("Pelunasan tidak bisa dibatalkan. Deposit sudah terdapat Koreksi Kurs / Kurs Akhir .", 200);
                                     }
                                 }
                             }
