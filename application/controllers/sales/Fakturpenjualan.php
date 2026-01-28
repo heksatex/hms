@@ -914,6 +914,7 @@ class Fakturpenjualan extends MY_Controller {
                         );
                         foreach ($detail as $key => $value) {
                             $warna = ($value->warna === "") ? "" : " / {$value->warna}";
+                            $rowOrder = (count($jurnalItems) + 1);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
@@ -925,7 +926,13 @@ class Fakturpenjualan extends MY_Controller {
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
                                 "nominal" => 0,
-                                "row_order" => (count($jurnalItems) + 1)
+                                "row_order" => $rowOrder
+                            );
+                            $fakturJurnal[] = array(
+                                "no_faktur" => $value->faktur_no,
+                                "faktur_detail_id" => $value->id,
+                                "jurnal_kode" => $jurnal,
+                                "jurnal_order" => $rowOrder
                             );
                         }
                     } else {
