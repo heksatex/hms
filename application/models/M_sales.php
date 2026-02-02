@@ -580,7 +580,7 @@ class M_sales extends CI_Model
 	{
 		$this->db->where('origin',$origin);
 		$this->db->where_in('dept_id',array('GRG','GRG-R'));
-		$this->db->where_in('status',array('done'));
+		$this->db->where_in('status',array('done', 'ready'));
 		$this->db->select('*');
 		$this->db->from('pengiriman_barang');
 		$query = $this->db->get();
