@@ -40,6 +40,7 @@ class Partner extends MY_Controller
             $row[] = $field->invoice_state;
             $row[] = $field->invoice_country;
             $row[] = $field->invoice_zip;
+			$row[] = $field->partner_type;
             $data[] = $row;
         }
  
