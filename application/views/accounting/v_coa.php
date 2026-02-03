@@ -76,8 +76,8 @@
                                             <th>Kode</th>
                                             <th>Nama</th>
                                             <th>Saldo Normal</th>
-                                            <th>Saldo Valas</th>
-                                            <th>Saldo Awal</th>
+                                            <th>Saldo Awal Valas</th>
+                                            <th>Saldo Awal IDR</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -141,7 +141,36 @@
 
                     });
                 });
+                
+                $("#btn-export").on("click", function (e) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: "<?= base_url('accounting/coa/ekspor/') ?>",
+                        type: "POST",
+                        data: {
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        success: function (data) {
+                            unblockUI(function () {});
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
 
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
 
             });
         </script>

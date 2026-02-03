@@ -11,9 +11,26 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  *
  * @author RONI
  */
+require_once APPPATH . '/third_party/vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
 class Coa extends MY_Controller {
 
     //put your code here
+
+    protected $jenis_transaksi = [
+        "utang" => "Utang",
+        "piutang" => "Piutang",
+        "utang_giro" => "Utang Giro",
+        "piutang_giro" => "Piutang Giro",
+        "um_penjualan" => "Uang Muka Penjualan",
+        "um_pembelian" => "Uang Muka Pembelian",
+        "bank" => "Bank"
+    ];
+
     public function __construct() {
         parent:: __construct();
         $this->is_loggedin();
@@ -26,7 +43,7 @@ class Coa extends MY_Controller {
         $data['id_dept'] = 'ACCCOA';
         $search = $this->input->get("search");
         if (!$datas = $this->cache->get("coa_{$search}")) {
-        $model = new $this->m_global;
+            $model = new $this->m_global;
             $datas = [];
             $model->setTables("acc_coa")->setSearch(["kode_coa", "nama"])
                     ->setSelects(["kode_coa,parent,nama,saldo_normal,saldo_valas,saldo_awal,level"]);
@@ -57,6 +74,7 @@ class Coa extends MY_Controller {
         try {
             $data['id_dept'] = 'ACCCOA';
             $data["id"] = $id;
+            $data["jenis_trans"] = $this->jenis_transaksi;
             $kode = decrypt_url($id);
             $model = new $this->m_global;
             $data["detail"] = $model->setTables("acc_coa ac")->setJoins("acc_coa acc", "ac.parent = acc.kode_coa", "left")
@@ -278,6 +296,60 @@ class Coa extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function ekspor() {
+        try {
+            $model = new $this->m_global;
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue("A1", "Kode Coa");
+            $sheet->setCellValue("b1", "Coa");
+            $sheet->setCellValue("c1", "Saldo Normal");
+            $sheet->setCellValue("d1", "Saldo Awal Valas");
+            $sheet->setCellValue("e1", "Saldo Awal IDR");
+            $sheet->setCellValue("f1", "Jenis Transaksi");
+            $sheet->setCellValue("g1", "Currency");
+            $row = 1;
+            $datas = [];
+            $model->setTables("acc_coa")->setSearch(["kode_coa", "nama"]);
+            $coa = $model->setOrder(["kode_coa" => "desc"])->getData();
+            foreach ($coa as $key => $value) {
+                $datas = $this->array_insert_assoc($datas, ["k{$value->kode_coa}" => $value], "k{$value->parent}");
+            }
+
+            foreach ($datas as $k => $val) {
+                if (is_string($val))
+                    continue;
+                $row += 1;
+                $sheet->setCellValue("A{$row}", $val->kode_coa);
+                $sheet->setCellValue("b{$row}", $val->nama);
+                $sheet->setCellValue("c{$row}", $val->saldo_normal);
+                $sheet->setCellValue("d{$row}", $val->saldo_valas);
+                $sheet->setCellValue("e{$row}", $val->saldo_awal);
+                $sheet->setCellValue("f{$row}", $val->jenis_transaksi);
+                $sheet->setCellValue("g{$row}", $val->curr);
+            }
+            if ($row > 1) {
+                $sheet->getStyle("d2:d{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                $sheet->getStyle("e2:e{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            }
+            $filename = "Master COA " . date("Y-m-d");
+            $url = "dist/storages/report/accounting";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 
