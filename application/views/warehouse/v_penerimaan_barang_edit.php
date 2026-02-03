@@ -91,21 +91,46 @@
                             <div class="col-md-6">
                                 <div class="form-group">
 
+                                    <div id="tgl_btn1">
+                                        <?php
+                                        // if ($list->status == 'draft' or $list->status == 'ready') {
+                                        //     $tgl_kirim = date('Y-m-d H:i:s');
+                                        // } else {
+                                        //     }
+                                        $tgl_kirim = $list->tanggal_transaksi;
+                                        $can_edit_tgl = $allow_edit_tgl_transaksi && ($list->status == 'draft' || $list->status == 'ready') && $list->dept_id == 'RCV';
+                                        ?>
+                                        <!-- <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi" value="<?php echo $tgl_kirim ?>" <?= $allow_edit_tgl_transaksi ? '' : 'readonly' ?> /> -->
+                                    </div>
                                     <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4"><label>Tanggal Kirim </label></div>
+                                        <div class="col-xs-4"><label>Tanggal Kirim</label></div>
                                         <div class="col-xs-8 col-md-8">
-                                            <div id="tgl_btn">
-                                                <?php
-                                                if ($list->status == 'draft' or $list->status == 'ready') {
-                                                    $tgl_kirim = date('Y-m-d H:i:s');
-                                                } else {
-                                                    $tgl_kirim = $list->tanggal_transaksi;
-                                                }
-                                                ?>
-                                                <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi" value="<?php echo $tgl_kirim ?>" readonly="readonly" />
-                                            </div>
+
+                                            <?php if ($can_edit_tgl): ?>
+                                                <!-- BOLEH EDIT -->
+                                                <div class="input-group date" id="dt_tgl_transaksi">
+                                                    <input type="text"
+                                                        class="form-control input-sm"
+                                                        name="tgl_transaksi"
+                                                        id="tgl_transaksi"
+                                                        value="<?= $tgl_kirim ?>">
+                                                    <span class="input-group-addon">
+                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                    </span>
+                                                </div>
+                                            <?php else: ?>
+                                                <!-- TIDAK BOLEH EDIT -->
+                                                <input type="text"
+                                                    class="form-control input-sm"
+                                                    name="tgl_transaksi"
+                                                    id="tgl_transaksi"
+                                                    value="<?= $tgl_kirim ?>"
+                                                    readonly>
+                                            <?php endif; ?>
+
                                         </div>
                                     </div>
+
 
                                     <div class="col-md-12 col-xs-12">
                                         <div class="col-xs-4"><label>Tanggal Jatuh Tempo </label></div>
@@ -199,12 +224,12 @@
                                                                     $color = 'blue';
                                                                 else
                                                                     $color = "black";
-                                                                if($row->konversi_aktif == '1'){
+                                                                if ($row->konversi_aktif == '1') {
                                                                     $qty_beli_tersedia = ($row->pembilang / $row->penyebut) * $row->sum_qty;
-                                                                }else{
-                                                                   if($row->nilai > 0){
+                                                                } else {
+                                                                    if ($row->nilai > 0) {
                                                                         $qty_beli_tersedia = $row->sum_qty / $row->nilai;
-                                                                    } else{
+                                                                    } else {
                                                                         $qty_beli_tersedia = 0;
                                                                     }
                                                                 }
@@ -451,14 +476,14 @@
             });
         });
 
-        $('#tgl_sj').inputmask("datetime", {
-            mask: "y-2-1 h:s:s",
-            //placeholder: "yyyy-mm-dd hh:mm:ss", 
-            placeholder: "yyyy-mm-dd hh:mm:ss",
-            leapday: "-02-29",
-            separator: "-",
-            alias: "yyyy/mm/dd"
-        });
+        <?php if ($allow_edit_tgl_transaksi): ?>
+            $(function() {
+                $('#dt_tgl_transaksi').datetimepicker({
+                    format: 'YYYY-MM-DD HH:mm:ss'
+                });
+            });
+        <?php endif; ?>
+
 
         //untuk merefresh data
         function refresh_div_in() {
@@ -797,7 +822,7 @@
                 var message = 'Maaf, Data Sudah dibatalkan !';
                 alert_modal_warning(message);
 
-            } else if (status == 'done') {
+            } else if (status == 'done' && deptid != 'RCV') {
                 var message = 'Maaf, Data tidak bisa dibatalkan, Data Sudah Terkirim !';
                 alert_modal_warning(message);
 
@@ -935,17 +960,17 @@
                 }
             });
         });
-        
-        
-        
-        $("#btn-crt-inv").unbind("click").off("click").on("click",function(){
+
+
+
+        $("#btn-crt-inv").unbind("click").off("click").on("click", function() {
             $.ajax({
                 url: "<?= base_url('warehouse/penerimaanbarang/create_invoice') ?>",
                 type: "POST",
                 data: {
                     id: "<?= $list->kode ?>",
                     departemen: "RCV",
-                    origin:$("#origin").val()
+                    origin: $("#origin").val()
                 },
                 beforeSend: function(xhr) {
                     please_wait(function() {});

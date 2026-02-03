@@ -6,8 +6,8 @@ class M_penerimaanBarang extends CI_Model
 {
 
 	//var $table 		  = 'penerimaan_barang';
-	var $column_order = array(null, 'pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin', 'pb.lokasi_tujuan', 'pb.reff_picking', 'pb.nama_partner','pb.reff_note', 'mmss.nama_status');
-	var $column_search = array('pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin', 'pb.lokasi_tujuan', 'pb.reff_picking', 'pb.nama_partner','pb.reff_note', 'mmss.nama_status');
+	var $column_order = array(null, 'pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin', 'pb.lokasi_tujuan', 'pb.reff_picking', 'pb.nama_partner', 'pb.reff_note', 'mmss.nama_status');
+	var $column_search = array('pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin', 'pb.lokasi_tujuan', 'pb.reff_picking', 'pb.nama_partner', 'pb.reff_note', 'mmss.nama_status');
 	var $order  	  = array('pb.kode' => 'desc');
 
 	var $table3  	    = 'stock_quant';
@@ -32,7 +32,7 @@ class M_penerimaanBarang extends CI_Model
 			$this->db->group_start();
 			$this->db->like('pbi.nama_produk', $this->input->post('nama_produk'));
 			$this->db->or_like('pbi.kode_produk', $this->input->post('nama_produk'));
-			$this->db->group_end(); 
+			$this->db->group_end();
 		}
 
 		//$this->db->from($this->table);
@@ -236,7 +236,7 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid, smi.lebar_greige,smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, sq.nama_grade, smi.origin_prod
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid, smi.lebar_greige,smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, sq.nama_grade, smi.origin_prod, sq.lokasi
 								FROM stock_move_items smi 
 								INNER JOIN penerimaan_barang pb ON smi.move_id = pb.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
@@ -267,6 +267,16 @@ class M_penerimaanBarang extends CI_Model
 	public function update_penerimaan_barang($kode, $reff_note, $no_sj, $tgl_sj)
 	{
 		return $this->db->query("UPDATE penerimaan_barang set reff_note = '$reff_note', no_sj = '$no_sj', tanggal_sj = '$tgl_sj' WHERE kode = '$kode'");
+	}
+
+	public function update_by_kode($kode, array $data)
+	{
+		if (empty($kode) || empty($data)) {
+			return false;
+		}
+
+		$this->db->where('kode', $kode);
+		return $this->db->update('penerimaan_barang', $data);
 	}
 
 	public function cek_status_barang_penerimaan_barang_items($kode, $status)
@@ -472,7 +482,7 @@ class M_penerimaanBarang extends CI_Model
 		return $query['qty'];
 	}
 
-	
+
 	public function get_produk_add_quant($kode, $kode_produk, $origin_prod)
 	{
 		$this->db->where("pbi.kode", $kode);
@@ -481,8 +491,8 @@ class M_penerimaanBarang extends CI_Model
 		$this->db->SELECT('pbi.kode, pbi.nama_produk, pbi.qty, pbi.uom, pbi.origin_prod, mp.uom_2, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi,cat.nama_category, pbi.nilai_konversiuom, nk.catatan, nk.dari as uom_beli, nk.konversi_aktif, nk.pembilang, nk.penyebut');
 		$this->db->from('penerimaan_barang_items as pbi');
 		$this->db->JOIN('mst_produk mp', 'pbi.kode_produk = mp.kode_produk', "inner");
-		$this->db->JOIN('mst_category cat','mp.id_category = cat.id','LEFT');
-		$this->db->JOIN('nilai_konversi nk','nk.id = pbi.id_konversiuom','LEFT');
+		$this->db->JOIN('mst_category cat', 'mp.id_category = cat.id', 'LEFT');
+		$this->db->JOIN('nilai_konversi nk', 'nk.id = pbi.id_konversiuom', 'LEFT');
 		$query = $this->db->get();
 		return $query->row();
 	}
@@ -544,5 +554,13 @@ class M_penerimaanBarang extends CI_Model
 	public function get_list_grade_select2_by_kode($name)
 	{
 		return $this->db->query("SELECT * FROM mst_grade WHERE nama_grade LIKE '%$name%' ORDER BY id   ")->result();
+	}
+
+	public function cek_invoice_by_kode($kode,$status)
+	{
+		$this->db->where('origin', $kode);
+		$this->db->where('status', $status);
+		$query = $this->db->get('invoice');
+		return $query;
 	}
 }

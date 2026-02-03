@@ -31,13 +31,28 @@ class Partner extends MY_Controller {
         try {
             $data = array();
             $list = new $this->m_global;
-            $list->setTables("partner")->setWheres(["supplier" => 1])
+            $nama_partner = $this->input->post("partner");
+            $type = $this->input->post("type");
+            $list->setTables("partner")
                     ->setJoins("partner_states","partner_states.id = invoice_state","left")
                     ->setJoins("partner_country","partner_country.id = invoice_country","left")
                     ->setOrder(["id" => "desc"])->setSearch(["nama", "invoice_city", "delivery_city"])
-                    ->setOrders([null, "nama","invoice_street","invoice_city","nama_state","nama_country","invoice_zip"])
-                    ->setSelects(["partner.*","partner_states.name as nama_state","partner_country.name as nama_country"]);
+                    ->setOrders([null, "nama","invoice_street","invoice_city","nama_state","nama_country","invoice_zip",null])
+                    ->setSelects(["partner.*","partner_states.name as nama_state","partner_country.name as nama_country", "CASE
+                        WHEN customer = 1 AND supplier = 1 THEN 'Customer dan Supplier'
+                        WHEN customer = 1 THEN 'Customer'
+                        WHEN supplier = 1 THEN 'Supplier'
+                        ELSE '-'
+                    END AS partner_type"]);
             $no = $_POST['start'];
+            if ($nama_partner !== "")
+                $list->setWheres(["nama like " => '%'.$nama_partner.'%']);
+            if($type != "all"){
+                if($type == 'customer')
+                    $list->setWheres(["customer" => 1]);
+                if($type == 'supplier')
+                    $list->setWheres(["supplier" => 1]);
+            }
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->id);
                 $no++;
@@ -49,6 +64,7 @@ class Partner extends MY_Controller {
                     $field->nama_state,
                     $field->nama_country,
                     $field->invoice_zip,
+                    $field->partner_type                    
                 );
             }
             echo json_encode(array("draw" => $_POST['draw'],
