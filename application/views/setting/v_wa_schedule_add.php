@@ -162,18 +162,18 @@
                 $('#bytanggal').on("select2:selecting", function (e) {
                     $('#byhari').val(null).trigger('change');
                     $('#bycustom').val(null).trigger('change');
-                    $('#date').val("").trigger('change');
+                    $('#date').val("");
                 });
 
                 $('#byhari').on("select2:selecting", function (e) {
                     $('#bytanggal').val(null).trigger('change');
                     $('#bycustom').val(null).trigger('change');
-                    $('#date').val("").trigger('change');
+                    $('#date').val("");
                 });
                 $('#bycustom').on("select2:selecting", function (e) {
                     $('#bytanggal').val(null).trigger('change');
                     $('#byhari').val(null).trigger('change');
-                    $('#date').val("").trigger('change');
+                    $('#date').val("");;
                 });
                 $('#date').on("change", function (e) {
                     $('#bytanggal').val(null).trigger('change');
