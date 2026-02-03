@@ -82,14 +82,14 @@
                                     <div class="field-group">
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">Saldo Awal</label></div>
+                                                <div class="col-xs-4"><label class="form-label required">Saldo Awal IDR</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="saldo_awal" value="<?= number_format($detail->saldo_awal, 2, ".", ",") ?>" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
                                                            class="form-control input-sm text-right" required/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">Saldo Valas</label></div>
+                                                <div class="col-xs-4"><label class="form-label required">Saldo Awal Valas</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="saldo_valas" value="<?= number_format($detail->saldo_valas, 2, ".", ",") ?>" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
                                                            class="form-control input-sm text-right" required/>
@@ -98,7 +98,16 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label">Jenis Transaksi </label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="jenis_trans" id="jenis_trans" class="form-control input-sm" value="<?= $detail->jenis_transaksi ?>"/>
+                                                    <select class="form-control input-sm curr" name="jenis_trans" style="width: 100%">
+                                                        <option></option>
+                                                        <?php
+                                                        foreach ($jenis_trans as $key => $value) {
+                                                            ?>
+                                                            <option value="<?= $key ?>" <?= ($detail->jenis_transaksi === $key) ? 'selected' : '' ?>><?= $value ?></option>
+                                                            <?php
+                                                        }
+                                                        ?>
+                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
