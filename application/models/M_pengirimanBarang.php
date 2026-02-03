@@ -762,6 +762,12 @@ class M_pengirimanBarang extends CI_Model
   		return $this->db->query("SELECT * FROM penerimaan_barang_items Where kode = '$kode' AND kode_produk = '$kode_produk' ");
   	}
 
+	public function cek_status_ow($ow)
+	{
+		$this->db->where('ow', $ow);
+		$query = $this->db->get('sales_color_line');
+		return $query;
+	}
   
 }
 

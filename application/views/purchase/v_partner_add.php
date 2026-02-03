@@ -25,7 +25,7 @@
             <section class="content">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Form Tambah Supplier</h3>
+                        <h3 class="box-title">Form Tambah</h3>
 
                     </div>
                     <div class="box-body">
