@@ -159,6 +159,20 @@
                   </div>                                    
                 </div>
                 &nbsp;
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Golongan</label></div>
+                  <div class="col-xs-8">
+                    <select type="text" class="form-control input-sm" name="golongan" id="golongan">
+                      <?php 
+                      echo '<option></option>';
+                      foreach($gol as $gl){
+                          echo '<option value="'.$gl->id.'">'.$gl->golnama.'</option>';
+                      }
+                      ?>
+                    </select>
+                  </div>                                    
+                </div>
+                &nbsp;
                 &nbsp;
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Customer</label></div>
@@ -475,6 +489,7 @@
                   status           : 'tambah',
                   check_supplier   : check_supplier,
                   check_customer   : check_customer,
+                  golongan         : $('#golongan').val()
 
 
             },success: function(data){

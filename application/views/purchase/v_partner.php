@@ -21,18 +21,66 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-body">
+                            <div class="col-md-12">
+                                <div class="col-md-12 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;cursor:pointer;">
+                                    <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                                        <label>
+                                            <i class="showAdvanced glyphicon glyphicon-triangle-bottom">&nbsp;</i>Filter
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <br>
+                            <div class="col-md-12">
+                                <div class="panel panel-default" style="margin-bottom: 0px;">
+                                    <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                                        <div class="panel-body" style="padding: 5px">
+                                            <div class="col-md-6 col-xs-12">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <label class="form-label">Nama</label>
+                                                        </div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <input type="text" class="form-control input-sm" name="partner" id="partner">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <label class="form-label">Partner</label>
+                                                        </div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <select name="type" class="form-control select2 input-sm" id="type" style="width: 100%">
+                                                                <option value="all"></option>
+                                                                <option value="customer" >Customer</option>
+                                                                <option value="supplier" selected>Supplier</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 col-xs-12">
+                                                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-xs-12 table-responsive">
                                 <table id="tbl-partner" class="table">
                                     <thead>
                                         <tr>
-                                            <th class="no">#</th>
+                                            <th class="style no">#</th>
                                             <th class="style">Nama</th>
                                             <th class="style">Invoice Street</th>
                                             <th class="style">Invoice City</th>
                                             <th class="style">Invoice State</th>
                                             <th class="style">Invoice Country</th>
                                             <th class="style">Invoice Zip</th>
-                                            
+                                            <th class="style">Partner</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -49,6 +97,14 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
+                $('#advancedSearch').on('shown.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+                });
+
+                //* Hide collapse advanced search
+                $('#advancedSearch').on('hidden.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+                });
                 const table = $('#tbl-partner').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -62,15 +118,23 @@
                     "autoWidth": false,
                     "ajax": {
                         "url": "<?php echo site_url('purchase/partner/list_data') ?>",
-                        "type": "POST"
+                        "type": "POST",
+                        "data": function (d) {
+                            d.partner = $("#partner").val();
+                            d.type = $("#type").val();
+                        }
                     },
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0,7],
                             "orderable": false
                         }
                     ]
 
+                });
+
+                $("#search").on("click", function () {
+                    table.ajax.reload();
                 });
             });
         </script>

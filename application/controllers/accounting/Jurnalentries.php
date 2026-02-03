@@ -99,7 +99,7 @@ class Jurnalentries extends MY_Controller
                 $no++;
                 $data[] = array(
                     $no,
-                    '<a href="' . base_url('purchase/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
+                    '<a href="' . base_url('accounting/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
                     $field->nama_jurnal,
                     $field->tanggal_dibuat,
                     //                    $field->tanggal_posting,

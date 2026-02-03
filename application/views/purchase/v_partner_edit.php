@@ -25,7 +25,7 @@
             <section class="content">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Form Edit Supplier</h3>
+                        <h3 class="box-title">Form Edit</h3>
 
                     </div>
                     <div class="box-body">
@@ -230,6 +230,30 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="col-xs-4"><label>Customer</label></div>
+                                        <div class="col-xs-8">
+                                            <?php if ($partner->customer == 1) {
+                                            ?>
+                                                <input type="checkbox" name="customer" id="check_customer" value="1" checked>
+                                            <?php } else { ?>
+                                                <input type="checkbox" name="customer" id="check_customer" value="1">
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="col-xs-4"><label>Supplier</label></div>
+                                        <div class="col-xs-8">
+                                            <?php if ($partner->supplier == 1) {
+                                            ?>
+                                                <input type="checkbox" name="supplier" id="check_supplier" value="1" checked>
+                                            <?php } else { ?>
+                                                <input type="checkbox" name="supplier" id="check_supplier" value="1">
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- <div class="form-group">
                                     <div class="col-md-12 col-xs-12">
                                         <div class="col-xs-4">
@@ -245,8 +269,8 @@
                             </div>
 
                     </div>
-                    <input type="hidden" value="<?= $partner->customer ?>" name="customer">
-                    <input type="hidden" value="<?= $partner->supplier ?>" name="supplier">
+                    <!-- <input type="hidden" value="<?= $partner->customer ?>" name="customer">
+                    <input type="hidden" value="<?= $partner->supplier ?>" name="supplier"> -->
                     <button type="submit" id="form-supp-submit" style="display: none"></button>
                     </form>
                 </div>

@@ -158,6 +158,24 @@
                     <input type="email" class="form-control input-sm" name="email" id="email" value="<?php echo $partner->email?>" placeholder="e.g. hms@heksatex.co.id" >
                   </div>                                    
                 </div>
+                  &nbsp;
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Golongan</label></div>
+                  <div class="col-xs-8">
+                    <select type="text" class="form-control input-sm" name="golongan" id="golongan">
+                      <?php 
+                      echo '<option></option>';
+                      foreach($gol as $gl){
+                          if($partner->gol === $gl->id){
+                            echo '<option value="'.$gl->id.'" selected>'.$gl->golnama.'</option>';
+                          } else {
+                            echo '<option value="'.$gl->id.'">'.$gl->golnama.'</option>';
+                          }
+                      }
+                      ?>
+                    </select>
+                  </div>   
+                </div>   
                 &nbsp;
                 &nbsp;
                 <div class="col-md-12 col-xs-12">
@@ -525,7 +543,7 @@
                   status           : 'edit',
                   check_supplier   : check_supplier,
                   check_customer   : check_customer,
-
+                  golongan         : $('#golongan').val()
 
             },success: function(data){
               if(data.sesi == "habis"){
