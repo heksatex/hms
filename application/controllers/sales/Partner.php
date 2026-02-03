@@ -59,6 +59,7 @@ class Partner extends MY_Controller
     {
         $data['id_dept']  ='PRT';
         //$data["currency"]  = $this->m_sales->get_list_currency();
+		$data['gol']      = $this->m_partner->get_list_golongan();
         return $this->load->view('sales/v_partner_add', $data);
     }
 
@@ -93,6 +94,7 @@ class Partner extends MY_Controller
         $nama_state             = $this->m_partner->get_name_state_by_id($partner->delivery_state)->row_array();
         $data['dv_nm_state']   = $nama_state['name'];
         // << delivery 
+		$data['gol']      = $this->m_partner->get_list_golongan();
        
         if(empty($data["partner"])){
           show_404();
@@ -159,6 +161,7 @@ class Partner extends MY_Controller
 	        $check_customer = $this->input->post('check_customer');
 	        $check_supplier = $this->input->post('check_supplier');
 			$status_simpan  = $this->input->post('status');
+			$golongan 		= $this->input->post('golongan');
 
 	        if(empty($name)){
 	        	$callback = array('status' => 'failed', 'field' => 'name', 'message' => 'Name Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
@@ -208,7 +211,7 @@ class Partner extends MY_Controller
 
 	        	if(empty($id)){ // jika id kosong maka simpan data
 
-	        		$this->m_partner->save_partner($name,$tanggal,$invoice_street,$invoice_city,$invoice_state,$invoice_country,$invoice_zip,$buyer_code,$website,$tax_name,$tax_address,$tax_city,$npwp,$contact_person,$phone,$mobile,$fax,$email,$delivery_street,$delivery_city,$delivery_state,$delivery_country,$delivery_zip,$check_customer,$check_supplier);
+	        		$this->m_partner->save_partner($name,$tanggal,$invoice_street,$invoice_city,$invoice_state,$invoice_country,$invoice_zip,$buyer_code,$website,$tax_name,$tax_address,$tax_city,$npwp,$contact_person,$phone,$mobile,$fax,$email,$delivery_street,$delivery_city,$delivery_state,$delivery_country,$delivery_zip,$check_customer,$check_supplier,$golongan);
 
 	        		//get max id partner
 	        		$last_id = $this->m_partner->get_last_id_partner();
@@ -223,7 +226,7 @@ class Partner extends MY_Controller
 
 	        	}else{ // jik id terisi maka update data partner
 
-	        		$this->m_partner->update_partner($name,$invoice_street,$invoice_city,$invoice_state,$invoice_country,$invoice_zip,$buyer_code,$website,$tax_name,$tax_address,$tax_city,$npwp,$contact_person,$phone,$mobile,$fax,$email,$delivery_street,$delivery_city,$delivery_state,$delivery_country,$delivery_zip,$check_customer,$check_supplier,$id);
+	        		$this->m_partner->update_partner($name,$invoice_street,$invoice_city,$invoice_state,$invoice_country,$invoice_zip,$buyer_code,$website,$tax_name,$tax_address,$tax_city,$npwp,$contact_person,$phone,$mobile,$fax,$email,$delivery_street,$delivery_city,$delivery_state,$delivery_country,$delivery_zip,$check_customer,$check_supplier,$id,$golongan);
 
 	                $jenis_log = "edit";
 	                $note_log  = $id." | ".$name." | ".$invoice_street." | ".$invoice_city." | ".$invoice_zip." | ".$buyer_code;

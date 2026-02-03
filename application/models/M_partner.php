@@ -97,9 +97,9 @@ class M_partner extends CI_Model
 	}
 
 
-	public function save_partner($name, $tanggal, $invoice_street, $invoice_city, $invoice_state, $invoice_country, $invoice_zip, $buyer_code, $website, $tax_name, $tax_address, $tax_city, $npwp, $contact_person, $phone, $mobile, $fax, $email, $delivery_street, $delivery_city, $delivery_state, $delivery_country, $delivery_zip, $check_customer, $check_supplier)
+	public function save_partner($name, $tanggal, $invoice_street, $invoice_city, $invoice_state, $invoice_country, $invoice_zip, $buyer_code, $website, $tax_name, $tax_address, $tax_city, $npwp, $contact_person, $phone, $mobile, $fax, $email, $delivery_street, $delivery_city, $delivery_state, $delivery_country, $delivery_zip, $check_customer, $check_supplier, $golongan)
 	{
-		$this->db->query("INSERT INTO partner (nama,create_date,invoice_street,invoice_city,invoice_state,invoice_country,invoice_zip,buyer_code,website,tax_nama,tax_address,tax_city,npwp,contact_person,phone,mobile,fax,email,delivery_street,delivery_city,delivery_state,delivery_country,delivery_zip,customer,supplier) values ('$name', '$tanggal', '$invoice_street', '$invoice_city', '$invoice_state', '$invoice_country', '$invoice_zip', '$buyer_code', '$website', '$tax_name', '$tax_address', '$tax_city', '$npwp', '$contact_person', '$phone', '$mobile', '$fax', '$email', '$delivery_street', '$delivery_city', '$delivery_state', '$delivery_country', '$delivery_zip', '$check_customer', '$check_supplier') ");
+		$this->db->query("INSERT INTO partner (nama,create_date,invoice_street,invoice_city,invoice_state,invoice_country,invoice_zip,buyer_code,website,tax_nama,tax_address,tax_city,npwp,contact_person,phone,mobile,fax,email,delivery_street,delivery_city,delivery_state,delivery_country,delivery_zip,customer,supplier, gol) values ('$name', '$tanggal', '$invoice_street', '$invoice_city', '$invoice_state', '$invoice_country', '$invoice_zip', '$buyer_code', '$website', '$tax_name', '$tax_address', '$tax_city', '$npwp', '$contact_person', '$phone', '$mobile', '$fax', '$email', '$delivery_street', '$delivery_city', '$delivery_state', '$delivery_country', '$delivery_zip', '$check_customer', '$check_supplier','$golongan') ");
 	}
 
 	public function get_last_id_partner()
@@ -109,7 +109,7 @@ class M_partner extends CI_Model
 		return $last->no;
 	}
 
-	public function update_partner($name, $invoice_street, $invoice_city, $invoice_state, $invoice_country, $invoice_zip, $buyer_code, $website, $tax_name, $tax_address, $tax_city, $npwp, $contact_person, $phone, $mobile, $fax, $email, $delivery_street, $delivery_city, $delivery_state, $delivery_country, $delivery_zip, $check_customer, $check_supplier, $id)
+	public function update_partner($name, $invoice_street, $invoice_city, $invoice_state, $invoice_country, $invoice_zip, $buyer_code, $website, $tax_name, $tax_address, $tax_city, $npwp, $contact_person, $phone, $mobile, $fax, $email, $delivery_street, $delivery_city, $delivery_state, $delivery_country, $delivery_zip, $check_customer, $check_supplier, $id, $golongan)
 	{
 		$this->db->query("UPDATE partner SET nama = '$name', invoice_street = '$invoice_street', invoice_city = '$invoice_city',
 											 invoice_state = '$invoice_state', invoice_country = '$invoice_country',
@@ -119,7 +119,7 @@ class M_partner extends CI_Model
 											 mobile = '$mobile',fax = '$fax', email = '$email', delivery_street = '$delivery_street',
 											 delivery_city = '$delivery_city', delivery_country = '$delivery_country',
 											  delivery_state = '$delivery_state', delivery_zip = '$delivery_zip',
-											  customer = '$check_customer', supplier = '$check_supplier'
+											  customer = '$check_customer', supplier = '$check_supplier', gol = '$golongan'
 										Where id = '$id' ");
 	}
 
@@ -155,5 +155,11 @@ class M_partner extends CI_Model
 	public function cek_partner_by_nama($nama)
 	{
 		return $this->db->query("SELECT id,nama FROM partner where nama='$nama'");
+	}
+
+
+	public function get_list_golongan()
+	{
+		return $this->db->query("SELECT * FROM partner_gol order by golnama")->result();
 	}
 }
