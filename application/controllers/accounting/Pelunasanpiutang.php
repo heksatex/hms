@@ -3371,7 +3371,7 @@ class Pelunasanpiutang extends MY_Controller
                                 'id'  => $mt->id_bukti,
                                 'lunas'   => 1
                             );
-                            $tmp_update3 =  array();
+                            // $tmp_update3 =  array();
                             array_push($tmp_update3, $data_update3);
                         } else {
                             throw new \Exception('Nominal Metode Pelunasan Kas  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
@@ -3387,7 +3387,7 @@ class Pelunasanpiutang extends MY_Controller
                                 'id'  => $mt->id_bukti,
                                 'lunas'   => 1
                             );
-                            $tmp_update4 =  array();
+                            // $tmp_update4 =  array();
                             array_push($tmp_update4, $data_update4);
                         } else {
                             throw new \Exception('Nominal Metode Pelunasan Retur  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
