@@ -44,6 +44,9 @@ class Kursakhirbulan extends MY_Controller {
             if (!$data["datas"]) {
                 throw new \Exception();
             }
+            $data["detail"] = $model->setTables("acc_kurs_akhir_bulan_detail")->setWheres(["kab_id" => $data["datas"]->id])->getData();
+            $data["jurnal"] = $model->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $data["datas"]->no_jurnal])
+                            ->setOrder(["posisi" => "desc", "kode_coa" => "asc"])->getData();
             $this->load->view('accounting/v_kursakhirbulan_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -247,9 +250,9 @@ class Kursakhirbulan extends MY_Controller {
                             ])->setSelects(["apps.id"])->getData();
             foreach ($data as $key => $value) {
                 $update[] = ["kurs_akhir" => $kurs, "id" => $value->id];
-            }                
+            }
 
-            if(count($update) > 0) {
+            if (count($update) > 0) {
                 $model->setTables("acc_pelunasan_piutang_summary apps")->updateBatch($update, "id");
             }
         } catch (Exception $ex) {
@@ -408,7 +411,8 @@ class Kursakhirbulan extends MY_Controller {
             $lock = "token_increment WRITE,main_menu_sub READ, log_history WRITE,acc_kurs_akhir_bulan WRITE,acc_jurnal_entries WRITE,picklist_detail WRITE,acc_jurnal_entries_items WRITE,"
                     . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
                     . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ,"
-                    . "acc_pelunasan_piutang app READ,acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_jurnal_entries je WRITE,acc_jurnal_entries_items jei WRITE";
+                    . "acc_pelunasan_piutang app READ,acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_jurnal_entries je WRITE,acc_jurnal_entries_items jei WRITE,"
+                    . "acc_kurs_akhir_bulan_detail WRITE";
             $this->_module->lock_tabel($lock);
             $coa = $this->_getSaldo();
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
@@ -431,12 +435,22 @@ class Kursakhirbulan extends MY_Controller {
             $model->setTables("acc_jurnal_entries")->save($dataJurnal);
             $noOrder = 1;
             $entriesDetail = [];
+            $kursAkhirDetail = [];
             foreach ($coa as $key => $value) {
                 $selisih = ($value->saldo_valas_final * $check->kurs) - $value->saldo_rp_final;
                 $nominal = abs($selisih);
                 if ($value->saldo_valas_final <= 0 || $nominal === (double) 0) {
                     continue;
                 }
+                $kursAkhirDetail[] = [
+                    "selisih" => $selisih,
+                    "saldo" => $value->saldo_valas_final,
+                    "kurs" => $check->kurs,
+                    "curr" => $check->curr,
+                    "kab_id" => $check->id,
+                    "no_kab" => $kode,
+                    "kode_coa" => $value->kode_coa
+                ];
                 $nama = "Kurs Akhir Bulan (Saldo : " . number_format($value->saldo_valas_final, 2) . " {$check->curr} Kurs : " . number_format($check->kurs, 2) . ")";
                 $entriesDetail[] = [
                     "nama" => $nama,
@@ -468,6 +482,7 @@ class Kursakhirbulan extends MY_Controller {
                 $noOrder += 1;
             }
             $model->setTables("acc_jurnal_entries_items")->saveBatch($entriesDetail);
+            $model->setTables("acc_kurs_akhir_bulan_detail")->saveBatch($kursAkhirDetail);
             $this->_updatekas();
             $this->_updateDeposit();
             if (!$this->_module->finishTransaction()) {
