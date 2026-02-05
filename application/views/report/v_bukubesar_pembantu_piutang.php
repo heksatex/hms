@@ -172,7 +172,7 @@
                                                         <th class='style bb' style="min-width: 100px" rowspan="2">Refund</th>
                                                         <th class='style bb' style="min-width: 150px" rowspan="2">
                                                             <span class="smarttip"
-                                                                data-tip="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka - Koreksi + Refund">
+                                                                data-tip="Saldo Akhir = Saldo Awal + Piutang Total - Pelunasan - Retur Total - Diskon Total - Uang Muka + Koreksi + Refund">
                                                                 &#x2757; Saldo Akhir
                                                             </span>
                                                         </th>
