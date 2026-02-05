@@ -84,7 +84,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         - IFNULL(retur_sblm.total_retur, 0) 
                         - IFNULL(um_sblm.total_uang_muka, 0) 
                         - IFNULL(diskon_sblm.total_diskon, 0)
-                        - IFNULL(koreksi_sblm.total_koreksi, 0)
+                        + IFNULL(koreksi_sblm.total_koreksi, 0)
                         + IFNULL(refund_sblm.total_refund, 0)
                     ) <> 0
                     OR
@@ -114,7 +114,7 @@ class M_bukubesarpembantupiutang extends CI_Model
 
         // $this->db->where_in('p.id', array(4195,4435,4494,5132,4210,5166,552));
         $this->db->select("p.id, p.nama, $cr_condition as saldo_awal_piutang,
-                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um,0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon,0)- IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0))) + IFNULL(refund_sblm.total_refund, 0) as saldo_awal_final,
+                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um,0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon,0)- IFNULL(um_sblm.total_uang_muka,0) + (IFNULL(koreksi_sblm.total_koreksi,0))) + IFNULL(refund_sblm.total_refund, 0) as saldo_awal_final,
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(piutang.dpp_piutang,0) as dpp_piutang,
                         IFNULL(piutang.ppn_piutang,0) as ppn_piutang,
@@ -332,9 +332,9 @@ class M_bukubesarpembantupiutang extends CI_Model
         // $total  = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2),0) + IFNULL(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4)))*11/12, 2) *a.tax_value, 2),0)" : "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*a.kurs_nominal, 0),0) + IFNULL(ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0), 0)";
 
 
-        $dpp    = ($currency === 'valas') ? "SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))" : "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0) ";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
-        $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
+        $dpp    = ($currency === 'valas') ? "SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))" : "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0) ";
+        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
+        $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)),0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
 
         $this->db->SELECT("a.id,a.no_faktur_internal,
                 IFNULL($dpp,0) as dpp_piutang,
@@ -420,9 +420,10 @@ class M_bukubesarpembantupiutang extends CI_Model
         // $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 2) * 11/12, 2) * a.tax_value, 2),2)" : "ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 0) * 11/12, 0) * a.tax_value, 0) * a.kurs_nominal,0)";
         // $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100),2),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 2) * 11/12, 2) * a.tax_value, 2),2), 0)" : "IFNULL(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100) * a.kurs_nominal,0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 0) * 11/12, 0) * a.tax_value, 0) * a.kurs_nominal,0),0)";
 
-        $dpp    = ($currency === 'valas') ? "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2)" : "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), IF(a.kurs=1, 0, 2)))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0)";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2)" : "ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), IF(a.kurs=1, 0, 2))) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
-        $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),2)" : "IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), IF(a.kurs=1, 0, 2)))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), IF(a.kurs=1, 0, 2))) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),2) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0),0)";
+        $dpp    = ($currency === 'valas') ? "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2)" : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)),0)";
+        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2)" : "ROUND(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
+        $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),2)" : "IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0),0)";
+        
 
         $this->db->SELECT("a.id,a.no_faktur_internal,
                 IFNULL($dpp,0) as dpp_diskon,
@@ -689,7 +690,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         if ($group) {
             $this->db->group_by($group);
         }
-        $total_m_normal   = ($currency === 'valas') ? 'apps.selisih' : 'apps.selisih * apps.kurs';
+        $total_m_normal   = ($currency === 'valas') ? '(apps.selisih * -1)' : '(apps.selisih * -1) * apps.kurs';
 
 
         $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  
@@ -731,7 +732,10 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->group_by($group);
         }
 
+        // $total_m_koreksi_1  = ($currency === 'valas') ? ' (appsk.nominal * -1) ' : '(appsk.nominal * -1) * apps.kurs';
+        // $total_m_koreksi_1  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "+", (appsk.nominal * -1), (appsk.nominal * -1)' : 'IF(appsk.koreksi_tanda = "+", (appsk.nominal * -1) * apps.kurs, (appsk.nominal * -1)*apps.kurs)';
         $total_m_koreksi  = ($currency === 'valas') ? 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1), appsk.nominal)' : 'IF(appsk.koreksi_tanda = "-", (appsk.nominal * -1) * apps.kurs, appsk.nominal*apps.kurs)';
+        // $total_m_koreksi  = ($currency === 'valas') ? '(appsk.nominal * -1)' : '(appsk.nominal * -1) * apps.kurs';
 
 
         $this->db->SELECT("app.id as id_bukti, app.id as id_bukti_ecr, app.no_pelunasan , app.tanggal_transaksi, app.partner_id as id_partner,  CONCAT('Koreksi : ', GROUP_CONCAT(ack.nama_koreksi SEPARATOR ', '), 
@@ -741,7 +745,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                 CONCAT(' - ',(SELECT GROUP_CONCAT(no_faktur) as group_no FROM acc_pelunasan_piutang_faktur WHERE  pelunasan_piutang_id = app.id))
             ))  as uraian,
                         CASE
-                            WHEN apps.selisih > 0 THEN
+                            WHEN (apps.selisih * -1) > 0 THEN
                                 /* D - C */
                                 SUM(
                                     CASE WHEN appsk.posisi = 'D'
@@ -757,7 +761,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                                     END
                                 )
 
-                            WHEN apps.selisih < 0 THEN
+                            WHEN (apps.selisih * -1) < 0 THEN
                                 /* C - D */
                                 SUM(
                                     CASE WHEN appsk.posisi = 'C'
@@ -1126,7 +1130,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         - IFNULL(retur_sblm.total_retur, 0) 
                         - IFNULL(um_sblm.total_uang_muka, 0) 
                         - IFNULL(diskon_sblm.total_diskon, 0)
-                        - IFNULL(koreksi_sblm.total_koreksi, 0)
+                        + IFNULL(koreksi_sblm.total_koreksi, 0)
                         + IFNULL(refund_sblm.total_refund, 0)
                     ) <> 0
                     OR
@@ -1149,7 +1153,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         }
 
         $this->db->select("p.id, p.nama, $cr_condition as saldo_awal_piutang,
-                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um, 0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon, 0) - IFNULL(um_sblm.total_uang_muka,0) - (IFNULL(koreksi_sblm.total_koreksi,0)) + IFNULL(refund_sblm.total_refund, 0) ) as saldo_awal_final,
+                        ($cr_condition - IFNULL(kas_um_sblm.total_kas_um, 0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon, 0) - IFNULL(um_sblm.total_uang_muka,0) + (IFNULL(koreksi_sblm.total_koreksi,0)) + IFNULL(refund_sblm.total_refund, 0) ) as saldo_awal_final,
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(pelunasan.total_pelunasan,0) as total_pelunasan,
                         IFNULL(retur.total_retur,0) as total_retur,
