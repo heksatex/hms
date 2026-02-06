@@ -541,7 +541,7 @@
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round(($subtotal2 + $totalTax), 2) : round($subtotal2 + $totalTax, 2), 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($inv->nilai_matauang > 1) ? round($inv->total, 2) : round($inv->total, 2), 4) ?></td>
                                                             </tr>
                                                         </table>
                                                     </div>
