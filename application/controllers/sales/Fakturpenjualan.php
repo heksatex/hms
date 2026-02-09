@@ -133,7 +133,7 @@ class Fakturpenjualan extends MY_Controller {
         "tunai" => "Tunai",
         "ekspor" => "Ekspor",
         "sample" => "Sample",
-//        "aktiva" => "Aktiva"
+        "aktiva" => "Aktiva"
     ];
 
     public function index() {
@@ -662,7 +662,7 @@ class Fakturpenjualan extends MY_Controller {
 //                            $dppDikson = round(($ddskon * 11) / 12, 2);
 //                            $ppn_diskon = round($dppDikson * $taxVal, 2);
 //                        }
-                        if ($check->jenis_ppn !== "aktiva" && $dppSet) {
+                        if ($header["jenis_ppn"] !== "aktiva" && $dppSet) {
                             $pajak = round($dpp * $taxVal, 2);
                             $dppDikson = round(($ddskon * 11) / 12, 2);
                             $ppn_diskon = round($dppDikson * $taxVal, 2);
@@ -710,7 +710,7 @@ class Fakturpenjualan extends MY_Controller {
 //                            $dppDikson = round(($header["diskon"] * 11) / 12, 2);
 //                            $ppn_diskon = round($dppDikson * $taxVal, 2);
 //                        }
-                        if ($check->jenis_ppn !== "aktiva" && $dppSet) {
+                        if ($header["jenis_ppn"] !== "aktiva" && $dppSet) {
                             $pajak = round($dpp * $taxVal, 2);
                             $dppDikson = round(($header["diskon"] * 11) / 12, 2);
                             $ppn_diskon = round($dppDikson * $taxVal, 2);
@@ -738,7 +738,7 @@ class Fakturpenjualan extends MY_Controller {
 //                            $dppDikson = round(($header["diskon"] * 11) / 12);
 //                            $ppn_diskon = round($dppDikson * $taxVal);
 //                        }
-                        if ($check->jenis_ppn !== "aktiva" && $dppSet) {
+                        if ($header["jenis_ppn"] !== "aktiva" && $dppSet) {
                             $pajak = round($dpp * $taxVal);
                             $dppDikson = round(($header["diskon"] * 11) / 12);
                             $ppn_diskon = round($dppDikson * $taxVal);
