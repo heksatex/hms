@@ -332,9 +332,120 @@ class M_bukubesarpembantupiutang extends CI_Model
         // $total  = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4))), 2),0) + IFNULL(ROUND(ROUND(SUM(CAST(b.qty*b.harga  AS DECIMAL(20,4)))*11/12, 2) *a.tax_value, 2),0)" : "IFNULL(ROUND(SUM(CAST(b.qty*b.harga AS DECIMAL(20,4)))*a.kurs_nominal, 0),0) + IFNULL(ROUND(  ROUND( ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))), 0) * 11 / 12, 0)* a.tax_value, 0)* a.kurs_nominal, 0), 0)";
 
 
-        $dpp    = ($currency === 'valas') ? "SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))" : "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0) ";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
-        $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)),0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
+        // $dpp    = ($currency === 'valas') ? "SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))" : "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0) ";
+
+        // $ppn    = ($currency === 'valas') ? "ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2) " : "ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
+
+        // $total  = ($currency === 'valas') ? "IFNULL(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),0) + IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),0)" : "IFNULL(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)),0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0), 0)";
+
+        $dpp_valas  = "
+            SUM(
+                ROUND(
+                    CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4))
+                ,2)
+            )
+        ";
+        $dpp_idr = "
+            ROUND(
+                ROUND(
+                    SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)),
+                    IF(a.kurs=1, 0, 2)
+                ) * CAST(a.kurs_nominal as DECIMAL(20, 4)),
+                0
+            )
+        ";
+
+        $ppn_idr = "
+            IFNULL(
+                ROUND(
+                    (
+                    CASE
+                        WHEN a.jenis_ppn = 'aktiva' THEN
+                        ROUND(
+                            ROUND(
+                                SUM(
+                                    ROUND(
+                                    CAST(b.qty AS DECIMAL(20,4)) * CAST(b.harga AS DECIMAL(20,4)),
+                                    2
+                                    )
+                                ),
+                                IF(a.kurs = 1, 0, 2)
+                            )
+                            * CAST(a.tax_value AS DECIMAL(20,4)),
+                            IF(a.kurs = 1, 0, 2)
+                        )
+                        ELSE
+                        ROUND(
+                            ROUND(
+                                ROUND(
+                                    SUM(
+                                    ROUND(
+                                        CAST(b.qty AS DECIMAL(20,4)) * CAST(b.harga AS DECIMAL(20,4)),
+                                        2
+                                    )
+                                    ),
+                                    IF(a.kurs = 1, 0, 2)
+                                )
+                                * 11/12,
+                                IF(a.kurs = 1, 0, 2)
+                            )
+                            * CAST(a.tax_value AS DECIMAL(20,4)),
+                            IF(a.kurs = 1, 0, 2)
+                        )
+                    END
+                    )
+                    * CAST(a.kurs_nominal AS DECIMAL(20,4)),
+                    0
+                ),
+            0
+            )
+        ";
+        $ppn_valas = "
+            IFNULL(
+                ROUND(
+                    CASE
+                    WHEN a.jenis_ppn = 'aktiva' THEN
+                        ROUND(
+                            ROUND(
+                                SUM(
+                                    ROUND(
+                                        CAST(b.qty AS DECIMAL(20,4)) * CAST(b.harga AS DECIMAL(20,4)),
+                                        2
+                                    )
+                                ),
+                                2
+                            )
+                            * CAST(a.tax_value AS DECIMAL(20,4)),
+                            2
+                        )
+                    ELSE
+                        ROUND(
+                            ROUND(
+                                ROUND(
+                                    SUM(
+                                        ROUND(
+                                            CAST(b.qty AS DECIMAL(20,4)) * CAST(b.harga AS DECIMAL(20,4)),
+                                            2
+                                        )
+                                    ),
+                                    2
+                                )
+                                * 11/12,
+                                2
+                            )
+                            * CAST(a.tax_value AS DECIMAL(20,4)),
+                            2
+                        )
+                    END,
+                    2
+                ),
+            0
+            )
+        ";
+        $dpp    = ($currency === 'valas') ? $dpp_valas : $dpp_idr ;
+        $ppn    = ($currency === 'valas') ? $ppn_valas : $ppn_idr ;
+        $total  = ($currency === 'valas') ? "IFNULL($dpp_valas, 0) + IFNULL($ppn_valas,0) " : "IFNULL($dpp_idr, 0) + IFNULL($ppn_idr, 0) ";
+
 
         $this->db->SELECT("a.id,a.no_faktur_internal,
                 IFNULL($dpp,0) as dpp_piutang,
@@ -420,10 +531,94 @@ class M_bukubesarpembantupiutang extends CI_Model
         // $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 2) * 11/12, 2) * a.tax_value, 2),2)" : "ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 0) * 11/12, 0) * a.tax_value, 0) * a.kurs_nominal,0)";
         // $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100),2),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 2) * 11/12, 2) * a.tax_value, 2),2), 0)" : "IFNULL(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100) * a.kurs_nominal,0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(SUM(CAST(b.qty * b.harga AS DECIMAL(20,4))) * (a.nominal_diskon / 100), 0) * 11/12, 0) * a.tax_value, 0) * a.kurs_nominal,0),0)";
 
-        $dpp    = ($currency === 'valas') ? "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2)" : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)),0)";
-        $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2)" : "ROUND(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
-        $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),2)" : "IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0),0)";
+        // $dpp    = ($currency === 'valas') ? "ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2)" : "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)),0)";
+        // $ppn    = ($currency === 'valas') ? "ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2)" : "ROUND(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0)";
+        // $total = ($currency === 'valas') ? "IFNULL(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2),0) + IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,2) * CAST(a.tax_value as DECIMAL(20,4)),2),2)" : "IFNULL(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)), 0),0) + IFNULL(ROUND(ROUND(ROUND(ROUND(ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), IF(a.kurs=1, 0, 2)) * 11/12, IF(a.kurs=1, 0, 2)) * CAST(a.tax_value as DECIMAL(20,4)),IF(a.kurs=1, 0, 2)) * CAST( a.kurs_nominal as DECIMAL(20, 4)) , 0),0)";
+
+        $dpp_valas = "
+            ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2)
+        ";
+
+        $dpp_idr = "
+            ROUND(
+                ROUND(
+                    ROUND(
+                        SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 2)),IF(a.kurs=1, 0, 2))   * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 
+                    IF(a.kurs=1, 0, 2)) 
+                    * CAST( a.kurs_nominal as DECIMAL(20, 4)),
+                0
+            )
+        ";
+
+        $ppn_valas = "
+            ROUND(
+                CASE
+                WHEN a.jenis_ppn = 'aktiva' THEN
+                    ROUND(
+                        SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) 
+                        * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 
+                    2) 
+                    * CAST(a.tax_value as DECIMAL(20,4))
+                ELSE 
+                    ROUND(
+                        ROUND(SUM(ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)),2)) * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100), 2) * 11/12,
+                    2)
+                    * CAST(a.tax_value as DECIMAL(20,4))
+                END
+            ,2)
+        ";
+
         
+        $ppn_idr = "
+            ROUND(
+                (
+                    CASE
+                        WHEN a.jenis_ppn = 'aktiva' THEN
+                        ROUND(
+                                ROUND(
+                                    ROUND(
+                                        SUM(
+                                            ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 
+                                            2)
+                                        ),
+                                    IF(a.kurs=1, 0, 2)
+                                    ) 
+                                    * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100),
+                                IF(a.kurs=1, 0, 2)
+                                ) 
+                            * CAST(a.tax_value as DECIMAL(20,4)),
+                        IF(a.kurs=1, 0, 2)
+                        ) 
+                    ELSE 
+                        ROUND(
+                            ROUND(
+                                ROUND(
+                                    ROUND(
+                                        SUM(
+                                            ROUND(CAST(b.qty as DECIMAL(20, 4)) * CAST(b.harga as DECIMAL(20, 4)), 
+                                            2)
+                                        ),
+                                    IF(a.kurs=1, 0, 2)
+                                    ) 
+                                    * (CAST(a.nominal_diskon AS DECIMAL(20,4)) / 100),
+                                IF(a.kurs=1, 0, 2)
+                                ) * 11/12,
+                            IF(a.kurs=1, 0, 2)
+                            ) 
+                            * CAST(a.tax_value as DECIMAL(20,4)),
+                        IF(a.kurs=1, 0, 2)
+                        ) 
+
+                    END
+                )
+                * CAST( a.kurs_nominal as DECIMAL(20, 4)),
+            0)
+        ";
+
+
+        $dpp    = ($currency === 'valas') ? $dpp_valas : $dpp_idr ;
+        $ppn    = ($currency === 'valas') ? $ppn_valas : $ppn_idr ;
+        $total  = ($currency === 'valas') ? " IFNULL($dpp_valas, 0) + IFNULL($ppn_valas, 0) " : " IFNULL($dpp_idr, 0) + IFNULL($ppn_idr, 0) ";
 
         $this->db->SELECT("a.id,a.no_faktur_internal,
                 IFNULL($dpp,0) as dpp_diskon,
