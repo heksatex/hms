@@ -31,7 +31,7 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-acc-kasadd" id="form-acc-kasadd" action="<?= base_url("accounting/kaskeluar/simpan") ?>">
+                        <form class="form-horizontal" method="POST" name="form-acc-kasadd" id="form-acc-kasadd" action="<?= base_url("{$class}/kaskeluar/simpan") ?>">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Bukti Kas Keluar <span id="no"></span></h3>
                             </div>

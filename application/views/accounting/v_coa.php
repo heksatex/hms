@@ -120,6 +120,7 @@
         <script>
             $(function () {
                 $("#tbl-gk").treetable({expandable: true});
+                
                 $(".expnd").on("click", async function () {
                     please_wait(function () {
                         setTimeout(function () {
@@ -171,7 +172,8 @@
                         }
                     });
                 });
-
+                
+                $('#tbl-gk').treetable('expandAll');
             });
         </script>
     </body>

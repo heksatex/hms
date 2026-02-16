@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <?php $this->load->view("admin/_partials/head.php") ?>
+        <?php
+        $this->load->view("admin/_partials/head.php");
+        $CI = & get_instance();
+        ?>
         <style>
             #btn-edit,#btn-cancel,#btn-print,.btn-save,#btn-confirm {
                 display: none;
@@ -20,7 +23,7 @@
                 display: none;
             }
         </style>
-        <?php $this->load->view("accounting/_v_style_group_select2.php") ?>
+<?php $this->load->view("accounting/_v_style_group_select2.php") ?>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
@@ -28,11 +31,11 @@
                 <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
-                $this->load->view("admin/_partials/topbar.php", $data)
+                $this->load->view("admin/_partials/topbar.php", $data);
                 ?>
             </header>
             <aside class="main-sidebar">
-                <?php $this->load->view("admin/_partials/sidebar-new.php") ?>
+<?php $this->load->view("admin/_partials/sidebar-new.php") ?>
             </aside>
             <div class="content-wrapper">
                 <section class="content-header">
@@ -40,7 +43,7 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-acc-bankmasuk" id="form-acc-bankmasuk" action="<?= base_url("accounting/bankmasuk/simpan") ?>">
+                        <form class="form-horizontal" method="POST" name="form-acc-bankmasuk" id="form-acc-bankmasuk" action="<?= base_url("{$class}/bankmasuk/simpan") ?>">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Bukti Bank Masuk <span id="no"></h3>
                             </div>
@@ -279,7 +282,7 @@
 
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
-                <?php $this->load->view("admin/_partials/js.php") ?>
+<?php $this->load->view("admin/_partials/js.php") ?>
             </footer>
         </div>
         <script>
@@ -347,7 +350,7 @@
                 }
 
                 $("#total_nominal").val(total);
-                formatCurrency($("#total_nominal"),"blur");
+                formatCurrency($("#total_nominal"), "blur");
             });
             const setCurr = (() => {
                 $(".select2-curr").select2({
@@ -418,6 +421,7 @@
                     if ($("#partner_name").val() !== "") {
                         $("#partner_name").val("");
                         $("#partner").val(null).trigger("change");
+                        $("#transaksi").val("");
                     }
                 });
                 $("#btn-simpan").on("click", function (e) {
@@ -499,6 +503,12 @@
                     var ttt = $(".partner").find(":selected");
                     $("#lain_lain").val("");
                     $("#partner_name").val(ttt.text());
+                    var namarek = $(".partner :selected").data()?.data.nama_rek;
+                    if ((namarek === '') || (typeof namarek === 'undefined')) {
+                        $("#transaksi").val("");
+                    } else {
+                        $("#transaksi").val("Alias : " + namarek);
+                    }
                 });
                 $("#partner").select2({
                     placeholder: "Pilih",
@@ -519,7 +529,8 @@
                             $.each(data.data, function (index, item) {
                                 results.push({
                                     id: item.id,
-                                    text: item.nama
+                                    text: item.nama,
+                                    nama_rek: item.nama_rekening
                                 });
                             });
                             return {

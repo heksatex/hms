@@ -70,6 +70,7 @@ class Giromasuk extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'ACCGM';
+        $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_giro_masuk', $data);
     }
 
@@ -171,13 +172,13 @@ class Giromasuk extends MY_Controller {
             $data = array();
             $no = $_POST['start'];
             $list = $this->_list_data();
-
+            $class= $this->uri->segment(1);
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_gm);
                 $no++;
                 $data [] = [
                     $no,
-                    "<a href='" . base_url("accounting/giromasuk/edit/{$kode_encrypt}") . "'>{$field->no_gm}</a>",
+                    "<a href='" . base_url("{$class}/giromasuk/edit/{$kode_encrypt}") . "'>{$field->no_gm}</a>",
                     ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama,
                     date("Y-m-d", strtotime($field->tanggal)),
                     $field->kode_coa . " - " . $field->nama_coa,
@@ -204,6 +205,7 @@ class Giromasuk extends MY_Controller {
     public function add() {
         $data['id_dept'] = 'ACCGM';
         $model = new $this->m_global;
+        $data["class"] = $this->uri->segment(1);
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi", ["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
@@ -365,8 +367,9 @@ class Giromasuk extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
+            $class= $this->uri->segment(1);
             $this->_module->gen_history_new($sub_menu, $nogm, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
-            $url = site_url("accounting/giromasuk/edit/" . encrypt_url($nogm));
+            $url = site_url("{$class}/giromasuk/edit/" . encrypt_url($nogm));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -386,6 +389,7 @@ class Giromasuk extends MY_Controller {
             $data["id"] = $id;
             $kode = decrypt_url($id);
             $model = new $this->m_global;
+            $data["class"] = $this->uri->segment(1);
             $data['datas'] = $model->setTables("acc_giro_masuk")->setWheres(["no_gm" => $kode])
 //                            ->setSelects(["agk.no_gk,agk.tanggal,agk.kode_coa,agk.partner_id,agk.partner_nama,agk.lain2,agk.transinfo,agk.total_rp"])
                             ->setOrder(["tanggal" => "desc"])->getDetail();
@@ -581,7 +585,8 @@ class Giromasuk extends MY_Controller {
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
 
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
-            $url = site_url("accounting/giromasuk/edit/{$id}");
+            $class = $this->uri->segment(1);
+            $url = site_url("{$class}/giromasuk/edit/{$id}");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -811,17 +816,21 @@ class Giromasuk extends MY_Controller {
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "D",
                         "nominal_curr" => $head->total_rp,
-                        "kurs" => 1,
+                        "kurs" => $items[0]->kurs ?? 1,
                         "kode_mua" => "IDR",
                         "nominal" => ($head->total_rp * $items[0]->kurs),
                         "row_order" => 1
                     );
                     $nominal_rp = 0;
+                    $nominal_curr = 0;
+                    $curr = "IDR";
                     foreach ($items as $key => $item) {
                         $uraian = $item->bank;
                         $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
                         $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
                         $nominal_rp += ($item->nominal * $item->kurs);
+                        $nominal_curr += $item->nominal;
+                        $curr = $item->currency;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -836,8 +845,9 @@ class Giromasuk extends MY_Controller {
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
-                    $jurnalItems[0]["nominal_curr"] = $nominal_rp;
+                    $jurnalItems[0]["nominal_curr"] = $nominal_curr;
                     $jurnalItems[0]["nominal"] = $nominal_rp;
+                    $jurnalItems[0]["kode_mua"] = $curr;
                     if ($head->jurnal !== "") {
                         $jurnalDB->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
                         $jurnalDB->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();

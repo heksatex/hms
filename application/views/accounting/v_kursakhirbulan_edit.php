@@ -105,6 +105,9 @@
                                                 Saldo
                                             </th>
                                             <th>
+                                                Saldo RP
+                                            </th>
+                                            <th>
                                                 Kurs
                                             </th>
                                             <th>
@@ -128,6 +131,9 @@
                                                             <?= number_format($value->saldo,4)." {$value->curr}" ?>
                                                         </td>
                                                         <td>
+                                                            <?= number_format($value->saldo_rp,2) ?>
+                                                        </td>
+                                                        <td>
                                                             <?= $value->kurs ?>
                                                         </td>
                                                         <td>
@@ -145,6 +151,9 @@
                                     </div>
                                     <div class="tab-pane" id="tab_2">
                                         <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                            <caption>
+                                                No Jurnal : <?= $datas === "" ? "":"{$datas->no_jurnal}" ?>
+                                            </caption>
                                             <thead>
                                             <th class="no">
                                                 No

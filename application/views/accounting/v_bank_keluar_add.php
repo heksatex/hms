@@ -44,7 +44,7 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-acc-bankkeluar" id="form-acc-bankkeluar" action="<?= base_url("accounting/bankkeluar/simpan") ?>">
+                        <form class="form-horizontal" method="POST" name="form-acc-bankkeluar" id="form-acc-bankkeluar" action="<?= base_url("{$class}/bankkeluar/simpan") ?>">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Bukti Bank Keluar <span id="no"></h3> 
                             </div>

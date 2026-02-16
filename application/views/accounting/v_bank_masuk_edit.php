@@ -582,6 +582,8 @@ if ($datas->status == 'confirm') {
                     if ($("#partner_name").val() !== "") {
                         $("#partner_name").val("");
                         $("#partner").val(null).trigger("change");
+                        $("#transaksi").val("");
+                        $("#transaksi").val("");
                     }
 
                 });
@@ -646,7 +648,7 @@ if ($datas->status == 'confirm') {
                         },
                         success: function (data) {
                             alert_notify(data.icon, data.message, data.type, function () {}, 500);
-                            window.location.href = "<?= base_url('accounting/bankmasuk/add') ?>";
+                            window.location.href = "<?= base_url("{$class}/bankmasuk/add") ?>";
                         },
                         complete: function (jqXHR, textStatus) {
                             unblockUI(function () {});
@@ -708,7 +710,7 @@ if ($datas->status == 'confirm') {
                                             $(".btn-save").trigger("click");
                                         });
                                     } else {
-                                        window.location.replace(response.data.url);
+                                        window.location.reload();
                                     }
                                 }
 //                                    
@@ -848,7 +850,8 @@ if ($datas->status == 'confirm') {
                                 $.each(data.data, function (index, item) {
                                     results.push({
                                         id: item.id,
-                                        text: item.nama
+                                        text: item.nama,
+                                        nama_rek: item.nama_rekening
                                     });
                                 });
                                 return {
@@ -865,6 +868,13 @@ if ($datas->status == 'confirm') {
                     var ttt = $(".partner").find(":selected");
                     $("#lain_lain").val("");
                     $("#partner_name").val(ttt.text());
+                    var namarek = $(".partner :selected").data()?.data.nama_rek;
+                    if ((namarek === '') || (typeof namarek === 'undefined')) {
+                        $("#transaksi").val("");
+                    } else {
+                        $("#transaksi").val("Alias : " + namarek);
+                    }
+                    
                 });
 
                 $(".no_acc").on("change", function () {

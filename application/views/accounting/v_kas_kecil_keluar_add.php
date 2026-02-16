@@ -30,7 +30,7 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-acc-kaskecil" id="form-acc-kaskecil" action="<?= base_url("accounting/kaskecilkeluar/simpan") ?>">
+                        <form class="form-horizontal" method="POST" name="form-acc-kaskecil" id="form-acc-kaskecil" action="<?= base_url("{$class}/kaskecilkeluar/simpan") ?>">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Bukti Kas Kecil Keluar <span id="no"></h3>
                             </div>
