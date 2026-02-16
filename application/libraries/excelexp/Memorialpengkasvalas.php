@@ -34,7 +34,7 @@ class Memorialpengkasvalas {
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setSelects(["uraian"]);
-                    $model->setGroups(["kkd.kode_coa"], true)->setOrder(["kkd.kode_coa"], true);
+                    $model->setGroups(["kkd.id"], true)->setOrder(["kkd.kode_coa","kkd.no_kk","kkd.id"], true);
                     $data["kas_kredit"] = $model->getData();
                     break;
                 default:

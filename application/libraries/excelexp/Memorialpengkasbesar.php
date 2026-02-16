@@ -31,7 +31,7 @@ class Memorialpengkasbesar {
             if ($datas['filter'] === "detail") {
                 $model->setSelects(["transinfo", "uraian", "date(km.tanggal) as tanggal", "km.no_kk as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
                 $data["kredit"] = $model->getData();
-                $model->setGroups(["kmd.kode_coa","kmd.no_kk"]);
+                $model->setGroups(["kmd.id","kmd.no_kk"])->setOrder(["kmd.kode_coa","kmd.no_kk"]);
                 $data["debit"] = $model->getData();
             } else {
                 $model->setGroups(["kmd.kode_coa"]);
