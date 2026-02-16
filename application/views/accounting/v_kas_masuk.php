@@ -135,6 +135,9 @@
         <script>
             var tanggal = "";
             $(function () {
+                $("#btn-tambah").on("click", function () {
+                    window.location.href = "<?php echo site_url("{$class}/kasmasuk/add") ?>";
+                });
                 const table = $("#tbl-km").DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -149,7 +152,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('accounting/kasmasuk/list_data') ?>",
+                        "url": "<?php echo site_url("{$class}/kasmasuk/list_data") ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.tanggal = tanggal;

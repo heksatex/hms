@@ -539,7 +539,7 @@ if ($datas->status == 'confirm') {
                             },
                             success: function (data) {
                                 alert_notify(data.icon, data.message, data.type, function () {}, 500);
-                                window.location.href = "<?= base_url('accounting/kasmasuk/add') ?>";
+                                window.location.href = "<?= base_url("{$class}/kasmasuk/add") ?>";
                             },
                             complete: function (jqXHR, textStatus) {
                                 unblockUI(function () {});
@@ -569,7 +569,7 @@ if ($datas->status == 'confirm') {
                                                 $(".btn-save").trigger("click");
                                             });
                                         } else {
-                                            window.location.replace(response.data.url);
+                                            window.location.reload();
                                         }
                                     }
                                 }

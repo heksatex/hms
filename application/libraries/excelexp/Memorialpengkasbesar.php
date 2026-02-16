@@ -26,16 +26,19 @@ class Memorialpengkasbesar {
             $model->setTables("acc_kas_keluar km")->setJoins("acc_kas_keluar_detail kmd", "kmd.kas_keluar_id = km.id")
                     ->setJoins("acc_coa", "acc_coa.kode_coa = kmd.kode_coa", "left")->setOrder(["kmd.kode_coa" => "asc"])
                     ->setWheres(["date(km.tanggal) >=" => $datas['tanggals'][0], "date(km.tanggal) <=" => $datas['tanggals'][1]])
-                    ->setWheres(["km.kode_coa>=" => "1111.01", "kmd.kurs" => 1, "km.status" => "confirm"])
+                    ->setWheres(["km.kode_coa " => "1111.01", "kmd.kurs" => 1, "km.status" => "confirm"])
                     ->setSelects(["sum(nominal) as nominals,km.kode_coa as km_kode_coa", "acc_coa.kode_coa,acc_coa.nama"]);
             if ($datas['filter'] === "detail") {
                 $model->setSelects(["transinfo", "uraian", "date(km.tanggal) as tanggal", "km.no_kk as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
+                $data["kredit"] = $model->getData();
+                $model->setGroups(["kmd.kode_coa","kmd.no_kk"]);
+                $data["debit"] = $model->getData();
             } else {
-                $model->setGroups(["km.kode_coa"]);
+                $model->setGroups(["kmd.kode_coa"]);
+                $data["debit"] = $model->getData();
+                $model->setGroups(["km.kode_coa"], true);
+                $data["kredit"] = $model->getData();
             }
-            $data["kredit"] = $model->getData();
-            $model->setGroups(["kmd.kode_coa", "kmd.no_kk"], true);
-            $data["debit"] = $model->getData();
             return $data;
         } catch (Exception $ex) {
             throw $ex;
@@ -141,7 +144,7 @@ class Memorialpengkasbesar {
             }
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} detail";
             $url = "dist/storages/report/jurnal_memorial";

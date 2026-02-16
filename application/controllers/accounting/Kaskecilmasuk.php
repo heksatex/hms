@@ -55,6 +55,7 @@ class Kaskecilmasuk extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'ACCKKM';
+        $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_kas_kecil_masuk', $data);
     }
     
@@ -165,13 +166,13 @@ class Kaskecilmasuk extends MY_Controller {
             $data = array();
             $no = $_POST['start'];
             $list = $this->_list_data();
-
+            $class = $this->uri->segment(1);
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_kkm);
                 $no++;
                 $data [] = [
                     $no,
-                    "<a href='" . base_url("accounting/kaskecilmasuk/edit/{$kode_encrypt}") . "'>{$field->no_kkm}</a>",
+                    "<a href='" . base_url("{$class}/kaskecilmasuk/edit/{$kode_encrypt}") . "'>{$field->no_kkm}</a>",
                     ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama,
                     date("Y-m-d", strtotime($field->tanggal)),
                     $field->kode_coa . " - " . $field->nama_coa,
@@ -196,6 +197,7 @@ class Kaskecilmasuk extends MY_Controller {
 
     public function add() {
         $data['id_dept'] = 'ACCKKM';
+        $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
@@ -209,6 +211,7 @@ class Kaskecilmasuk extends MY_Controller {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
             $kodeCoa = $this->input->post("kode_coa");
+            $class = $this->uri->segment(1);
             $val = [
                 [
                     'field' => 'tanggal',
@@ -321,7 +324,7 @@ class Kaskecilmasuk extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $nokkm, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
-            $url = site_url("accounting/kaskecilmasuk/edit/" . encrypt_url($nokkm));
+            $url = site_url("{$class}/kaskecilmasuk/edit/" . encrypt_url($nokkm));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -337,6 +340,7 @@ class Kaskecilmasuk extends MY_Controller {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
+            $data["class"] = $this->uri->segment(1);
             $kode = decrypt_url($id);
             $model = new $this->m_global;
             $data['datas'] = $model->setTables("acc_kas_kecil_masuk")->setWheres(["no_kkm" => $kode])
@@ -489,7 +493,8 @@ class Kaskecilmasuk extends MY_Controller {
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
 
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
-            $url = site_url("accounting/kaskecilmasuk/edit/{$id}");
+            $class= $this->uri->segment(1);
+            $url = site_url("{$class}/kaskecilmasuk/edit/{$id}");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -728,14 +733,17 @@ class Kaskecilmasuk extends MY_Controller {
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "D",
                         "nominal_curr" => $head->total_rp,
-                        "kurs" => 1,
+                        "kurs" => $items[0]->kurs ?? 1,
                         "kode_mua" => "IDR",
                         "nominal" => ($head->total_rp * $items[0]->kurs),
                         "row_order" => 1
                     );
-
+                    $nominal_curr = 0;
+                    $curr = "IDR";  
                     foreach ($items as $key => $item) {
                          $nominal_rp += ($item->nominal * $item->kurs);
+                         $nominal_curr += $item->nominal;
+                        $curr = $item->currency;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$info}{$item->uraian}",
@@ -750,8 +758,9 @@ class Kaskecilmasuk extends MY_Controller {
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
-                    $jurnalItems[0]["nominal_curr"] = $nominal_rp;
+                    $jurnalItems[0]["nominal_curr"] = $nominal_curr;
                     $jurnalItems[0]["nominal"] = $nominal_rp;
+                    $jurnalItems[0]["kode_mua"] = $curr;
                     if ($head->jurnal !== "") {
                         $jurnalDB->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
                         $jurnalDB->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();

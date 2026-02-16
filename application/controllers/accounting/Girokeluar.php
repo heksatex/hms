@@ -74,6 +74,7 @@ class Girokeluar extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'ACCGK';
+        $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_giro_keluar', $data);
     }
     
@@ -177,13 +178,13 @@ public function ekspor() {
             $data = array();
             $no = $_POST['start'];
             $list = $this->_list_data();
-
+            $class = $this->uri->segment(1);
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_gk);
                 $no++;
                 $data [] = [
                     $no,
-                    "<a href='" . base_url("accounting/girokeluar/edit/{$kode_encrypt}") . "'>{$field->no_gk}</a>",
+                    "<a href='" . base_url("{$class}/girokeluar/edit/{$kode_encrypt}") . "'>{$field->no_gk}</a>",
                     ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama,
                     date("Y-m-d", strtotime($field->tanggal)),
                     $field->kode_coa . " - " . $field->nama_coa,
@@ -210,6 +211,7 @@ public function ekspor() {
 
     public function add() {
         $data['id_dept'] = 'ACCGK';
+        $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
         $data["trx_intern"] = $this->trx_intern;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
@@ -224,6 +226,7 @@ public function ekspor() {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
+            $class = $this->uri->segment(1);
             $val = [
                 [
                     'field' => 'tanggal',
@@ -372,7 +375,7 @@ public function ekspor() {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $nogk, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
-            $url = site_url("accounting/girokeluar/edit/" . encrypt_url($nogk));
+            $url = site_url("{$class}/girokeluar/edit/" . encrypt_url($nogk));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -392,6 +395,7 @@ public function ekspor() {
             $data["id"] = $id;
             $kode = decrypt_url($id);
             $model = new $this->m_global;
+            $data["class"] = $this->uri->segment(1);
             $data["trx_intern"] = $this->trx_intern;
             $data['datas'] = $model->setTables("acc_giro_keluar agk")->setWheres(["no_gk" => $kode])
 //                            ->setSelects(["agk.no_gk,agk.tanggal,agk.kode_coa,agk.partner_id,agk.partner_nama,agk.lain2,agk.transinfo,agk.total_rp"])
@@ -588,9 +592,9 @@ public function ekspor() {
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
-
+            $class = $this->uri->segment(1);
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
-            $url = site_url("accounting/girokeluar/edit/{$id}");
+            $url = site_url("{$class}/girokeluar/edit/{$id}");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -819,11 +823,15 @@ public function ekspor() {
                                     ->setSelects(["acc_giro_keluar_detail.*", "currency_kurs.currency"])
                                     ->setWheres(["giro_keluar_id" => $head->id])->getData();
                     $nominal_rp = 0;
+                    $nominal_curr = 0;
+                    $curr = "IDR";
                     foreach ($items as $key => $item) {
                         $uraian = $item->bank;
                         $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
                         $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
                         $nominal_rp += ($item->nominal * $item->kurs);
+                        $nominal_curr += $item->nominal;
+                        $curr = $item->currency;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -846,9 +854,9 @@ public function ekspor() {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "C",
-                        "nominal_curr" => $nominal_rp,
-                        "kurs" => 1,
-                        "kode_mua" => "IDR",
+                        "nominal_curr" => $nominal_curr,
+                        "kurs" => $items[0]->kurs ?? 1,
+                        "kode_mua" => $curr,
                         "nominal" => $nominal_rp,
                         "row_order" => (count($jurnalItems) + 1)
                     );

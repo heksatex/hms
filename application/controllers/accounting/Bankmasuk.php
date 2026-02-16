@@ -71,6 +71,7 @@ class Bankmasuk extends MY_Controller {
     public function add() {
         $data['id_dept'] = 'ACCBM';
         $data["jenis_transaksi"] = $this->jenisTransaksi;
+        $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
@@ -82,9 +83,10 @@ class Bankmasuk extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'ACCBM';
+        $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_bank_masuk', $data);
     }
-    
+
     public function ekspor() {
         try {
             $tanggal = $this->input->post("tanggal");
@@ -102,9 +104,9 @@ class Bankmasuk extends MY_Controller {
                 $filter .= "Customer : {$customers}; ";
             }
             if ($uraian !== "") {
-              $filter .= "Uraian : {$uraian}; ";
+                $filter .= "Uraian : {$uraian}; ";
             }
-            
+
             $data = $this->_list_data();
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
@@ -132,10 +134,10 @@ class Bankmasuk extends MY_Controller {
                 $sheet->setCellValue("G{$row}", $field->total_rp);
                 $sheet->setCellValue("H{$row}", $field->status);
             }
-            if($noUrut > 0) {
+            if ($noUrut > 0) {
                 $sheet->getStyle("G4:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             }
-            $filename = "Bank Masuk ".date("Y-m-d");
+            $filename = "Bank Masuk " . date("Y-m-d");
             $url = "dist/storages/report/bankgirokas";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
@@ -162,7 +164,7 @@ class Bankmasuk extends MY_Controller {
                     ->setSearch(["no_bm", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo"])
                     ->setOrders([null, "no_bm", "partner_nama", "acc_bank_masuk.tanggal", null, null, "total_rp"])
                     ->setSelects(["acc_bank_masuk.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
-            
+
             $tanggal = $this->input->post("tanggal");
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
@@ -181,8 +183,8 @@ class Bankmasuk extends MY_Controller {
             if ($uraian !== "") {
                 $model->setJoins("acc_bank_masuk_detail abkd", "abkd.bank_masuk_id = acc_bank_masuk.id")
                         ->setGroups(["bank_masuk_id"])->setWheres(["abkd.uraian LIKE" => "%{$uraian}%"]);
-            }    
-            
+            }
+
             return $model;
         } catch (Exception $ex) {
             throw $ex;
@@ -194,13 +196,13 @@ class Bankmasuk extends MY_Controller {
             $data = array();
             $no = $_POST['start'];
             $list = $this->_list_data();
-
+            $class = $this->uri->segment(1);
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_bm);
                 $no++;
                 $data [] = [
                     $no,
-                    "<a href='" . base_url("accounting/bankmasuk/edit/{$kode_encrypt}") . "'>{$field->no_bm}</a>",
+                    "<a href='" . base_url("{$class}/bankmasuk/edit/{$kode_encrypt}") . "'>{$field->no_bm}</a>",
                     ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama,
                     date("Y-m-d", strtotime($field->tanggal)),
                     $field->kode_coa . " - " . $field->nama_coa,
@@ -304,6 +306,7 @@ class Bankmasuk extends MY_Controller {
     public function simpan() {
         try {
             $sub_menu = $this->uri->segment(2);
+            $class = $this->uri->segment(1);
             $username = $this->session->userdata('username');
             $val = [
                 [
@@ -437,7 +440,7 @@ class Bankmasuk extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $nobm, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
-            $url = site_url("accounting/bankmasuk/edit/" . encrypt_url($nobm));
+            $url = site_url("{$class}/bankmasuk/edit/" . encrypt_url($nobm));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -455,6 +458,7 @@ class Bankmasuk extends MY_Controller {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
+            $data["class"] = $this->uri->segment(1);
             $data["jenis_transaksi"] = $this->jenisTransaksi;
             $kode = decrypt_url($id);
             $model = new $this->m_global;
@@ -655,7 +659,7 @@ class Bankmasuk extends MY_Controller {
             $model = new $this->m_global;
 
             $head = $model->setTables("acc_bank_masuk")->setJoins("acc_coa", "acc_coa.kode_coa = acc_bank_masuk.kode_coa")
-                            ->setSelects(["acc_bank_masuk.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setSelects(["acc_bank_masuk.*", "acc_coa.nama as nama_coa", "date(tanggal) as tanggal"])
                             ->setWheres(["no_bm" => $kode])->getDetail();
             if (!$head) {
                 throw new \exception("Data No Bank Masuk {$kode} tidak ditemukan", 500);
@@ -955,6 +959,7 @@ class Bankmasuk extends MY_Controller {
 
                     $jurnalItems = [];
                     $nominal_rp = 0;
+
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
                         "nama" => "{$head->transinfo}",
@@ -963,12 +968,13 @@ class Bankmasuk extends MY_Controller {
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "D",
                         "nominal_curr" => 0,
-                        "kurs" => 1,
+                        "kurs" => $items[0]->kurs ?? 1,
                         "kode_mua" => "IDR",
                         "nominal" => 0,
                         "row_order" => 1
                     );
-
+                    $nominal_curr = 0;
+                    $curr = "IDR";
                     foreach ($items as $key => $item) {
                         $giro[] = $item->giro_masuk_detail_id;
                         $uraian = $item->uraian;
@@ -976,6 +982,8 @@ class Bankmasuk extends MY_Controller {
                         $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
                         $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
                         $nominal_rp += ($item->nominal * $item->kurs);
+                        $nominal_curr += $item->nominal;
+                        $curr = $item->currency;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$uraian}",
@@ -990,8 +998,9 @@ class Bankmasuk extends MY_Controller {
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }
-                    $jurnalItems[0]["nominal_curr"] = $nominal_rp;
+                    $jurnalItems[0]["nominal_curr"] = $nominal_curr;
                     $jurnalItems[0]["nominal"] = $nominal_rp;
+                    $jurnalItems[0]["kode_mua"] = $curr;
                     if ($head->jurnal !== "") {
                         $jurnalDB->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($jurnalData);
                         $jurnalDB->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();
