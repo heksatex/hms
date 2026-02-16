@@ -149,3 +149,9 @@ $route["finance/kaskecilmasuk/list_data"] = 'accounting/kaskecilmasuk/list_data'
 $route["finance/kaskecilmasuk/edit/(:any)"] = 'accounting/kaskecilmasuk/edit/$1';
 $route["finance/kaskecilmasuk/add"] = 'accounting/kaskecilmasuk/add';
 $route["finance/kaskecilmasuk/simpan"] = 'accounting/kaskecilmasuk/simpan';
+
+$route["accounting/jurnalentries"] = 'purchase/jurnalentries';
+$route["accounting/jurnalentries/data"] = 'purchase/jurnalentries/data';
+$route["accounting/jurnalentries/edit/(:any)"] = 'purchase/jurnalentries/edit/$1';
+$route["accounting/jurnalentries/add"] = 'purchase/jurnalentries/add';
+$route["accounting/jurnalentries/simpan"] = 'purchase/jurnalentries/simpan';
