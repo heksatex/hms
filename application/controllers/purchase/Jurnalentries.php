@@ -35,6 +35,7 @@ class Jurnalentries extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'JNE';
+        $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
         $data["jurnal"] = $model->setTables("mst_jurnal")->setSelects(["kode","nama"])->setOrder(["nama"=>"asc"])->getData();
         $this->load->view('purchase/v_jurnal_entries', $data);
@@ -62,7 +63,7 @@ class Jurnalentries extends MY_Controller {
     public function add() {
         $data['id_dept'] = 'JNE';
         $model = new $this->m_global;
-
+        $data["class"] = $this->uri->segment(1);
         $data["jurnal"] = $model->setTables("mst_jurnal")->setOrder(["kode"])->setSelects(["nama,kode"])->getData();
         $this->load->view('purchase/v_jurnal_entries_add', $data);
     }
@@ -72,7 +73,7 @@ class Jurnalentries extends MY_Controller {
             $data = array();
             $list = new $this->m_global;
             $no = $_POST['start'];
-
+            $class = $this->uri->segment(1);
             $list->setTables("acc_jurnal_entries")->setOrder(["tanggal_dibuat" => "desc"])
                     ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_jurnal_entries.status", "left")
@@ -93,7 +94,7 @@ class Jurnalentries extends MY_Controller {
                 $no++;
                 $data [] = array(
                     $no,
-                    '<a href="' . base_url('purchase/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
+                    '<a href="' . base_url($class.'/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
                     $field->nama_jurnal,
                     $field->tanggal_dibuat,
 //                    $field->tanggal_posting,
@@ -120,6 +121,7 @@ class Jurnalentries extends MY_Controller {
 
     public function simpan() {
         try {
+            $class = $this->uri->segment(1);
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
             $refnote = $this->input->post("reff_note");
@@ -170,7 +172,7 @@ class Jurnalentries extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $kode, 'create', "DATA -> " . logArrayToString("; ", $input), $username);
-            $url = site_url("purchase/jurnalentries/edit/" . encrypt_url($kode));
+            $url = site_url("{$class}/jurnalentries/edit/" . encrypt_url($kode));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -187,6 +189,7 @@ class Jurnalentries extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $data['id_dept'] = 'JNE';
             $data["id"] = $id;
+            $data["class"] = $this->uri->segment(1);
             $head = new $this->m_global;
             $detail = clone $head;
             $data["curr"] = $head->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
