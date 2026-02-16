@@ -40,13 +40,14 @@ class Bukubank extends MY_Controller {
             $coa = $this->input->post("kode_coa");
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
+            $curr = $this->input->post("curr");
             $model = new $this->m_global;
             $entries = $model->setTables("acc_jurnal_entries_items jei")->setJoins("acc_jurnal_entries je", 'je.kode = jei.kode')
                             ->setWheres(["date(je.tanggal_dibuat) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(je.tanggal_dibuat) <=" => date("Y-m-d", strtotime($tanggals[1])),
                                 'je.status' => 'posted'])
                             ->setSelects(["jei.posisi, jei.kode_coa,  IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit,   IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit"])
                     ->setSelects(["IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal_curr ELSE 0 END),0) AS total_debit_valas,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal_curr ELSE 0 END),0) AS total_credit_valas"])
-                            ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa])->getQuery();
+                            ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa,"jei.kode_mua"=>$curr])->getQuery();
             //saldodebet
             $start = $this->periodesaldo->get_start_periode();
             $tgl_dari = date("Y-m-d 00:00:00", strtotime($start));
@@ -54,12 +55,12 @@ class Bukubank extends MY_Controller {
             $saldoDebet = $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
                     ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_debit"])
                     ->setSelects(["SUM(jei.nominal_curr) as total_debit_valas"])
-                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D"])
+                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D","jei.kode_mua"=>$curr])
                     ->getQuery();
             $saldoKredit = $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
                     ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit"])
                     ->setSelects(["SUM(jei.nominal_curr) as total_credit_valas"])
-                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C"])
+                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C","jei.kode_mua"=>$curr])
                     ->getQuery();
          
             //Kredit
@@ -67,6 +68,7 @@ class Bukubank extends MY_Controller {
                     ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$entries}) as jr ", "jr.kode_coa = coa.kode_coa", "left")
                     ->setOrder(["coa.kode_coa" => "asc"])->setWheres(["coa.kode_coa" => $coa])
+                            ->setWheres(["coa.curr"=>$curr])
                     ->setSelects(["coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,coa.saldo_awal,COALESCE(debit_sbl.total_debit, 0) as total_debit_sbl,COALESCE(debit_sbl.total_debit_valas, 0) as total_debit_valas_sbl",
                         "COALESCE(credit_sbl.total_credit, 0) as total_credit_sbl,COALESCE(credit_sbl.total_credit_valas, 0) as total_credit_valas_sbl", 
                         "COALESCE(jr.total_debit, 0) as total_debit,COALESCE(jr.total_debit_valas, 0) as total_debit_valas", 
@@ -84,7 +86,7 @@ class Bukubank extends MY_Controller {
                                 WHEN coa.saldo_normal = 'C' THEN 
                                     (coa.saldo_valas + COALESCE(credit_sbl.total_credit_valas, 0) - COALESCE(debit_sbl.total_debit_valas, 0))
                                 ELSE coa.saldo_valas
-                            END AS saldo_valas_final"]);
+                            END AS saldo_valas_final","coa.curr as coa_curr"]);
             return $model->getDetail();
         } catch (Exception $ex) {
             throw $ex;
@@ -155,6 +157,7 @@ class Bukubank extends MY_Controller {
             $data["saldo"] = $this->_getSaldoAwal();
             $data["data"] = $model->getData();
             $data["curr"] = $this->input->post("curr");
+            
             $html = $this->load->view('report/acc/v_buku_bank_detail', $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

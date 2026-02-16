@@ -601,7 +601,7 @@ class Fakturpenjualan extends MY_Controller {
             $noFakturInternal = $this->input->post("no_faktur_internal");
             $noInvEks = $this->input->post("no_inv_ekspor");
             $model = new $this->m_global;
-            $check = $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" =>$kode])->getDetail();
+            $check = $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" => $kode])->getDetail();
             if ($noFakturInternal !== "") {
                 $fk = $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur_internal" => $noFakturInternal, "id <>" => $ids])->getDetail();
                 if ($fk) {
@@ -667,6 +667,7 @@ class Fakturpenjualan extends MY_Controller {
                             $dppDikson = round(($ddskon * 11) / 12, 2);
                             $ppn_diskon = round($dppDikson * $taxVal, 2);
                         } else {
+                            $dpp = 0;
                             $pajak = round(($jumlah - $ddskon) * $taxVal, 2);
                             $ppn_diskon = round(($ddskon) * $taxVal, 2);
                         }
@@ -715,6 +716,7 @@ class Fakturpenjualan extends MY_Controller {
                             $dppDikson = round(($header["diskon"] * 11) / 12, 2);
                             $ppn_diskon = round($dppDikson * $taxVal, 2);
                         } else {
+                            $dpp = 0;
                             $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal, 2);
                             $ppn_diskon = round(($header["diskon"]) * $taxVal, 2);
                         }
@@ -743,6 +745,7 @@ class Fakturpenjualan extends MY_Controller {
                             $dppDikson = round(($header["diskon"] * 11) / 12);
                             $ppn_diskon = round($dppDikson * $taxVal);
                         } else {
+                            $dpp = 0;
                             $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal);
                             $ppn_diskon = round(($header["diskon"]) * $taxVal);
                         }
@@ -845,6 +848,7 @@ class Fakturpenjualan extends MY_Controller {
                     . "setting READ,faktur_jurnal WRITE";
             $this->_module->lock_tabel($lock);
             $updateHead = ["status" => $status];
+            $sjs = explode("/", $data->no_sj);
             switch ($status) {
                 case "confirm":
                     if ($data->no_faktur_internal === "") {
@@ -889,7 +893,6 @@ class Fakturpenjualan extends MY_Controller {
                     $detail = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->getData();
                     $jurnalItems = [];
                     $fakturJurnal = [];
-                    $sjs = explode("/", $data->no_sj);
                     $totalC = 0;
                     $totalD = 0;
                     if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
@@ -1089,6 +1092,13 @@ class Fakturpenjualan extends MY_Controller {
                     }
                     break;
                 default:
+
+                    if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
+                        $data->lunas = 0;
+                        $data->final_total = 0;
+                        $data->piutang_rp = 0;
+                    }
+
                     if ($data->lunas == 1) {
                         throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
                     }
@@ -1097,7 +1107,8 @@ class Fakturpenjualan extends MY_Controller {
                         throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
                     }
 
-                    $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted"]);
+                    $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted",]);
+                    $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" => $kode])->update(["lunas"=>0]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
                     $this->_module->gen_history_new("jurnal_entries", $data->jurnal, 'edit', "Merubah Status Ke unposted dari penjualan", $username);
                     break;
@@ -1242,6 +1253,7 @@ class Fakturpenjualan extends MY_Controller {
                 $dppDis = round($dpp = (($ddskon) * 11) / 12, 2);
                 $ppn_diskon = round($dppDis * $getDetail->tax_value, 2);
             } else {
+                $dpp = 0;
                 $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value, 2);
                 $ppn_diskon = round($ddskon * $getDetail->tax_value, 2);
             }
@@ -1273,7 +1285,8 @@ class Fakturpenjualan extends MY_Controller {
                 $dppDis = round((($ddskon) * 11) / 12, 2);
                 $ppn_diskon = round($dppDis * $getDetail->tax_value, 2);
             } else {
-                 $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value, 2);
+                $dpp = 0;
+                $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value, 2);
                 $ppn_diskon = round($ddskon * $getDetail->tax_value, 2);
             }
             $totalHarga = round(($jumlah - $ddskon) + ($pajak), 2);
@@ -1594,6 +1607,7 @@ class Fakturpenjualan extends MY_Controller {
                 $dppDiskon = round(($ddskon * 11) / 12, 2);
                 $ppn_diskon = round($dppDiskon * $check->tax_value, 2);
             } else {
+                $dpp = 0;
                 $pajak = round(($jumlah - $ddskon) * $check->tax_value, 2);
                 $ppn_diskon = round($ddskon * $check->tax_value, 2);
             }
@@ -1881,7 +1895,7 @@ class Fakturpenjualan extends MY_Controller {
                         $no[$k] = $vls;
                     }
                     $warna = ($value->warna === "") ? "" : " / {$value->warna}";
-                    $uraian = str_split($value->uraian . trim(preg_replace("/\s+/u",' ',$warna)), 39);
+                    $uraian = str_split($value->uraian . trim(preg_replace("/\s+/u", ' ', $warna)), 39);
                     foreach ($uraian as $k => $vls) {
                         $vls = trim($vls);
                         $uraian[$k] = $vls;
@@ -2153,7 +2167,7 @@ class Fakturpenjualan extends MY_Controller {
                 $this->hitungLinesPrint($printer, $lines, $halaman);
                 $this->hitungLinesPrint($printer, $lines, $halaman);
                 $subtotal2 = (round($head->grand_total * $head->kurs_nominal) - round($head->diskon * $head->kurs_nominal));
-                $dpp = number_format(round($subtotal2 * 11 / 12), 2, ".", ",");
+                $dpp = number_format($head->dpp_lain);
                 $diskon = number_format(round($head->diskon), 2, ".", ",");
                 $ppn = number_format(round($head->ppn - $head->diskon_ppn), 2, ".", ",");
                 $finalTotal = number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",");
@@ -2251,8 +2265,8 @@ class Fakturpenjualan extends MY_Controller {
 //            $printer->feed();
 //            $this->hitungLinesPrint($printer, $lines, $halaman);
             $buff->write("\x0c");
-//            $datas = $connector->getData();
-            $dataPrint[] = (object) ["img" => "fp.prn", "data" => serialize($connector->getData())];
+            $datas = $connector->getData();
+            $dataPrint[] = (object) ["img" => "fp.prn", "data" => serialize($datas)];
             $printer->close();
             $client = new GuzzleHttp\Client();
             $resp = $client->request("POST", $this->config->item('url_web_print_w_logo_multi'), [

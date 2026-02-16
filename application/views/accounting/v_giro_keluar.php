@@ -128,6 +128,10 @@
         <script>
             var tanggal = "";
             $(function () {
+                $("#btn-tambah").on("click", function () {
+                    window.location.href = "<?php echo site_url("{$class}/girokeluar/add") ?>";
+                });
+                
                 const table = $("#tbl-gk").DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -142,7 +146,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('accounting/girokeluar/list_data') ?>",
+                        "url": "<?php echo site_url("{$class}/girokeluar/list_data") ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.tanggal = tanggal;

@@ -10,7 +10,7 @@
                 <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
-                $this->load->view("admin/_partials/topbar.php", $data)
+                $this->load->view("admin/_partials/topbar.php", $data);
                 ?>
             </header>
             <aside class="main-sidebar">
@@ -136,6 +136,9 @@
         <script>
             var tanggal = "";
             $(function () {
+                $("#btn-tambah").on("click", function () {
+                    window.location.href = "<?php echo site_url("{$class}/bankmasuk/add") ?>";
+                });
                 const table = $("#tbl-gm").DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -150,7 +153,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('accounting/bankmasuk/list_data') ?>",
+                        "url": "<?php echo site_url("{$class}/bankmasuk/list_data") ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.tanggal = tanggal;

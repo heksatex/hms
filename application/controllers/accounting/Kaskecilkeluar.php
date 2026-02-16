@@ -55,9 +55,10 @@ class Kaskecilkeluar extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'ACCKKK';
+        $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_kas_kecil_keluar', $data);
     }
-    
+
     protected function _list_data() {
         try {
             $list = new $this->m_global;
@@ -68,7 +69,6 @@ class Kaskecilkeluar extends MY_Controller {
                     ->setOrders([null, "no_kkk", "partner_nama", "acc_kas_kecil_keluar.tanggal", "acc_coa.kode_coa", "total_rp"])
                     ->setSelects(["acc_kas_kecil_keluar.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
 
-            
             $tanggal = $this->input->post("tanggal");
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
@@ -93,7 +93,7 @@ class Kaskecilkeluar extends MY_Controller {
             throw $ex;
         }
     }
-    
+
     public function ekspor() {
         try {
             $tanggal = $this->input->post("tanggal");
@@ -167,13 +167,13 @@ class Kaskecilkeluar extends MY_Controller {
             $data = array();
             $no = $_POST['start'];
             $list = $this->_list_data();
-
+            $class = $this->uri->segment(1);
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_kkk);
                 $no++;
                 $data [] = [
                     $no,
-                    "<a href='" . base_url("accounting/kaskecilkeluar/edit/{$kode_encrypt}") . "'>{$field->no_kkk}</a>",
+                    "<a href='" . base_url("{$class}/kaskecilkeluar/edit/{$kode_encrypt}") . "'>{$field->no_kkk}</a>",
                     ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama,
                     date("Y-m-d", strtotime($field->tanggal)),
                     $field->kode_coa . " - " . $field->nama_coa,
@@ -198,6 +198,7 @@ class Kaskecilkeluar extends MY_Controller {
 
     public function add() {
         $data['id_dept'] = 'ACCKKK';
+        $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
@@ -208,6 +209,7 @@ class Kaskecilkeluar extends MY_Controller {
 
     public function simpan() {
         try {
+            $class = $this->uri->segment(1);
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
             $kodeCoa = $this->input->post("kode_coa");
@@ -242,7 +244,7 @@ class Kaskecilkeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -259,10 +261,10 @@ class Kaskecilkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -321,7 +323,7 @@ class Kaskecilkeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->_module->gen_history_new($sub_menu, $nokkk, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
-            $url = site_url("accounting/kaskecilkeluar/edit/" . encrypt_url($nokkk));
+            $url = site_url("{$class}/kaskecilkeluar/edit/" . encrypt_url($nokkk));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -337,6 +339,7 @@ class Kaskecilkeluar extends MY_Controller {
 
     public function edit($id) {
         try {
+            $data["class"] = $this->uri->segment(1);
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
             $kode = decrypt_url($id);
@@ -395,7 +398,7 @@ class Kaskecilkeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -412,10 +415,10 @@ class Kaskecilkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -451,7 +454,7 @@ class Kaskecilkeluar extends MY_Controller {
                 "partner_nama" => $this->input->post("partner_nama"),
                 "lain2" => $this->input->post("lain_lain"),
                 "transinfo" => $this->input->post("transaksi"),
-                "total_rp"=>0
+                "total_rp" => 0
             ];
             $this->_module->startTransaction();
             $model->setTables("acc_kas_kecil_keluar")->setWheres(["no_kkk" => $kode])->update($header);
@@ -488,14 +491,15 @@ class Kaskecilkeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$dt);
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array) $dt);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
 
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
-            $url = site_url("accounting/kaskecilkeluar/edit/{$id}");
+            $class = $this->uri->segment(1);
+            $url = site_url("{$class}/kaskecilkeluar/edit/{$id}");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -691,7 +695,7 @@ class Kaskecilkeluar extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_kas_kecil_keluar")->setJoins("acc_kas_kecil_keluar_detail", "acc_kas_kecil_keluar.id = kas_kecil_keluar_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_kas_kecil_keluar.*", "currency_kurs.currency,currency_kurs.kurs","kas_kecil_keluar_id"])
+                            ->setSelects(["acc_kas_kecil_keluar.*", "currency_kurs.currency,currency_kurs.kurs", "kas_kecil_keluar_id"])
                             ->setWheres(["acc_kas_kecil_keluar.no_kkk" => $kode])->getDetail();
 
             if (!$head) {
@@ -731,10 +735,14 @@ class Kaskecilkeluar extends MY_Controller {
                     $items = $model->setTables("acc_kas_kecil_keluar_detail")->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
                                     ->setSelects(["acc_kas_kecil_keluar_detail.*", "currency_kurs.currency"])
                                     ->setWheres(["kas_kecil_keluar_id" => $head->id])->getData();
-                   $info = ($head->transinfo === "") ? "":"{$head->transinfo} - ";
-                           $nominal_rp = 0;
+                    $info = ($head->transinfo === "") ? "" : "{$head->transinfo} - ";
+                    $nominal_rp = 0;
+                    $nominal_curr = 0;
+                    $curr = "IDR";
                     foreach ($items as $key => $item) {
                         $nominal_rp += ($item->nominal * $item->kurs);
+                        $nominal_curr += $item->nominal;
+                        $curr = $item->currency;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$info}{$item->uraian}",
@@ -756,9 +764,9 @@ class Kaskecilkeluar extends MY_Controller {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "C",
-                        "nominal_curr" => $nominal_rp,
-                        "kurs" => 1,
-                        "kode_mua" => "IDR",
+                        "nominal_curr" => $nominal_curr,
+                        "kurs" => $items[0]->kurs ?? 1,
+                        "kode_mua" => $curr,
                         "nominal" => $nominal_rp,
                         "row_order" => (count($jurnalItems) + 1)
                     );
@@ -817,7 +825,7 @@ class Kaskecilkeluar extends MY_Controller {
         if ($bbln === 1) {
             $model = new $this->m_global();
             $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
-            if (date("j") >= (int)$pinDate->value) {
+            if (date("j") >= (int) $pinDate->value) {
 
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);
@@ -841,7 +849,7 @@ class Kaskecilkeluar extends MY_Controller {
             $this->session->unset_userdata('pin');
         }
     }
-    
+
     public function print_pdf() {
         try {
             $id = $this->input->post("id");
@@ -849,7 +857,7 @@ class Kaskecilkeluar extends MY_Controller {
             $model = new $this->m_global;
 
             $head = $model->setTables("acc_kas_kecil_keluar")->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_kecil_keluar.kode_coa")
-                            ->setSelects(["acc_kas_kecil_keluar.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setSelects(["acc_kas_kecil_keluar.*", "acc_coa.nama as nama_coa", "date(tanggal) as tanggal"])
                             ->setWheres(["no_kkk" => $kode])->getDetail();
             if (!$head) {
                 throw new \exception("Data No Kas Kecil Keluar {$kode} tidak ditemukan", 500);
@@ -880,6 +888,4 @@ class Kaskecilkeluar extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
-    
-    
 }

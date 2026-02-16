@@ -64,6 +64,7 @@ $route['sales'] = 'sales/sales';
 $route['setting'] = 'setting/setting';
 $route['report'] = 'report/report';
 $route['accounting'] = 'accounting/accounting';
+$route['finance'] = 'finance/finance';
 //WA Group
 $route['setting/wa_group']['GET'] = 'setting/WaGroup/index';
 $route['setting/wa_group/add']['GET'] = 'setting/WaGroup/add';
@@ -97,6 +98,54 @@ $route['setting/wa_schedule/delete']['POST'] = 'setting/WaScheduleMessage/delete
 $route['setting/wa_schedule/status']['POST'] = 'setting/WaScheduleMessage/disablePesan';
 $route['setting/wa_schedule/get_users']['GET'] = 'setting/WaScheduleMessage/getUsers';
 
-$route['print/check'] = 'warehouse/picklistvalidasi/check';
+$route['print/check'] = 'prints/print/check';
 $route['setting/wa_template/test']['GET'] = 'warehouse/picklistvalidasi/test';
 
+//$route["accounting/bankmasuk/list_data"] = "accounting/bankmasuk/list_data";
+$route["finance/bankmasuk"] = 'accounting/bankmasuk';
+$route["finance/bankmasuk/list_data"] = 'accounting/bankmasuk/list_data';
+$route["finance/bankmasuk/edit/(:any)"] = 'accounting/bankmasuk/edit/$1';
+$route["finance/bankmasuk/add"] = 'accounting/bankmasuk/add';
+$route["finance/bankmasuk/simpan"] = 'accounting/bankmasuk/simpan';
+
+$route["finance/bankkeluar"] = 'accounting/bankkeluar';
+$route["finance/bankkeluar/list_data"] = 'accounting/bankkeluar/list_data';
+$route["finance/bankkeluar/edit/(:any)"] = 'accounting/bankkeluar/edit/$1';
+$route["finance/bankkeluar/add"] = 'accounting/bankkeluar/add';
+$route["finance/bankkeluar/simpan"] = 'accounting/bankkeluar/simpan';
+
+$route["finance/girokeluar"] = 'accounting/girokeluar';
+$route["finance/girokeluar/list_data"] = 'accounting/girokeluar/list_data';
+$route["finance/girokeluar/edit/(:any)"] = 'accounting/girokeluar/edit/$1';
+$route["finance/girokeluar/add"] = 'accounting/girokeluar/add';
+$route["finance/girokeluar/simpan"] = 'accounting/girokeluar/simpan';
+
+$route["finance/giromasuk"] = 'accounting/giromasuk';
+$route["finance/giromasuk/list_data"] = 'accounting/giromasuk/list_data';
+$route["finance/giromasuk/edit/(:any)"] = 'accounting/giromasuk/edit/$1';
+$route["finance/giromasuk/add"] = 'accounting/giromasuk/add';
+$route["finance/giromasuk/simpan"] = 'accounting/giromasuk/simpan';
+
+$route["finance/kaskeluar"] = 'accounting/kaskeluar';
+$route["finance/kaskeluar/list_data"] = 'accounting/kaskeluar/list_data';
+$route["finance/kaskeluar/edit/(:any)"] = 'accounting/kaskeluar/edit/$1';
+$route["finance/kaskeluar/add"] = 'accounting/kaskeluar/add';
+$route["finance/kaskeluar/simpan"] = 'accounting/kaskeluar/simpan';
+
+$route["finance/kasmasuk"] = 'accounting/kasmasuk';
+$route["finance/kasmasuk/list_data"] = 'accounting/kasmasuk/list_data';
+$route["finance/kasmasuk/edit/(:any)"] = 'accounting/kasmasuk/edit/$1';
+$route["finance/kasmasuk/add"] = 'accounting/kasmasuk/add';
+$route["finance/kasmasuk/simpan"] = 'accounting/kasmasuk/simpan';
+
+$route["finance/kaskecilkeluar"] = 'accounting/kaskecilkeluar';
+$route["finance/kaskecilkeluar/list_data"] = 'accounting/kaskecilkeluar/list_data';
+$route["finance/kaskecilkeluar/edit/(:any)"] = 'accounting/kaskecilkeluar/edit/$1';
+$route["finance/kaskecilkeluar/add"] = 'accounting/kaskecilkeluar/add';
+$route["finance/kaskecilkeluar/simpan"] = 'accounting/kaskecilkeluar/simpan';
+
+$route["finance/kaskecilmasuk"] = 'accounting/kaskecilmasuk';
+$route["finance/kaskecilmasuk/list_data"] = 'accounting/kaskecilmasuk/list_data';
+$route["finance/kaskecilmasuk/edit/(:any)"] = 'accounting/kaskecilmasuk/edit/$1';
+$route["finance/kaskecilmasuk/add"] = 'accounting/kaskecilmasuk/add';
+$route["finance/kaskecilmasuk/simpan"] = 'accounting/kaskecilmasuk/simpan';

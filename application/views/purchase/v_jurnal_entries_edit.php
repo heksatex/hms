@@ -86,6 +86,13 @@
 
                                     <?php
                                 }
+                                if ($jurnal->status === "cancel" && $jurnal->origin === "") {
+                                    ?>
+                                    <button class="btn btn-primary " id="btn-update-status" data-status="unposted"  data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-check-circle">&nbsp;Unpost</i>
+                                    </button>
+                                    <?php
+                                }
                                 ?>
                             </div>
                         </div>
@@ -400,7 +407,7 @@
                     });
                     $.each(kredit, function (idx, nomina) {
                         let ttl = $(nomina).val().replace(/,/g, "");
-                         var parseF = parseFloat(ttl);
+                        var parseF = parseFloat(ttl);
                         totalKredit += parseFloat(parseF.toFixed(2));
                         totalKredit = parseFloat(totalKredit.toFixed(2));
 //                        console.log("Kredit : "+totalKredit);
@@ -411,8 +418,8 @@
                     if (totalKredit === NaN) {
                         totalKredit = 0;
                     }
-                    
-                        
+
+
                     $(".total_debit").val(totalDebet);
                     $(".total_kredit").val(totalKredit);
                 });
@@ -572,8 +579,9 @@
                 });
                 $("#btn-update-status").off("click").unbind("click").on("click", function () {
                     calculateTotal();
-                    confirmRequest("Jurnal Entries", "Posted Jurnal ? ", function () {
-                        updateStatus("posted");
+                    var stats = $(this).data("status");
+                    confirmRequest("Jurnal Entries", stats+" Jurnal ? ", function () {
+                        updateStatus(stats);
 
                     });
                 });
@@ -719,12 +727,12 @@
                                 location.reload();
                             },
                             error: function (req, error) {
-                            unblockUI(function () {
-                                setTimeout(function () {
-                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                                }, 500);
-                            });
-                        }
+                                unblockUI(function () {
+                                    setTimeout(function () {
+                                        alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                    }, 500);
+                                });
+                            }
                         });
                     });
                 }

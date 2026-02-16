@@ -579,7 +579,7 @@ if ($datas->status == 'confirm') {
                                                 $(".btn-save").trigger("click");
                                             });
                                         } else {
-                                            window.location.replace(response.data.url);
+                                            window.location.reload();
                                         }
                                     }
                                 }
