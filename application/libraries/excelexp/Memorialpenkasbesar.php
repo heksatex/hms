@@ -34,7 +34,7 @@ class Memorialpenkasbesar {
                         ->setOrder(["kmd.kode_coa" => "asc"]);
             if ($datas['filter'] === "detail") {
                 $model->setSelects(["transinfo", "uraian", "date(km.tanggal) as tanggal", "km.no_km as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
-                $model->setGroups(["kmd.kode_coa", "kmd.no_km"], true);
+                $model->setGroups(["kmd.kode_coa", "kmd.id"], true)->setOrder(["kmd.kode_coa", "kmd.no_km","kmd.id"]);
                 $data["kredit"] = $model->getData();
                 $model->setGroups(["km.kode_coa"]);
                 $data["debit"] = $model->getData();

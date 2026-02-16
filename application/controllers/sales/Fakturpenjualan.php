@@ -2167,7 +2167,7 @@ class Fakturpenjualan extends MY_Controller {
                 $this->hitungLinesPrint($printer, $lines, $halaman);
                 $this->hitungLinesPrint($printer, $lines, $halaman);
                 $subtotal2 = (round($head->grand_total * $head->kurs_nominal) - round($head->diskon * $head->kurs_nominal));
-                $dpp = number_format($head->dpp_lain);
+                $dpp = number_format($head->dpp_lain,2);
                 $diskon = number_format(round($head->diskon), 2, ".", ",");
                 $ppn = number_format(round($head->ppn - $head->diskon_ppn), 2, ".", ",");
                 $finalTotal = number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",");

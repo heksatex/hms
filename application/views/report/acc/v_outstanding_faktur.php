@@ -3,6 +3,7 @@
 
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
+        <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
         <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
         <style type="text/css">
             h3 {
@@ -93,10 +94,10 @@
                         <div class="box-body">
 
                             <form name="form-search" class="form-horizontal form-search" role="form" action="<?= base_url('report/outstandingfaktur/export') ?>" method="post" id="form-search">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <div class="col-sm-12 col-md-12">
-                                            <div class="col-md-2">
+                                            <div class="col-md-4">
                                                 <label>Customer</label>
                                             </div>
                                             <div class="col-sm-* col-md-8 col-lg-8">
@@ -109,6 +110,18 @@
                                                     }
                                                     ?>
                                                 </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div class="col-sm-12 col-md-12">
+                                            <div class="col-md-4">
+                                                <label>Tanggal Faktur</label>
+                                            </div>
+                                            <div class="col-sm-* col-md-8 col-lg-8">
+                                                <input type="text" class="form-control" name="tanggal" id="tanggal">
                                             </div>
                                         </div>
                                     </div>
@@ -179,7 +192,7 @@
         </div>
 
         <?php $this->load->view("admin/_partials/js.php"); ?>
-
+        <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <div id="load_modal">
             <!-- Load Partial Modal -->
             <?php $this->load->view("admin/_partials/modal.php") ?>
@@ -187,6 +200,25 @@
 
         <script>
             $(function () {
+                $('#tanggal').daterangepicker({
+//                    autoUpdateInput: false,
+                    startDate: moment().startOf('month'),
+                    endDate: moment().endOf('month'),
+                    locale: {
+                        format: 'YYYY-MM-DD',
+                        cancelLabel: 'Clear'
+                    },
+                    ranges: {
+                        'H': [moment(), moment()],
+                        '1..H': [moment().startOf('month'), moment()],
+                        '1..31': [moment().startOf('month'), moment().endOf('month')],
+                        '1..P': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                });
+                $('#tanggal').on('cancel.daterangepicker', function (ev, picker) {
+                    $(this).val('');
+                });
+                $('#tanggal').val('');
                 $('#customer').select2({
                     allowClear: true,
                     placeholder: "Select Customer",
@@ -225,7 +257,8 @@
                         type: "post",
                         url: "<?php echo base_url(); ?>report/outstandingfaktur/generate",
                         data: {
-                            customer: $("#customer").val()
+                            customer: $("#customer").val(),
+                            tanggal: $("#tanggal").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -243,7 +276,8 @@
                         type: "post",
                         url: "<?php echo base_url(); ?>report/outstandingfaktur/pdf",
                         data: {
-                            customer: $("#customer").val()
+                            customer: $("#customer").val(),
+                            tanggal: $("#tanggal").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
