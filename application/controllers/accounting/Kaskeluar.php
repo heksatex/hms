@@ -56,11 +56,13 @@ class Kaskeluar extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'ACCKK';
+        $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_kas_keluar', $data);
     }
 
     public function add() {
         $data['id_dept'] = 'ACCKK';
+        $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
@@ -203,13 +205,13 @@ class Kaskeluar extends MY_Controller {
             $data = array();
             $no = $_POST['start'];
             $list = $this->_list_data();
-
+            $class = $this->uri->segment(1);
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->no_kk);
                 $no++;
                 $data [] = [
                     $no,
-                    "<a href='" . base_url("accounting/kaskeluar/edit/{$kode_encrypt}") . "'>{$field->no_kk}</a>",
+                    "<a href='" . base_url("{$class}/kaskeluar/edit/{$kode_encrypt}") . "'>{$field->no_kk}</a>",
                     ($field->partner_nama === "") ? $field->lain2 : $field->partner_nama,
                     date("Y-m-d", strtotime($field->tanggal)),
                     $field->kode_coa . " - " . $field->nama_coa,
@@ -237,6 +239,7 @@ class Kaskeluar extends MY_Controller {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
             $kode = decrypt_url($id);
+            $data["class"] = $this->uri->segment(1);
             $model = new $this->m_global;
             $data['datas'] = $model->setTables("acc_kas_keluar acd")->setWheres(["no_kk" => $kode])
 //                            ->setSelects(["acd.no_kk,acd.tanggal,acd.kode_coa,acd.partner_id,acd.partner_nama,acd.lain2,acd.transinfo,acd.total_rp,status,id"])
@@ -398,9 +401,10 @@ class Kaskeluar extends MY_Controller {
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
-
+            
+            $class = $this->uri->segment(1);
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
-            $url = site_url("accounting/kaskeluar/edit/{$id}");
+            $url = site_url("{$class}/kaskeluar/edit/{$id}");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -414,7 +418,7 @@ class Kaskeluar extends MY_Controller {
 
     public function simpan() {
         try {
-
+            $class = $this->uri->segment(1);
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
             $kodeCoa = $this->input->post("kode_coa");
@@ -528,7 +532,7 @@ class Kaskeluar extends MY_Controller {
             }
 
             $this->_module->gen_history_new($sub_menu, $nokk, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
-            $url = site_url("accounting/kaskeluar/edit/" . encrypt_url($nokk));
+            $url = site_url("{$class}/kaskeluar/edit/" . encrypt_url($nokk));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'url' => $url)));
@@ -591,9 +595,10 @@ class Kaskeluar extends MY_Controller {
     public function get_partner() {
         try {
             $model = new $this->m_global;
-            $model->setTables("partner")->setSelects(["id", "nama"])->setOrder(["nama" => "asc"]);
+            $model->setTables("partner")->setSelects(["id", "nama","nama_rekening"])->setOrder(["nama" => "asc"])->setSearch(["nama","nama_rekening"]);
             if ($this->input->get('search') !== "") {
-                $model->setWheres(["nama LIKE" => "%{$this->input->get('search')}%"]);
+//                $model->setWheres(["nama LIKE" => "%{$this->input->get('search')}%"]);
+                $_POST['search']['value'] = $this->input->get('search');
             }
             if ($jenis = $this->input->get("jenis")) {
                 switch ($jenis) {
@@ -939,6 +944,8 @@ class Kaskeluar extends MY_Controller {
                     if (strpos($kode, "KKVH") !== false)
                         $valas = true;
                     $nominal_rp = 0;
+                    $nominal_curr = 0;
+                    $curr = "IDR";
                     foreach ($items as $key => $item) {
                         $textKurs = "";
                         if ($valas)
@@ -946,6 +953,8 @@ class Kaskeluar extends MY_Controller {
 
                         $poid [] = $item->po_detail_id;
                         $nominal_rp += ($item->nominal * $item->kurs);
+                        $nominal_curr += $item->nominal;
+                        $curr = $item->currency;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "{$item->uraian}{$textKurs}",
@@ -970,9 +979,9 @@ class Kaskeluar extends MY_Controller {
                         "partner" => ($head->partner_id ?? ""),
                         "kode_coa" => $head->kode_coa,
                         "posisi" => "C",
-                        "nominal_curr" => $nominal_rp,
-                        "kurs" => 1,
-                        "kode_mua" => "IDR",
+                        "nominal_curr" => $nominal_curr,
+                        "kurs" => $items[0]->kurs ?? 1,
+                        "kode_mua" => $curr,
                         "nominal" => $nominal_rp,
                         "row_order" => (count($jurnalItems) + 1)
                     );

@@ -30,7 +30,7 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <form class="form-horizontal" method="POST" name="form-acc-giromasuk" id="form-acc-giromasuk" action="<?= base_url("accounting/giromasuk/simpan") ?>">
+                        <form class="form-horizontal" method="POST" name="form-acc-giromasuk" id="form-acc-giromasuk" action="<?= base_url("{$class}/giromasuk/simpan") ?>">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Bukti Giro Masuk <span id="no"></h3>
                             </div>

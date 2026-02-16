@@ -135,6 +135,10 @@
         <script>
             var tanggal = "";
             $(function () {
+                 $("#btn-tambah").on("click", function () {
+                    window.location.href = "<?php echo site_url("{$class}/kaskeluar/add") ?>";
+                });
+                
                 const table = $("#tbl-kk").DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -149,7 +153,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('accounting/kaskeluar/list_data') ?>",
+                        "url": "<?php echo site_url("{$class}/kaskeluar/list_data") ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.tanggal = tanggal;

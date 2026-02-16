@@ -136,7 +136,9 @@
 
             var tanggal = "";
             $(function () {
-
+                $("#btn-tambah").on("click", function () {
+                    window.location.href = "<?php echo site_url("{$class}/bankkeluar/add") ?>";
+                });
                 const table = $("#tbl-bk").DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -151,7 +153,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('accounting/bankkeluar/list_data') ?>",
+                        "url": "<?php echo site_url("{$class}/bankkeluar/list_data") ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.tanggal = tanggal;
@@ -180,7 +182,7 @@
                     tanggal = $("#tanggal").val();
                     table.ajax.reload();
                 });
-                
+
                 $("#export").on("click", function (e) {
                     e.preventDefault();
                     $.ajax({
