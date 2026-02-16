@@ -49,6 +49,11 @@ class Outstandingfaktur extends MY_Controller {
             if (!empty($customer)) {
                 $model->setWheres(["partner_id" => $customer]);
             }
+            $tanggal = $this->input->post("tanggal");
+            $tanggals = explode(" - ", $tanggal);
+            if(count($tanggals) > 1) {
+                $model->setWheres(["date(tanggal) >= "=>$tanggals[0],"date(tanggal) <="=>$tanggals[1]]);
+            }
             return $model->setSelects(["partner_nama,partner_id"]);
         } catch (Exception $ex) {
             throw $ex;
@@ -58,8 +63,10 @@ class Outstandingfaktur extends MY_Controller {
     protected function _query_data() {
         try {
             $model = new $this->m_global;
+            
             $model->setTables("acc_faktur_penjualan")->setOrder(["tanggal" => "asc", "no_faktur_internal" => "asc"])
                     ->setSelects(["acc_faktur_penjualan.*", "DATEDIFF(CURDATE(), tanggal) AS hari"])->setWheres(["lunas" => 0, "status" => "confirm"]);
+            
             return $model;
         } catch (Exception $ex) {
             throw $ex;
@@ -70,9 +77,15 @@ class Outstandingfaktur extends MY_Controller {
         try {
             $partner = $this->_query_customer_faktur()->getData();
             $lData = $this->_query_data();
+            $tanggal = $this->input->post("tanggal");
+            $whereDate = [];
+            $tanggals = explode(" - ", $tanggal);
+            if(count($tanggals) > 1) {
+                $whereDate = ["date(tanggal) >= "=>$tanggals[0],"date(tanggal) <="=>$tanggals[1]];
+            }
             $dt = [];
             foreach ($partner as $key => $value) {
-                $datas = $lData->setWheres(["lunas" => 0, "status" => "confirm", "partner_id" => $value->partner_id], true)->getData();
+                $datas = $lData->setWheres(array_merge(["lunas" => 0, "status" => "confirm", "partner_id" => $value->partner_id],$whereDate), true)->getData();
                 $data = [];
                 foreach ($datas as $keys => $values) {
                     $data[] = $values;
@@ -95,9 +108,15 @@ class Outstandingfaktur extends MY_Controller {
         try {
             $partner = $this->_query_customer_faktur()->getData();
             $lData = $this->_query_data();
+            $tanggal = $this->input->post("tanggal");
+            $whereDate = [];
+            $tanggals = explode(" - ", $tanggal);
+            if(count($tanggals) > 1) {
+                $whereDate = ["date(tanggal) >= "=>$tanggals[0],"date(tanggal) <="=>$tanggals[1]];
+            }
             $dt = [];
             foreach ($partner as $key => $value) {
-                $datas = $lData->setWheres(["lunas" => 0, "status" => "confirm", "partner_id" => $value->partner_id], true)->getData();
+                $datas = $lData->setWheres(array_merge(["lunas" => 0, "status" => "confirm", "partner_id" => $value->partner_id],$whereDate), true)->getData();
                 $data = [];
                 foreach ($datas as $keys => $values) {
                     $data[] = $values;
@@ -133,9 +152,17 @@ class Outstandingfaktur extends MY_Controller {
 
             $partner = $this->_query_customer_faktur()->getData();
             $lData = $this->_query_data();
+            $filter = "";
+            $tanggal = $this->input->post("tanggal");
+            $whereDate = [];
+            $tanggals = explode(" - ", $tanggal);
+            if(count($tanggals) > 1) {
+                $whereDate = ["date(tanggal) >= "=>$tanggals[0],"date(tanggal) <="=>$tanggals[1]];
+                $filter .= "Tanggal Faktur : {$tanggal}, ";
+            }
             $dt = [];
             foreach ($partner as $key => $value) {
-                $datas = $lData->setWheres(["lunas" => 0, "status" => "confirm", "partner_id" => $value->partner_id], true)->getData();
+                $datas = $lData->setWheres(array_merge(["lunas" => 0, "status" => "confirm", "partner_id" => $value->partner_id],$whereDate), true)->getData();
                 $data = [];
                 foreach ($datas as $keys => $values) {
                     $data[] = $values;
@@ -143,9 +170,9 @@ class Outstandingfaktur extends MY_Controller {
                 $dt[$value->partner_nama] = $data;
             }
             $customer = $this->input->post("customer");
-            $filter = "";
+            
             if (!empty($customer)) {
-                $filter .= "Customer : " . $partner[0]->partner_nama ?? '' . ", ";
+                $filter .= "Customer : " . $partner[0]->partner_nama ?? '' . "";
             }
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();

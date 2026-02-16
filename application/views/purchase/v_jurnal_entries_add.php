@@ -31,7 +31,7 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">Form Tambah</h3>
                         </div>
-                            <form  class="form-horizontal" method="POST" name="form-jurnal" id="form-jurnal" action="<?= base_url('purchase/jurnalentries/simpan/') ?>">
+                            <form  class="form-horizontal" method="POST" name="form-jurnal" id="form-jurnal" action="<?= base_url($class.'/jurnalentries/simpan/') ?>">
                         <div class="box-body">
                             <button type="submit" style="display: none;" id="form-jurnal-submit"></button>
                             <div class="col-md-6 col-xs-12">

@@ -130,6 +130,11 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
+
+                $("#btn-tambah").on("click", function () {
+                    window.location.href = "<?php echo site_url("{$class}/jurnalentries/add") ?>";
+                });
+
                 $(".select2").select2({
                     allowClear: true,
                     placeholder: "Tipe Jurnal"
@@ -147,7 +152,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('purchase/jurnalentries/data') ?>",
+                        "url": "<?php echo site_url($class.'/jurnalentries/data') ?>",
                         "type": "POST",
                         "data": function (d) {
                             d.kode = $("#kode").val();
@@ -171,7 +176,7 @@
                 $('#advancedSearch').on('hidden.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
                 });
-                
+
                 $("#reset").on("click", function (e) {
                     e.preventDefault();
                     $(".reset").trigger("click");
