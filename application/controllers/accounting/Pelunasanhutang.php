@@ -1367,14 +1367,14 @@ class Pelunasanhutang extends MY_Controller
                                 throw new \Exception('Status Bayar tidak bisa diubah ke <b>Partial</b>, Karena Total Pelunasan sama dengan Sisa Utang !', 200);
                             }
 
-                            if ($status_bayar == 'lunas') {
-                                $cek = $this->m_pelunasanhutang->get_data_summary_by_code($no_pelunasan);
-                                foreach($cek as $ck){
-                                    if($ck->keterangan == 'Uang Muka') {
-                                        throw new \Exception('Status Bayar tidak bisa diubah ke <b>Lunas</b>, Karena Pelunasan memakai <b>Uang Muka</b> !', 200);
-                                    }
-                                }
-                            }
+                            // if ($status_bayar == 'lunas') {
+                            //     $cek = $this->m_pelunasanhutang->get_data_summary_by_code($no_pelunasan);
+                            //     foreach($cek as $ck){
+                            //         if($ck->keterangan == 'Uang Muka') {
+                            //             throw new \Exception('Status Bayar tidak bisa diubah ke <b>Lunas</b>, Karena Pelunasan memakai <b>Uang Muka</b> !', 200);
+                            //         }
+                            //     }
+                            // }
 
                             $update = $this->m_pelunasanhutang->update_pelunasan_invoice_by_kode($tmp_update, $no_pelunasan);
                         } else {
