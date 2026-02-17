@@ -94,7 +94,7 @@ class Bankkeluar extends MY_Controller {
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
             $uraian = $this->input->post("uraian");
-
+            $status = $this->input->post("status"); 
             if ($tanggal !== "") {
                 $tanggals = explode(" - ", $tanggal);
                 $list->setWheres(["date(acc_bank_keluar.tanggal) >=" => $tanggals[0], "date(acc_bank_keluar.tanggal) <=" => $tanggals[1]]);
@@ -108,6 +108,9 @@ class Bankkeluar extends MY_Controller {
             if ($uraian !== "") {
                 $list->setJoins("acc_bank_keluar_detail abkd", "abkd.bank_keluar_id = acc_bank_keluar.id")
                         ->setGroups(["bank_keluar_id"])->setWheres(["abkd.uraian LIKE" => "%{$uraian}%"]);
+            }
+            if ($status !== "") {
+                $list->setWheres(["acc_bank_keluar.status" => "{$status}"]);
             }
             return $list;
         } catch (Exception $ex) {

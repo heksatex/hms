@@ -86,7 +86,10 @@ class Giromasuk extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
-
+            $status = $this->input->post("status"); 
+            if ($status !== "") {
+                $list->setWheres(["acc_giro_masuk.status" => "{$status}"]);
+            }
             if ($tanggal !== "") {
                 $tanggals = explode(" - ", $tanggal);
                 $list->setWheres(["date(acc_giro_masuk.tanggal) >=" => $tanggals[0], "date(acc_giro_masuk.tanggal) <=" => $tanggals[1]]);
