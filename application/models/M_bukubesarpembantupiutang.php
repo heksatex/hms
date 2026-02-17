@@ -1090,9 +1090,9 @@ class M_bukubesarpembantupiutang extends CI_Model
     function get_saldo_koreksi(array $where = [], string $group = '',  string $currency = '')
     {
         $where_tipe_cur = ($currency === 'valas') ? 'Valas' : 'Rp';
-        $where_normal = ['apps.mode' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency' => $where_tipe_cur, 'ack.koreksi_bb' => 'true'];
-        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, '', $currency);
-        $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ', 'apps.tipe_currency' => $where_tipe_cur,  'appsk.head' => 'false', 'appsk.alat_pelunasan' => 'false', 'ack.koreksi_bb' => 'true'];
+        $where_normal = ['apps.mode' => 'normal', 'app.status' => 'done', 'apps.keterangan <>  ' => "", 'apps.tipe_currency' => $where_tipe_cur, 'ack.koreksi_bb' => 'true'];
+        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, 'app.partner_id', $currency);
+        $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ' => "", 'apps.tipe_currency' => $where_tipe_cur,  'appsk.head' => 'false', 'appsk.alat_pelunasan' => 'false', 'ack.koreksi_bb' => 'true'];
         $sub_query_split  = $this->get_saldo_koreksi_split($where_split, 'app.partner_id', $currency);
 
         if (count($where) > 0) {
