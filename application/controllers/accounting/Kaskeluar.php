@@ -111,7 +111,10 @@ class Kaskeluar extends MY_Controller {
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
             $uraian = $this->input->post("uraian");
-
+            $status = $this->input->post("status"); 
+            if ($status !== "") {
+                $list->setWheres(["acc_kas_keluar.status" => "{$status}"]);
+            }
             if ($tanggal !== "") {
                 $tanggals = explode(" - ", $tanggal);
                 $list->setWheres(["date(acc_kas_keluar.tanggal) >=" => $tanggals[0], "date(acc_kas_keluar.tanggal) <=" => $tanggals[1]]);

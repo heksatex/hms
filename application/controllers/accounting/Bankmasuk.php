@@ -169,7 +169,10 @@ class Bankmasuk extends MY_Controller {
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
             $uraian = $this->input->post("uraian");
-
+            $status = $this->input->post("status"); 
+            if ($status !== "") {
+                $model->setWheres(["acc_bank_masuk.status" => "{$status}"]);
+            }
             if ($tanggal !== "") {
                 $tanggals = explode(" - ", $tanggal);
                 $model->setWheres(["date(acc_bank_masuk.tanggal) >=" => $tanggals[0], "date(acc_bank_masuk.tanggal) <=" => $tanggals[1]]);
