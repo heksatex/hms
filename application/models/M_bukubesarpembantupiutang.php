@@ -913,7 +913,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->jOIN("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id", "INNER");
         $this->db->JOIN("(SELECT GROUP_CONCAT(DISTINCT ack.nama_koreksi) as nama_koreksi, appsk.pelunasan_summary_id, ack.koreksi_bb
                         FROM acc_pelunasan_piutang_summary_koreksi appsk
-                        LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode GROUP BY appsk.pelunasan_piutang_id) as ack", "ack.pelunasan_summary_id = apps.id", "INNER");
+                        LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode GROUP BY appsk.pelunasan_summary_id) as ack", "ack.pelunasan_summary_id = apps.id", "INNER");
         return $this->db->get_compiled_select();
     }
 
