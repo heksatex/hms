@@ -3,6 +3,14 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
         <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
+        <style>
+            .merah{
+                color: red;
+            }
+            .hijau{
+                color:green;
+            }
+        </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -78,7 +86,19 @@
                                                                     <input type="text" class="form-control" name="uraian" id="uraian">
                                                                 </div>
                                                             </div>
-
+                                                            <div class="col-md-12 col-xs-12">
+                                                                <div class="col-xs-3">
+                                                                    <label class="form-label">Status</label>
+                                                                </div>
+                                                                <div class="col-xs-9 col-md-9">
+                                                                    <select class="form-control input-sm" name="status" id="status">
+                                                                        <option value=""></option>
+                                                                        <option value="draft">Draft</option>
+                                                                        <option value="confirm">Confirm</option>
+                                                                        <option value="cancel">Cancel</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
@@ -159,14 +179,22 @@
                             d.customer = $("#customer").val();
                             d.no_bukti = $("#no_bukti").val();
                             d.uraian = $("#uraian").val();
+                            d.status = $("#status").val();
                         }
                     },
                     columnDefs: [
                         {
-                            "targets": [0,6],
+                            "targets": [0, 6],
                             "orderable": false
                         }
-                    ]
+                    ],
+                    "createdRow": function (row, data, dataIndex) {
+                        if (data[6].toLowerCase() === "cancel") {
+                            $(row).addClass('merah');
+                        } else if (data[6].toLowerCase() === "draft") {
+                            $(row).addClass('hijau');
+                        }
+                    }
                 });
                 $("#reset").on("click", function (e) {
                     e.preventDefault();
@@ -180,7 +208,7 @@
                     tanggal = $("#tanggal").val();
                     table.ajax.reload();
                 });
-                
+
                 $("#export").on("click", function (e) {
                     e.preventDefault();
                     $.ajax({
@@ -190,7 +218,8 @@
                             tanggal: $("#tanggal").val(),
                             customer: $("#customer").val(),
                             no_bukti: $("#no_bukti").val(),
-                            uraian: $("#uraian").val()
+                            uraian: $("#uraian").val(),
+                            status: $("#status").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait(function () {});
