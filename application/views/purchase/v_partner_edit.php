@@ -48,6 +48,19 @@
                                 <div class="form-group">
                                     <div class="col-md-12 col-xs-12">
                                         <div class="col-xs-4">
+                                            <label class="form-label">Nama Pemilik Rekening</label>
+                                        </div>
+                                        <div class="col-xs-8 col-md-8">
+                                            <div class="input-group">
+                                                <input class="form-control" type="text" name="nama_rekening" value="<?= $partner->nama_rekening ?>">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="col-xs-4">
                                             <label class="form-label">Phone</label>
                                         </div>
                                         <div class="col-xs-8 col-md-8">
