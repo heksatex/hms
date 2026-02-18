@@ -36,8 +36,8 @@ class Partner extends MY_Controller {
             $list->setTables("partner")
                     ->setJoins("partner_states","partner_states.id = invoice_state","left")
                     ->setJoins("partner_country","partner_country.id = invoice_country","left")
-                    ->setOrder(["id" => "desc"])->setSearch(["nama", "invoice_city", "delivery_city"])
-                    ->setOrders([null, "nama","invoice_street","invoice_city","nama_state","nama_country","invoice_zip",null])
+                    ->setOrder(["id" => "desc"])->setSearch(["nama", "invoice_city", "delivery_city", "nama_rekening"])
+                    ->setOrders([null, "nama","nama_rekening","invoice_street","invoice_city","nama_state","nama_country","invoice_zip",null])
                     ->setSelects(["partner.*","partner_states.name as nama_state","partner_country.name as nama_country", "CASE
                         WHEN customer = 1 AND supplier = 1 THEN 'Customer dan Supplier'
                         WHEN customer = 1 THEN 'Customer'
@@ -59,6 +59,7 @@ class Partner extends MY_Controller {
                 $data [] = array(
                     $no,
                     '<a href="' . base_url('purchase/partner/edit/' . $kode_encrypt) . '">' . $field->nama . '</a>',
+                    $field->nama_rekening,
                     $field->invoice_street,
                     $field->invoice_city,
                     $field->nama_state,
@@ -126,6 +127,7 @@ class Partner extends MY_Controller {
             $tanggal = date('Y-m-d H:i:s');
 
             $name = addslashes($this->input->post('name'));
+            $nama_rekening = addslashes($this->input->post('nama_rekening'));
             $invoice_street = addslashes($this->input->post('invoice_street'));
             $invoice_city = addslashes($this->input->post('invoice_city'));
             $invoice_state = addslashes($this->input->post('invoice_state'));
@@ -154,6 +156,7 @@ class Partner extends MY_Controller {
 
             $data = [
                 "nama" => $name,
+                "nama_rekening" => $nama_rekening,
                 "create_date" => $tanggal,
                 "invoice_street" => $invoice_street,
                 "invoice_city" => $invoice_city,
