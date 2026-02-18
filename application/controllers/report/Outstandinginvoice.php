@@ -25,7 +25,8 @@ class Outstandinginvoice extends MY_Controller
         try {
             //code...
             $partner    = $this->input->post('partner');
-            $data       = $this->proses_data($partner);
+            $tgl        = $this->input->post('tgl');
+            $data       = $this->proses_data($partner,$tgl);
             $callback   = array('status' => 'success', 'message' => 'berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'record' => $data);
             $this->output->set_status_header(200)
                 ->set_content_type('application/json', 'utf-8')
@@ -38,11 +39,17 @@ class Outstandinginvoice extends MY_Controller
     }
 
 
-    function proses_data($partner)
+    function proses_data($partner,$tgl)
     {
+        $tanggals = explode(" - ", $tgl);
         $where_partner = ['inv.id_supplier' => $partner];
+        $where_tgl    = '';
         $where_params = ["inv.status" => "done", "inv.lunas " => 0];
         $result = (!empty($partner)) ? array_merge($where_partner, $where_params) : $where_params;
+        if(!empty($tgl)){
+            $where_tgl = [ "inv.created_at >= " => $tanggals[0], "inv.created_at <= " => $tanggals[1]];
+            $result =  array_merge($where_tgl, $result);
+        }
 
         $data = $this->m_outstandinginvoice->get_list_invoice_group_partner($result);
         $tmp_data_head   = array();
@@ -52,6 +59,7 @@ class Outstandinginvoice extends MY_Controller
             // get_list_invoice_by_partner
             $where2 = ['inv.id_supplier' => $datas->id_supplier];
             $where  = array_merge($where_params, $where2);
+            $where  = (!empty($where_tgl))? array_merge($where_tgl, $where) : $where;
             $data2 = $this->m_outstandinginvoice->get_list_invoice_by_partner($where);
             foreach ($data2 as $datas2) {
 
@@ -60,7 +68,7 @@ class Outstandinginvoice extends MY_Controller
                     'no_invoice'    => $datas2->no_invoice,
                     'no_po'         => $datas2->no_po,
                     'origin'        => $datas2->origin,
-                    'tanggal'       => date("Y-m-d", strtotime($datas2->order_date)),
+                    'tanggal'       => date("Y-m-d", strtotime($datas2->created_at)),
                     'hari'          => $datas2->hari,
                     'currency'      => $datas2->currency,
                     'kurs'          => $datas2->nilai_matauang,
@@ -93,6 +101,7 @@ class Outstandinginvoice extends MY_Controller
             //code...
             $this->load->library('excel');
             $partner = $this->input->post('partner');
+            $tgl     = $this->input->post('tgl');
             $tgl_now = date("Y-m-d");
 
             ob_start();
@@ -140,7 +149,7 @@ class Outstandinginvoice extends MY_Controller
                 )
             );
 
-            $data = $this->proses_data($partner);
+            $data = $this->proses_data($partner,$tgl);
             $rowCount = 6;
             $num      = 1;
 
@@ -300,9 +309,10 @@ class Outstandinginvoice extends MY_Controller
         $partner   = '';
         foreach ($data_arr as $rows) {
             $partner = $rows['partner'];
+            $tgl     = $rows['tgl'];
         }
 
-        $data = $this->proses_data($partner);
+        $data = $this->proses_data($partner,$tgl);
 
         $data['list'] = $data;
         $data['periode'] = tgl_indo(date('d-m-Y', strtotime($tgl_now)));
@@ -320,8 +330,9 @@ class Outstandinginvoice extends MY_Controller
         $partner = '';
         foreach ($data_arr as $r) {
             $partner = $r['partner'];
+            $tgl     = $r['tgl'];
         }
-        $data = $this->proses_data($partner);
+        $data = $this->proses_data($partner,$tgl);
 
         $this->load->library('Pdf');
 

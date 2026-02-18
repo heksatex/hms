@@ -28,11 +28,11 @@ class M_outstandinginvoice extends CI_Model
             $this->db->where($where);
         }
 
-        $this->db->select("inv.no_invoice, p.nama as nama_partner, inv.no_po,  c.currency, inv.nilai_matauang , inv.order_date, DATEDIFF(CURDATE(), inv.order_date) AS hari, inv.origin, inv.status, IFNULL(inv.total_rp,0) as hutang_rp, IFNULL(inv.hutang_rp,0) as sisa_hutang_rp, IFNULL(inv.total_valas,0) as hutang_valas, IFNULL(inv.hutang_valas,0) as sisa_hutang_valas");
+        $this->db->select("inv.no_invoice, p.nama as nama_partner, inv.no_po,  c.currency, inv.nilai_matauang , inv.created_at, DATEDIFF(CURDATE(), inv.created_at) AS hari, inv.origin, inv.status, IFNULL(inv.total_rp,0) as hutang_rp, IFNULL(inv.hutang_rp,0) as sisa_hutang_rp, IFNULL(inv.total_valas,0) as hutang_valas, IFNULL(inv.hutang_valas,0) as sisa_hutang_valas");
         $this->db->from('invoice inv');
         $this->db->join('partner p', "inv.id_supplier = p.id", "inner");
         $this->db->join("currency_kurs c","inv.matauang = c.id","left");
-        $this->db->order_by('inv.order_date', 'asc');
+        $this->db->order_by('inv.created_at', 'asc');
         $this->db->order_by('inv.no_invoice', 'asc');
         $result = $this->db->get();
         return $result->result();
