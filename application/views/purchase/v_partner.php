@@ -43,6 +43,8 @@
                                                             <label class="form-label">Nama</label>
                                                         </div>
                                                         <div class="col-xs-8 col-md-8">
+
+                                                        
                                                             <input type="text" class="form-control input-sm" name="partner" id="partner">
                                                         </div>
                                                     </div>
@@ -75,6 +77,7 @@
                                         <tr>
                                             <th class="style no">#</th>
                                             <th class="style">Nama</th>
+                                            <th class="style">Nama Pemilik Rekening</th>
                                             <th class="style">Invoice Street</th>
                                             <th class="style">Invoice City</th>
                                             <th class="style">Invoice State</th>
@@ -126,7 +129,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0,7],
+                            "targets": [0,8],
                             "orderable": false
                         }
                     ]

@@ -3,6 +3,7 @@
 
 <head>
     <?php $this->load->view("admin/_partials/head.php") ?>
+    <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
     <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
     <style type="text/css">
         h3 {
@@ -93,14 +94,26 @@
                     <div class="box-body">
 
                         <form name="input" class="form-horizontal" role="form" method="POST" id="frm_form_search">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <div class="col-sm-12 col-md-12">
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <label>Supplier</label>
                                         </div>
                                         <div class="col-sm-* col-md-8 col-lg-8">
                                             <select class="form-control input-sm" name="partner" id="partner"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="col-sm-12 col-md-12">
+                                        <div class="col-md-4">
+                                            <label>Tanggal</label>
+                                        </div>
+                                        <div class="col-sm-* col-md-8 col-lg-8">
+                                            <input type="text" class="form-control input-sm" name="tanggal" id="tanggal">
                                         </div>
                                     </div>
                                 </div>
@@ -171,13 +184,28 @@
     </div>
 
     <?php $this->load->view("admin/_partials/js.php"); ?>
-
-    <div id="load_modal">
-        <!-- Load Partial Modal -->
-        <?php $this->load->view("admin/_partials/modal.php") ?>
-    </div>
+    <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
 
     <script type="text/javascript">
+        $('#tanggal').daterangepicker({
+            //                    autoUpdateInput: false,
+            startDate: moment().startOf('month'),
+            endDate: moment().endOf('month'),
+            locale: {
+                format: 'YYYY-MM-DD',
+                cancelLabel: 'Clear'
+            },
+            ranges: {
+                'H': [moment(), moment()],
+                '1..H': [moment().startOf('month'), moment()],
+                '1..31': [moment().startOf('month'), moment().endOf('month')],
+                '1..P': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+        $('#tanggal').on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('');
+        });
+        $('#tanggal').val('');
         //select 2 supplier
         $('#partner').select2({
             allowClear: true,
@@ -226,7 +254,9 @@
                     url: "<?php echo base_url(); ?>accounting/pelunasanhutang/get_supplier_by_id",
                     type: "POST",
                     dataType: "JSON",
-                    data: { id: id_partner },
+                    data: {
+                        id: id_partner
+                    },
                     success: function(partner) {
                         if (partner) {
                             var option = new Option(partner.nama, partner.id, true, true);
@@ -255,8 +285,9 @@
 
         function proses_outstanding(this_btn) {
             var partner = $('#partner').val();
+            var tgl     = $('#tanggal').val();
             let slowProcessWarning = setTimeout(function() {
-                please_wait(function(){});
+                please_wait(function() {});
             }, 5000); // 5 detik
 
             $("#example1_processing").css('display', ''); // show loading
@@ -266,11 +297,11 @@
                 dataType: "JSON",
                 url: "<?php echo site_url('report/outstandinginvoice/loadData') ?>",
                 data: {
-                    partner: partner
+                    partner: partner, tgl:tgl
                 },
                 success: function(data) {
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     if (data.status == 'failed') {
                         unblockUI(function() {
                             setTimeout(function() {
@@ -355,7 +386,7 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseText);
                     clearTimeout(slowProcessWarning);
-                    unblockUI(function () { });
+                    unblockUI(function() {});
                     $("#example1_processing").css('display', 'none'); // hidden loading
                     this_btn.button('reset');
                 }
@@ -367,11 +398,12 @@
         // klik btn excel
         $('#btn-excel').click(function() {
             var partner = $('#partner').val();
+            var tgl     = $('#tanggal').val();
             $.ajax({
                 "type": 'POST',
                 "url": "<?php echo site_url('report/outstandinginvoice/export_excel') ?>",
                 "data": {
-                    partner: partner
+                    partner: partner, tgl  : tgl
                 },
                 "dataType": 'json',
                 beforeSend: function() {
@@ -401,8 +433,9 @@
         $(document).on('click', "#btn-pdf", function(e) {
 
             var partner = $('#partner').val();
+            var tgl     = $('#tanggal').val();
             arr_filter.push({
-                partner: partner
+                partner: partner, tgl:tgl
             });
             var arrStr = encodeURIComponent(JSON.stringify(arr_filter));
             if (arr_filter.length == 0) {
