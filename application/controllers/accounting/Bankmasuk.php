@@ -68,8 +68,8 @@ class Bankmasuk extends MY_Controller {
         $this->load->driver('cache', array('adapter' => 'file'));
     }
 
-    public function add() {
-        $data['id_dept'] = 'ACCBM';
+    public function add($depth = 'ACCBM') {
+        $data['id_dept'] = $depth;
         $data["jenis_transaksi"] = $this->jenisTransaksi;
         $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
@@ -81,8 +81,8 @@ class Bankmasuk extends MY_Controller {
         $this->load->view('accounting/v_bank_masuk_add', $data);
     }
 
-    public function index() {
-        $data['id_dept'] = 'ACCBM';
+    public function index($depth = 'ACCBM') {
+        $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_bank_masuk', $data);
     }
@@ -457,7 +457,7 @@ class Bankmasuk extends MY_Controller {
         }
     }
 
-    public function edit($id) {
+    public function edit($id,$depth = "ACCBM") {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
@@ -480,7 +480,7 @@ class Bankmasuk extends MY_Controller {
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
             $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama" => "asc"])->getData();
-            $data['id_dept'] = 'ACCBM';
+            $data['id_dept'] = $depth;
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $this->load->view('accounting/v_bank_masuk_edit', $data);

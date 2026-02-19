@@ -72,8 +72,8 @@ class Girokeluar extends MY_Controller {
         return TRUE;
     }
 
-    public function index() {
-        $data['id_dept'] = 'ACCGK';
+    public function index($depth = 'ACCGK') {
+        $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_giro_keluar', $data);
     }
@@ -212,8 +212,8 @@ public function ekspor() {
         }
     }
 
-    public function add() {
-        $data['id_dept'] = 'ACCGK';
+    public function add($depth = 'ACCGK') {
+        $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
         $data["trx_intern"] = $this->trx_intern;
@@ -392,7 +392,7 @@ public function ekspor() {
         }
     }
 
-    public function edit($id) {
+    public function edit($id,$depth = 'ACCGK') {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
@@ -416,7 +416,7 @@ public function ekspor() {
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
             $data["coa"] = $model->setTables("acc_coa")->setWhereIn("jenis_transaksi", ["utang_giro", "piutang_giro"])->setOrder(["kode_coa" => "asc"])->getData();
-            $data['id_dept'] = 'ACCGK';
+            $data['id_dept'] = $depth;
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $this->load->view('accounting/v_giro_keluar_edit', $data);
