@@ -257,6 +257,7 @@
                         let debit = 0;
                         let credit = 0;
                         let s_awal = 0;
+                        let s_akhir = 0;
                         let tbody = $("<tbody />");
 
                         arr_filter.push({
@@ -290,6 +291,7 @@
                             s_awal = s_awal + value.saldo_awal;
                             debit = debit + value.debit;
                             credit = credit + value.credit;
+                            s_akhir = s_akhir + value.saldo_akhir;
                         });
 
                         if (empty == true) {
@@ -299,10 +301,11 @@
                             tbody.append("<tr><td colspan='8'>&nbsp</td></tr>");
                             tr2 = $("<tr>").append(
                                 $("<td colspan='4'>").text(''),
-                                // $("<td align='right'>").text(formatNumber(s_awal.toFixed(2))),
-                                $("<td align='right'>").text(''),
+                                $("<td align='right'>").text(formatNumber(s_awal.toFixed(2))),
+                                // $("<td align='right'>").text(''),
                                 $("<td align='right'>").text(formatNumber(debit.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(credit.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(s_akhir.toFixed(2))),
                             );
                             tbody.append(tr2);
                         }
