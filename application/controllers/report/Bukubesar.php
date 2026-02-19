@@ -442,6 +442,7 @@ class Bukubesar extends MY_Controller
             
             $data = $this->proses_data($tgl_dari,$tgl_sampai,$checkhidden);
             $s_awal = 0;
+            $s_akhir = 0;
             $debit = 0;
             $credit = 0;
             $num  = 1;
@@ -461,7 +462,7 @@ class Bukubesar extends MY_Controller
 				$object->getActiveSheet()->getStyle('G'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 				$object->getActiveSheet()->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
-
+                $s_akhir = $s_akhir + $row['saldo_akhir'];
                 $s_awal = $s_awal + $row['saldo_awal'];
                 $debit = $debit + $row['debit'];
                 $credit = $credit + $row['credit'];
@@ -471,13 +472,15 @@ class Bukubesar extends MY_Controller
             $rowCount++;
 			$object->getActiveSheet()->SetCellValue('A'.$rowCount, '');
             $sheet->mergeCells('A'.$rowCount.':D'.$rowCount);
-			// $object->getActiveSheet()->SetCellValue('E'.$rowCount, $s_awal);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $s_awal);
 			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $debit);
 			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $credit);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $s_akhir);
 			
-            // $object->getActiveSheet()->getStyle('E'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            $object->getActiveSheet()->getStyle('E'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
             $object->getActiveSheet()->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
             $object->getActiveSheet()->getStyle('G'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+            $object->getActiveSheet()->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
 
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
