@@ -97,6 +97,8 @@
             $no = 1;
             $debit = 0;
             $credit = 0;
+            $s_awal = 0;
+            $s_akhir = 0;
             foreach ($list as $rows) {
 
             ?>
@@ -114,12 +116,16 @@
             <?php
                 $credit = $credit + $rows['credit'];
                 $debit = $debit + $rows['debit'];
+                $s_awal = $s_awal + $rows['saldo_awal'];
+                $s_akhir = $s_akhir + $rows['saldo_akhir'];
             }
             ?>
             <tr>
-                <td colspan="5"></td>
+                <td colspan="4"></td>
+                <td class="text-right"><?php echo number_format($s_awal, 2); ?></td>
                 <td class="text-right"><?php echo number_format($credit, 2); ?></td>
                 <td class="text-right"> <?php echo number_format($debit, 2); ?></td>
+                <td class="text-right"> <?php echo number_format($s_akhir, 2); ?></td>
             </tr>
         </tbody>
     </table>
