@@ -33,8 +33,8 @@ class Jurnalentries extends MY_Controller {
         $this->load->library("token");
     }
 
-    public function index() {
-        $data['id_dept'] = 'JNE';
+    public function index($depth = "JNE") {
+        $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
         $data["jurnal"] = $model->setTables("mst_jurnal")->setSelects(["kode","nama"])->setOrder(["nama"=>"asc"])->getData();
@@ -60,8 +60,8 @@ class Jurnalentries extends MY_Controller {
         }
     }
 
-    public function add() {
-        $data['id_dept'] = 'JNE';
+    public function add($depth = "JNE") {
+        $data['id_dept'] = $depth;
         $model = new $this->m_global;
         $data["class"] = $this->uri->segment(1);
         $data["jurnal"] = $model->setTables("mst_jurnal")->setOrder(["kode"])->setSelects(["nama,kode"])->getData();
@@ -184,10 +184,10 @@ class Jurnalentries extends MY_Controller {
         }
     }
 
-    public function edit($id) {
+    public function edit($id,$depth = "JNE") {
         try {
             $kode_decrypt = decrypt_url($id);
-            $data['id_dept'] = 'JNE';
+            $data['id_dept'] = $depth;
             $data["id"] = $id;
             $data["class"] = $this->uri->segment(1);
             $head = new $this->m_global;

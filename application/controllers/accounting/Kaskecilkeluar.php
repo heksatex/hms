@@ -53,8 +53,8 @@ class Kaskecilkeluar extends MY_Controller {
         $this->load->driver('cache', array('adapter' => 'file'));
     }
 
-    public function index() {
-        $data['id_dept'] = 'ACCKKK';
+    public function index($depth = "ACCKKK") {
+        $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_kas_kecil_keluar', $data);
     }
@@ -199,8 +199,8 @@ class Kaskecilkeluar extends MY_Controller {
         }
     }
 
-    public function add() {
-        $data['id_dept'] = 'ACCKKK';
+    public function add($depth = "ACCKKK") {
+        $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
@@ -340,7 +340,7 @@ class Kaskecilkeluar extends MY_Controller {
         }
     }
 
-    public function edit($id) {
+    public function edit($id,$depth = "ACCKKK") {
         try {
             $data["class"] = $this->uri->segment(1);
             $data["user"] = (object) $this->session->userdata('nama');
@@ -363,7 +363,7 @@ class Kaskecilkeluar extends MY_Controller {
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
             $data["coa"] = $model->setTables("acc_coa")->setWheres(["nama" => "Kas Kecil"])->setOrder(["kode_coa" => "asc"])->getData();
-            $data['id_dept'] = 'ACCKKK';
+            $data['id_dept'] = $depth;
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $this->load->view('accounting/v_kas_kecil_keluar_edit', $data);
         } catch (Exception $ex) {
