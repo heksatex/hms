@@ -565,7 +565,7 @@ class M_pelunasanhutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("b.id,(a.no_bk) as no_bukti, a.tanggal, b.currency_id, c.currency, b.kurs, IF(c.currency='IDR', b.nominal, IFNULL(b.nominal*b.kurs,0)) as total_rp, IF(c.currency != 'IDR', b.nominal, 0) as total_valas, 'bank' as tipe2, b.uraian, b.kode_coa");
+        $this->db->select("b.id,(a.no_bk) as no_bukti, a.tanggal, b.currency_id, c.currency,(CASE WHEN b.kurs_akhir IS NOT NULL AND b.kurs_akhir > 0 THEN b.kurs_akhir ELSE b.kurs END ) as kurs, IF(c.currency='IDR', b.nominal, IFNULL(b.nominal* (CASE WHEN b.kurs_akhir IS NOT NULL AND b.kurs_akhir > 0 THEN b.kurs_akhir ELSE b.kurs END) ,0)) as total_rp, IF(c.currency != 'IDR', b.nominal, 0) as total_valas, 'bank' as tipe2, b.uraian, b.kode_coa");
         $this->db->from("acc_bank_keluar a");
         $this->db->join("acc_bank_keluar_detail b ", "a.id = b.bank_keluar_id", "left");
         $this->db->join("currency_kurs c ", "b.currency_id = c.id", "left");
@@ -583,7 +583,7 @@ class M_pelunasanhutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("e.id,(h.no_kk) as no_bukti , h.tanggal, e.currency_id, i.currency, e.kurs, IF(i.currency='IDR', e.nominal, IFNULL(e.nominal*e.kurs,0) ) as total_rp, IF(i.currency != 'IDR', e.nominal, 0) as total_valas, 'kas' as tipe2, e.uraian, e.kode_coa");
+        $this->db->select("e.id,(h.no_kk) as no_bukti , h.tanggal, e.currency_id, i.currency, (CASE WHEN e.kurs_akhir is NOT NULL and e.kurs_akhir > 0 THEN e.kurs_akhir ELSE e.kurs END ) as kurs, IF(i.currency='IDR', e.nominal, IFNULL(e.nominal* (CASE WHEN e.kurs_akhir is NOT NULL and e.kurs_akhir > 0 THEN e.kurs_akhir ELSE e.kurs END) ,0) ) as total_rp, IF(i.currency != 'IDR', e.nominal, 0) as total_valas, 'kas' as tipe2, e.uraian, e.kode_coa");
         $this->db->from("acc_kas_keluar h");
         $this->db->join("acc_kas_keluar_detail e ", "h.id = e.kas_keluar_id", "left");
         $this->db->join("currency_kurs i ", "e.currency_id = i.id", "left");
@@ -601,7 +601,7 @@ class M_pelunasanhutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("g.id,(f.no_gk) as no_bukti, f.tanggal, g.currency_id, j.currency, g.kurs, IF(j.currency='IDR', g.nominal, IFNULL(g.nominal*g.kurs,0)) as total_rp, IF(j.currency != 'IDR', g.nominal, 0) as total_valas, 'giro' as tipe2, iF(f.transinfo !='', f.transinfo, f.lain2 ) as uraian, g.kode_coa");
+        $this->db->select("g.id,(f.no_gk) as no_bukti, f.tanggal, g.currency_id, j.currency, (CASE WHEN g.kurs_akhir IS NOT NULL and g.kurs_akhir > 0 THEN g.kurs_akhir ELSE g.kurs END) as kurs, IF(j.currency='IDR', g.nominal, IFNULL(g.nominal*(CASE WHEN g.kurs_akhir IS NOT NULL and g.kurs_akhir > 0 THEN g.kurs_akhir ELSE g.kurs END),0)) as total_rp, IF(j.currency != 'IDR', g.nominal, 0) as total_valas, 'giro' as tipe2, iF(f.transinfo !='', f.transinfo, f.lain2 ) as uraian, g.kode_coa");
         $this->db->from("acc_giro_keluar f");
         $this->db->join("acc_giro_keluar_detail g ", "f.id = g.giro_keluar_id", "left");
         $this->db->join("currency_kurs j ", "g.currency_id = j.id", "left");
