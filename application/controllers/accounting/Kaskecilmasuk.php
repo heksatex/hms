@@ -204,7 +204,7 @@ class Kaskecilmasuk extends MY_Controller {
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["nama" => "Kas Kecil"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["nama" => "Kas Kecil",'status'=>'aktif'])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_kecil_masuk_add', $data);
     }
@@ -360,7 +360,7 @@ class Kaskecilmasuk extends MY_Controller {
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setTables("acc_coa")->setWheres(["nama" => "Kas Kecil"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["nama" => "Kas Kecil",'status'=>'aktif'])->getData();
             $data['id_dept'] = $depth;
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $this->load->view('accounting/v_kas_kecil_masuk_edit', $data);
