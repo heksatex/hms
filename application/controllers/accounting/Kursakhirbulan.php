@@ -366,7 +366,7 @@ class Kursakhirbulan extends MY_Controller {
                 $selisih = ($saldoAwalValas * $check->kurs) - $saldoAkhir;
                 $nominal = abs($selisih);
 
-                if ($saldoAwalValas <= 0 || $nominal === (double) 0) {
+                if ($saldoAkhirValas <= 0) {
                     continue;
                 }
                 $kursAkhirDetail[] = [
@@ -548,14 +548,12 @@ class Kursakhirbulan extends MY_Controller {
             return $model->setTables("acc_pelunasan_piutang app")->setJoins("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id")
                             ->setJoins("acc_pelunasan_piutang_summary_koreksi appsk", "apps.id = appsk.pelunasan_summary_id")
                             ->setWheres([
-                                "YEAR(app.tanggal_transaksi)" => $bulans[0],
-                                "MONTH(app.tanggal_transaksi)" => $bulans[1],
                                 "appsk.lunas" => 0,
                                 "appsk.alat_pelunasan" => "true",
                                 "appsk.koreksi_id" => "deposit",
                                 "app.status" => "done",
                                 "apps.tipe_currency" => "Valas"
-                            ])->setSelects(["apps.id,apps.no_pelunasan,apps.total_piutang,apps.total_pelunasan,apps.kurs,apps.kurs_akhir,appsk.kode_coa"])->getData();
+                            ])->setSelects(["apps.id,apps.no_pelunasan,apps.total_piutang,apps.total_pelunasan,apps.kurs,apps.kurs_akhir,appsk.kode_coa,app.partner_nama"])->getData();
         } catch (Exception $ex) {
             throw $ex;
         }
@@ -570,8 +568,6 @@ class Kursakhirbulan extends MY_Controller {
             $data = $model->setTables("acc_pelunasan_piutang app")->setJoins("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id")
                             ->setJoins("acc_pelunasan_piutang_summary_koreksi appsk", "apps.id = appsk.pelunasan_summary_id")
                             ->setWheres([
-                                "YEAR(app.tanggal_transaksi)" => $bulans[0],
-                                "MONTH(app.tanggal_transaksi)" => $bulans[1],
                                 "appsk.lunas" => 0,
                                 "appsk.alat_pelunasan" => "true",
                                 "appsk.koreksi_id" => "deposit",
