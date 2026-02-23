@@ -43,7 +43,7 @@
 
                 $selisih = ($saldoAkhirValas * $kurs) - $saldoAkhir;
                 $nominal = abs($selisih);
-                if ($saldoAwalValas <= 0 || $nominal === (double) 0) {
+                if ($saldoAkhirValas <= 0) {
                     continue;
                 }
                 $no += 1;
@@ -124,31 +124,32 @@
         </th>
         </thead>
         <tbody>
-            <?php foreach ($kas as $key => $value) {
-                $oldKurs = ($value->kurs_akhir > 0) ?  $value->kurs_akhir : $value->kurs;
-                $nominals = number_format($value->nominal,2);
+            <?php
+            foreach ($kas as $key => $value) {
+                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
+                $nominals = number_format($value->nominal, 2);
                 ?>
-            <tr>
-                <td>
-                    <?= $key + 1 ?>
-                </td>
-                <td>
-                    <?= "{$value->nama_menu} {$value->no} ({$nominals} {$curr})" ?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($oldKurs,2)?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($value->nominal * $oldKurs,2)?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($kurs,2)?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($value->nominal * $kurs,2)?>
-                </td>
-            </tr>
-                <?php }
+                <tr>
+                    <td>
+    <?= $key + 1 ?>
+                    </td>
+                    <td>
+    <?= "{$value->nama_menu} {$value->no} ({$nominals} {$curr})" ?>
+                    </td>
+                    <td class="text-right">
+    <?= number_format($oldKurs, 2) ?>
+                    </td>
+                    <td class="text-right">
+    <?= number_format($value->nominal * $oldKurs, 2) ?>
+                    </td>
+                    <td class="text-right">
+    <?= number_format($kurs, 2) ?>
+                    </td>
+                    <td class="text-right">
+    <?= number_format($value->nominal * $kurs, 2) ?>
+                    </td>
+                </tr>
+            <?php }
             ?>
         </tbody>
     </table>
@@ -158,7 +159,7 @@
     <caption>Pelunasan</caption>
     <table class="table table-condesed table-hover rlstable  over" width="100%">
         <thead>
-        <th class="no">
+        <th>
             No
         </th>
         <th class="text-right">
@@ -175,30 +176,32 @@
         </th>
         </thead>
         <tbody>
-            <?php foreach ($deposit as $key => $value) {
-                $oldKurs = ($value->kurs_akhir > 0) ?  $value->kurs_akhir : $value->kurs;
+            <?php
+            foreach ($deposit as $key => $value) {
+                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
                 $saldo = $value->total_piutang - $value->total_pelunasan;
+//                $saldo = abs($saldo);
                 ?>
-            <tr>
-                <td>
-                    <?= $value->no_pelunasan ?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($oldKurs,2)?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($oldKurs * $saldo,2)?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($kurs,2)?>
-                </td>
-                <td class="text-right">
-                    <?=number_format($saldo * $kurs,2)?>
-                </td>
-                
-            </tr>
-                <?php }
-            ?>
+                <tr>
+                    <td>
+                        <?= "{$value->no_pelunasan} -  {$value->partner_nama} ({$saldo}) {$curr}" ?>
+                    </td>
+                    <td class="text-right">
+                        <?= number_format($oldKurs, 2) ?>
+                    </td>
+                    <td class="text-right">
+                        <?= number_format($oldKurs * abs($saldo), 2) ?>
+                    </td>
+                    <td class="text-right">
+                        <?= number_format($kurs, 2) ?>
+                    </td>
+                    <td class="text-right">
+    <?= number_format(abs($saldo) * $kurs, 2) ?>
+                    </td>
+
+                </tr>
+<?php }
+?>
         </tbody>
     </table>
 </div>
