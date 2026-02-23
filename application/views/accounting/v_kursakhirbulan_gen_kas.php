@@ -75,7 +75,7 @@
                         <?= $nama ?>
                     </td>
                     <td>
-                        <?= $coa_sk->value ?>
+                        <?= ($selisih > 0) ? $coa_sk->value :$coa_skr->value?>
                     </td>
                     <td class="text-right">
                         <?= ($selisih > 0) ? "0.00" : number_format($nominal, 2) ?>
