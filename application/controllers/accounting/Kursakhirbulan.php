@@ -544,6 +544,7 @@ class Kursakhirbulan extends MY_Controller {
         try {
             $bulans = explode("-", $this->input->post("bulan"));
             $kurs = str_replace(",", "", $this->input->post("kurs"));
+            $curr = $this->input->post("currency");
             $model = new $this->m_global;
             return $model->setTables("acc_pelunasan_piutang app")->setJoins("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id")
                             ->setJoins("acc_pelunasan_piutang_summary_koreksi appsk", "apps.id = appsk.pelunasan_summary_id")
@@ -552,7 +553,8 @@ class Kursakhirbulan extends MY_Controller {
                                 "appsk.alat_pelunasan" => "true",
                                 "appsk.koreksi_id" => "deposit",
                                 "app.status" => "done",
-                                "apps.tipe_currency" => "Valas"
+                                "apps.tipe_currency" => "Valas",
+                                "apps.currency"=>$curr
                             ])->setSelects(["apps.id,apps.no_pelunasan,apps.total_piutang,apps.total_pelunasan,apps.kurs,apps.kurs_akhir,appsk.kode_coa,app.partner_nama"])->getData();
         } catch (Exception $ex) {
             throw $ex;
@@ -562,6 +564,7 @@ class Kursakhirbulan extends MY_Controller {
     protected function _updateDeposit() {
         try {
             $bulans = explode("-", $this->input->post("bulan"));
+             $curr = $this->input->post("currency");
             $kurs = str_replace(",", "", $this->input->post("kurs"));
             $model = new $this->m_global;
             $update = [];
@@ -572,7 +575,8 @@ class Kursakhirbulan extends MY_Controller {
                                 "appsk.alat_pelunasan" => "true",
                                 "appsk.koreksi_id" => "deposit",
                                 "app.status" => "done",
-                                "apps.tipe_currency" => "Valas"
+                                "apps.tipe_currency" => "Valas",
+                                "apps.currency"=>$curr
                             ])->setSelects(["apps.id"])->getData();
             foreach ($data as $key => $value) {
                 $update[] = ["kurs_akhir" => $kurs, "id" => $value->id];
