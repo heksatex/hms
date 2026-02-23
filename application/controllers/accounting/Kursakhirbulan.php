@@ -221,6 +221,7 @@ class Kursakhirbulan extends MY_Controller {
             $model = new $this->m_global;
             $data["coa"] = $this->_getSaldo();
             $data["coa_sk"] = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
+            $data["coa_skr"] = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs_rugi"])->getDetail();
             $data["curr"] = $curr;
             $data["kas"] = $this->_updatekasView();
             $data["deposit"] = $this->_updateDepositView();
@@ -327,7 +328,8 @@ class Kursakhirbulan extends MY_Controller {
             $this->_module->lock_tabel($lock);
             $coa = $this->_getSaldo();
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
-
+            $coaskr = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs_rugi"])->getDetail();
+            
             if (!$noJurnal = $this->token->noUrut('jurnal_selisih_kurs', date('ym', strtotime($tanggal)), true)->generate('SK', '/%03d')->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . date('m', strtotime($tanggal)))->get()) {
                 throw new \Exception("No Jurnal tidak terbuat", 500);
             }
