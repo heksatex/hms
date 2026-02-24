@@ -876,13 +876,15 @@ class M_bukubesarpembantupiutang extends CI_Model
     // }
 
 
-    function get_saldo_koreksi_normal(array $where = [], string $group = '',  string $currency = '')
+    function get_saldo_koreksi_normal(array $where = [], array $group = [],  string $currency = '')
     {
+        $this->db->reset_query();
 
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        if ($group) {
+        if (count($group)) {
+            // $this->db->group_by(implode(', ', $group), FALSE);
             $this->db->group_by($group);
         }
         $total_m_normal   = ($currency === 'valas') ? '(apps.selisih * -1)' : '(apps.selisih * -1) * apps.kurs';
@@ -914,16 +916,21 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->JOIN("(SELECT GROUP_CONCAT(DISTINCT ack.nama_koreksi) as nama_koreksi, appsk.pelunasan_summary_id, ack.koreksi_bb
                         FROM acc_pelunasan_piutang_summary_koreksi appsk
                         LEFT JOIN acc_pelunasan_koreksi_piutang ack ON appsk.koreksi_id = ack.kode GROUP BY appsk.pelunasan_summary_id) as ack", "ack.pelunasan_summary_id = apps.id", "INNER");
-        return $this->db->get_compiled_select();
+        $sql = $this->db->get_compiled_select();
+        $this->db->reset_query();
+        return $sql;
     }
 
-    function get_saldo_koreksi_split(array $where = [], string $group = '',  string $currency = '')
+    function get_saldo_koreksi_split(array $where = [], array $group = [],  string $currency = '')
     {
+
+        $this->db->reset_query();
 
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        if ($group) {
+        if (count($group)) {
+            // $this->db->group_by(implode(', ', $group));
             $this->db->group_by($group);
         }
 
@@ -1073,7 +1080,11 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->jOIN("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id", "INNER");
         $this->db->jOIN("acc_pelunasan_piutang_summary_koreksi appsk", "apps.id = appsk.pelunasan_summary_id", "INNER");
         $this->db->JOIN("acc_pelunasan_koreksi_piutang ack", "appsk.koreksi_id = ack.kode", "left");
-        return $this->db->get_compiled_select();
+        
+        $sql = $this->db->get_compiled_select();
+        $this->db->reset_query();
+
+        return $sql;
     }
 
     //  CASE 
@@ -1091,16 +1102,9 @@ class M_bukubesarpembantupiutang extends CI_Model
     {
         $where_tipe_cur = ($currency === 'valas') ? 'Valas' : 'Rp';
         $where_normal = ['apps.mode' => 'normal', 'app.status' => 'done', 'apps.keterangan <>  ' => "", 'apps.tipe_currency' => $where_tipe_cur, 'ack.koreksi_bb' => 'true'];
-        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, 'app.partner_id', $currency);
+        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, array('app.partner_id', 'apps.id'), $currency);
         $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ' => "", 'apps.tipe_currency' => $where_tipe_cur,  'appsk.head' => 'false', 'appsk.alat_pelunasan' => 'false', 'ack.koreksi_bb' => 'true'];
-        $sub_query_split  = $this->get_saldo_koreksi_split($where_split, 'app.partner_id', $currency);
-
-        if (count($where) > 0) {
-            $this->db->where($where);
-        }
-        if ($group) {
-            $this->db->group_by($group, FALSE);
-        }
+        $sub_query_split  = $this->get_saldo_koreksi_split($where_split, ['app.partner_id', 'apps.id'], $currency);        
 
         $this->db->select("
                         (id_bukti)        AS id_bukti,
@@ -1121,11 +1125,19 @@ class M_bukubesarpembantupiutang extends CI_Model
                         (total_dpp_ppn)   AS total_dpp_ppn
                         
                         ");
-        $this->db->FROM("(" . $sub_query_normal . " UNION ALL " . $sub_query_split . ") as t ");
-        return $this->db->get_compiled_select();
+        $this->db->from("( ({$sub_query_normal}) UNION ALL ({$sub_query_split}) ) t");
+
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+
+        if ($group) {
+            $this->db->group_by($group);
+        }
+
+        $sql = $this->db->get_compiled_select();
+        return $sql ;
     }
-
-
 
 
     function get_saldo_deposit(array $where = [], string $group = '',  string $currency = '')
@@ -1425,7 +1437,7 @@ class M_bukubesarpembantupiutang extends CI_Model
             $this->db->where($where);
         }
 
-        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi . ' UNION ALL ' . $subquery_diskon . " UNION ALL " . $subquery_kas . " UNION ALL " . $subquery_refund;
+        $union_sql = $subquery_faktur . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi . ' UNION ALL ' . $subquery_diskon . ' UNION ALL ' . $subquery_kas . ' UNION ALL ' . $subquery_refund;
 
         $this->db->SELECT('id_bukti, id_bukti_ecr,  no_bukti, tgl, id_partner, uraian, debit, credit, status, link');
         $this->db->from('(' . $union_sql . ') as sub');
