@@ -949,7 +949,7 @@ if ($datas->status == 'confirm') {
                             $(".nourut" + no).html(no);
                             setCoaItem("coa_" + no);
                             $(".coa_" + no).select2("trigger", "select", {
-                                data: {id: row.kode_coa, text: row.kode_coa}
+                                data: {id: row.kode_coa_head, text: row.kode_coa_head}
                             });
                             $(".nominal" + no).keyup(function (ev) {
                                 if (ev.keyCode === 13) {
