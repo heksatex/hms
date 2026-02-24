@@ -480,7 +480,7 @@ class Kasmasuk extends MY_Controller {
 
             $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
-                            ->setSelects(["agkd.nominal,agkd.no_gk,agkd.kode_coa,agkd.bank,agkd.no_rek,agkd.no_bg", "agkd.id,if(partner_nama = '',agk.lain2,partner_nama) as lain"])
+                            ->setSelects(["agkd.nominal,agkd.no_gk,agk.kode_coa,agkd.bank,agkd.no_rek,agkd.no_bg", "agkd.id,if(partner_nama = '',agk.lain2,partner_nama) as lain"])
                             ->setSelects(["agkd.currency_id as agk_curr,agkd.kurs", "currency_kurs.currency as curr", "transinfo"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
             $this->output->set_status_header(200)
