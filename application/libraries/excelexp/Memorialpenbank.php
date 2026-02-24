@@ -19,7 +19,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Memorialpenbank {
 
-    protected $notList = ["piutang_giro", "piutang", "um_penjualan"];
+    protected $notList = ["piutang", "um_penjualan"];
     protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
 
     //put your code here
