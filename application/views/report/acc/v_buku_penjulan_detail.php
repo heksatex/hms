@@ -6,8 +6,13 @@ $totalHarga = 0;
 if ($posisi !== "bks") {
 
     foreach ($data as $key => $value) {
-        $total += $value->nominal;
+        $sjs = explode("/", $value->no_sj);
+        if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
+            $value->nominal = 0;
+            $value->harga = 0;
+        }
         $harga = ($value->harga * $value->qty) * $value->kurs;
+        $total += $value->nominal;
         $totalHarga += $harga;
         $grandTotal += ($value->qty) ? $harga : $value->nominal;
         $no++;
@@ -99,12 +104,43 @@ if ($posisi !== "bks") {
             <?php
         }
     }
+    if ($grandTotal > 0) {
+        ?>
+        <tr>
+            <td>
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="text-bold"><?= "Grand Total " ?></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right;" class="text-bold"><?= number_format($grandTotal, 2) ?></td>
+        </tr>
+        <?php
+    }
 } else {
     $totalHargaValas = 0;
     $totalPpn = 0;
     $GrandtotalRp = 0;
     foreach ($data as $key => $value) {
         $no++;
+        $sjs = explode("/", $value->no_sj);
+        if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
+            $value->nominal = 0;
+            $value->harga = 0;
+        }
         $JumlahRp = ($value->qty * $value->harga) * $value->kurs;
         $ppn = $value->pajak * $value->kurs;
         $totalPpn += $ppn;
@@ -211,11 +247,11 @@ if ($posisi !== "bks") {
     }
     if ($GrandtotalRp > 0) {
         ?>
-            <tr>
-                <td>
-                    &nbsp;
-                </td>
-            </tr>
+        <tr>
+            <td>
+                &nbsp;
+            </td>
+        </tr>
         <tr>
             <td></td>
             <td></td>
