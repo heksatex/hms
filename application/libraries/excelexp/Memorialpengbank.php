@@ -34,6 +34,7 @@ class Memorialpengbank {
                     ->setWhereRaw("bkd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")
                     ->setSelects(["bk.kode_coa,bkd.kode_coa as kode_coa_bkd,sum(case when bkd.kurs <> 1 then nominal else 0 end) as valas,sum(bkd.nominal*bkd.kurs) as nominals",
                         "acbk.nama as nama,acbkd.nama as nama_bkd", "if(partner_nama ='',lain2,partner_nama) as partner"])
+                            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
                     ->setGroups(["bkd.kode_coa"])->setOrder(["bkd.kode_coa"]);
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
@@ -43,7 +44,7 @@ class Memorialpengbank {
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setSelects(["transinfo as uraian,bkd.no_bk,bkd.tanggal,kurs"]);
+                    $model->setSelects(["bkd.no_bk,bkd.tanggal,kurs"]);
                     $model->setGroups(["bkd.no_bk"], true)->setOrder(["bkd.kode_coa","bkd.no_bk"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
