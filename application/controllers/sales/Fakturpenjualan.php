@@ -26,6 +26,7 @@ class Fakturpenjualan extends MY_Controller {
 
     //put your code here
     protected $curr_def_id = 1;
+
     public function __construct() {
         parent:: __construct();
         $this->is_loggedin();
@@ -1084,7 +1085,7 @@ class Fakturpenjualan extends MY_Controller {
                     }
 
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted",]);
-                    $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" => $kode])->update(["lunas"=>0]);
+                    $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" => $kode])->update(["lunas" => 0]);
                     $model->setTables("delivery_order")->setWheres(["no_sj" => $data->no_sj, "status" => "done"])->update(["faktur" => 0]);
                     $this->_module->gen_history_new("jurnal_entries", $data->jurnal, 'edit', "Merubah Status Ke unposted dari penjualan", $username);
                     break;
@@ -2127,11 +2128,11 @@ class Fakturpenjualan extends MY_Controller {
                 $this->hitungLinesPrint($printer, $lines, $halaman);
                 $this->hitungLinesPrint($printer, $lines, $halaman);
                 $subtotal2 = (round($head->grand_total * $head->kurs_nominal) - round($head->diskon * $head->kurs_nominal));
-                $dpp = number_format($head->dpp_lain,2);
+                $dpp = number_format($head->dpp_lain, 2);
                 $diskon = number_format(round($head->diskon), 2, ".", ",");
                 $ppn = number_format(round($head->ppn - $head->diskon_ppn), 2, ".", ",");
                 $finalTotal = number_format(round($head->final_total * $head->kurs_nominal), 2, ".", ",");
-                $terbilang = Kwitansi($head->final_total);
+                $terbilang = Kwitansi(($head->final_total > 0) ? $head->final_total : 0);
                 $spltTbl = str_split(trim($terbilang) . " Rupiah", 73);
                 $printer->text(str_pad(" Terbilang : ", 13));
                 $printer->text(str_pad($spltTbl[0] ?? " ", 79));
