@@ -27,9 +27,10 @@ class Memorialpengkasbesar {
                     ->setJoins("acc_coa", "acc_coa.kode_coa = kmd.kode_coa", "left")->setOrder(["kmd.kode_coa" => "asc"])
                     ->setWheres(["date(km.tanggal) >=" => $datas['tanggals'][0], "date(km.tanggal) <=" => $datas['tanggals'][1]])
                     ->setWheres(["km.kode_coa " => "1111.01", "kmd.kurs" => 1, "km.status" => "confirm"])
-                    ->setSelects(["sum(nominal) as nominals,km.kode_coa as km_kode_coa", "acc_coa.kode_coa,acc_coa.nama"]);
+                    ->setSelects(["sum(nominal) as nominals,km.kode_coa as km_kode_coa", "acc_coa.kode_coa,acc_coa.nama"])
+            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian']);
             if ($datas['filter'] === "detail") {
-                $model->setSelects(["transinfo", "uraian", "date(km.tanggal) as tanggal", "km.no_kk as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
+                $model->setSelects(["date(km.tanggal) as tanggal", "km.no_kk as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
                 $data["kredit"] = $model->getData();
                 $model->setGroups(["kmd.id","kmd.no_kk"])->setOrder(["kmd.kode_coa","kmd.no_kk","kmd.id"]);
                 $data["debit"] = $model->getData();
