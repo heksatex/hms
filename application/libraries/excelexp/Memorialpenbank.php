@@ -34,7 +34,7 @@ class Memorialpenbank {
                     ->setWheres(["date(bm.tanggal) >=" => $datas['tanggals'][0], "date(bm.tanggal) <=" => $datas['tanggals'][1], "bm.status" => "confirm"])
                     ->setWhereRaw("bmd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bm.no_bm,bmd.kurs"])
-                    ->setSelects(["bm.kode_coa,bmd.kode_coa as kode_coa_bmd,acbm.nama,acbmd.nama as nama_bmd,if(bmd.kurs > 1,sum(bmd.nominal),0) as valas,sum(bmd.nominal*bmd.kurs) as nominals,date(bmd.tanggal) as tanggal"])
+                    ->setSelects(["bm.kode_coa,bmd.kode_coa as kode_coa_bmd,acbm.nama,acbmd.nama as nama_bmd,sum(if(bmd.kurs > 1,bmd.nominal,0)) as valas,sum(bmd.nominal*bmd.kurs) as nominals,date(bmd.tanggal) as tanggal"])
                     ->setSelects(["transinfo as uraian"])
                     ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
             $data["bank_debit"] = $model->getData();
@@ -44,7 +44,7 @@ class Memorialpenbank {
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setGroups(["bm.no_bm"], true)->setOrder(["bm.no_bm","bm.kode_coa"], true);
+                    $model->setGroups(["bm.no_bm"], true)->setOrder(["bm.kode_coa","bm.no_bm"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
                 default:
@@ -56,7 +56,7 @@ class Memorialpenbank {
                     ->setJoins("acc_coa acgm", "acgm.kode_coa = gm.kode_coa", "left")
                     ->setJoins("acc_coa acgmd", "acgmd.kode_coa = gmd.kode_coa", "left")
                     ->setWheres(["date(gm.tanggal) >=" => $datas['tanggals'][0], "date(gm.tanggal) <=" => $datas['tanggals'][1], "gm.status" => "confirm"])
-                    ->setSelects(["gm.kode_coa,acgm.nama,gmd.kode_coa as kode_coa_gmd,acgmd.nama as nama_gmd,if(gmd.kurs > 1,sum(gmd.nominal),0) as valas,sum(gmd.nominal*gmd.kurs) as nominals"])
+                    ->setSelects(["gm.kode_coa,acgm.nama,gmd.kode_coa as kode_coa_gmd,acgmd.nama as nama_gmd,sum(if(gmd.kurs > 1,gmd.nominal,0)) as valas,sum(gmd.nominal*gmd.kurs) as nominals"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,gm.no_gm,gmd.kurs", "date(gmd.tanggal) as tanggal", "transinfo as uraian"])
                     ->setWhereRaw("gmd.kode_coa not in ('{$nt}')")->setGroups(["gm.kode_coa"])->setOrder(["gm.kode_coa"]);
             $data["giro_debit"] = $model->getData();
@@ -66,7 +66,7 @@ class Memorialpenbank {
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setGroups(["gm.no_gm"], true)->setOrder(["gm.no_gm","gm.kode_coa"], true);
+                    $model->setGroups(["gm.no_gm"], true)->setOrder(["gm.kode_coa","gm.no_gm"], true);
                     $data["giro_debit"] = $model->getData();
                     break;
                 default:
