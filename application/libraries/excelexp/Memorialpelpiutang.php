@@ -31,16 +31,15 @@ class Memorialpelpiutang {
                     ->setWheres(["date(bm.tanggal) >=" => $datas['tanggals'][0], "date(bm.tanggal) <=" => $datas['tanggals'][1], "bm.status" => "confirm"])
                     ->setWhereRaw("bmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bm.no_bm,bmd.kurs"])
                     ->setSelects(["bmd.kode_coa as kode_coa_bmd,acbmd.nama as nama_bmd,if(bmd.kurs > 1,sum(bmd.nominal),0) as valas,sum(bmd.nominal*bmd.kurs) as nominals,acbm.nama,bm.kode_coa,date(bmd.tanggal) as tanggal"])
-                    ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
+                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
+                            ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setSelects(["bmd.uraian"]);
                     $model->setGroups(["bmd.kode_coa","bm.no_bm"], true)->setOrder(["bmd.kode_coa","bm.no_bm"], true);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setSelects(["transinfo as uraian"]);
                     $model->setGroups(["bm.no_bm"], true)->setOrder(["bm.kode_coa"], true);
                     $data["bank_debit"] = $model->getData();
                     break;

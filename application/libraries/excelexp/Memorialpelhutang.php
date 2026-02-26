@@ -16,13 +16,13 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
 class Memorialpelhutang {
 
     //put your code here
-    protected $list = ["utang_giro","utang","um_pembelian"];
+    protected $list = ["utang_giro", "utang", "um_pembelian"];
     protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
 
-    
     public function _data($model, $datas) {
         $nt = implode("','", $this->list);
         $data = [];
@@ -33,16 +33,15 @@ class Memorialpelhutang {
                     ->setWheres(["date(bk.tanggal) >=" => $datas['tanggals'][0], "date(bk.tanggal) <=" => $datas['tanggals'][1], "bk.status" => "confirm"])
                     ->setWhereRaw("bkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bk.no_bk,bkd.kurs"])
                     ->setSelects(["bkd.kode_coa as kode_coa_bkd,acbkd.nama as nama_bkd,sum(bkd.nominal) as valas,sum(bkd.nominal*bkd.kurs) as nominals,acbk.nama,bk.kode_coa,date(bkd.tanggal) as tanggal"])
+                    ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
                     ->setGroups(["bkd.kode_coa"])->setOrder(["bkd.kode_coa"]);
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setSelects(["bkd.uraian"]);
-                    $model->setGroups(["bk.kode_coa","bkd.no_bk"], true)->setOrder(["bk.kode_coa","bkd.no_bk"], true);
+                    $model->setGroups(["bk.kode_coa", "bkd.no_bk"], true)->setOrder(["bk.kode_coa", "bkd.no_bk"], true);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setSelects(["transinfo as uraian"]);
                     $model->setGroups(["bkd.no_bk"], true)->setOrder(["bkd.kode_coa"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
@@ -61,7 +60,7 @@ class Memorialpelhutang {
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["gk.kode_coa","gkd.no_gk"], true)->setOrder(["gk.kode_coa","gkd.no_gk"], true);
+                    $model->setGroups(["gk.kode_coa", "gkd.no_gk"], true)->setOrder(["gk.kode_coa", "gkd.no_gk"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
@@ -257,7 +256,7 @@ class Memorialpelhutang {
             }
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
@@ -362,7 +361,7 @@ class Memorialpelhutang {
             }
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
