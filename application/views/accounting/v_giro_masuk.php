@@ -149,7 +149,7 @@
             var tanggal = "";
             $(function () {
                 $("#btn-tambah").on("click", function () {
-                    window.location.href = "<?php echo site_url("{$class}/girokeluar/add") ?>";
+                    window.location.href = "<?php echo site_url("{$class}/giromasuk/add") ?>";
                 });
                 const table = $("#tbl-gm").DataTable({
                     "iDisplayLength": 50,
