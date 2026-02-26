@@ -25,6 +25,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 class Fakturpenjualan extends MY_Controller {
 
     //put your code here
+    protected $curr_def_id = 1;
     public function __construct() {
         parent:: __construct();
         $this->is_loggedin();
@@ -34,6 +35,7 @@ class Fakturpenjualan extends MY_Controller {
         $this->config->load('additional');
         $this->load->library("token");
         $this->load->library("dompdflib");
+        $this->curr_def_id = $this->config->item('default_curr_id');
     }
 
     protected $tipe = [
@@ -156,6 +158,7 @@ class Fakturpenjualan extends MY_Controller {
     public function edit($id) {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
+            $data["curr_def_id"] = $this->curr_def_id;
             $data["id"] = $id;
             $data['id_dept'] = 'ACCFPJ';
             $data["tipe"] = $this->tipe;
@@ -654,14 +657,6 @@ class Fakturpenjualan extends MY_Controller {
                         $ddskon = round(($tipediskon === "%") ? ($jumlah * ($nominalDiskon / 100)) : $nominalDiskon, 2);
                         $grandDiskon += $ddskon;
                         $dpp = round(($jumlah - $ddskon) * 11 / 12, 2);
-//                        if (!$dppSet) {
-//                            $pajak = round(($jumlah - $ddskon) * $taxVal, 2);
-//                            $ppn_diskon = round(($ddskon) * $taxVal, 2);
-//                        } else {
-//                            $pajak = round($dpp * $taxVal, 2);
-//                            $dppDikson = round(($ddskon * 11) / 12, 2);
-//                            $ppn_diskon = round($dppDikson * $taxVal, 2);
-//                        }
                         if ($header["jenis_ppn"] !== "aktiva" && $dppSet) {
                             $pajak = round($dpp * $taxVal, 2);
                             $dppDikson = round(($ddskon * 11) / 12, 2);
@@ -674,9 +669,6 @@ class Fakturpenjualan extends MY_Controller {
 
                         $grandDiskonPpn += $ppn_diskon;
                         $totalHarga = round(($jumlah - $ddskon) + $pajak, 2);
-//                        $header["ppn"] += $pajak;
-//                        $header["dpp_lain"] += $dpp;
-//                        $header["final_total"] += $totalHarga;
 
                         $detail[] = [
                             "uraian" => $this->input->post("uraian")[$key],
@@ -698,19 +690,11 @@ class Fakturpenjualan extends MY_Controller {
                         ];
                     }
 
-                    if ((double) $header["kurs_nominal"] > 1) {
+                    if ($check->kurs != $this->curr_def_id) {
                         $header["grand_total"] = round($grandTotal, 2);
                         $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon, 2);
                         $header["diskon"] = $alldiskon;
                         $dpp = round(($header["grand_total"] - $header["diskon"]) * 11 / 12, 2);
-//                        if (!$dppSet) {
-//                            $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal, 2);
-//                            $ppn_diskon = round(($header["diskon"]) * $taxVal, 2);
-//                        } else {
-//                            $pajak = round($dpp * $taxVal, 2);
-//                            $dppDikson = round(($header["diskon"] * 11) / 12, 2);
-//                            $ppn_diskon = round($dppDikson * $taxVal, 2);
-//                        }
                         if ($header["jenis_ppn"] !== "aktiva" && $dppSet) {
                             $pajak = round($dpp * $taxVal, 2);
                             $dppDikson = round(($header["diskon"] * 11) / 12, 2);
@@ -732,14 +716,6 @@ class Fakturpenjualan extends MY_Controller {
                         $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon);
                         $header["diskon"] = $alldiskon;
                         $dpp = round(($header["grand_total"] - $header["diskon"]) * 11 / 12);
-//                        if (!$dppSet) {
-//                            $pajak = round(($header["grand_total"] - $header["diskon"]) * $taxVal);
-//                            $ppn_diskon = round(($header["diskon"]) * $taxVal);
-//                        } else {
-//                            $pajak = round($dpp * $taxVal);
-//                            $dppDikson = round(($header["diskon"] * 11) / 12);
-//                            $ppn_diskon = round($dppDikson * $taxVal);
-//                        }
                         if ($header["jenis_ppn"] !== "aktiva" && $dppSet) {
                             $pajak = round($dpp * $taxVal);
                             $dppDikson = round(($header["diskon"] * 11) / 12);
@@ -933,7 +909,7 @@ class Fakturpenjualan extends MY_Controller {
                             );
                         }
                     } else {
-                        $piutang = round($data->final_total * $data->kurs_nominal);
+                        $piutang = round(($data->grand_total + $data->ppn) * $data->kurs_nominal);
                         $totalD += $piutang;
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
@@ -942,7 +918,7 @@ class Fakturpenjualan extends MY_Controller {
                             "partner" => $data->partner_id,
                             "kode_coa" => $getCoaDefault->value,
                             "posisi" => "D",
-                            "nominal_curr" => ($data->final_total),
+                            "nominal_curr" => ($data->grand_total + $data->ppn),
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
                             "nominal" => $piutang,
@@ -1019,7 +995,7 @@ class Fakturpenjualan extends MY_Controller {
 
                         foreach ($detail as $key => $value) {
                             $warna = ($value->warna === "") ? "" : " / {$value->warna}";
-                            $totalC += round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2);
+                            $totalC += round(($value->jumlah) * $data->kurs_nominal, 2);
 //                            $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
 //                            $totalPiutangCurr += $value->jumlah;
                             $rowOrder = (count($jurnalItems) + 1);
@@ -1030,10 +1006,10 @@ class Fakturpenjualan extends MY_Controller {
                                 "partner" => $data->partner_id,
                                 "kode_coa" => $value->no_acc,
                                 "posisi" => "C",
-                                "nominal_curr" => $value->jumlah - $value->diskon,
+                                "nominal_curr" => $value->jumlah,
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2),
+                                "nominal" => round(($value->jumlah) * $data->kurs_nominal, 2),
                                 "row_order" => $rowOrder
                             );
                             $fakturJurnal[] = array(
@@ -1240,14 +1216,6 @@ class Fakturpenjualan extends MY_Controller {
             $jumlah = round($hasilKurang * $getDetail->harga, 2);
             $ddskon = round(($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon, 2);
             $dpp = round((($jumlah - $ddskon) * 11) / 12, 2);
-//            if (!$dppSet) {
-//                $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value, 2);
-//                $ppn_diskon = round($ddskon * $getDetail->tax_value, 2);
-//            } else {
-//                $pajak = round($dpp * $getDetail->tax_value, 2);
-//                $dppDis = round($dpp = (($ddskon) * 11) / 12, 2);
-//                $ppn_diskon = round($dppDis * $getDetail->tax_value, 2);
-//            }
             if ($getDetail->jenis_ppn !== "aktiva" && $dppSet) {
                 $pajak = round($dpp * $getDetail->tax_value, 2);
                 $dppDis = round($dpp = (($ddskon) * 11) / 12, 2);
@@ -1272,14 +1240,6 @@ class Fakturpenjualan extends MY_Controller {
             $jumlah = round($qty * $getDetail->harga, 2);
             $ddskon = round(($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon, 2);
             $dpp = round((($jumlah - $ddskon) * 11) / 12, 2);
-//            if (!$dppSet) {
-//                $pajak = round(($jumlah - $ddskon) * $getDetail->tax_value, 2);
-//                $ppn_diskon = round($ddskon * $getDetail->tax_value, 2);
-//            } else {
-//                $pajak = round($dpp * $getDetail->tax_value, 2);
-//                $dppDis = round((($ddskon) * 11) / 12, 2);
-//                $ppn_diskon = round($dppDis * $getDetail->tax_value, 2);
-//            }
             if ($getDetail->jenis_ppn !== "aktiva" && $dppSet) {
                 $pajak = round($dpp * $getDetail->tax_value, 2);
                 $dppDis = round((($ddskon) * 11) / 12, 2);
@@ -1377,14 +1337,14 @@ class Fakturpenjualan extends MY_Controller {
                 $dpp += $value->dpp_lain;
             }
 
-            $check->final_total -= ($check->kurs_nominal > 1) ? $finalTotal : round($finalTotal);
-            $check->diskon_ppn -= ($check->kurs_nominal > 1) ? $ppnDiskon : round($ppnDiskon);
-            $check->diskon -= ($check->kurs_nominal > 1) ? $diskon : round($diskon);
-            $check->grand_total -= ($check->kurs_nominal > 1) ? $total : round($total);
-            $check->ppn -= ($check->kurs_nominal > 1) ? $pajak : round($pajak);
-            $check->dpp_lain -= ($check->kurs_nominal > 1) ? $dpp : round($dpp);
+            $check->final_total -= ($check->kurs != $this->curr_def_id) ? $finalTotal : round($finalTotal);
+            $check->diskon_ppn -= ($check->kurs != $this->curr_def_id) ? $ppnDiskon : round($ppnDiskon);
+            $check->diskon -= ($check->kurs != $this->curr_def_id) ? $diskon : round($diskon);
+            $check->grand_total -= ($check->kurs != $this->curr_def_id) ? $total : round($total);
+            $check->ppn -= ($check->kurs != $this->curr_def_id) ? $pajak : round($pajak);
+            $check->dpp_lain -= ($check->kurs != $this->curr_def_id) ? $dpp : round($dpp);
 
-            if ($check->kurs_nominal > 1) {
+            if ($check->kurs != $this->curr_def_id) {
                 $check->total_piutang_valas = round($check->final_total, 2);
                 $check->piutang_valas = round($check->final_total, 2);
             }
@@ -1634,7 +1594,7 @@ class Fakturpenjualan extends MY_Controller {
             ];
             $model->setTables("acc_faktur_penjualan_detail")->save($item);
 
-            if ($check->kurs_nominal > 1) {
+            if ($check->kurs != $this->curr_def_id) {
                 $check->dpp_lain += $dpp;
                 $check->ppn += $pajak;
                 $check->grand_total += $jumlah;
@@ -1709,7 +1669,7 @@ class Fakturpenjualan extends MY_Controller {
             $data["alamat"] = $model->setTables("setting")->setWheres(["setting_name" => "alamat_fp"])->getDetail();
             $data["npwp"] = $model->setWheres(["setting_name" => "npwp_fp"], true)->getDetail();
             $data["detail"] = $model->setTables("acc_faktur_penjualan_detail")->setWheres(["faktur_no" => $kode])->setOrder(["uraian" => "asc", "warna" => "asc"])->getData();
-            if ($data["head"]->kurs_nominal > 1) {
+            if ($data["head"]->kurs != $this->curr_def_id) {
                 $data["curr"] = $model->setTables("currency_kurs")->setWheres(["currency_kurs.id" => $data["head"]->kurs])
                                 ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
                                 ->setSelects(["currency.*,ket"])->getDetail();
@@ -1850,7 +1810,7 @@ class Fakturpenjualan extends MY_Controller {
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad(" ", 137));
             $printer->setUnderline(Printer::UNDERLINE_NONE);
-            if ($head->kurs_nominal > 1) {
+            if ($head->kurs != $this->curr_def_id) {
 //                valas
                 $curr = $model->setTables("currency_kurs")->setWheres(["currency_kurs.id" => $head->kurs])
                                 ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
