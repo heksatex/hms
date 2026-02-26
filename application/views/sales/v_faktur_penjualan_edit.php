@@ -341,7 +341,7 @@
                                                     <tfoot>
                                                         <?php
                                                         if (count($detail) > 0) {
-                                                            if ($datas->kurs_nominal > 1) {
+                                                            if ($datas->kurs != $curr_def_id) {
                                                                 ?>
                                                                 <tr>
                                                                     <td colspan="8"></td>
