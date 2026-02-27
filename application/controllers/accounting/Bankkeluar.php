@@ -80,7 +80,7 @@ class Bankkeluar extends MY_Controller {
         $data["class"] = $this->uri->segment(1);
         $this->load->view('accounting/v_bank_keluar', $data);
     }
-    
+
     protected function _list_data() {
         try {
             $list = new $this->m_global;
@@ -94,7 +94,7 @@ class Bankkeluar extends MY_Controller {
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
             $uraian = $this->input->post("uraian");
-            $status = $this->input->post("status"); 
+            $status = $this->input->post("status");
             if ($tanggal !== "") {
                 $tanggals = explode(" - ", $tanggal);
                 $list->setWheres(["date(acc_bank_keluar.tanggal) >=" => $tanggals[0], "date(acc_bank_keluar.tanggal) <=" => $tanggals[1]]);
@@ -117,7 +117,7 @@ class Bankkeluar extends MY_Controller {
             throw $ex;
         }
     }
-    
+
     public function ekspor() {
         try {
             $tanggal = $this->input->post("tanggal");
@@ -135,9 +135,9 @@ class Bankkeluar extends MY_Controller {
                 $filter .= "Supplier : {$customers}; ";
             }
             if ($uraian !== "") {
-              $filter .= "Uraian : {$uraian}; ";
+                $filter .= "Uraian : {$uraian}; ";
             }
-            
+
             $data = $this->_list_data();
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
@@ -165,10 +165,10 @@ class Bankkeluar extends MY_Controller {
                 $sheet->setCellValue("G{$row}", $field->total_rp);
                 $sheet->setCellValue("H{$row}", $field->status);
             }
-            if($noUrut > 0) {
+            if ($noUrut > 0) {
                 $sheet->getStyle("G4:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             }
-            $filename = "Bank Keluar ".date("Y-m-d");
+            $filename = "Bank Keluar " . date("Y-m-d");
             $url = "dist/storages/report/bankgirokas";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
@@ -185,7 +185,7 @@ class Bankkeluar extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
-    
+
     public function list_data() {
         try {
             $data = array();
@@ -227,22 +227,21 @@ class Bankkeluar extends MY_Controller {
         $data["class"] = $this->uri->segment(1);
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank",'status'=>'aktif'])->setOrder(["nama" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank", 'status' => 'aktif'])->setOrder(["nama" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
-       
+
         $this->load->view('accounting/v_bank_keluar_add', $data);
     }
-    
+
     public function preview_no() {
         try {
             $kodes = [
-                "BBKH"=>"bank_keluar",
-                "BBMH"=>"bank_masuk",
-                "MKGH"=>"giro_masuk",
-                "BGKH"=>"giro_keluar",
-                "KKM"=>"kas_kecil_masuk",
-                "KKK"=>"kas_kecil_keluar"
-                
+                "BBKH" => "bank_keluar",
+                "BBMH" => "bank_masuk",
+                "MKGH" => "giro_masuk",
+                "BGKH" => "giro_keluar",
+                "KKM" => "kas_kecil_masuk",
+                "KKK" => "kas_kecil_keluar"
             ];
             $kode = $this->input->post("kode");
             $tanggal = $this->input->post("tanggal");
@@ -480,7 +479,7 @@ class Bankkeluar extends MY_Controller {
 
             $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
-                            ->setSelects(["agkd.*", "partner_id,partner_nama,agk.lain2 as lain,agk.transinfo,agk.kode_coa_head"])
+                            ->setSelects(["agkd.*", "partner_id,partner_nama,agk.lain2 as lain,agk.transinfo,agk.kode_coa as kode_coa_head"])
                             ->setSelects(["currency_kurs.currency as curr"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
             $this->output->set_status_header(200)
@@ -493,7 +492,7 @@ class Bankkeluar extends MY_Controller {
         }
     }
 
-    public function edit($id,$depth = 'ACCBK') {
+    public function edit($id, $depth = 'ACCBK') {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
@@ -515,7 +514,7 @@ class Bankkeluar extends MY_Controller {
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank",'status'=>'aktif'])->setOrder(["nama" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank", 'status' => 'aktif'])->setOrder(["nama" => "asc"])->getData();
             $data['id_dept'] = $depth;
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -674,7 +673,7 @@ class Bankkeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array)$asal);
+            $log = "Asal Data : DATA -> " . logArrayToString("; ", (array) $asal);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $asalDetail);
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
@@ -832,7 +831,7 @@ class Bankkeluar extends MY_Controller {
                 $temp[] = count($nobg);
                 $counter = max($temp);
                 for ($i = 0; $i < $counter; $i++) {
-                    
+
                     $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
                     $line .= (isset($uraian[$i])) ? str_pad($uraian[$i], 46, " ", STR_PAD_RIGHT) : str_pad("", 46, " ", STR_PAD_RIGHT);
                     $line .= (isset($nobg[$i])) ? str_pad($nobg[$i], 20, " ", STR_PAD_RIGHT) : str_pad("", 20, " ", STR_PAD_RIGHT);
@@ -841,7 +840,6 @@ class Bankkeluar extends MY_Controller {
                     $line .= (isset($curr[$i])) ? str_pad("{$curr[$i]}", 10, " ", STR_PAD_BOTH) : str_pad("", 10, " ", STR_PAD_BOTH);
                     $line .= (isset($nominal[$i])) ? str_pad($nominal[$i], 33, " ", STR_PAD_LEFT) : str_pad("", 33, " ", STR_PAD_LEFT);
                     $printer->text($line . "\n");
-                   
                 }
             }
             $printer->feed();
@@ -966,9 +964,9 @@ class Bankkeluar extends MY_Controller {
                     foreach ($items as $key => $item) {
                         $giro[] = $item->giro_keluar_detail_id;
                         $uraian = $item->uraian;
-                        $uraian .= ($item->bank !== "") ? " - {$item->bank}":"";
-                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}":"";
-                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}":"";
+                        $uraian .= ($item->bank !== "") ? " - {$item->bank}" : "";
+                        $uraian .= ($item->no_rek !== "") ? " - {$item->no_rek}" : "";
+                        $uraian .= ($item->no_bg !== "") ? " - {$item->no_bg}" : "";
                         $nominal_rp += ($item->nominal * $item->kurs);
                         $nominal_curr += $item->nominal;
                         $curr = $item->currency;
@@ -1097,7 +1095,7 @@ class Bankkeluar extends MY_Controller {
             $this->session->unset_userdata('pin');
         }
     }
-    
+
     public function print_pdf() {
         try {
             $id = $this->input->post("id");
@@ -1105,7 +1103,7 @@ class Bankkeluar extends MY_Controller {
             $model = new $this->m_global;
 
             $head = $model->setTables("acc_bank_keluar")->setJoins("acc_coa", "acc_coa.kode_coa = acc_bank_keluar.kode_coa")
-                            ->setSelects(["acc_bank_keluar.*", "acc_coa.nama as nama_coa","date(tanggal) as tanggal"])
+                            ->setSelects(["acc_bank_keluar.*", "acc_coa.nama as nama_coa", "date(tanggal) as tanggal"])
                             ->setWheres(["no_bk" => $kode])->getDetail();
             if (!$head) {
                 throw new \exception("Data No Bank Keluar {$kode} tidak ditemukan", 500);
