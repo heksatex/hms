@@ -101,7 +101,7 @@
                             <div class="col-xs-4"><label>Kode Produk  </label></div>
                                 <div class="col-xs-8">
                                     <input type="hidden" class="form-control input-sm" name="quant_id" id="quant_id"  value="<?php echo $split->quant_id; ?>" readonly >  
-                                    <input type="text" class="form-control input-sm" name="kode_produk" id="kode_produk"  value="<?php echo $split->kode_produk; ?>" readonly >                    
+                                    <input type="text" class="form-control input-sm" name="kode_produk" id="kode_produk"  value="<?= htmlspecialchars($split->kode_produk, ENT_QUOTES, 'UTF-8'); ?>" readonly >                    
                                 </div>                                    
                             </div>
 
