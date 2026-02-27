@@ -35,16 +35,17 @@ class Memorialpenbank {
                     ->setWhereRaw("bmd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bm.no_bm,bmd.kurs"])
                     ->setSelects(["bm.kode_coa,bmd.kode_coa as kode_coa_bmd,acbm.nama,acbmd.nama as nama_bmd,sum(if(bmd.kurs > 1,bmd.nominal,0)) as valas,sum(bmd.nominal*bmd.kurs) as nominals,date(bmd.tanggal) as tanggal"])
-                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
+                    ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bm.jenis_transaksi) else bm.jenis_transaksi end as uraian'])
                     ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["bmd.kode_coa","bm.no_bm"], true)->setOrder(["bmd.kode_coa","bm.no_bm"], true);
+                    $model->setGroups(["bmd.kode_coa", "bm.no_bm"], true)->setOrder(["bmd.kode_coa", "bm.no_bm"], true)
+                            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",GROUP_CONCAT(uraian)) else GROUP_CONCAT(uraian) end as uraian']);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setGroups(["bm.no_bm"], true)->setOrder(["bm.kode_coa","bm.no_bm"], true);
+                    $model->setGroups(["bm.no_bm"], true)->setOrder(["bm.kode_coa", "bm.no_bm"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
                 default:
@@ -62,11 +63,11 @@ class Memorialpenbank {
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["gmd.kode_coa","gm.no_gm"], true)->setOrder(["gmd.kode_coa","gm.no_gm"], true);
+                    $model->setGroups(["gmd.kode_coa", "gm.no_gm"], true)->setOrder(["gmd.kode_coa", "gm.no_gm"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setGroups(["gm.no_gm"], true)->setOrder(["gm.kode_coa","gm.no_gm"], true);
+                    $model->setGroups(["gm.no_gm"], true)->setOrder(["gm.kode_coa", "gm.no_gm"], true);
                     $data["giro_debit"] = $model->getData();
                     break;
                 default:
@@ -143,7 +144,7 @@ class Memorialpenbank {
             $sheet->getStyle("D2:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$data["filter"]}";
             $url = "dist/storages/report/jurnal_memorial";
@@ -224,7 +225,7 @@ class Memorialpenbank {
             $giro = $data["giro_kredit"];
 
             foreach ($giro as $key => $value) {
-                 $row += 1;
+                $row += 1;
                 $totalGiroKredit += $value->nominals;
                 $totalGiroValas += $value->valas;
                 $grandTotal += $value->nominals;
@@ -399,7 +400,7 @@ class Memorialpenbank {
             $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
