@@ -18,7 +18,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Mpdf\Mpdf;
 
 class Jurnalentries extends MY_Controller {
@@ -37,7 +36,7 @@ class Jurnalentries extends MY_Controller {
         $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
-        $data["jurnal"] = $model->setTables("mst_jurnal")->setSelects(["kode","nama"])->setOrder(["nama"=>"asc"])->getData();
+        $data["jurnal"] = $model->setTables("mst_jurnal")->setSelects(["kode", "nama"])->setOrder(["nama" => "asc"])->getData();
         $this->load->view('purchase/v_jurnal_entries', $data);
     }
 
@@ -80,21 +79,21 @@ class Jurnalentries extends MY_Controller {
                     ->setSearch(["acc_jurnal_entries.kode", "periode", "origin", "reff_note", "mst_jurnal.nama"])
                     ->setOrders([null, "acc_jurnal_entries.kode", "mst_jurnal.nama", "tanggal_dibuat", "periode", "origin", "reff_note", "status"])
                     ->setSelects(["acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat", "nama_status", "mst_jurnal.nama as nama_jurnal"]);
-            if($this->input->post("kode") !== "") {
-                $list->setWheres(["acc_jurnal_entries.kode LIKE"=>"%".$this->input->post('kode')."%"]);
+            if ($this->input->post("kode") !== "") {
+                $list->setWheres(["acc_jurnal_entries.kode LIKE" => "%" . $this->input->post('kode') . "%"]);
             }
-            if($this->input->post("jurnal") !== "") {
-                $list->setWheres(["acc_jurnal_entries.tipe"=>$this->input->post('jurnal')]);
+            if ($this->input->post("jurnal") !== "") {
+                $list->setWheres(["acc_jurnal_entries.tipe" => $this->input->post('jurnal')]);
             }
-            if($this->input->post("status") !== "") {
-                $list->setWheres(["acc_jurnal_entries.status"=>$this->input->post("status")]);
+            if ($this->input->post("status") !== "") {
+                $list->setWheres(["acc_jurnal_entries.status" => $this->input->post("status")]);
             }
             foreach ($list->getData() as $key => $field) {
                 $kode_encrypt = encrypt_url($field->kode);
                 $no++;
                 $data [] = array(
                     $no,
-                    '<a href="' . base_url($class.'/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
+                    '<a href="' . base_url($class . '/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
                     $field->nama_jurnal,
                     $field->tanggal_dibuat,
 //                    $field->tanggal_posting,
@@ -184,7 +183,7 @@ class Jurnalentries extends MY_Controller {
         }
     }
 
-    public function edit($id,$depth = "JNE") {
+    public function edit($id, $depth = "JNE") {
         try {
             $kode_decrypt = decrypt_url($id);
             $data['id_dept'] = $depth;
@@ -474,7 +473,6 @@ class Jurnalentries extends MY_Controller {
             $sheetEx->setCellValue("f{$rowEx}", "0");
             $sheetEx->setCellValue("g{$rowEx}", "15400");
             $sheetEx->setCellValue("h{$rowEx}", "USD");
-
             $filename = "template_{$nm}";
             $url = "dist/storages/report/jurnalentries";
             if (!is_dir(FCPATH . $url)) {
@@ -523,7 +521,13 @@ class Jurnalentries extends MY_Controller {
             $data = $activeWorksheet->toArray();
             $jurnalItem = [];
             unset($data[0]);
+            $model = new $this->m_global;
+            $model->setTables("acc_coa");
             foreach ($data as $key => $value) {
+                $accoa = $model->setWheres(["level" => "5", "kode_coa" => "{$value[3]}"],true)->getDetail();
+                if (!$accoa) {
+                    throw new exception("{$key} Coa {$value[3]} Tidak ditemukan dimaster", 500);
+                }
                 $nominal = $value[5];
                 $posisi = "C";
                 if ($value[4] > 0) {
@@ -545,8 +549,7 @@ class Jurnalentries extends MY_Controller {
                     "posisi" => $posisi
                 ];
             }
-            $model = new $this->m_global;
-             $model->setTables("acc_jurnal_entries_items")->setWheres(["kode"=>$kode_decrypt])->delete();
+            $model->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $kode_decrypt])->delete();
             $model->saveBatch($jurnalItem);
             $log = "data -> " . logArrayToString("; ", $jurnalItem);
             $this->_module->gen_history_new($sub_menu, $kode_decrypt, "edit", $log, $username);
