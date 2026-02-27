@@ -28,7 +28,7 @@ class Memorialpenkasvalas {
                     ->setWheres(["km.kode_coa" => "1112.01", "kmd.kurs <>" => 1, "km.status" => "confirm"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,km.no_km,kmd.kurs"])
                     ->setSelects(["kmd.kode_coa as kode_coa_kmd,if(kmd.kurs > 1,sum(kmd.nominal),0) as valas,sum(kmd.nominal*kmd.kurs) as nominals,ackmd.nama as nama_kmd,km.kode_coa,ackm.nama as nama,date(kmd.tanggal) as tanggal"])
-                    ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
+                    ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",GROUP_CONCAT(uraian)) else GROUP_CONCAT(uraian) end as uraian'])
                     ->setGroups(["km.kode_coa"])->setOrder(["km.kode_coa"]);
             $data["kas_debit"] = $model->getData();
             switch ($datas["filter"]) {

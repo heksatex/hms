@@ -16,11 +16,13 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
 class Memorialpelpiutang {
 
     //put your code here
-    protected $list = ['piutang_giro','piutang',"um_penjualan"];
-    protected $ket = ["detail"=>"Rekapan Kredit","detail_2"=>"Rekapan Debet","global"=>"Global"];
+    protected $list = ['piutang_giro', 'piutang', "um_penjualan"];
+    protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
+
     public function _data($model, $datas) {
         $nt = implode("','", $this->list);
         $data = [];
@@ -31,12 +33,13 @@ class Memorialpelpiutang {
                     ->setWheres(["date(bm.tanggal) >=" => $datas['tanggals'][0], "date(bm.tanggal) <=" => $datas['tanggals'][1], "bm.status" => "confirm"])
                     ->setWhereRaw("bmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bm.no_bm,bmd.kurs"])
                     ->setSelects(["bmd.kode_coa as kode_coa_bmd,acbmd.nama as nama_bmd,if(bmd.kurs > 1,sum(bmd.nominal),0) as valas,sum(bmd.nominal*bmd.kurs) as nominals,acbm.nama,bm.kode_coa,date(bmd.tanggal) as tanggal"])
-                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
-                            ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
+                    ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bm.jenis_transaksi) else bm.jenis_transaksi end as uraian'])
+                    ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["bmd.kode_coa","bm.no_bm"], true)->setOrder(["bmd.kode_coa","bm.no_bm"], true);
+                    $model->setGroups(["bmd.kode_coa", "bm.no_bm"], true)->setOrder(["bmd.kode_coa", "bm.no_bm"], true)
+                            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",GROUP_CONCAT(uraian)) else GROUP_CONCAT(uraian) end as uraian']);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
@@ -58,7 +61,7 @@ class Memorialpelpiutang {
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["gmd.kode_coa","gm.no_gm"], true)->setOrder(["gmd.kode_coa","gm.no_gm"], true);
+                    $model->setGroups(["gmd.kode_coa", "gm.no_gm"], true)->setOrder(["gmd.kode_coa", "gm.no_gm"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
@@ -163,7 +166,7 @@ class Memorialpelpiutang {
             throw $ex;
         }
     }
-    
+
     public function _detail_2($data, &$filename) {
         try {
             $spreadsheet = new Spreadsheet();
@@ -212,7 +215,7 @@ class Memorialpelpiutang {
                     $row += 1;
                 }
             }
-            
+
             $total = 0;
             $giro = $data["giro_debit"] ?? [];
             foreach ($giro as $key => $value) {
@@ -245,7 +248,7 @@ class Memorialpelpiutang {
                     $row += 1;
                 }
             }
-            
+
             if ($grandTotal > 0) {
                 $row += 2;
                 $sheet->setCellValue("E{$row}", $grandTotal);
@@ -254,7 +257,7 @@ class Memorialpelpiutang {
             }
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
@@ -268,7 +271,7 @@ class Memorialpelpiutang {
             throw $ex;
         }
     }
-    
+
     public function _detail($data, &$filename) {
         try {
             $spreadsheet = new Spreadsheet();
@@ -317,7 +320,7 @@ class Memorialpelpiutang {
                     $row += 1;
                 }
             }
-            
+
             $total = 0;
             $giro = $data["giro_kredit"] ?? [];
             foreach ($giro as $key => $value) {
@@ -350,7 +353,7 @@ class Memorialpelpiutang {
                     $row += 1;
                 }
             }
-            
+
             if ($grandTotal > 0) {
                 $row += 2;
                 $sheet->setCellValue("E{$row}", $grandTotal);
@@ -359,7 +362,7 @@ class Memorialpelpiutang {
             }
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
@@ -373,5 +376,4 @@ class Memorialpelpiutang {
             throw $ex;
         }
     }
-    
 }
