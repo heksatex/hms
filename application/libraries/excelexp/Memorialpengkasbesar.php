@@ -28,7 +28,7 @@ class Memorialpengkasbesar {
                     ->setWheres(["date(km.tanggal) >=" => $datas['tanggals'][0], "date(km.tanggal) <=" => $datas['tanggals'][1]])
                     ->setWheres(["km.kode_coa " => "1111.01", "kmd.kurs" => 1, "km.status" => "confirm"])
                     ->setSelects(["sum(nominal) as nominals,km.kode_coa as km_kode_coa", "acc_coa.kode_coa,acc_coa.nama"])
-            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian']);
+            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",GROUP_CONCAT(uraian)) else GROUP_CONCAT(uraian) end as uraian']);
             if ($datas['filter'] === "detail") {
                 $model->setSelects(["date(km.tanggal) as tanggal", "km.no_kk as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
                 $data["kredit"] = $model->getData();
