@@ -978,7 +978,7 @@ class Fakturpenjualan extends MY_Controller {
                             );
                         }
                         if ($data->ppn > 0) {
-                            $totalC += round($data->ppn * $data->kurs_nominal, 2);
+                            $totalC += round(($data->ppn + $data->diskon_ppn)* $data->kurs_nominal, 2);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "PPN",
@@ -986,17 +986,17 @@ class Fakturpenjualan extends MY_Controller {
                                 "partner" => $data->partner_id,
                                 "kode_coa" => $getCoaDefaultPpnDisc->value,
                                 "posisi" => "C",
-                                "nominal_curr" => $data->ppn,
+                                "nominal_curr" => $data->ppn + $data->diskon_ppn,
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => round($data->ppn * $data->kurs_nominal, 2),
+                                "nominal" => round(($data->ppn + $data->diskon_ppn)* $data->kurs_nominal, 2),
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
 
                         foreach ($detail as $key => $value) {
                             $warna = ($value->warna === "") ? "" : " / {$value->warna}";
-                            $totalC += round(($value->jumlah + $value->diskon_ppn) * $data->kurs_nominal, 2);
+                            $totalC += round(($value->jumlah) * $data->kurs_nominal, 2);
 //                            $totalPiutang += round($value->jumlah * $data->kurs_nominal, 2);
 //                            $totalPiutangCurr += $value->jumlah;
                             $rowOrder = (count($jurnalItems) + 1);
@@ -1007,10 +1007,10 @@ class Fakturpenjualan extends MY_Controller {
                                 "partner" => $data->partner_id,
                                 "kode_coa" => $value->no_acc,
                                 "posisi" => "C",
-                                "nominal_curr" => $value->jumlah + $value->diskon_ppn,
+                                "nominal_curr" => $value->jumlah,
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => round(($value->jumlah + $value->diskon_ppn) * $data->kurs_nominal, 2),
+                                "nominal" => round(($value->jumlah) * $data->kurs_nominal, 2),
                                 "row_order" => $rowOrder
                             );
                             $fakturJurnal[] = array(

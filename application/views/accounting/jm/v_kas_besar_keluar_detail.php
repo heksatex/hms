@@ -9,8 +9,8 @@ foreach ($kredits as $key => $value) {
     <tr>
         <td><?= $value->tanggal ?> </td>
         <td><?= $value->no_bukti ?></td>
-        <td><?= $value->uraian ?></td>
-        <td><?= $value->partner ?></td>
+        <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0,50) ?></td>
+        <td title="<?= $value->partner ?>"><?= substr($value->partner, 0,38) ?></td>
         <td class="text-right">
             <?= number_format($value->nominals, 2) ?>
         </td>
