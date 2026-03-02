@@ -10,8 +10,8 @@ foreach ($giro as $key => $value) {
     <tr>
         <td><?= $value->tanggal ?></td>
         <td><?= $value->no_gk ?></td>
-        <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0, 50) ?></td>
-        <td><?= $value->partner ?></td>
+        <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0,50) ?></td>
+        <td title="<?= $value->partner ?>"><?= substr($value->partner, 0,38) ?></td>
         <td class="text-right"><?= number_format($value->nominals, 2) ?></td>
         <td><?= $value->kode_coa_gkd ?></td>
         <td><?= $value->nama_gkd ?></td>
