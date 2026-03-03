@@ -4,9 +4,8 @@ $debets = 0;
 $saldos = 0;
 $temp = "";
 $noUrut = 0;
-
-if (count($data) > 0) {
-    $saldos = ($curr === "") ? floatval($saldo->saldo_awal_final):floatval($saldo->saldo_valas_final);
+$saldos = ($curr === "") ? floatval($saldo->saldo_awal_final) : floatval($saldo->saldo_valas_final);
+if ($saldos > 0) {
     ?>
     <tr>
         <td colspan="3"></td>
@@ -19,7 +18,7 @@ if (count($data) > 0) {
     <?php
 }
 foreach ($data as $key => $value) {
-     $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] " ; 
+    $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
     $showUrut = "";
     $shw = false;
     if ($value->no_bukti !== $temp) {
@@ -43,7 +42,7 @@ foreach ($data as $key => $value) {
         <td><?= $showUrut ?></td>
         <td><?= ($shw) ? $value->tanggal : "" ?></td>
         <td><?= ($shw) ? $value->no_bukti : "" ?></td>
-        <td title="<?= $partner.$value->uraian ?>"><?= substr(($partner.$value->uraian), 0,55) ?></td>
+        <td title="<?= $partner . $value->uraian ?>"><?= substr(($partner . $value->uraian), 0, 55) ?></td>
         <td><?= $value->coa ?></td>
         <td class="text-right"><?= number_format($debet, 2) ?></td>
         <td class="text-right"><?= number_format($kredit, 2) ?></td>
