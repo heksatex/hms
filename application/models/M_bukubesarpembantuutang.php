@@ -30,7 +30,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $subquery_pelunasan    = $this->get_saldo_pelunasan(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai], 'aph.partner_id','');
         $subquery_retur        = $this->get_saldo_retur(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai], 'aph.partner_id','');
         $subquery_um           = $this->get_saldo_um(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'], 'aph.partner_id','');
-        $subquery_korksi       = $this->get_saldo_koreksi(['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'], 'aph.partner_id','');
+        $subquery_korksi       = $this->get_saldo_koreksi(['tanggal_transaksi >= '=> $tgldari, 'tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'tipe_currency' => 'Rp'], 'id_partner','');
 
 
         if($checkhidden == 'true'){
@@ -120,12 +120,12 @@ class M_bukubesarpembantuutang extends CI_Model
             }
             $subquery  = $this->get_saldo_um($tmp_where, 'aph.partner_id',$currency);
         } else { // koreksi
-            $tmp_where = ['aph.tanggal_transaksi >= '=> $tgl_dari, 'aph.tanggal_transaksi <= '=> $tgl_sampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'];
-            if($currency === 'valas'){
-                $cr_condition = ($currency === 'valas')? '<>' : '';
-                $tmp_where = array_merge($tmp_where, [ 'aphs.tipe_currency ' .$cr_condition => 'Rp']);
-            }
-            $subquery  = $this->get_saldo_koreksi($tmp_where, 'aph.partner_id',$currency);
+            $tmp_where = ['tanggal_transaksi >= ' => $tgl_dari, 'tanggal_transaksi <= ' => $tgl_sampai, 'status' => 'done'];
+            // if ($currency === 'valas') {
+            // }
+            $cr_condition = ($currency === 'valas') ? '<>' : '';
+            $tmp_where = array_merge($tmp_where, ['tipe_currency ' . $cr_condition => 'Rp']);
+            $subquery  = $this->get_saldo_koreksi($tmp_where, 'id_partner', $currency);
         }
         return $subquery;
     }
@@ -242,7 +242,7 @@ class M_bukubesarpembantuutang extends CI_Model
         return $this->db->get_compiled_select();
     }
 
-    function get_saldo_koreksi(array $where = [], string $group = '',  string $currency = '') 
+    function get_saldo_koreksi_normalx(array $where = [], array $group = [],  string $currency = '') 
     {
         if(count($where) > 0){
             $this->db->where($where);
@@ -257,7 +257,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->where('aph.status', 'done');
         // $this->db->where('aphs.tipe_currency', 'Rp');
         $this->db->where('ack.koreksi_bb', 'true');
-        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tgl, aph.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, IF('$currency' = 'valas', 
+        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tanggal_transaksi, aph.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, IF('$currency' = 'valas', 
                 CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', aphs.kurs), 
                 CONCAT(' - ',(SELECT GROUP_CONCAT(no_invoice) as group_no FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id))
             ))  as uraian, IFNULL(SUM($total),0) as total_koreksi,  
@@ -268,12 +268,245 @@ class M_bukubesarpembantuutang extends CI_Model
                         (CASE
                             WHEN aphs.selisih > 0 THEN ($total)
                             ELSE 0 
-                        END) AS credit, aph.status, 'plh' as link");
+                        END) AS credit, aph.status, 'plh' as link, aphs.tipe_currency");
         $this->db->FROM('acc_pelunasan_hutang aph');
         $this->db->jOIN("acc_pelunasan_hutang_summary aphs","aph.id = aphs.pelunasan_hutang_id", "INNER");
         $this->db->JOIN("acc_pelunasan_koreksi ack","aphs.koreksi = ack.kode","left");
         return $this->db->get_compiled_select();
     } 
+
+
+    function get_saldo_koreksi_normal(array $where = [], array $group = [],  string $currency = '') 
+    {
+        if(count($where) > 0){
+            $this->db->where($where);
+        }
+        if (count($group)) {
+            $this->db->group_by($group);
+        }
+
+        $total  = ($currency === 'valas')? 'aphs.selisih' : 'aphs.selisih';
+
+        $this->db->where('aphs.keterangan <>', 'Uang Muka');
+        // $this->db->where('aph.status', 'done');
+        // $this->db->where('aphs.tipe_currency', 'Rp');
+        $this->db->where('ack.koreksi_bb', 'true');
+        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tanggal_transaksi, aph.partner_id as id_partner,  CONCAT('Koreksi : ', ack.nama_koreksi, IF('$currency' = 'valas', 
+                CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', aphs.kurs), 
+                CONCAT(' - ',(SELECT GROUP_CONCAT(no_invoice) as group_no FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id))
+            ))  as uraian, IFNULL(SUM($total),0) as total_koreksi,  
+                        (CASE 
+                            WHEN aphs.selisih < 0 THEN abs($total) 
+                            ELSE 0 
+                        END) AS debit,
+                        (CASE
+                            WHEN aphs.selisih > 0 THEN ($total)
+                            ELSE 0 
+                        END) AS credit, aph.status, 'plh' as link, aphs.tipe_currency");
+        $this->db->FROM('acc_pelunasan_hutang aph');
+        $this->db->jOIN("acc_pelunasan_hutang_summary aphs","aph.id = aphs.pelunasan_hutang_id", "INNER");
+        $this->db->JOIN("acc_pelunasan_koreksi ack","aphs.koreksi = ack.kode","left");
+        return $this->db->get_compiled_select();
+    } 
+
+
+    function get_saldo_koreksi_split(array $where = [] , array $group = [], string $currency = '')
+    {
+
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        if (count($group)) {
+            // $this->db->group_by(implode(', ', $group));
+            $this->db->group_by($group);
+        }
+
+        $total_m_koreksi  = ($currency === 'valas') ? 'IF(aphsk.koreksi_tanda = "-", (aphsk.nominal * -1), aphsk.nominal)' : 'IF(aphsk.koreksi_tanda = "-", (aphsk.nominal * -1) * aphs.kurs, aphsk.nominal*aphs.kurs)';
+
+
+        $this->db->where('aphsk.koreksi_id <>', 'uang_muka');
+        // $this->db->where('aphs.keterangan <>', 'Uang Muka');
+        // $this->db->where('aph.status', 'done');
+        // $this->db->where('aphs.tipe_currency', 'Rp');
+        // $this->db->where('ack.koreksi_bb', 'true');
+        $this->db->SELECT("aph.id as id_bukti, aph.no_pelunasan as no_bukti, aph.tanggal_transaksi as tanggal_transaksi, aph.partner_id as id_partner,  CONCAT('Koreksi : ', GROUP_CONCAT(ack.nama_koreksi SEPARATOR ', '), IF('$currency' = 'valas', 
+                CONCAT(' - ',' Curr: ', (SELECT currency FROM currency_kurs WHERE id = currency_id), ' - Kurs: ', aphs.kurs), 
+                CONCAT(' - ',(SELECT GROUP_CONCAT(no_invoice) as group_no FROM acc_pelunasan_hutang_invoice WHERE pelunasan_hutang_id = aph.id))
+            ))  as uraian, 
+                CASE
+                    WHEN (aphs.selisih) > 0 THEN
+                                /* D - C */
+                                SUM(
+                                    CASE WHEN aphsk.posisi = 'D'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+                                -
+                                SUM(
+                                    CASE WHEN aphsk.posisi = 'C'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+
+                    WHEN (aphs.selisih) < 0 THEN
+                                /* C - D */
+                                SUM(
+                                    CASE WHEN aphsk.posisi = 'C'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+                                -
+                                SUM(
+                                    CASE WHEN aphsk.posisi = 'D'
+                                        THEN   ($total_m_koreksi)
+                                        ELSE 0
+                                    END
+                                )
+                    ELSE 0
+                END AS total_koreksi,
+                CASE
+                        WHEN (
+                                CASE
+                                    WHEN aphs.selisih < 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN aphs.selisih > 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            ) > 0
+                            THEN ABS(
+                                CASE
+                                    WHEN aphs.selisih < 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN aphs.selisih > 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            )
+                        ELSE 0
+                END AS debit,
+                CASE
+                        WHEN (
+                                CASE
+                                    WHEN aphs.selisih < 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN aphs.selisih > 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            ) < 0
+                            THEN ABS(
+                                CASE
+                                    WHEN aphs.selisih < 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    WHEN aphs.selisih > 0 THEN
+                                        SUM(CASE WHEN aphsk.posisi='C'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                        -
+                                        SUM(CASE WHEN aphsk.posisi='D'
+                                                THEN ($total_m_koreksi)
+                                                ELSE 0 END)
+                                    ELSE 0
+                                END
+                            )
+                        ELSE 0
+                END AS credit,
+              
+                aph.status, 'plh' as link, aphs.tipe_currency");
+        $this->db->FROM('acc_pelunasan_hutang aph');
+        $this->db->jOIN("acc_pelunasan_hutang_summary aphs","aph.id = aphs.pelunasan_hutang_id", "INNER");
+        $this->db->jOIN("acc_pelunasan_hutang_summary_koreksi aphsk", "aphs.id = aphsk.pelunasan_summary_id", "INNER");
+        $this->db->JOIN("acc_pelunasan_koreksi ack","aphsk.koreksi_id = ack.kode","left");
+        return $this->db->get_compiled_select();
+
+
+
+
+    }
+
+
+    function get_saldo_koreksi(array $where = [], string $group = '', string $currency = '')
+    {
+
+        $where_tipe_cur = ($currency === 'valas') ? 'Valas' : 'Rp';
+        $where_normal   = ['aphs.mode' => 'normal', 'aph.status' => 'done', 'aphs.keterangan <> ' => '', 'aphs.tipe_currency' => $where_tipe_cur, 'ack.koreksi_bb' => 'true'];
+        $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, array('aph.partner_id', 'aphs.id'), $currency);
+        $where_split    = ['aphs.mode'=> 'split',  'aph.status' => 'done', 'aphs.keterangan <> ' => '', 'aphs.tipe_currency' => $where_tipe_cur,   'aphsk.head' => 'false','ack.koreksi_bb' => 'true'];
+        $sub_query_split  = $this->get_saldo_koreksi_split($where_split, ['aph.partner_id', 'aphs.id'], $currency);  
+
+        $this->db->select("
+                        (id_bukti)        AS id_bukti,
+                        (no_bukti)        AS no_bukti,
+                        (tanggal_transaksi)  AS tgl,
+                        (id_partner)      AS id_partner,
+                        (uraian)          AS uraian,
+
+                        SUM(total_koreksi)   AS total_koreksi,
+
+                        SUM(debit)           AS debit,
+                        SUM(credit)          AS credit,
+                        (status)          AS status,
+                        (link)            AS link,
+                        ");
+        $this->db->FROM("( ({$sub_query_normal}) UNION ALL ({$sub_query_split})) as t");
+
+        if(count($where) > 0) {
+            $this->db->where($where);
+        }
+
+        if ($group) {
+            $this->db->group_by($group);
+        }
+        $sql = $this->db->get_compiled_select();
+        // die($sql);
+        return $sql;
+    }
 
 
     public function get_list_bukubesar_detail($tgldari, $tglsampai, $checkhidden, array $where = [], $currency)
@@ -294,7 +527,7 @@ class M_bukubesarpembantuutang extends CI_Model
             $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
             $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
             $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency' => 'Rp'];
-            $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= '=> $tgldari, 'tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'tipe_currency' => 'Rp'];
         } else {
            $cr_condition = ($currency === 'valas')? '<>' : '';
             
@@ -302,7 +535,7 @@ class M_bukubesarpembantuutang extends CI_Model
            $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
            $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
            $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency ' .$cr_condition => 'Rp'];
-           $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency ' .$cr_condition => 'Rp'];
+           $where_koreksi = ['tanggal_transaksi >= '=> $tgldari, 'tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'tipe_currency ' .$cr_condition => 'Rp'];
         }
 
         // saldo berdasakran periode berjalan
@@ -310,7 +543,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $subquery_pelunasan    = $this->get_saldo_pelunasan($where_pelunasan, 'aph.partner_id',$currency);
         $subquery_retur        = $this->get_saldo_retur($where_retur, 'aph.partner_id',$currency);
         $subquery_um           = $this->get_saldo_um($where_um, 'aph.partner_id',$currency);
-        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'aph.partner_id',$currency);
+        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'id_partner',$currency);
 
         $cr_condition = ($currency === 'valas')? 'p.saldo_awal_utang_valas' : 'p.saldo_awal_utang';
         if($checkhidden == 'true'){
@@ -374,7 +607,7 @@ class M_bukubesarpembantuutang extends CI_Model
             $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
             $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai];
             $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency' => 'Rp'];
-            $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency' => 'Rp'];
+            $where_koreksi = ['tanggal_transaksi >= '=> $tgldari, 'tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'tipe_currency' => 'Rp'];
         } else {
            $cr_condition = ($currency === 'valas')? '<>' : '';
             
@@ -382,14 +615,14 @@ class M_bukubesarpembantuutang extends CI_Model
            $where_pelunasan = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
            $where_retur = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi  <= '=> $tglsampai, 'aphm.currency_id ' .$cr_condition => 1];
            $where_um    = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done','aphs.tipe_currency ' .$cr_condition => 'Rp'];
-           $where_koreksi = ['aph.tanggal_transaksi >= '=> $tgldari, 'aph.tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'aphs.tipe_currency ' .$cr_condition => 'Rp'];
+           $where_koreksi = ['tanggal_transaksi >= '=> $tgldari, 'tanggal_transaksi <= '=> $tglsampai, 'status'=>'done', 'tipe_currency ' .$cr_condition => 'Rp'];
         }
 
         $subquery_invoice      = $this->get_saldo_utang($where_utang, 'no_invoice',$currency);
         $subquery_pelunasan    = $this->get_saldo_pelunasan($where_pelunasan, 'aph.no_pelunasan',$currency);
         $subquery_retur        = $this->get_saldo_retur($where_retur, 'aph.no_pelunasan',$currency);
         $subquery_um           = $this->get_saldo_um($where_um,'aph.no_pelunasan',$currency);
-        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'aph.no_pelunasan',$currency);
+        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'no_bukti',$currency);
 
         if(count($where) > 0){
             $this->db->where($where);
