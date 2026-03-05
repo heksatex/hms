@@ -1022,7 +1022,7 @@ class M_pelunasanhutang extends CI_Model
         if(count($where) > 0){
             $this->db->where($where);
         }
-        $this->db->select('aphsk.posisi, aphsk.kode_coa, aphsk.nama_coa, aphs.koreksi');
+        $this->db->select('aphsk.posisi, aphsk.kode_coa, aphsk.nama_coa, aphs.koreksi, aphs.currency_id, aphs.currency, aphs.kurs, aphsk.nominal, aphs.mode, aphsk.koreksi_id, aphsk.head');
         $this->db->order_by('aphsk.id');
         $this->db->from('acc_pelunasan_hutang_summary_koreksi aphsk');
         $this->db->join('acc_pelunasan_hutang_summary aphs', 'aphs.id = aphsk.pelunasan_summary_id', 'inner');
@@ -1267,6 +1267,32 @@ class M_pelunasanhutang extends CI_Model
         return $query->row();
     }
 
+
+    function get_sum_pelunasan_by_kode($no_pelunasan, $tipe_currency) 
+    {
+        if($tipe_currency === 'Rp'){
+            $this->db->where('currency_id', 1);
+            $this->db->select('sum(total_rp) as total');
+        } else{
+            $this->db->select('sum(total_valas) as total');
+            $this->db->where('currency_id <>', 1);
+        }
+        $this->db->where('no_pelunasan', $no_pelunasan);
+
+        $this->db->from('acc_pelunasan_hutang_metode');
+        $query = $this->db->get();
+        return $query;
+    }
+    
+
+    function get_list_summary_koreksi_by_id($no_pelunasan, $sum_id)
+    {
+        $this->db->where('no_pelunasan', $no_pelunasan);
+        $this->db->where('pelunasan_summary_id', $sum_id);
+        $this->db->order_by('id','asc');
+        $result = $this->db->get('acc_pelunasan_hutang_summary_koreksi');
+        return $result->result();
+    }
 
     
 

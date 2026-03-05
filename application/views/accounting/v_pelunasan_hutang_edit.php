@@ -81,11 +81,20 @@
             /* tinggi tetap */
             line-height: 1.2;
             overflow: hidden;
+            margin-top: 3px;
+            padding: 4px;
+            background: #f7f7f7;
+            border-radius: 4px;
             /* jangan biarkan mempengaruhi layout */
         }
 
         .coa-info small {
             display: block;
+        }
+
+        .coa-info small hr {
+            margin: 4px 0;
+            border-top: 1px dashed #ccc;
         }
 
         .warna-hutang {
@@ -203,7 +212,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_invoice"border="1">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table_invoice" border="1">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no">No.</th>
@@ -231,7 +240,7 @@
                                                     <tfoot>
                                                     </tfoot>
                                                 </table>
-                                                <div id="example2_processing" class="table_processing" style="display: none; z-index:5;">
+                                                <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                                                     Processing...
                                                 </div>
                                             </div>
@@ -1532,7 +1541,7 @@
                         $coaInfo.show();
                         let summaryId = $(this).data('id');
 
-                        loadCoaInfo(selectedVal, summaryId, $coaInfo.find('small'));
+                        // loadCoaInfo(selectedVal, summaryId, $coaInfo.find('small'));
                     } else {
                         $coaInfo.hide();
                         $coaInfo.find('small').text('');
@@ -1544,101 +1553,123 @@
 
             function renderKoreksiCell(value, status) {
                 // let gt_nm = getKoreksiOptionById(value.koreksi);
-                let koreksiId = value.koreksi; // nilai default dari database
+                // let koreksiId = value.koreksi; // nilai default dari database
                 let koreksiNama = value.koreksi_text;
-                let hasCoa = value.koreksi_get_coa;
+                // let hasCoa = value.koreksi_get_coa;
                 let keterangan = value.keterangan;
-                
-                let tipe =  (keterangan == 'Uang Muka')? 'um' : 'koreksi';
+                let coaList = value.coa_list || [];
+                let mode = value.mode;
+                let tipe = (keterangan == 'Uang Muka') ? 'um' : 'koreksi';
 
-                // bikin select
-                let $select = $('<select>', {
-
-                    class: 'form-control input-sm select-koreksi',
-                    name: 'koreksi',
-                    style: 'width:100% !important;',
-                    'data-id': value.id,
-                    'data-tipe' : tipe,
-                    'data-default': koreksiId,
-                    'data-currency': value.tipe_currency
-                });
-
-                if (koreksiId && koreksiNama) {
-                    let option = new Option(koreksiNama, koreksiId, true, true);
-                    $(option).data('get_coa', value.koreksi_get_coa);
-                    $select.append(option);
-                }
-
-                let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
-                if (keterangan.length === 0 || (keterangan === 'Uang Muka'  && value.tipe_currency == 'Valas')) {
-                    $wrapper = $('<div>').append('').append($coaInfo);
-                } else {
-                    // tempat info COA
-                    if (status == 'draft') {
-                        $wrapper = $('<div>').append($select).append($coaInfo);
-                    } else {
-                        $wrapper = $('<div>').append(koreksiNama).append($coaInfo);
-                    }
-                }
-
-                // tombol aksi
                 let $tdButton = $('<td>');
+                let $wrapper = $('<div>');
+                let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
+
+                // // bikin select
+                // let $select = $('<select>', {
+
+                //     class: 'form-control input-sm select-koreksi',
+                //     name: 'koreksi',
+                //     style: 'width:100% !important;',
+                //     'data-id': value.id,
+                //     'data-tipe': tipe,
+                //     'data-default': koreksiId,
+                //     'data-currency': value.tipe_currency
+                // });
+
+                // if (koreksiId && koreksiNama) {
+                //     let option = new Option(koreksiNama, koreksiId, true, true);
+                //     $(option).data('get_coa', value.koreksi_get_coa);
+                //     $select.append(option);
+                // }
+
+                // let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
+
+                // if (keterangan.length === 0 || (keterangan === 'Uang Muka' && value.tipe_currency == 'Valas')) {
+                //     $wrapper = $('<div>').append('').append($coaInfo);
+                // } else {
+                //     // tempat info COA
+                //     if (status == 'draft') {
+                //         $wrapper = $('<div>').append($select).append($coaInfo);
+                //     } else {
+                //         $wrapper = $('<div>').append(koreksiNama).append($coaInfo);
+                //     }
+                // }
+
+                // // tombol aksi
+                // let $tdButton = $('<td>');
 
                 // fungsi render COA dan tombol jika default valid
-                function updateCoaButton(selectedId) {
+                function updateCoaButton() {
                     $tdButton.empty();
-                    if ((hasCoa == "true") && selectedId === koreksiId) {
-                        // $tdButton.html('<button type="button" class="btn btn-sm btn-default btn-koreksi" data-tipe="' + koreksiId + '" data-summary="' + value.id + '" data-nm-koreksi="' + koreksiNama + '"><i class="fa fa-edit"></i></button>');
+
+
+                    if(coaList.length > 0) {
                         $tdButton.html(`
-                            <button type="button" class="btn btn-xs btn-primary btn-koreksi" 
-                                    data-tipe="${koreksiId}" 
-                                    data-summary="${value.id}" 
-                                    data-nm-koreksi="${koreksiNama}">
+                            <button class="btn btn-xs btn-primary btn-koreksi" 
+                                    data-tipe="${tipe}" data-summary="${value.id}" data-currency="${value.tipe_currency}">
                                 <i class="fa fa-edit"></i>
                             </button>
-                            <button type="button" class="btn btn-xs btn-danger btn-hapus-koreksi"
-                                    data-tipe="${koreksiId}" 
-                                    data-summary="${value.id}" >
+                            <button class="btn btn-xs btn-danger btn-hapus-koreksi"
+                                    data-tipe="${tipe}" data-summary="${value.id}">
                                 <i class="fa fa-trash"></i>
                             </button>
                         `);
                         $coaInfo.show();
-                        if (value.tipe_currency == 'Rp') {
-                            loadCoaInfo(selectedId, value.id, $coaInfo.find('small'));
-                        }
-                    } else if (hasCoa == 'false') {
-                        $tdButton.html(`                           
-                            <button type="button" class="btn btn-xs btn-danger btn-hapus-koreksi"
-                                    data-tipe="${koreksiId}" 
-                                    data-summary="${value.id}" >
-                                <i class="fa fa-trash"></i>
-                            </button>
+                    } else if(coaList.length == 0 && value.selisih != 0) { 
+                        $tdButton.html(`
+                                <button type="button" class="btn btn-xs btn-primary btn-koreksi" 
+                                        data-tipe="${tipe}"
+                                        data-summary="${value.id}" 
+                                        data-currency="${value.tipe_currency}">
+                                    <i class="fa fa-edit"></i>
+                                </button>
                         `);
                         $coaInfo.hide();
                     } else {
                         $coaInfo.hide();
                     }
+                    
+                }
+
+                if (mode == 'normal') {
+                    $wrapper.append(koreksiNama).append($coaInfo);
+                    loadCoaInfo(value.id, $coaInfo.find('small')); // ambil text via ajax/func lama
+
+                } else if (mode == 'split') {
+
+                    let content = "";
+                    $.each(coaList, function(index, item) {
+                        content += `<b>${item.head == 'true' ? 'Head' : 'Item  : ' +item.koreksi_text}</b>
+                        ${item.head == 'true' && item.posisi != '' ? '' : item.posisi} <br>
+                        ${item.kode_coa + ' - ' + item.nama_coa} <br>
+                        ${item.head == 'true' ? '' : 'Nominal  : ' +formatNumber(item.nominal)} <br>
+                        <hr>`;
+                    });
+
+                    $coaInfo.find('small').html(content);
+                    $wrapper.append($coaInfo);
                 }
 
                 // initial render sesuai data database
                 if (status == 'draft') {
-                    updateCoaButton(koreksiId);
+                    updateCoaButton();
                 }
 
-                if (status == 'done') {
-                    $coaInfo.show();
-                    if (value.tipe_currency == 'Rp') {
-                        loadCoaInfo(koreksiId, value.id, $coaInfo.find('small'));
-                    }
-                }
+                // if (status == 'done') {
+                //     $coaInfo.show();
+                //     if (value.tipe_currency == 'Rp') {
+                //         loadCoaInfo(koreksiId, value.id, $coaInfo.find('small'));
+                //     }
+                // }
 
                 // event onchange
-                $select.on('change', function() {
-                    let selectedData = $(this).select2('data')[0] || {};
-                    let val = $(this).val();
-                    hasCoa = selectedData.get_coa ?? $(this).find('option:selected').data('get_coa');
-                    updateCoaButton(val);
-                });
+                // $select.on('change', function() {
+                //     let selectedData = $(this).select2('data')[0] || {};
+                //     let val = $(this).val();
+                //     hasCoa = selectedData.get_coa ?? $(this).find('option:selected').data('get_coa');
+                //     updateCoaButton(val);
+                // });
 
                 return {
                     wrapper: $wrapper,
@@ -1647,12 +1678,7 @@
             }
 
 
-            function loadCoaInfo(koreksiId, summaryId, $target) {
-                if (!koreksiId) {
-                    $target.text("");
-                    return;
-                }
-
+            function loadCoaInfo( summaryId, $target) {
                 $.ajax({
                     url: "<?php echo site_url('accounting/pelunasanhutang/getCoaByKoreksi') ?>",
                     type: "POST",
@@ -1679,10 +1705,11 @@
 
 
             $(document).on("click", ".btn-koreksi", function(e) {
-                let jenis_koreksi = $(this).attr("data-tipe");
                 let id_summary = $(this).attr("data-summary");;
-                let nama_koreksi = $(this).attr('data-nm-koreksi');
-                koreksi(id_summary, jenis_koreksi, nama_koreksi)
+                let tipe_koreksi = $(this).attr("data-tipe");
+                let tipe_currency = $(this).attr("data-currency");  // valas / Rp
+                // let nama_koreksi = $(this).attr('data-nm-koreksi');
+                koreksi(id_summary, tipe_currency, tipe_koreksi)
             });
 
             $(document).on("click", ".btn-hapus-koreksi", function(e) {
@@ -1739,25 +1766,26 @@
             });
 
 
-            function koreksi(id_summary, jenis_koreksi, nama_koreksi) {
+            function koreksi(id_summary, tipe_currency, tipe_koreksi) {
 
                 $("#tambah_data").modal({
                     show: true,
                     backdrop: "static"
                 });
 
-                $("#tambah_data").removeClass("modal fade lebar").addClass("modal fade lebar_mode");
+                $("#tambah_data").removeClass('modal fade lebar_mode').addClass('modal fade lebar');
                 $("#tambah_data .modal-dialog .modal-content .modal-body").addClass("add_batch");
 
                 $(".tambah_data").html(
                     '<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>'
                 );
-                $(".modal-title").html("Koreksi <b>" + nama_koreksi + "</b>");
+                $(".modal-title").html("Koreksi <b>" + tipe_currency + "</b>");
 
                 $.post("<?= base_url('accounting/pelunasanhutang/get_view_koreksi') ?>", {
                     no_pelunasan: "<?= $list->no_pelunasan; ?>",
                     id: id_summary,
-                    jenis_koreksi: jenis_koreksi
+                    tipe_currency: tipe_currency,
+                    tipe_koreksi:tipe_koreksi
                 }, function(data) {
                     setTimeout(function() {
                         $(".tambah_data").html(data.data);
