@@ -5,7 +5,7 @@ $saldos = 0;
 $temp = "";
 $noUrut = 0;
 $sld = 0;
-if (count($data) > 0) {
+//if (count($data) > 0) {
     $saldos = floatval($saldo->saldo_awal_final);
     ?>
     <tr>
@@ -21,7 +21,7 @@ if (count($data) > 0) {
         <td class="text-right"><?= number_format($saldos, 2) ?></td>
     </tr>
     <?php
-}
+//}
 
 $valass = ["usd" => ["debit" => 0, "kredit" => 0], "euro" => ["debit" => 0, "kredit" => 0]];
 foreach ($data as $key => $value) {
