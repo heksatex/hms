@@ -5,7 +5,7 @@ $saldos = 0;
 $temp = "";
 $noUrut = 0;
 $saldos = ($curr === "") ? floatval($saldo->saldo_awal_final) : floatval($saldo->saldo_valas_final);
-if ($saldos > 0) {
+
     ?>
     <tr>
         <td colspan="3"></td>
@@ -16,7 +16,7 @@ if ($saldos > 0) {
         <td class="text-right"><?= number_format($saldos, 2) ?></td>
     </tr>
     <?php
-}
+
 foreach ($data as $key => $value) {
     $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
     $showUrut = "";
