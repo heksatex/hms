@@ -389,15 +389,33 @@ class M_pelunasanpiutang extends CI_Model
         return $query->result();
     }
 
+    function query_get_metode()
+    {
+        $this->db->select("id, pelunasan_piutang_id, no_pelunasan, no_bukti, DATE(tanggal_bukti) as tanggal_bukti, uraian, currency_id, currency, kurs, total_rp, total_valas, row_order, tipe, tipe2, id_bukti");
+        $this->db->from('acc_pelunasan_piutang_metode');
+
+    }
 
     function get_data_metode_by_code($kode)
     {
         $this->db->order_by('row_order', 'asc');
         $this->db->where('no_pelunasan', $kode);
-        $this->db->select("id, pelunasan_piutang_id, no_pelunasan, no_bukti, DATE(tanggal_bukti) as tanggal_bukti, uraian, currency_id, currency, kurs, total_rp, total_valas, row_order, tipe, tipe2, id_bukti");
-        $this->db->from('acc_pelunasan_piutang_metode');
+        $this->query_get_metode();
         $query = $this->db->get();
         return $query->result();
+    }
+
+  
+
+    function get_data_metode_by_code2($where)
+    {
+        $this->db->order_by('row_order', 'asc');
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        $this->query_get_metode();
+        $query = $this->db->get();
+        return $query;
     }
 
 
