@@ -11,9 +11,11 @@
         button[id="btn-simpan"],
         button[id="btn-confirm"],
         button[id="btn-cancel"],
+        button[id="btn-duplicate"],
         button[id="btn-edit"] {
             display: none;
         }
+
 
         .style_total {
             white-space: nowrap !important;
@@ -409,6 +411,7 @@
                 $("#btn-cancel").hide();
                 $("#btn-edit").hide();
                 $("#btn-confirm").hide();
+                $("#btn-duplicate").show();
             } else if (status == 'done') {
                 $("#btn-cancel").show();
             } else { // draft
@@ -785,6 +788,7 @@
                                         $("#btn-edit").hide();
                                         $("#btn-confirm").hide();
                                         $("#btn-cancel").hide();
+                                        $("#btn-duplicate").show();
                                     }
 
                                 },
@@ -1350,10 +1354,7 @@
 
             }
 
-            function
-
-
-            loadInvoice() {
+            function loadInvoice() {
 
                 $("#example1_processing").css('display', ''); // show loading
                 var id = "<?php echo $list->id; ?>";
@@ -1980,6 +1981,21 @@
                     $(".view_data").empty();
                 });
             }
+
+            // duplicate pelunasan
+            $(document).on('click', '#btn-duplicate', function(e) {
+                e.preventDefault();
+                var id = "<?php echo $list->id; ?>";
+                var no_pelunasan = "<?php echo $list->no_pelunasan; ?>";
+                var duplicate = 'true';
+
+                if (id === "" || no_pelunasan === "") {
+                    alert_modal_warning('No Pelunasan Kosong', function() {});
+                } else {
+                    var url = '<?php echo base_url() ?>accounting/pelunasanpiutang/add';
+                    window.open(url + '?id=' + id + '&&duplicate=' + duplicate + '&&no=' + no_pelunasan, '_blank');
+                }
+            });
 
 
         })
