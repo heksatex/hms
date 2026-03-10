@@ -121,8 +121,8 @@ class Rekapbank extends MY_Controller {
             $sheet->setCellValue("E{$row}", 'Kepada');
             $sheet->setCellValue("F{$row}", 'Uraian');
             $sheet->setCellValue("G{$row}", 'No Coa');
-            $sheet->setCellValue("I{$row}", 'Coa');
-            $sheet->setCellValue("J{$row}", 'Total');
+            $sheet->setCellValue("H{$row}", 'Coa');
+            $sheet->setCellValue("I{$row}", 'Total');
             $no = 0;
             $total = 0;
             foreach ($data as $key => $value) {

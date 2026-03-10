@@ -2,13 +2,14 @@
 $total = 0;
 foreach ($data as $key => $value) {
     $total += $value->nominal;
+    $uraian = ($value->uraian === "") ? $value->transinfo : $value->uraian;
     ?>
     <tr>
         <td><?= $value->no_kk ?? $value->no_km ?></td>
         <td class="text-capitalize"><?= $kas ?></td>
         <td><?= date("Y-m-d", strtotime($value->tanggal)) ?></td>
         <td><?= ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama ?></td>
-        <td><?= ($value->uraian === "") ? $value->transinfo : $value->uraian ?></td>
+        <td title="<?=$uraian?>" ><?= substr($uraian, 1,50) ?></td>
         <td><?= $value->kode_coa ?></td>
         <td><?= $value->coa ?></td>
         <td class="text-right"><?= number_format($value->nominal, 2) ?></td>
