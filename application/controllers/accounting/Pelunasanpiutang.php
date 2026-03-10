@@ -67,7 +67,22 @@ class Pelunasanpiutang extends MY_Controller
     public function add()
     {
         $data['id_dept'] = 'ACCPP';
-        $this->load->view('accounting/v_pelunasan_piutang_add', $data);
+
+        $duplicate = $this->input->get('duplicate');
+
+        if ($duplicate === 'true') {
+            $no_pelunasan = $this->input->get('no'); // no_pelunasan
+            $list  = $this->m_pelunasanpiutang->get_data_by_code($no_pelunasan);
+
+            if (empty($list)) {
+                show_404();
+            } else {
+                $data['list']    = $list;
+                return $this->load->view('accounting/v_pelunasan_piutang_duplicate', $data);
+            }
+        } else {
+            $this->load->view('accounting/v_pelunasan_piutang_add', $data);
+        }
     }
 
 
@@ -173,6 +188,8 @@ class Pelunasanpiutang extends MY_Controller
             $tgl_transaksi_new = $tgl_transaksi . " " . date("H:i:s");
             $tgl = date('Y-m-d H:i:s');
             $retry = $this->input->post('retry');
+            $duplicate = $this->input->post('duplicate');
+            $log_duplicate   = "";
 
             if (empty($partner)) {
                 throw new \Exception('Customer harus diisi', 422); // Validation error
@@ -201,8 +218,118 @@ class Pelunasanpiutang extends MY_Controller
                 if (!$insert['status']) {
                     throw new \Exception('Gagal menyimpan data baru: ' . $insert['message'], 500);
                 }
-
                 $jenis_log = "create";
+
+                if ($duplicate === 'true') {
+
+                    $last_id = $this->db->insert_id();
+
+                    $invoice   = $this->input->post('invoice');
+                    $pelunasan = $this->input->post('pelunasan');
+                    $no_pelunasan_sblm = $this->input->post('no_pelunasan_sblm');
+                    $row    = 1;
+                    $num    = 1;
+                    $data_items_faktur = array();
+                    $data_items_mt = array();
+                    $log_add_items = "";
+                    if ($invoice) {
+                        // get Invoice by no_pelunasan_sblm
+                        foreach ($invoice as $inv) {
+                            $id        = $inv['id'];
+                            $no_faktur = $inv['no_faktur'];
+
+                            $get_inv = $this->m_pelunasanpiutang->get_data_faktur_by_code2(['no_pelunasan' => $no_pelunasan_sblm, 'id' => $id])->row();
+
+                            if (isset($get_inv)) {
+                                $data_items_faktur[] = array(
+                                    'pelunasan_piutang_id'   => $last_id,
+                                    'no_pelunasan'           => $kode,
+                                    'faktur_id'              => $get_inv->faktur_id,
+                                    'no_faktur'              => $get_inv->no_faktur,
+                                    'no_sj'                  => $get_inv->no_sj,
+                                    'tanggal_faktur'         => $get_inv->tanggal_faktur,
+                                    'currency_id'            => $get_inv->currency_id,
+                                    'currency'               => $get_inv->currency,
+                                    'kurs'                   => $get_inv->kurs,
+                                    'total_piutang_rp'       => $get_inv->total_piutang_rp,
+                                    'total_piutang_valas'    => $get_inv->total_piutang_valas,
+                                    'sisa_piutang_rp'        => $get_inv->sisa_piutang_rp,
+                                    'sisa_piutang_valas'     => $get_inv->sisa_piutang_valas,
+                                    'row_order'              => $row
+                                );
+                                $row++;
+                                $log_add_items .= "(" . $num . ") " . $get_inv->no_faktur . " " . $get_inv->no_sj . " " . $get_inv->tanggal_faktur . " " . $get_inv->currency . " " . $get_inv->kurs . " " . $get_inv->total_piutang_rp . " " . $get_inv->total_piutang_valas . " " . $get_inv->sisa_piutang_rp . " " . $get_inv->sisa_piutang_valas . "  <br> ";
+                                $num++;
+                                $get_inv = '';
+                            } else {
+                                throw new \Exception('Faktur ' . $no_faktur . ' tidak ditemukan ', 409);
+                            }
+                        }
+                    }
+
+                    $row    = 1;
+                    $num    = 1;
+                    $log_add_items_mt = "";
+                    if ($pelunasan) {
+                        foreach ($pelunasan as $mt) {
+                            $id        = $mt['id'];
+                            $no_bukti  = $mt['no_bukti'];
+
+                            $get_mt = $this->m_pelunasanpiutang->get_data_metode_by_code2(['no_pelunasan' => $no_pelunasan_sblm, 'id' => $id])->row();
+
+                            if (isset($get_mt)) {
+                                $data_items_mt[] = array(
+                                    'pelunasan_piutang_id'  => $last_id,
+                                    'no_pelunasan'         => $kode,
+                                    'no_bukti'             => $get_mt->no_bukti,
+                                    'tanggal_bukti'        => $get_mt->tanggal_bukti,
+                                    'currency_id'          => $get_mt->currency_id,
+                                    'currency'             => $get_mt->currency,
+                                    'kurs'                 => $get_mt->kurs,
+                                    'total_rp'             => $get_mt->total_rp,
+                                    'total_valas'          => $get_mt->total_valas,
+                                    'id_bukti'             => $get_mt->id_bukti, //id bukti detail
+                                    'tipe'                 => $get_mt->tipe,
+                                    'tipe2'                 => $get_mt->tipe2, // kas, bank, giro
+                                    'uraian'               => $get_mt->uraian,
+                                    'row_order'            => $row,
+                                );
+                                $row++;
+                                $log_add_items_mt .= "(" . $num . ") " . $get_mt->no_bukti . " " . $get_mt->tanggal_bukti . " " . $get_mt->uraian . " " . $get_mt->currency . " " . $get_mt->kurs . " " . $get_mt->total_rp . " " . $get_mt->total_valas . " <br>";
+                                $num++;
+                                $get_mt = '';
+                            } else {
+                                throw new \Exception('Metode Pelunasan ' . $no_bukti . ' tidak ditemukan ', 409);
+                            }
+                        }
+                    }
+
+                    if ($data_items_faktur) {
+
+                        if (!empty($insert)) {
+                            throw new \Exception('Data Gagal Disimpan !', 200);
+                        }
+                    }
+
+                    if ($data_items_faktur) {
+                        $insert = $this->m_pelunasanpiutang->insert_data_pelunasan_piutang_metode($data_items_mt);
+                        if (!empty($insert)) {
+                            throw new \Exception('Data Gagal Disimpan !', 200);
+                        }
+                    }
+
+                    $result = $this->distribusi_pelunasan_otomatis($kode);
+                    if (!empty($result)) {
+                        throw new \Exception('Distribusi gagal di update !', 200);
+                    }
+
+                    $result2 = $this->hitung_summary($kode);
+                    if (!empty($result2)) {
+                        throw new \Exception('Summary Gagal di update !', 200);
+                    }
+
+                    $log_duplicate = "<br> Duplicate dari " . $no_pelunasan_sblm . " <br> Faktur : <br>" .  $log_add_items . " Metode Pelunasan : " . $log_add_items_mt;
+                }
             } else {
                 $cek = $this->m_pelunasanpiutang->get_data_by_code($kode);
 
@@ -251,7 +378,7 @@ class Pelunasanpiutang extends MY_Controller
             }
 
             // Log History
-            $note_log = "$kode | Tgl Transaksi: $tgl_transaksi | Customer: " . ($get_p->nama ?? '');
+            $note_log = "$kode | Tgl Transaksi: $tgl_transaksi | Customer: " . ($get_p->nama ?? '') . " " . $log_duplicate;
             $data_history = [
                 'datelog'   => date("Y-m-d H:i:s"),
                 'kode'      => $kode,
@@ -2741,8 +2868,8 @@ class Pelunasanpiutang extends MY_Controller
                 }
             }
 
-            if($deposit_true == 'yes' && $deposit_alat == 'no' ) {
-               throw new \Exception("Pelunasan tidak bisa Confirm. Koreksi Deposit bukan jadi alat pelunasan .", 200);
+            if ($deposit_true == 'yes' && $deposit_alat == 'no') {
+                throw new \Exception("Pelunasan tidak bisa Confirm. Koreksi Deposit bukan jadi alat pelunasan .", 200);
             }
 
 
@@ -3625,7 +3752,7 @@ class Pelunasanpiutang extends MY_Controller
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Koreksi Deposit sudah di Nonaktifkan / Refund .", 200);
                                     }
 
-                                    if($items->koreksi_id === 'deposit' && $row->kurs_akhir > 0) {
+                                    if ($items->koreksi_id === 'deposit' && $row->kurs_akhir > 0) {
                                         throw new \Exception("Pelunasan tidak bisa dibatalkan. Deposit sudah terdapat Koreksi Kurs / Kurs Akhir .", 200);
                                     }
                                 }
