@@ -63,7 +63,9 @@ class Rekapgiro extends MY_Controller {
             $tanggals = explode(" - ", $tanggal);
 
             $model = new $this->m_global;
-            $model->setTables("acc_giro_{$giro} ag")->setJoins("acc_giro_{$giro}_detail agd", "giro_{$giro}_id = ag.id")->setWheres(["status" => "confirm"]);
+            $model->setTables("acc_giro_{$giro} ag")->setJoins("acc_giro_{$giro}_detail agd", "giro_{$giro}_id = ag.id")
+                    ->setJoins("acc_coa ac","ac.kode_coa = agd.kode_coa","left")
+                    ->setWheres(["ag.status" => "confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(ag.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(ag.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }
@@ -88,7 +90,7 @@ class Rekapgiro extends MY_Controller {
         try {
             $giro = $this->input->post("giro");
             $model = $this->_query();
-            $data["data"] = $model->setSelects(["agd.*,transinfo,partner_nama,lain2"])->getData();
+            $data["data"] = $model->setSelects(["agd.*,transinfo,partner_nama,lain2","ac.nama as coa"])->getData();
             $data["giro"] = $giro;
             $html = $this->load->view('report/acc/v_rekap_giro_detail', $data, true);
             $this->output->set_status_header(200)
@@ -105,7 +107,7 @@ class Rekapgiro extends MY_Controller {
         try {
             $giro = $this->input->post("giro");
             $model = $this->_query();
-            $data = $model->setSelects(["agd.*,transinfo,partner_nama,lain2"])->getData();
+            $data = $model->setSelects(["agd.*,transinfo,partner_nama,lain2","ac.nama as coa"])->getData();
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
@@ -120,7 +122,8 @@ class Rekapgiro extends MY_Controller {
             $sheet->setCellValue("H{$row}", 'Kpd/Dari');
             $sheet->setCellValue("I{$row}", 'Uraian');
             $sheet->setCellValue("J{$row}", 'No Coa');
-            $sheet->setCellValue("K{$row}", 'Nominal');
+            $sheet->setCellValue("K{$row}", 'Coa');
+            $sheet->setCellValue("L{$row}", 'Nominal');
             $no = 0;
             $total = 0;
             foreach ($data as $key => $value) {
@@ -137,14 +140,15 @@ class Rekapgiro extends MY_Controller {
                 $sheet->setCellValue("H{$row}", ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama);
                 $sheet->setCellValue("I{$row}", $value->transinfo);
                 $sheet->setCellValue("J{$row}", $value->kode_coa);
-                $sheet->setCellValue("K{$row}", $value->nominal);
+                $sheet->setCellValue("K{$row}", $value->coa);
+                $sheet->setCellValue("L{$row}", $value->nominal);
             }
             if($total > 0 ) {
                 $row += 1;
-                $sheet->setCellValue("J{$row}", "Total");
-                $sheet->setCellValue("K{$row}", $total);
+                $sheet->setCellValue("K{$row}", "Total");
+                $sheet->setCellValue("L{$row}", $total);
             }
-            $sheet->getStyle("K2:K{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("L2:L{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $writer = new Xlsx($spreadsheet);

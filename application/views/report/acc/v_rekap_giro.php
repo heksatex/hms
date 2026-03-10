@@ -147,6 +147,7 @@
                                             <th class="style bb ws">Tgl.JT</th>
                                             <th class="style bb ws">Kpd/Dari</th>
                                             <th class="style bb ws">Uraian</th>
+                                            <th class="style bb ws">Kode Coa</th>
                                             <th class="style bb ws">Coa</th>
                                             <th class="style bb ws text-right">Nominal</th>
                                         </tr>
