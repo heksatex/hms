@@ -11,7 +11,7 @@ foreach ($data as $key => $value) {
         <td><?= $value->no_bg ?></td>
         <td><?= date("Y-m-d", strtotime($value->tanggal)) ?></td>
         <td><?= ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama ?></td>
-        <td><?= $value->transinfo ?></td> 
+         <td title="<?=$value->transinfo?>" ><?= substr($value->transinfo, 1,50) ?></td>
         <td><?= $value->kode_coa ?></td>
         <td><?= $value->coa ?></td>
         <td class="text-right"><?= number_format($value->nominal, 2) ?></td>

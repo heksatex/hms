@@ -1,22 +1,19 @@
 <?php
 $kredits = 0;
 $debets = 0;
-$saldos = 0;
 $temp = "";
 $noUrut = 0;
-$saldos = ($curr === "") ? floatval($saldo->saldo_awal_final) : floatval($saldo->saldo_valas_final);
-
-    ?>
-    <tr>
-        <td colspan="3"></td>
-        <td> <strong>Saldo Awal</strong></td>
-        <td></td>
-        <td class="text-right"><?= number_format($debets, 2) ?></td>
-        <td class="text-right"><?= number_format($kredits, 2) ?></td>
-        <td class="text-right"><?= number_format($saldos, 2) ?></td>
-    </tr>
-    <?php
-
+$saldos = (in_array($curr, ["", "IDR"])) ? floatval($saldo->saldo_awal_final) : floatval($saldo->saldo_valas_final);
+?>
+<tr>
+    <td colspan="3"></td>
+    <td> <strong>Saldo Awal <?= $curr ?></strong></td>
+    <td></td>
+    <td class="text-right"><?= number_format($debets, 2) ?></td>
+    <td class="text-right"><?= number_format($kredits, 2) ?></td>
+    <td class="text-right"><?= number_format($saldos, 2) ?></td>
+</tr>
+<?php
 foreach ($data as $key => $value) {
     $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
     $showUrut = "";
