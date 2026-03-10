@@ -138,13 +138,14 @@
                             </form>
                             <div class="col-md-12 table-responsive divListviewHead">
                                 <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
-                                    <table id="tblgiro" class="table table-condesed table-hover" border="1">
+                                    <table id="tblgiro" class="table table-condesed table-hover">
                                         <tr>
                                             <th  class="style bb ws no" >No Bukti</th>
                                             <th class="style bb ws">Bank</th>
                                             <th class="style bb ws">Tanggal</th>
                                             <th class="style bb ws">Kepada</th>
                                             <th class="style bb ws">Uraian</th>
+                                            <th class="style bb ws">Coa</th>
                                             <th class="style bb ws text-right">Total</th>
                                         </tr>
                                         <tbody id="tBody" class="ws">

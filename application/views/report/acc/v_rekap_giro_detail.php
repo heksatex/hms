@@ -12,6 +12,7 @@ foreach ($data as $key => $value) {
         <td><?= date("Y-m-d", strtotime($value->tanggal)) ?></td>
         <td><?= ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama ?></td>
         <td><?= $value->transinfo ?></td> 
+        <td><?= $value->kode_coa ?></td>
         <td class="text-right"><?= number_format($value->nominal, 2) ?></td>
     </tr>
 
@@ -19,7 +20,7 @@ foreach ($data as $key => $value) {
 if($total > 0) {
     ?>
     <tr>
-        <td colspan="7"></td>
+        <td colspan="8"></td>
         <td> <strong>Total</strong></td>
         <td class="text-right"><?= number_format($total, 2) ?></td>
     </tr>
