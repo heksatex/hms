@@ -162,6 +162,7 @@
                                             <th class="style bb ws">Tanggal</th>
                                             <th class="style bb ws">Kepada</th>
                                             <th class="style bb ws">Uraian</th>
+                                            <th class="style bb ws">Kode Coa</th>
                                             <th class="style bb ws">Coa</th>
                                             <th class="style bb ws text-right">Total</th>
                                         </tr>

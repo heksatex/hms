@@ -10,6 +10,7 @@ foreach ($data as $key => $value) {
         <td><?= ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama ?></td>
         <td><?= ($value->uraian === "") ? $value->transinfo : $value->uraian ?></td>
         <td><?= $value->kode_coa ?></td>
+        <td><?= $value->coa ?></td>
         <td class="text-right"><?= number_format($value->nominal, 2) ?></td>
     </tr>
 
@@ -18,7 +19,7 @@ foreach ($data as $key => $value) {
 if ($total > 0) {
     ?>
     <tr>
-        <td colspan="5"></td>
+        <td colspan="6"></td>
         <td> <strong>Total</strong></td>
         <td class="text-right"><?= number_format($total, 2) ?></td>
     </tr>
