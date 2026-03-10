@@ -59,7 +59,9 @@ class Rekapbank extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
-            $model->setTables("acc_bank_{$bank} ag")->setJoins("acc_bank_{$bank}_detail agd", "bank_{$bank}_id = ag.id")->setWheres(["status" => "confirm"]);
+            $model->setTables("acc_bank_{$bank} ag")->setJoins("acc_bank_{$bank}_detail agd", "bank_{$bank}_id = ag.id")
+                    ->setJoins("acc_coa ac", "ac.kode_coa = agd.kode_coa", "left")
+                    ->setWheres(["ag.status" => "confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(ag.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(ag.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }
@@ -87,7 +89,7 @@ class Rekapbank extends MY_Controller {
             if ($bank === "keluar")
                 $id = "no_bk";
             $model = $this->_query();
-            $data["data"] = $model->setSelects(["agd.*,transinfo,partner_nama,lain2"])->getData();
+            $data["data"] = $model->setSelects(["agd.*,transinfo,partner_nama,lain2","ac.nama as coa"])->getData();
             $data["bank"] = $bank;
             $html = $this->load->view('report/acc/v_rekap_bank_detail', $data, true);
             $this->output->set_status_header(200)
@@ -107,7 +109,7 @@ class Rekapbank extends MY_Controller {
             if ($bank === "keluar")
                 $id = "no_bk";
             $model = $this->_query();
-            $data = $model->setSelects(["agd.*,transinfo,partner_nama,lain2"])->getData();
+            $data = $model->setSelects(["agd.*,transinfo,partner_nama,lain2","ac.nama as coa"])->getData();
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
@@ -119,7 +121,8 @@ class Rekapbank extends MY_Controller {
             $sheet->setCellValue("E{$row}", 'Kepada');
             $sheet->setCellValue("F{$row}", 'Uraian');
             $sheet->setCellValue("G{$row}", 'No Coa');
-            $sheet->setCellValue("H{$row}", 'Total');
+            $sheet->setCellValue("I{$row}", 'Coa');
+            $sheet->setCellValue("J{$row}", 'Total');
             $no = 0;
             $total = 0;
             foreach ($data as $key => $value) {
@@ -133,14 +136,15 @@ class Rekapbank extends MY_Controller {
                 $sheet->setCellValue("E{$row}", ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama);
                 $sheet->setCellValue("F{$row}", ($value->uraian === "") ? $value->transinfo : $value->uraian);
                 $sheet->setCellValue("G{$row}", $value->kode_coa);
-                $sheet->setCellValue("H{$row}", $value->nominal);
+                $sheet->setCellValue("H{$row}", $value->coa);
+                $sheet->setCellValue("I{$row}", $value->nominal);
             }
             if ($total > 0) {
                 $row += 1;
-                $sheet->setCellValue("G{$row}", "Total");
-                $sheet->setCellValue("H{$row}", $total);
+                $sheet->setCellValue("H{$row}", "Total");
+                $sheet->setCellValue("I{$row}", $total);
             }
-            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("I2:I{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $writer = new Xlsx($spreadsheet);
