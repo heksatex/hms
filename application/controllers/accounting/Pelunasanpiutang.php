@@ -305,13 +305,13 @@ class Pelunasanpiutang extends MY_Controller
                     }
 
                     if ($data_items_faktur) {
-
+                        $insert = $this->m_pelunasanpiutang->insert_data_pelunasan_piutang_faktur($data_items_faktur);
                         if (!empty($insert)) {
                             throw new \Exception('Data Gagal Disimpan !', 200);
                         }
                     }
 
-                    if ($data_items_faktur) {
+                    if ($data_items_mt) {
                         $insert = $this->m_pelunasanpiutang->insert_data_pelunasan_piutang_metode($data_items_mt);
                         if (!empty($insert)) {
                             throw new \Exception('Data Gagal Disimpan !', 200);
