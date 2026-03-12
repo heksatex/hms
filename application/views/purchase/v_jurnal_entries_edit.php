@@ -70,6 +70,9 @@
                                 }
                                 if ($jurnal->status === "posted") {
                                     ?>
+                                    <button class="btn btn-primary btn-sm" id="btn-download" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-download">&nbsp;Download</i>
+                                    </button>
                                     <button class="btn btn-success btn-sm" id="btn-print" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         <i class="fa fa-print">&nbsp;Print</i>
                                     </button>
@@ -580,7 +583,7 @@
                 $("#btn-update-status").off("click").unbind("click").on("click", function () {
                     calculateTotal();
                     var stats = $(this).data("status");
-                    confirmRequest("Jurnal Entries", stats+" Jurnal ? ", function () {
+                    confirmRequest("Jurnal Entries", stats + " Jurnal ? ", function () {
                         updateStatus(stats);
 
                     });
@@ -694,6 +697,32 @@
                         }
                     });
                 });
+                
+                $("#btn-download").on("click", function () {
+                    $.ajax({
+                        url: "<?= base_url("purchase/jurnalentries/download/{$id}"); ?>",
+                        type: "POST",
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        }, success: function (data) {
+                            unblockUI(function () {});
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.url;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+                
 
                 $("#btn-import").on("click", function (e) {
                     e.preventDefault();
