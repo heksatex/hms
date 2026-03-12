@@ -1271,11 +1271,11 @@ class M_pelunasanhutang extends CI_Model
     function get_sum_pelunasan_by_kode($no_pelunasan, $tipe_currency) 
     {
         if($tipe_currency === 'Rp'){
-            $this->db->where('currency_id', 1);
+            // $this->db->where('currency_id', 1);
             $this->db->select('sum(total_rp) as total');
         } else{
             $this->db->select('sum(total_valas) as total');
-            $this->db->where('currency_id <>', 1);
+            // $this->db->where('currency_id <>', 1);
         }
         $this->db->where('no_pelunasan', $no_pelunasan);
 
