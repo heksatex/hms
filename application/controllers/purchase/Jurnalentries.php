@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Mpdf\Mpdf;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Jurnalentries extends MY_Controller {
 
@@ -422,6 +423,93 @@ class Jurnalentries extends MY_Controller {
         }
     }
 
+    public function download($id) {
+        try {
+            $kode_decrypt = decrypt_url($id);
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $row = 1;
+            $model = new $this->m_global;
+            $head = $model->setTables("acc_jurnal_entries")->setWheres(["status" => "posted", "acc_jurnal_entries.kode" => $kode_decrypt])
+                    ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
+                    ->setSelects(["mst_jurnal.nama as nama_jurnal", "acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat"])
+                    ->getDetail();
+
+            $sheet->setCellValue("A{$row}", "{$head->kode}");
+            $row += 1;
+            $sheet->setCellValue("A{$row}", "Jurnal");
+            $sheet->setCellValue("B{$row}", $head->nama_jurnal ?? "");
+            $sheet->setCellValue("c{$row}", "Origin");
+            $sheet->setCellValue("d{$row}", $head->origin);
+            $row += 1;
+            $sheet->setCellValue("A{$row}", "Tanggal Dibuat");
+            $sheet->setCellValue("B{$row}", $head->tanggal_dibuat);
+            $sheet->setCellValue("c{$row}", "Reff Note");
+            $sheet->setCellValue("d{$row}", $head->reff_note);
+            $row += 1;
+            $sheet->setCellValue("A{$row}", "Periode");
+            $sheet->setCellValue("B{$row}", $head->periode);
+            $row += 1;
+            $sheet->setCellValue("A{$row}", "No");
+            $sheet->setCellValue("b{$row}", "Nama");
+            $sheet->setCellValue("c{$row}", "Reff Note");
+            $sheet->setCellValue("d{$row}", "Partner");
+            $sheet->setCellValue("e{$row}", "kode coa");
+            $sheet->setCellValue("f{$row}", "Debet");
+            $sheet->setCellValue("g{$row}", "Kredit");
+            $sheet->setCellValue("h{$row}", "Kurs");
+            $sheet->setCellValue("i{$row}", "Mata Uang");
+            $details = $model->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $kode_decrypt])
+                            ->setJoins("partner", "partner.id = acc_jurnal_entries_items.partner", "left")
+                            ->setSelects(["acc_jurnal_entries_items.*", "partner.nama as partner_nama"])
+                            ->setOrder(["row_order"])->getData();
+            $no = 0;
+            //row 6;
+            $totalDebet = 0;
+            $totalKredit = 0;
+            foreach ($details as $key => $value) {
+                $row += 1;
+                $no += 1;
+                $debet = ($value->posisi === "D") ? $value->nominal : 0;
+                $kredit = ($value->posisi === "C") ? $value->nominal : 0;
+                $totalDebet += $debet;
+                $totalKredit += $kredit;
+                $sheet->setCellValue("A{$row}", $no);
+                $sheet->setCellValue("b{$row}", $value->nama);
+                $sheet->setCellValue("c{$row}", $value->reff_note);
+                $sheet->setCellValue("d{$row}", $value->partner_nama);
+                $sheet->setCellValue("e{$row}", (string)$value->kode_coa);
+                $sheet->setCellValue("f{$row}", $debet);
+                $sheet->setCellValue("g{$row}", $kredit);
+                $sheet->setCellValue("h{$row}", $value->kurs);
+                $sheet->setCellValue("i{$row}", $value->nominal);
+            }
+            $row += 2;
+            $sheet->setCellValue("f{$row}", $totalDebet);
+            $sheet->setCellValue("g{$row}", $totalKredit);
+
+            $sheet->getStyle("G6:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F6:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("e6:e{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $nm = str_replace("/", "_", $kode_decrypt);
+            $filename = "Jurnal Entries {$nm}";
+            $url = "dist/storages/report/jurnalentries";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "url" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
+    }
+
     public function download_template($id) {
         try {
             $kode_decrypt = decrypt_url($id);
@@ -524,7 +612,7 @@ class Jurnalentries extends MY_Controller {
             $model = new $this->m_global;
             $model->setTables("acc_coa");
             foreach ($data as $key => $value) {
-                $accoa = $model->setWheres(["level" => "5", "kode_coa" => "{$value[3]}"],true)->getDetail();
+                $accoa = $model->setWheres(["level" => "5", "kode_coa" => "{$value[3]}"], true)->getDetail();
                 if (!$accoa) {
                     throw new exception("{$key} Coa {$value[3]} Tidak ditemukan dimaster", 500);
                 }
