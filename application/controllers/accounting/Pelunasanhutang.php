@@ -2883,15 +2883,20 @@ class Pelunasanhutang extends MY_Controller
                                 $total_credit  = 0;
                                 $total_debit   = 0;
 
-                                if (!isset($gs->mode)) {
-                                    throw new \Exception('Koreksi Masih kosong ' . $gs->tipe_currency . ' ! ', 422);
+                                if (empty($gs->mode)) {
+                                    throw new \Exception('Koreksi ' . $gs->tipe_currency . ' Masih kosong  ! ', 422);
                                 }
 
-                                $data_koreksi_coa =  $this->m_pelunasanhutang->get_coa_summary_id(['aphsk.no_pelunasan' => $no_pelunasan, 'aphs.tipe_currency' => 'Rp'])->result();
-                                if (empty($data_koreksi_coa)) {
-                                    throw new \Exception('Data Koreksi Tidak di temukan !', 422);
+                                if ($gs->tipe_currency !== 'Rp') {
+                                    // continue; // skip Valas
+                                    $data_koreksi_coa = [];
+                                } else {
+                                    $data_koreksi_coa =  $this->m_pelunasanhutang->get_coa_summary_id(['aphsk.no_pelunasan' => $no_pelunasan, 'aphs.tipe_currency' => 'Rp'])->result();
+                                    if (empty($data_koreksi_coa)) {
+                                        throw new \Exception('Data Koreksi Tidak di temukan !', 422);
+                                    }
                                 }
-
+  
                                 // looping coa 
                                 foreach ($data_koreksi_coa as $cok) {
 
@@ -2997,10 +3002,11 @@ class Pelunasanhutang extends MY_Controller
                                 }
 
                                 if ((float) round($total_credit) != (float) round($total_debit)) {
-                                    throw new \Exception('Nominal Debit '.$total_debit.' dan Credit '.$total_credit.' tidak sama di Koreksi ' . $gs->tipe_currency . ' ! ', 422);
+                                    throw new \Exception('Nominal Debit '.$total_debit.' dan Credit '.$total_credit.' tidak sama di Koreksi ' . $gs->tipe_currency . ' ! '.$cok->mode, 422);
                                 }
                             }
                         }
+
                     } else {
                         throw new \Exception('Data Metode Pelunasan masih Kosong ', 409);
                     }
@@ -3053,10 +3059,10 @@ class Pelunasanhutang extends MY_Controller
                                             );
                                         }
                                         $kode_coa_head   =  $gk->kode_coa;
+                                        ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
+                                        $nominal_head = $nominal_head + abs($gk->nominal);
                                     }
 
-                                    ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
-                                    $nominal_head = $nominal_head + abs($gk->nominal);
                                 } else { // false
 
                                     $cek_koreksi = $this->m_pelunasanhutang->get_koreksi_by_kode(['kode' => $gk->koreksi_id]);
@@ -3133,10 +3139,10 @@ class Pelunasanhutang extends MY_Controller
                                                     );
                                                     $row_items++;
                                                 }
+                                                ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
+                                                $sum_nominal_head = $sum_nominal_head + abs($gk->nominal);
+                                                $total_nominal_items = $total_nominal_items + abs($gk->nominal);
                                             }
-                                            ($gk->posisi === 'D') ? $total_debit = $total_debit + abs($gk->nominal) : $total_credit = $total_credit + abs($gk->nominal);
-                                            $sum_nominal_head = $sum_nominal_head + abs($gk->nominal);
-                                            $total_nominal_items = $total_nominal_items + abs($gk->nominal);
                                         } else {
                                             $total_nominal_items = $total_nominal_items + abs($gk->nominal);
                                         }
@@ -3511,7 +3517,7 @@ class Pelunasanhutang extends MY_Controller
             $this->m_pelunasanhutang->delete_pelunasan_hutang_summary_koreksi_by_id(['no_pelunasan' => $no_pelunasan, 'pelunasan_summary_id' => $id_summary]);
 
             $tmp_update = array();
-            $data_update = array('id' => $id_summary, 'koreksi' => '');
+            $data_update = array('id' => $id_summary, 'koreksi' => '', 'mode'=>'');
             array_push($tmp_update, $data_update);
             $update = $this->m_pelunasanhutang->update_data_pelunasan_hutang_summary($tmp_update);
 
