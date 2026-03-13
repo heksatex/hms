@@ -16,7 +16,7 @@
             }
             if ($jurnal->status === "cancel") {
                 ?>
-                .btn-sm{
+                .btn-sm, #btn-download{
                     display: none;
                 }
                 <?php
@@ -62,6 +62,9 @@
                         <div class="box-header with-border">
                             <h3 class="box-title"><strong> <?= $jurnal->kode ?? "" ?> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
+                                <button class="btn btn-primary btn-sm" id="btn-download" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                    <i class="fa fa-download">&nbsp;Download</i>
+                                </button>
                                 <?php if ($jurnal->status === "unposted" && count($detail) > 0) { ?>
                                     <button class="btn btn-success btn-sm" id="btn-update-status" data-status="posted"  data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         <i class="fa fa-check">&nbsp;Post</i>
@@ -70,9 +73,6 @@
                                 }
                                 if ($jurnal->status === "posted") {
                                     ?>
-                                    <button class="btn btn-primary btn-sm" id="btn-download" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
-                                        <i class="fa fa-download">&nbsp;Download</i>
-                                    </button>
                                     <button class="btn btn-success btn-sm" id="btn-print" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         <i class="fa fa-print">&nbsp;Print</i>
                                     </button>
@@ -697,7 +697,7 @@
                         }
                     });
                 });
-                
+
                 $("#btn-download").on("click", function () {
                     $.ajax({
                         url: "<?= base_url("purchase/jurnalentries/download/{$id}"); ?>",
@@ -722,7 +722,7 @@
                         }
                     });
                 });
-                
+
 
                 $("#btn-import").on("click", function (e) {
                     e.preventDefault();
