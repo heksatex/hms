@@ -56,12 +56,15 @@
                                                     </div>
                                                     <div class="col-xs-9 col-md-9">
                                                         <input type="hidden" name="curr" id="curr">
+                                                        <input type="hidden" name="coanama" id="coanama">
                                                         <select class="form-control input-sm select2 no_acc" name="kode_coa" id="kode_coa">
                                                             <option value=""></option>
                                                             <?php
                                                             foreach ($coa as $key => $value) {
                                                                 ?>
-                                                                <option value="<?= $value->kode_coa ?>" data-curr="<?= $value->curr ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
+                                                                <option value="<?= $value->kode_coa ?>" data-curr="<?= $value->curr ?>" 
+                                                                        data-coanama="<?= $value->nama ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?>
+                                                                </option>
                                                                 <?php
                                                             }
                                                             ?>
@@ -142,7 +145,9 @@
                 });
                 $(".no_acc").on("select2:select", function () {
                     var symbol = $('#kode_coa').find(':selected').data().curr;
+                    var namaCoa = $('#kode_coa').find(':selected').data().coanama;
                     $("#curr").val(symbol);
+                    $("#coanama").val(namaCoa);
                 });
 
                 $("#search").on("click", function () {
