@@ -2089,8 +2089,13 @@ class Pelunasanhutang extends MY_Controller
             // $coa_credit = $this->get_coa_default('um', $summary, 'C', $summary->no_pelunasan);
             $kode_coa = $coa_debit['kode_coa'] ?? '';
             $nama_coa = $coa_debit['nama_coa'] ?? '';
-            $posisi_head = 'D';
-            $posisi_item = 'C';
+            if ($summary->selisih > 0) {
+                $posisi_head = 'D';
+                $posisi_item = 'C';
+            } else {
+                $posisi_head = 'D';
+                $posisi_item = 'C';
+            }
         } else {
             if ($summary->selisih > 0) {
                 $posisi_head = 'C';
