@@ -159,7 +159,7 @@
         <!-- </div>
         </div> -->
         <div class="row form-group">
-            <label class="col-lg-4 col-md-4 col-12">Total (D) </label>
+            <label class="col-lg-4 col-md-4 col-12">Total (C) </label>
             <div class="col-lg-1 col-md-6 col-12">
                 <input type="text" class="form-control input-sm" name="posisi_credit" id="posisi_credit" value="C" readonly>
             </div>
@@ -168,7 +168,7 @@
             </div>
         </div>
         <div class="row form-group">
-            <label class="col-lg-4 col-md-4 col-12">Total (C) </label>
+            <label class="col-lg-4 col-md-4 col-12">Total (D) </label>
             <div class="col-lg-1 col-md-6 col-12">
                 <input type="text" class="form-control input-sm" name="posisi_debit" value="D" id="posisi_debit" readonly>
             </div>
@@ -772,19 +772,24 @@
         }
         
         let selisih = parseFloat(Math.abs(`<?php echo $get_sum->selisih; ?>`));
+        let selisih_non_abs = parseFloat((`<?php echo $get_sum->selisih; ?>`));
         $("#nominal_head").val(selisih);
 
         $("#tabel-koreksi tbody tr").each(function() {
             let row = $(this);
             koreksi = row.find(".koreksi-select").val();    
+            posisi_um = row.find(".posisi_item").val();
 
             if(koreksi === 'uang_muka') {
+                posisi_head = $("#posisi_head").val();
                 let nominal_um = `<?php echo $sum_pelunasan->total ?>`;
-                nominal_head  = selisih + parseFloat(nominal_um);
+                if(selisih_non_abs > 0 ){
+                    nominal_head  = parseFloat(nominal_um) - selisih;
+                } else {
+                    nominal_head  = selisih + parseFloat(nominal_um);
+                }
                 $("#nominal_head").val(nominal_head);
-
             }
-
         });
 
 
@@ -842,19 +847,26 @@
         initSelectCoa(row.find(".coa-select")); // load lagi select2
 
         let selisih = parseFloat(Math.abs(`<?php echo $get_sum->selisih; ?>`));
+        let selisih_non_abs = parseFloat((`<?php echo $get_sum->selisih; ?>`));
         $("#nominal_head").val(selisih);
+
         $("#tabel-koreksi tbody tr").each(function() {
             let row = $(this);
             koreksi = row.find(".koreksi-select").val();    
+            posisi_um = row.find(".posisi_item").val();
 
             if(koreksi === 'uang_muka') {
+                posisi_head = $("#posisi_head").val();
                 let nominal_um = `<?php echo $sum_pelunasan->total ?>`;
-                nominal_head  = selisih + parseFloat(nominal_um);
+                if(selisih_non_abs > 0 ){
+                    nominal_head  = parseFloat(nominal_um) - selisih;
+                } else {
+                    nominal_head  = selisih + parseFloat(nominal_um);
+                }
                 $("#nominal_head").val(nominal_head);
-
             }
-
         });
+
         bindFormatAngka();
     });
 
@@ -951,12 +963,14 @@
         let posisi_debit = $("#posisi_debit").val(); // contoh: D
         let head_posisi = $("#posisi_head").val() // D/C
         let head = parseFloat(unformatNumber($("#nominal_head").val())) || 0;
+        let selisih = `<?php echo $get_sum->selisih; ?>`;
 
         $("#tabel-koreksi tbody tr").each(function() {
 
             let row = $(this);
             let nominal = parseFloat(unformatNumber(row.find(".nominal-input").val())) || 0;
             let posisi_item = row.find(".posisi_item").val();
+            let koreksi_id  = row.find(".koreksi-select").val();
 
             if (nominal <= 0) return;
 
@@ -1040,6 +1054,7 @@
         } else {
             $("#sisa_nominal").css("color", "black");
         }
+        bindFormatAngka();
     }
 
     $(document).on('change', '.posisi_item', function() {
