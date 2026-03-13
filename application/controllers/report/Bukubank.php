@@ -181,7 +181,15 @@ class Bukubank extends MY_Controller {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $saldos = 0;
-            $row = 1;
+            $sheet->setCellValue("A1", 'BUKU BANK');
+            $coanama = $this->input->post("coanama");
+            $coa = $this->input->post("kode_coa");
+            $tanggals = $this->input->post("tanggal");
+            $curr = $this->input->post("curr");
+            
+            $sheet->setCellValue("A2", "{$coa} - {$coanama}");
+            $sheet->setCellValue("A3", "Periode : {$tanggals}");
+            $row = 5;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Tanggal');
             $sheet->setCellValue("C{$row}", 'No Bukti');
@@ -193,11 +201,11 @@ class Bukubank extends MY_Controller {
 
             if (count($data) > 0) {
                 $data_saldo = $this->_getSaldoAwal();
-                $saldos = floatval($data_saldo->saldo_awal_final);
+                $saldos = (in_array($curr, ["", "IDR"])) ? floatval($data_saldo->saldo_awal_final) : floatval($data_saldo->saldo_valas_final);
                 $row += 1;
                 $sheet->setCellValue("D{$row}", "Saldo Awal");
-                $sheet->setCellValue("F{$row}", 0);
-                $sheet->setCellValue("G{$row}", 0);
+                $sheet->setCellValue("F{$row}", "");
+                $sheet->setCellValue("G{$row}", "");
                 $sheet->setCellValue("H{$row}", $saldos);
             }
 
@@ -233,8 +241,8 @@ class Bukubank extends MY_Controller {
                 $sheet->setCellValue("C{$row}", $no_bukti);
                 $sheet->setCellValue("D{$row}", $partner . $value->uraian);
                 $sheet->setCellValue("E{$row}", $value->kode_coa);
-                $sheet->setCellValue("F{$row}", $debet);
-                $sheet->setCellValue("G{$row}", $kredit);
+                $sheet->setCellValue("F{$row}", ($debet < 1)? "":$debet);
+                $sheet->setCellValue("G{$row}", ($kredit < 1)? "":$kredit);
                 $sheet->setCellValue("H{$row}", $saldos);
 
                 $temp = $value->no_bukti;
