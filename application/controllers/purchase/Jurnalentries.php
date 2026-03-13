@@ -482,7 +482,7 @@ class Jurnalentries extends MY_Controller {
                 $sheet->setCellValue("f{$row}", $debet);
                 $sheet->setCellValue("g{$row}", $kredit);
                 $sheet->setCellValue("h{$row}", $value->kurs);
-                $sheet->setCellValue("i{$row}", $value->nominal);
+                $sheet->setCellValue("i{$row}", $value->kode_mua);
             }
             $row += 2;
             $sheet->setCellValue("f{$row}", $totalDebet);
