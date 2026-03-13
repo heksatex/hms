@@ -430,7 +430,7 @@ class Jurnalentries extends MY_Controller {
             $sheet = $spreadsheet->getActiveSheet();
             $row = 1;
             $model = new $this->m_global;
-            $head = $model->setTables("acc_jurnal_entries")->setWheres(["status" => "posted", "acc_jurnal_entries.kode" => $kode_decrypt])
+            $head = $model->setTables("acc_jurnal_entries")->setWheres(["status <>" => "cancel", "acc_jurnal_entries.kode" => $kode_decrypt])
                     ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
                     ->setSelects(["mst_jurnal.nama as nama_jurnal", "acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat"])
                     ->getDetail();
