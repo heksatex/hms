@@ -978,7 +978,7 @@ class Fakturpenjualan extends MY_Controller {
                             );
                         }
                         if ($data->ppn > 0) {
-                            $totalC += round(($data->ppn + $data->diskon_ppn)* $data->kurs_nominal, 2);
+                            $totalC += round(($data->ppn + $data->diskon_ppn) * $data->kurs_nominal, 2);
                             $jurnalItems[] = array(
                                 "kode" => $jurnal,
                                 "nama" => "PPN",
@@ -989,7 +989,7 @@ class Fakturpenjualan extends MY_Controller {
                                 "nominal_curr" => $data->ppn + $data->diskon_ppn,
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => round(($data->ppn + $data->diskon_ppn)* $data->kurs_nominal, 2),
+                                "nominal" => round(($data->ppn + $data->diskon_ppn) * $data->kurs_nominal, 2),
                                 "row_order" => (count($jurnalItems) + 1)
                             );
                         }
@@ -1071,6 +1071,10 @@ class Fakturpenjualan extends MY_Controller {
                 default:
 
                     if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
+                        $data->lunas = 0;
+                        $data->final_total = 0;
+                        $data->piutang_rp = 0;
+                    } else if (in_array($sjs[0], ["SJ"]) && $data->nominal_diskon >= 100) {
                         $data->lunas = 0;
                         $data->final_total = 0;
                         $data->piutang_rp = 0;
