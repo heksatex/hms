@@ -21,6 +21,14 @@ class Downtime extends MY_Controller
 	}
 
 
+	public function get_departement_select2()
+	{
+		$nama  = addslashes($this->input->post('nama'));
+		$callback = $this->m_downtime->get_list_departement_select2($nama);
+		echo json_encode($callback);
+	}
+
+
     public function loadData()
 	{
 		date_default_timezone_set('Asia/Jakarta');
