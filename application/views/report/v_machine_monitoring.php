@@ -60,8 +60,20 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title"><strong>Mesin Monitoring Jacquard (Realtime Update)</strong></h3>
+                            <h3 class="box-title"><strong>Mesin Monitoring <?= $dept_nm ?> (Realtime Update)</strong></h3>
                             <div class="pull-right" id="btn-header">
+                                Mesin : 
+                                <select class="mesin-select2" id="mesin">
+                                    <option value=""></option>
+                                    <?php
+                                    foreach ($allMesin as $key => $value) {
+                                        ?>
+                                        <option value="<?= $value->dept_id ?>" <?= ($value->dept_id === $dept) ? "selected" : ""?>><?= $value->nama ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                                &nbsp;&nbsp;&nbsp;
                                 Summary : 
                                 <span class="label label-danger sum-mark_danger" style="background-color: red; color: black;" data-val="0">0</span>
                                 <span class="label label-warning sum-mark_warning" style="background-color: yellow; color: black;" data-val="0">0</span>
@@ -263,10 +275,16 @@
             };
             socket.onmessage = function (event) {
                 var data = JSON.parse(event.data);
+//                var dept = $("#mesin :selected").val();
+//                console.log(dept);
                 updateContent(data);
 //                document.getElementById("messages").innerHTML += `<p><strong>Server:</strong> ${event.data}</p>`;
             };
             $(function () {
+                $(".mesin-select2").select2({
+                    allowClear: true,
+                    placeholder: "Filter Departemen",
+                });
                 $(".sum-mark_danger").attr("data-val",<?= $sumRed ?>);
                 $(".sum-mark_danger").html("<?= $sumRed ?>");
 
@@ -294,6 +312,11 @@
 //                    requestUpdate();
 //                    setInterval(requestUpdate, 60000);
 //                }, initialDelayMilliseconds);
+                $("#mesin").on("change", function () {
+                    var dept_id = $(this).val();
+                    var dept_nama = $("#mesin :selected").text();
+                    location.href = "<?= base_url("report/machinemonitoring") ?>"+`?dept=${dept_id}&nm=${dept_nama}`;
+                });
             });
         </script>
     </body>
