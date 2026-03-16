@@ -30,6 +30,11 @@ class Machinemonitoring extends MY_Controller {
     }
 
     public function index($depth = 'RPTMM') {
+        $dept = $_GET["dept"] ?? "";
+        $dept_nm = $_GET["nm"] ?? "";
+        $data["dept"] = $dept;
+        $data["dept_nm"] = $dept_nm;
+
         $ip = $_SERVER['REMOTE_ADDR']; // Mengambil IP pengunjung
 
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
@@ -37,7 +42,7 @@ class Machinemonitoring extends MY_Controller {
         } else {
             $data["ip_socket"] = "ws://10.10.0.17:8889";
         }
-        
+
         $data['id_dept'] = $depth;
         $data["class"] = $this->uri->segment(1);
         $model = new $this->m_global;
@@ -52,21 +57,29 @@ class Machinemonitoring extends MY_Controller {
 //        $mulai = date("Y-m-d H:i:s", strtotime("-15 minute", strtotime($sampai)));
         $data["times"] = $sampai;
         $data["ship"] = $mulai;
-        $data["mesin"] = $model->setTables("mesin mst")
-                        ->setJoins("log_mc log", "mst.devid_ard=log.devid AND mst.port_ard=log.port")->setWheres(["status_aktif" => "t", "port_ard > " => 0])
-                        ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai])
-                        ->setSelects(["nama_mesin,count(state) as total,state,port,devid,no_mesin,dept_id,mc_id"])
-                        ->setSelects(["COUNT(log.state)*SUM(log.state=1) as downtime"])
-                        ->setSelects(["COUNT(log.state)*SUM(log.state=0) as uptime"])
-                        ->setGroups(["devid", "port"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"])->getData();
+        $model->setTables("mesin mst")
+                ->setJoins("log_mc log", "mst.devid_ard=log.devid AND mst.port_ard=log.port")->setWheres(["status_aktif" => "t", "port_ard > " => 0])
+                ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai])
+                ->setSelects(["nama_mesin,count(state) as total,state,port,devid,no_mesin,dept_id,mc_id"])
+                ->setSelects(["COUNT(log.state)*SUM(log.state=1) as downtime"])
+                ->setSelects(["COUNT(log.state)*SUM(log.state=0) as uptime"])
+                ->setGroups(["devid", "port"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"]);
+        if ($dept !== "") {
+            $model->setWheres(["dept_id" => $dept]);
+        }
+        $data["mesin"] = $model->getData();
         $mulai = date("Y-m-d H:i:s", strtotime("-3 day", strtotime($sampai)));
-        $durasis = $model->setTables("mesin mst")
-                        ->setJoins("log_mc log", "mst.devid_ard=log.devid AND mst.port_ard=log.port")->setWheres(["status_aktif" => "t", "port_ard > " => 0])
-                        ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai])
-                        ->setSelects(["COUNT(log.state)*SUM(log.state=1) as downtime"])
-                        ->setSelects(["COUNT(log.state)*SUM(log.state=0) as uptime"])
-                        ->setSelects(["nama_mesin,count(state) as total,state,port,devid,no_mesin,dept_id,mc_id,max(timelog) as last_time"])
-                        ->setGroups(["devid", "port", "state"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"])->getData();
+        $model->setTables("mesin mst")
+                ->setJoins("log_mc log", "mst.devid_ard=log.devid AND mst.port_ard=log.port")->setWheres(["status_aktif" => "t", "port_ard > " => 0])
+                ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai])
+                ->setSelects(["COUNT(log.state)*SUM(log.state=1) as downtime"])
+                ->setSelects(["COUNT(log.state)*SUM(log.state=0) as uptime"])
+                ->setSelects(["nama_mesin,count(state) as total,state,port,devid,no_mesin,dept_id,mc_id,max(timelog) as last_time"])
+                ->setGroups(["devid", "port", "state"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"]);
+        if ($dept !== "") {
+            $model->setWheres(["dept_id" => $dept]);
+        }
+        $durasis = $model->getData();
         $durasi = [];
         foreach ($durasis as $key => $value) {
             $nm = "d{$value->devid}p{$value->port}";
@@ -98,6 +111,10 @@ class Machinemonitoring extends MY_Controller {
             $durasi[$nm] = $value;
         }
         $data["durasi"] = $durasi;
+
+        $data["allMesin"] = $model->setTables("mesin")
+                        ->setJoins("departemen", "departemen.kode = dept_id", "left")
+                        ->setSelects(["dept_id", "departemen.nama"])->setGroups(["dept_id"])->getData();
 //        log_message("error",json_encode($durasi));
         $this->load->view('report/v_machine_monitoring', $data);
     }
