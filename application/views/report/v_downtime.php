@@ -211,7 +211,7 @@
       ajax: {
         dataType: 'JSON',
         type: "POST",
-        url: "<?php echo base_url(); ?>report/qualitycontrol/get_departement_select2",
+        url: "<?php echo base_url(); ?>report/downtime/get_departement_select2",
         //delay : 250,
         data: function(params) {
           return {
