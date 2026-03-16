@@ -64,9 +64,9 @@ class Machinemonitoring extends MY_Controller {
                 ->setSelects(["COUNT(log.state)*SUM(log.state=1) as downtime"])
                 ->setSelects(["COUNT(log.state)*SUM(log.state=0) as uptime"])
                 ->setGroups(["devid", "port"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"]);
-        if ($dept !== "") {
+//        if ($dept !== "") {
             $model->setWheres(["dept_id" => $dept]);
-        }
+//        }
         $data["mesin"] = $model->getData();
         $mulai = date("Y-m-d H:i:s", strtotime("-3 day", strtotime($sampai)));
         $model->setTables("mesin mst")
@@ -76,9 +76,9 @@ class Machinemonitoring extends MY_Controller {
                 ->setSelects(["COUNT(log.state)*SUM(log.state=0) as uptime"])
                 ->setSelects(["nama_mesin,count(state) as total,state,port,devid,no_mesin,dept_id,mc_id,max(timelog) as last_time"])
                 ->setGroups(["devid", "port", "state"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"]);
-        if ($dept !== "") {
+//        if ($dept !== "") {
             $model->setWheres(["dept_id" => $dept]);
-        }
+//        }
         $durasis = $model->getData();
         $durasi = [];
         foreach ($durasis as $key => $value) {
@@ -113,7 +113,7 @@ class Machinemonitoring extends MY_Controller {
         $data["durasi"] = $durasi;
 
         $data["allMesin"] = $model->setTables("mesin")
-                        ->setJoins("departemen", "departemen.kode = dept_id", "left")
+                        ->setJoins("departemen", "departemen.kode = dept_id", "left")->setWheres(["mesin.status_aktif" => "t", "port_ard > " => 0])
                         ->setSelects(["dept_id", "departemen.nama"])->setGroups(["dept_id"])->getData();
 //        log_message("error",json_encode($durasi));
         $this->load->view('report/v_machine_monitoring', $data);
