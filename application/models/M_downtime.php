@@ -48,4 +48,16 @@ class M_downtime extends CI_Model
 		return $this->db->query("SELECT nama_mesin FROM mesin where mc_id = '$mc_id' ");
 	}
 
+   public function get_list_departement_select2($nama)
+	{
+		return $this->db->query("SELECT a.kode,a.nama
+                               FROM departemen  a
+                               INNER JOIN mesin b ON a.kode = b.dept_id
+                               WHERE b.devid_ard <> '' AND
+                               a.show_dept = 'true' AND 
+                               a.nama LIKE '%$nama%' 
+                               GROUP BY a.kode
+                               ORDER BY nama ")->result();
+	}
+
 }
