@@ -182,7 +182,15 @@ class Bukukas extends MY_Controller {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $saldos = 0;
-            $row = 1;
+            $sheet->setCellValue("A1", 'BUKU KAS');
+            $coa = $this->input->post("kode_coa");
+            $ccoa = $this->input->post("coa");
+            $coas = explode(" - ",$ccoa);
+            $tanggals = $this->input->post("tanggal");
+            
+            $sheet->setCellValue("A2", "{$coa} - {$coas[1]}");
+            $sheet->setCellValue("A3", "Periode : {$tanggals}");
+            $row = 5;
             if ($valas) {
                 $sheet->setCellValue("A{$row}", 'No');
                 $sheet->mergeCells("A{$row}:A2");
@@ -210,10 +218,10 @@ class Bukukas extends MY_Controller {
                     $saldos = floatval($data_saldo->saldo_awal_final);
                     $row += 1;
                     $sheet->setCellValue("D{$row}", "Saldo Awal");
-                    $sheet->setCellValue("F{$row}", '0');
-                    $sheet->setCellValue("G{$row}", '0');
-                    $sheet->setCellValue("H{$row}", '0');
-                    $sheet->setCellValue("I{$row}", '0');
+                    $sheet->setCellValue("F{$row}", '');
+                    $sheet->setCellValue("G{$row}", '');
+                    $sheet->setCellValue("H{$row}", '');
+                    $sheet->setCellValue("I{$row}", '');
                     $sheet->setCellValue("J{$row}", $saldos);
                 }
             } else {
@@ -231,8 +239,8 @@ class Bukukas extends MY_Controller {
                     $saldos = floatval($data_saldo->saldo_awal_final);
                     $row += 1;
                     $sheet->setCellValue("D{$row}", "Saldo Awal");
-                    $sheet->setCellValue("F{$row}", 0);
-                    $sheet->setCellValue("G{$row}", 0);
+                    $sheet->setCellValue("F{$row}", "");
+                    $sheet->setCellValue("G{$row}", "");
                     $sheet->setCellValue("H{$row}", $saldos);
                 }
             }
@@ -275,13 +283,13 @@ class Bukukas extends MY_Controller {
                     if (strtolower($value->nama_curr) === "usd") {
                         $valass["usd"]["debit"] += $debet;
                         $valass["usd"]["kredit"] += $kredit;
-                        $sheet->setCellValue("F{$row}", $debet);
-                        $sheet->setCellValue("G{$row}", $kredit);
+                        $sheet->setCellValue("F{$row}", ($debet < 1) ? "":$debet);
+                        $sheet->setCellValue("G{$row}", ($kredit < 1) ? "":$kredit);
                     } else {
                         $valass["euro"]["debit"] += $debet;
                         $valass["euro"]["kredit"] += $kredit;
-                        $sheet->setCellValue("H{$row}", $debet);
-                        $sheet->setCellValue("I{$row}", $kredit);
+                        $sheet->setCellValue("H{$row}", ($debet < 1) ? "":$debet);
+                        $sheet->setCellValue("I{$row}", ($kredit < 1) ? "":$kredit);
                     }
                     $sheet->setCellValue("J{$row}", $saldos);
                 } else {
@@ -290,8 +298,8 @@ class Bukukas extends MY_Controller {
                     $sheet->setCellValue("C{$row}", $no_bukti);
                     $sheet->setCellValue("D{$row}", $value->uraian);
                     $sheet->setCellValue("E{$row}", $value->kode_coa);
-                    $sheet->setCellValue("F{$row}", $debet);
-                    $sheet->setCellValue("G{$row}", $kredit);
+                    $sheet->setCellValue("F{$row}", ($debet < 1) ? "":$debet);
+                    $sheet->setCellValue("G{$row}", ($kredit < 1) ? "":$kredit);
                     $sheet->setCellValue("H{$row}", $saldos);
                 }
 
