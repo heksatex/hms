@@ -53,6 +53,20 @@
             accent-color: #000000;
         }
 
+        @media (max-width: 990px) {
+            .form-group {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            #btn-generate,
+            #btn-excel {
+                display: block;
+                width: 100%;
+                margin-top: 8px;
+            }
+        }
+
 
         /*
     .btn-setTgl {
@@ -144,13 +158,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <button type="button" class="btn btn-sm btn-default btn-block" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
-                                    <i class="fa fa-refresh"></i> Generate 
-                                </button>
-                                <button type="button" class="btn btn-sm btn-default btn-block" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
-                                    <i class="fa fa-file-excel-o" style="color:green"></i> Export Excel
-                                </button>
+                            <div class="col-xs-12 col-md-4">
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-refresh"></i> Generate</button>
+                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                                </div>
                             </div>
 
                         </form>
@@ -405,7 +417,7 @@
                         }
 
                         let saldo_display = (value.saldo !== null) ? formatNumber(value.saldo) : "";
-                        
+
 
                         tr.append(
                             $("<td>").text(key + 1),

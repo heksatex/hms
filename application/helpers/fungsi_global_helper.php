@@ -3,6 +3,14 @@
 if (!defined("BASEPATH"))
     exit("No direct script access allowed");
 
+
+function get_bulan_indo() {
+    return array(
+        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    );
+}
+
 function tgl_indo($tanggal) {
     $bulan = array(
         1 => 'Januari',
