@@ -272,10 +272,16 @@
 
 
         function formatNumber(n) {
-            return new Intl.NumberFormat('en-US', {
+            if (n === null || n === undefined) return "";
+
+            let val = parseFloat(n);
+            let formatted = Math.abs(val).toLocaleString('id-ID', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
-            }).format(n);
+            });
+
+            // Jika minus, bungkus dengan kurung
+            return val < 0 ? "(" + formatted + ")" : formatted;
         }
 
 
