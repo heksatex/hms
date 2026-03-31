@@ -79,7 +79,7 @@ class Labarugimonthly extends MY_Controller
         // 1. Query Saldo PIVOT (Jan s/d Des)
         $case_months = "";
         for ($i = $bulan_dari; $i <= $bulan_sampai; $i++) {
-            $case_months .= "SUM(CASE WHEN MONTH(je.tanggal_dibuat) = $i THEN (CASE WHEN jei.posisi='D' THEN jei.nominal ELSE -jei.nominal END) ELSE 0 END) AS bulan_$i, ";
+            $case_months .= "SUM(CASE WHEN MONTH(je.tanggal_dibuat) = $i THEN (CASE WHEN jei.posisi='C' THEN jei.nominal ELSE -jei.nominal END) ELSE 0 END) AS bulan_$i, ";
         }
         $case_months = rtrim($case_months, ", ");
 
@@ -112,11 +112,11 @@ class Labarugimonthly extends MY_Controller
                         // Logika: Jika saldo normal D, maka D-C. Jika C, maka C-D.
                         // Di query SQL Anda: D = nominal, C = -nominal.
                         // Jadi: Jika D => tetap $amt. Jika C => -$amt.
-                        if ($saldo_normal == 'D') {
-                            $monthly_res[$m] += $amt;
-                        } else {
-                            $monthly_res[$m] += -$amt;
-                        }
+                        $monthly_res[$m] += $amt;
+                        // if ($saldo_normal == 'D') {
+                        // } else {
+                        //     $monthly_res[$m] += -$amt;
+                        // }
                     }
                 }
             }
@@ -134,13 +134,14 @@ class Labarugimonthly extends MY_Controller
             if ($coa['level'] == 1) {
                 $prefix = substr($coa['kode_coa'], 0, 1);
                 foreach ($monthly_balances as $m => $val) {
-                    if ($prefix == '4') {
-                        // Jika Pendapatan, maka menambah laba
-                        $laba_bersih_monthly[$m] += $val;
-                    } else {
-                        // Jika Beban (kepala 5 keatas), maka mengurangi laba
-                        $laba_bersih_monthly[$m] -= $val;
-                    }
+                    $laba_bersih_monthly[$m] += $val;
+                    
+                    // if ($prefix == '4') {
+                    //     // Jika Pendapatan, maka menambah laba
+                    // } else {
+                    //     // Jika Beban (kepala 5 keatas), maka mengurangi laba
+                    //     $laba_bersih_monthly[$m] -= $val;
+                    // }
                 }
             }
 

@@ -75,7 +75,7 @@ class Labarugiyearly extends MY_Controller
         // 1. Query Saldo PIVOT Berdasarkan Tahun
         $case_years = "";
         for ($t = $tahun_dari; $t <= $tahun_sampai; $t++) {
-            $case_years .= "SUM(CASE WHEN YEAR(je.tanggal_dibuat) = $t THEN (CASE WHEN jei.posisi='D' THEN jei.nominal ELSE -jei.nominal END) ELSE 0 END) AS tahun_$t, ";
+            $case_years .= "SUM(CASE WHEN YEAR(je.tanggal_dibuat) = $t THEN (CASE WHEN jei.posisi='C' THEN jei.nominal ELSE -jei.nominal END) ELSE 0 END) AS tahun_$t, ";
         }
         $case_years = rtrim($case_years, ", ");
 
@@ -111,7 +111,8 @@ class Labarugiyearly extends MY_Controller
                     for ($t = $tahun_dari; $t <= $tahun_sampai; $t++) {
                         $amt = (float)$val["tahun_$t"];
                         // Jika saldo normal D (Beban), maka D-C (positif). Jika C (Pendapatan), maka C-D (dibalik).
-                        $yearly_res[$t] += ($saldo_normal == 'D') ? $amt : -$amt;
+                        // $yearly_res[$t] += ($saldo_normal == 'D') ? $amt : -$amt;
+                        $yearly_res[$t] += $amt;
                     }
                 }
             }
@@ -133,11 +134,11 @@ class Labarugiyearly extends MY_Controller
             if ($coa['level'] == 1) {
                 $prefix = substr($coa['kode_coa'], 0, 1);
                 foreach ($yearly_balances as $t => $val) {
-                    if ($prefix == '4') {
-                        $laba_bersih_yearly[$t] += $val; // Pendapatan menambah laba
-                    } else {
-                        $laba_bersih_yearly[$t] -= $val; // Beban mengurangi laba
-                    }
+                    $laba_bersih_yearly[$t] += $val; 
+                    // if ($prefix == '4') {
+                    // } else {
+                    //     $laba_bersih_yearly[$t] -= $val; // Beban mengurangi laba
+                    // }
                 }
             }
 
