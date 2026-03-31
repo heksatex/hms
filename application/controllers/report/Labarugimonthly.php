@@ -74,6 +74,8 @@ class Labarugimonthly extends MY_Controller
             $hide_empty   = $filter_manual[0]['checkhidden'] ?? false;
         }
 
+        // Mendapatkan level maksimal yang dipilih user (misal: 4)
+        $max_level_selected = !empty($levels) ? max(array_map('intval', $levels)) : 5;
         $hide_empty = ($hide_empty === 'true' || $hide_empty === true || $hide_empty === '1');
 
         // 1. Query Saldo PIVOT (Jan s/d Des)
@@ -147,20 +149,22 @@ class Labarugimonthly extends MY_Controller
 
             $next_coa = $all_coa[$index + 1] ?? null;
 
-            // Cek visibilitas (jika ada salah satu bulan yang tidak nol)
-            $is_empty = array_sum($monthly_balances) == 0;
-            $is_visible = (empty($levels) || in_array($coa['level'], $levels)) && !($hide_empty && $is_empty);
+            $has_value = false;
+            foreach ($monthly_balances as $v) { if (round($v, 2) != 0) { $has_value = true; break; } }
+            $is_visible = (empty($levels) || in_array($coa['level'], $levels)) && !($hide_empty && !$has_value);
 
             if ($is_visible) {
                 $results[] = [
                     "kode_acc" => $coa['kode_coa'],
                     "nama_acc" => $coa['nama'],
                     "level"    => (int)$coa['level'],
-                    "monthly"  => ($coa['level'] > 4) ? $monthly_balances : array_fill($bulan_dari, count($monthly_balances), null),
+                    // "monthly"  => ($coa['level'] > 4) ? $monthly_balances : array_fill($bulan_dari, count($monthly_balances), null),
+                    "monthly"  => ($coa['level'] == $max_level_selected || $coa['level'] == 5) ? $monthly_balances : array_fill($bulan_dari, count($monthly_balances), null),
                     "tipe"     => "row"
                 ];
 
-                if ($coa['level'] < 5) {
+                // Masukkan ke stack UNTUK TOTAL hanya jika level < max_level_selected
+                if ($coa['level'] < $max_level_selected) {
                     array_push($stack, [
                         "nama"    => "TOTAL " . $coa['nama'],
                         "level"   => $coa['level'],
@@ -265,7 +269,7 @@ class Labarugimonthly extends MY_Controller
             foreach ($records as $val) {
                 $levelOrder = array_search($val['level'], $uniqueLevels);
                 $indentStr = str_repeat('    ', $levelOrder);
-                $nama_acc = ($val['tipe'] == 'total') ? "TOTAL " . $val['nama_acc'] : $val['nama_acc'];
+                $nama_acc = ($val['tipe'] == 'total') ? " " . $val['nama_acc'] : $val['nama_acc'];
 
                 // Kolom Statis
                 $sheet->setCellValue('A' . $rowCount, $no++);
