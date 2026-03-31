@@ -161,7 +161,7 @@
                                 </div>
                             </div>
                             <div class="box-footer">
-                                <div class="colxs-12">
+                                <div class="col-xs-12">
                                     <ul class="nav nav-tabs">
                                         <li class="active"><a href="#tab_1" data-toggle="tab">Item</a></li>
                                         <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
@@ -415,12 +415,12 @@
                         totalKredit = parseFloat(totalKredit.toFixed(2));
 //                        console.log("Kredit : "+totalKredit);
                     });
-                    if (totalDebet === NaN) {
+                    if (totalDebet === NaN)
                         totalDebet = 0;
-                    }
-                    if (totalKredit === NaN) {
+
+                    if (totalKredit === NaN)
                         totalKredit = 0;
-                    }
+
 
 
                     $(".total_debit").val(totalDebet);
