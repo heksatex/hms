@@ -1669,9 +1669,18 @@ class Penerimaanbarang extends MY_Controller
                     throw new Exception('Invoice sudah terbentuk status DONE');
                 }
 
+                // cek backorder atau origin yang sama yg status nya ready atau draft
+                if($cek_kirim['status'] == 'done') {
+                    $get_head = $this->m_penerimaanBarang->get_data_by_code($kode);
+                    $cek_in   = $this->m_penerimaanBarang->cek_penerimaan_barang_backorder_by_kode($get_head->origin, ['draft','ready']);
+                    if($cek_in->num_rows() > 0 ){
+                        throw new Exception('Silahkan batalkan dahulu Penerimaan Barang  Backorder dari hasil penerimaan ini !');
+                    }
+                }
+
                 if(in_array($cek_kirim['status'], ['draft', 'ready'])) {
                     $status_update = $status_cancel;
-                } else {
+                } else { // status  = done
                     $status_update = $status_ready;
                 }
 
