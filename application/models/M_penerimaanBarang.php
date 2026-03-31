@@ -563,4 +563,14 @@ class M_penerimaanBarang extends CI_Model
 		$query = $this->db->get('invoice');
 		return $query;
 	}
+
+	public function cek_penerimaan_barang_backorder_by_kode($origin, $status)
+	{
+		$this->db->where('origin', $origin);
+		if(isset($status)) {
+			$this->db->where_in('status', $status);
+		}
+		$query = $this->db->get('penerimaan_barang');
+		return $query;
+	}
 }
