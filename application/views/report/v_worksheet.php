@@ -107,7 +107,7 @@
                                 <div class="form-group">
                                     <div class="col-md-12">
                                         <div class="col-md-2">
-                                            <label> </label>
+                                            <label>Opsi</label>
                                         </div>
                                         <div class="col-md-6">
                                             <input type="checkbox" name="hidden_check" id="hidden_check" checked>
