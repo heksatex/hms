@@ -895,19 +895,20 @@ class Labarugistandar extends MY_Controller
             $total = 0;
             foreach ($saldo_map as $kode_tr => $val) {
                 if (strpos($kode_tr, $kode_coa) === 0) {
-                    if ($saldo_normal == 'D') {
-                        $total += ($val['total_debit'] - $val['total_credit']);
-                    } else {
+                    // if ($saldo_normal == 'D') {
+                    //     $total += ($val['total_debit'] - $val['total_credit']);
+                    // } else {
+                    //     }
                         $total += ($val['total_credit'] - $val['total_debit']);
-                    }
                 }
             }
             return $total;
         };
 
         $results = [];
-        $total_pendapatan = 0;
-        $total_beban = 0;
+        $laba_bersih = 0;
+        $total_kredit_group = 0;
+        $total_debit_group = 0;
         $stack = []; // Untuk menyimpan antrean baris Total
 
         foreach ($all_coa as $index => $coa) {
@@ -915,9 +916,12 @@ class Labarugistandar extends MY_Controller
 
             // Akumulasi Laba Bersih
             if ($coa['level'] == 1) {
-                $prefix = substr($coa['kode_coa'], 0, 1);
-                if ($prefix == '4') $total_pendapatan += $saldo;
-                else if ($prefix >= '5') $total_beban += $saldo;
+                // if ($coa['saldo_normal'] == 'C') {
+                //     $total_kredit_group += $saldo;
+                // } else {
+                //     $total_debit_group += $saldo;
+                // }
+                $laba_bersih += $saldo;
             }
 
             // Cek apakah akun selanjutnya adalah level yang lebih tinggi (kembali ke induk)
@@ -967,7 +971,7 @@ class Labarugistandar extends MY_Controller
 
         return [
             "record" => $results,
-            "laba_bersih" => $total_pendapatan - $total_beban
+            "laba_bersih" => $laba_bersih
         ];
     }
 
