@@ -69,7 +69,9 @@ class Labarugiyearly extends MY_Controller
             $levels       = $filter_manual[0]['level'] ?? [];
             $hide_empty   = $filter_manual[0]['checkhidden'] ?? false;
         }
-
+        
+        // Mendapatkan level maksimal yang dipilih user (misal: 4)
+        $max_level_selected = !empty($levels) ? max(array_map('intval', $levels)) : 5;
         $hide_empty = ($hide_empty === 'true' || $hide_empty === true || $hide_empty === '1' || $hide_empty === 'on');
 
         // 1. Query Saldo PIVOT Berdasarkan Tahun
@@ -145,19 +147,21 @@ class Labarugiyearly extends MY_Controller
             $next_coa = $all_coa[$index + 1] ?? null;
 
             // Cek visibilitas
-            $is_empty = array_sum($yearly_balances) == 0;
-            $is_visible = (empty($levels) || in_array($coa['level'], $levels)) && !($hide_empty && $is_empty);
+            $has_value = false;
+            foreach ($yearly_balances as $v) { if (round($v, 2) != 0) { $has_value = true; break; } }
+            $is_visible = (empty($levels) || in_array($coa['level'], $levels)) && !($hide_empty && !$has_value);
 
             if ($is_visible) {
                 $results[] = [
                     "kode_acc" => $coa['kode_coa'],
                     "nama_acc" => $coa['nama'],
                     "level"    => (int)$coa['level'],
-                    "yearly"   => ($coa['level'] > 4) ? $yearly_balances : array_fill($tahun_dari, ($tahun_sampai - $tahun_dari + 1), null),
+                    // "yearly"   => ($coa['level'] > 4) ? $yearly_balances : array_fill($tahun_dari, ($tahun_sampai - $tahun_dari + 1), null),
+                    "yearly"   => ($coa['level'] == $max_level_selected || $coa['level'] == 5) ? $yearly_balances : array_fill_keys(range($tahun_dari, $tahun_sampai), null),
                     "tipe"     => "row"
                 ];
 
-                if ($coa['level'] < 5) {
+                if ($coa['level'] < $max_level_selected) {
                     array_push($stack, [
                         "nama"    => "TOTAL " . $coa['nama'],
                         "level"   => $coa['level'],
@@ -252,7 +256,7 @@ class Labarugiyearly extends MY_Controller
             foreach ($records as $val) {
                 $levelIndex = array_search($val['level'], $sortedLevels);
                 $indentStr  = str_repeat('    ', $levelIndex);
-                $nama_acc   = ($val['tipe'] == 'total') ? "TOTAL " . $val['nama_acc'] : $val['nama_acc'];
+                $nama_acc   = ($val['tipe'] == 'total') ? " " . $val['nama_acc'] : $val['nama_acc'];
 
                 // --- LOGIKA NOMOR (NO) ---
                 // Sesuai permintaan: No muncul di baris data & total, tapi tidak di spacer

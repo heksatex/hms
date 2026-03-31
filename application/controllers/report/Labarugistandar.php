@@ -864,6 +864,9 @@ class Labarugistandar extends MY_Controller
             $hide_empty = $filter_manual[0]['checkhidden'] ?? false;
         }
 
+        // Cari tahu level tertinggi yang dipilih (misal: 4)
+        $max_level_selected = !empty($levels) ? max(array_map('intval', $levels)) : 5;
+
         $hide_empty = ($hide_empty === 'true' || $hide_empty === true || $hide_empty === '1');
 
         $tgldari   = date('Y-m-d', strtotime($tgldari)) . " 00:00:00";
@@ -937,13 +940,16 @@ class Labarugistandar extends MY_Controller
                     "kode_acc"  => $coa['kode_coa'],
                     "nama_acc"  => $coa['nama'],
                     "level"     => (int)$coa['level'],
-                    "saldo"     => ($coa['level'] > 4) ? $saldo : null, // Saldo hanya muncul di leaf/detail
+                    // "saldo"     => ($coa['level'] > 4) ? $saldo : null, // Saldo hanya muncul di leaf/detail
+                    // Jika ini adalah level terakhir yang dipilih user, tampilkan saldonya di baris ini
+                    "saldo"     => ($coa['level'] == $max_level_selected || $coa['level'] == 5) ? $saldo : null,
                     "tipe"      => "row"
                 ];
 
-                // Simpan ke stack untuk baris Total nanti
-                // Kita hanya ingin baris Total untuk level 1, 2, 3, 4
-                if ($coa['level'] < 5) {
+                // LOGIKA STACK TOTAL:
+                // Hanya buat total jika level akun saat ini LEBIH KECIL dari level maksimal yang dipilih
+                // Contoh: Jika user pilih sampai lvl 4, maka lvl 1, 2, dan 3 yang punya baris TOTAL.
+                if ($coa['level'] < $max_level_selected) {
                     array_push($stack, [
                         "nama"  => "TOTAL " . $coa['nama'],
                         "level" => $coa['level'],
@@ -1063,7 +1069,7 @@ class Labarugistandar extends MY_Controller
                 $indentStr = str_repeat('    ', $levelOrder); // Indentasi berdasarkan urutan
                 // Indentasi Nama Acc (menggunakan spasi manual di Excel)
                 // $indentStr = str_repeat('    ', ($val['level'] - 1));
-                $nama_acc = ($val['tipe'] == 'total') ? "TOTAL " . $val['nama_acc'] : $val['nama_acc'];
+                $nama_acc = ($val['tipe'] == 'total') ? "" . $val['nama_acc'] : $val['nama_acc'];
 
                 // Isi Kolom
                 // No hanya muncul di baris akun transaksi (Level 5) atau baris Header Utama

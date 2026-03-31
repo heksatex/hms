@@ -372,6 +372,11 @@
                 level.push($(this).val());
             });
 
+            if (level.length === 0) {
+                alert_modal_warning("Pilih minimal satu level!");
+                return false;
+            }
+
             $("#example1_processing").show();
             this_btn.button('loading');
 
