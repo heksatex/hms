@@ -107,7 +107,7 @@ class Bankkeluar extends MY_Controller {
             }
             if ($uraian !== "") {
                 $list->setJoins("acc_bank_keluar_detail abkd", "abkd.bank_keluar_id = acc_bank_keluar.id")
-                        ->setGroups(["bank_keluar_id"])->setWheres(["abkd.uraian LIKE" => "%{$uraian}%"]);
+                        ->setGroups(["bank_keluar_id"])->setWhereRaw("(abkd.uraian LIKE '%{$uraian}%' OR abkd.bank LIKE '%{$uraian}%' OR abkd.no_rek LIKE '%{$uraian}%' OR abkd.no_bg LIKE '%{$uraian}%')");
             }
             if ($status !== "") {
                 $list->setWheres(["acc_bank_keluar.status" => "{$status}"]);
