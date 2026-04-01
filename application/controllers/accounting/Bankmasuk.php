@@ -185,7 +185,7 @@ class Bankmasuk extends MY_Controller {
             }
             if ($uraian !== "") {
                 $model->setJoins("acc_bank_masuk_detail abkd", "abkd.bank_masuk_id = acc_bank_masuk.id")
-                        ->setGroups(["bank_masuk_id"])->setWheres(["abkd.uraian LIKE" => "%{$uraian}%"]);
+                        ->setGroups(["bank_masuk_id"])->setWhereRaw("(abkd.uraian LIKE '%{$uraian}%' OR abkd.bank LIKE '%{$uraian}%' OR abkd.no_rek LIKE '%{$uraian}%' OR abkd.no_bg LIKE '%{$uraian}%')");
             }
 
             return $model;
