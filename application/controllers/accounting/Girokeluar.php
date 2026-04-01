@@ -88,7 +88,7 @@ class Girokeluar extends MY_Controller {
                     ->setOrders([null, "no_gk", "partner_nama", "acc_giro_keluar.tanggal", null, null, "total_rp", "acc_giro_keluar.status"])
                     ->setSelects(["acc_giro_keluar.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
 
-            
+            $uraian = $this->input->post("uraian");
             $tanggal = $this->input->post("tanggal");
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
@@ -105,6 +105,10 @@ class Girokeluar extends MY_Controller {
             }
             if ($customer !== "") {
                 $list->setWhereRaw("(partner_nama LIKE '%{$customer}%' or lain2 LIKE '%{$customer}%')");
+            }
+            if ($uraian !== "") {
+                $list->setJoins("acc_giro_keluar_detail agmd", "agmd.giro_keluar_id = acc_giro_keluar.id")
+                        ->setGroups(["giro_keluar_id"])->setWhereRaw("(agmd.bank LIKE '%$uraian%' OR agmd.no_rek LIKE '%$uraian%' OR agmd.no_bg LIKE '%$uraian%')");
             }
             return $list;
         } catch (Exception $ex) {
@@ -308,15 +312,15 @@ public function ekspor() {
             if ($this->form_validation->run() == FALSE) {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
+            $tanggal = $this->input->post("tanggal");
 
             $this->_module->startTransaction();
             $this->_module->lock_tabel("token_increment WRITE,acc_giro_keluar WRITE,log_history WRITE,main_menu_sub READ,acc_giro_keluar_detail WRITE,acc_giro_masuk_detail WRITE");
-            if (!$nogk = $this->token->noUrut('giro_keluar', date('ym'), true)->generate('BGKH', '/%03d')->prefixAdd("/" . date("y") . "/" . getRomawi(date('m') . "/"))->get()) {
+            if (!$nogk = $this->token->noUrut('giro_keluar', date('ym',strtotime($tanggal)), true)->generate('BGKH', '/%03d')->prefixAdd("/" . date("y",strtotime($tanggal)) . "/" . getRomawi(date('m',strtotime($tanggal)) . "/"))->get()) {
                 throw new \Exception("No Giro Keluar tidak terbuat", 500);
             }
 
             $now = date("Y-m-d H:i:s");
-            $tanggal = $this->input->post("tanggal");
             $trx_intern = $this->input->post("trx_intern");
             $header = [
                 "no_gk" => $nogk,

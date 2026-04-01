@@ -87,6 +87,7 @@ class Giromasuk extends MY_Controller {
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
             $status = $this->input->post("status"); 
+            $uraian = $this->input->post("uraian"); 
             if ($status !== "") {
                 $list->setWheres(["acc_giro_masuk.status" => "{$status}"]);
             }
@@ -99,6 +100,10 @@ class Giromasuk extends MY_Controller {
             }
             if ($customer !== "") {
                 $list->setWhereRaw("(partner_nama LIKE '%{$customer}%' or lain2 LIKE '%{$customer}%')");
+            }
+            if ($uraian !== "") {
+                $list->setJoins("acc_giro_masuk_detail agmd", "agmd.giro_masuk_id = acc_giro_masuk.id")
+                        ->setGroups(["giro_masuk_id"])->setWhereRaw("(agmd.bank LIKE '%$uraian%' OR agmd.no_rek LIKE '%$uraian%' OR agmd.no_bg LIKE '%$uraian%')");
             }
             return $list;
         } catch (Exception $ex) {
@@ -308,13 +313,12 @@ class Giromasuk extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
             $this->_module->startTransaction();
+            $tanggal = $this->input->post("tanggal");
             $this->_module->lock_tabel("token_increment WRITE,acc_giro_masuk WRITE,log_history WRITE,main_menu_sub READ,acc_giro_masuk_detail WRITE, acc_giro_keluar_detail WRITE");
-            if (!$nogm = $this->token->noUrut('giro_masuk', date('ym'), true)->generate('MKGH', '/%03d')->prefixAdd("/" . date("y") . "/" . getRomawi(date('m') . "/"))->get()) {
+            if (!$nogm = $this->token->noUrut('giro_masuk', date('ym',strtotime($tanggal)), true)->generate('MKGH', '/%03d')->prefixAdd("/" . date("y",strtotime($tanggal)) . "/" . getRomawi(date('m',strtotime($tanggal)) . "/"))->get()) {
                 throw new \Exception("No Giro Masuk tidak terbuat", 500);
             }
-
             $now = date("Y-m-d H:i:s");
-            $tanggal = $this->input->post("tanggal");
             $header = [
                 "no_gm" => $nogm,
                 "create_date" => $now,
