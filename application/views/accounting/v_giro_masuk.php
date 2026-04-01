@@ -80,6 +80,14 @@
                                                             </div>
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-3">
+                                                                    <label class="form-label">Uraian</label>
+                                                                </div>
+                                                                <div class="col-xs-9 col-md-9">
+                                                                    <input type="text" class="form-control" name="uraian" id="uraian" title="No REK, NO BG, BANK">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 col-xs-12">
+                                                                <div class="col-xs-3">
                                                                     <label class="form-label">Status</label>
                                                                 </div>
                                                                 <div class="col-xs-9 col-md-9">
@@ -171,7 +179,7 @@
                             d.tanggal = tanggal;
                             d.customer = $("#customer").val();
                             d.no_bukti = $("#no_bukti").val();
-                            d.uraian = "";
+                            d.uraian =  $("#uraian").val();
                             d.status = $("#status").val();
                         }
                     },
