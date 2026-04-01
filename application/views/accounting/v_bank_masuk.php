@@ -83,7 +83,7 @@
                                                                     <label class="form-label">Uraian</label>
                                                                 </div>
                                                                 <div class="col-xs-9 col-md-9">
-                                                                    <input type="text" class="form-control input-sm" name="uraian" id="uraian" title="BANK, No REK, No BG">
+                                                                    <input type="text" class="form-control input-sm" name="uraian" id="uraian" title="Uraian, BANK, No REK, No BG">
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-12 col-xs-12">
