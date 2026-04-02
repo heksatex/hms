@@ -757,6 +757,7 @@ class Asettetap extends MY_Controller {
                         $text = "<div class='list-item-div'>Penyusutan : {$awalFormat} (Disusutkan seluruhnya)</div>";
                         $hasil = 0;
                         $penyusutan = $awal;
+                        $hrgBulanan = $penyusutan / 12;
                     }
                     $data[] = (object) [
                                 "text" => $text,

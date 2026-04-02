@@ -249,7 +249,7 @@
                                                                 foreach ($jurnals as $key => $value) {
                                                                     $no += 1;
                                                                     $jrnl = str_replace("/", "_", $value->no_jurnal);
-                                                                    $totalPenyusutan += $value->penyusutan_bulan;
+                                                                    $totalPenyusutan += ($value->status_jurnal === "cancel") ? 0:$value->penyusutan_bulan;
                                                                     ?>
                                                                     <tr>
                                                                         <td>
@@ -262,7 +262,7 @@
                                                                         </td>
                                                                         <td> <?= $value->reff_note ?></td>
                                                                         <td><?= $value->penyusutan_tgl ?></td>
-                                                                        <td  class="text-right" style="text-align: right"><?= number_format($value->penyusutan_bulan) ?></td>
+                                                                        <td  class="text-right" style="text-align: right"><?= number_format($value->penyusutan_bulan,2) ?></td>
                                                                         <td class="sts-jurnal-<?= $jrnl ?>"><?= $value->status_jurnal ?></td>
                                                                         <td>
                                                                             <?php
@@ -292,7 +292,7 @@
                                                                         Total Penyusutan
                                                                     </td>
                                                                     <td class="text-right">
-                                                                        <?= number_format(round($totalPenyusutan), 2) ?>
+                                                                        <?= number_format(round($totalPenyusutan,2), 2) ?>
                                                                     </td>
                                                                 </tr>
                                                             </tfoot>
@@ -322,7 +322,7 @@
                                                             $no = 0;
                                                             foreach ($jurnals as $key => $value) {
                                                                 $no += 1;
-                                                                $totalPenyusutan += $value->penyusutan_bulan;
+                                                                $totalPenyusutan += ($value->status_jurnal === "cancel") ? 0:$value->penyusutan_bulan;
                                                                 $jrnl = str_replace("/", "_", $value->no_jurnal);
                                                                 ?>
                                                                 <tr>
@@ -370,7 +370,7 @@
                                                                     Total Penyusutan
                                                                 </td>
                                                                 <td class="text-right">
-                                                                    <?= number_format(round($totalPenyusutan), 2) ?>
+                                                                    <?= number_format(round($totalPenyusutan,2), 2) ?>
                                                                 </td>
                                                             </tr>
                                                         </tfoot>
@@ -436,17 +436,17 @@
                     searching: false,
                     lengthChange: true,
                     lengthMenu: [[12, 50, -1],[12, 50, "All"]],
-                    dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-4'B><'col-sm-8'i>>",
+                    dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-8'B><'col-sm-4'i>>",
                     buttons: [
                         {
-                            "text": '<i class="fa fa-check"> <span>Posted</span>',
+                            "text": '<i class="fa fa-check"> <span>Posted All</span>',
                             "className": "btn-posted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".posted-data").trigger("click");
                             }
                         },
                         {
-                            "text": '<i class="fa fa-check"> <span>unPosted</span>',
+                            "text": '<i class="fa fa-check"> <span>unPosted All</span>',
                             "className": "btn-unposted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".unposted-data").trigger("click");
@@ -508,17 +508,17 @@
                     ordering: false,
                     lengthChange: true,
                     lengthMenu: [[12, 50, -1],[12, 50, "All"]],
-                    dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-4'B><'col-sm-8'i>>",
+                    dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-8'B><'col-sm-4'i>>",
                     buttons: [
                         {
-                            "text": '<i class="fa fa-check"> <span>Posted</span>',
+                            "text": '<i class="fa fa-check"> <span>Posted All</span>',
                             "className": "btn-posted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".posted-data").trigger("click");
                             }
                         },
                         {
-                            "text": '<i class="fa fa-check"> <span>unPosted</span>',
+                            "text": '<i class="fa fa-check"> <span>unPosted All</span>',
                             "className": "btn-unposted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".unposted-data").trigger("click");
