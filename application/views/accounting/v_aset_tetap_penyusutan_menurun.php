@@ -1,5 +1,5 @@
 <style>
-   
+
 </style>
 <div class="col-xs-12 col-md-6">
     <?php
@@ -56,8 +56,9 @@
         iDisplayLength: 12,
         ordering: false,
         searching: false,
-        lengthChange: false,
-        dom: "<'row'<'col-sm-12'p>>" +
+        lengthChange: true,
+        lengthMenu: [[12, 50, -1], [12, 50, "All"]],
+        dom: "<'row'<'col-sm-4'l><'col-sm-8'p>>" +
                 "<'row'<'col-sm-12'tr>>" +
                 "<'row'<'col-sm-5'i>>",
     });
