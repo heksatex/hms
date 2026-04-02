@@ -36,7 +36,7 @@
             }
         </style>
     </head>
-    <body class="hold-transition skin-black fixed sidebar-mini">
+    <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <header class="main-header">
             <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
             <?php
@@ -117,11 +117,11 @@
                         <div class="box-footer">
                             <div class="box-footer">
                                 <ul class="nav nav-tabs ">
-                                    <li class="active"><a href="#tab_1" data-toggle="tab">Setting</a></li>
-                                    <li><a href="#tab_2" data-toggle="tab">Tabel Penyusutan</a></li>
+                                    <li class="<?= ($datas->status ==='draft') ? 'active':"" ?>"><a href="#tab_1" data-toggle="tab">Setting</a></li>
+                                    <li class="<?= ($datas->status !=='draft') ? 'active':"" ?>"><a href="#tab_2" data-toggle="tab">Tabel Penyusutan</a></li>
                                 </ul>
                                 <div class="tab-content"></br>
-                                    <div class="tab-pane active" id="tab_1" >
+                                    <div class="tab-pane <?= ($datas->status ==='draft') ? 'active':"" ?>" id="tab_1" >
                                         <div class="col-md-6 col-xs-12">
                                             <div class="field-group">
                                                 <div class="form-group">
@@ -208,7 +208,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane" id="tab_2" >
+                                    <div class="tab-pane <?= ($datas->status !=='draft') ? 'active':"" ?>" id="tab_2" >
                                         <div class="field-group">
                                             <button type="button" class="btn btn-success btn-sm btn-generate">Generate</button>
                                         </div>
