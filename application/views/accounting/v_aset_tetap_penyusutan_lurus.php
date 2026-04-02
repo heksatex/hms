@@ -54,6 +54,7 @@
     const table = $("#tbl-penyu").DataTable({
         iDisplayLength: 12,
         ordering: false,
-        lengthChange: false
+        lengthChange: true,
+        lengthMenu: [[12, 50, -1],[12, 50, "All"]],
     });
 </script>

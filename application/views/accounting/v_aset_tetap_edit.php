@@ -3,14 +3,15 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php"); ?>
         <style>
-            #btn-done,#btn-simpan,.btn-generate,.btn-posted,#btn-cancel{
+            #btn-done,#btn-simpan,.btn-generate,.btn-posted,.btn-unposted,#btn-cancel{
                 display: none !important;
             }
             <?php if ($datas->status === "done") {
                 ?>
-                #btn-cancel{
+                #btn-cancel,.btn-posted,.btn-unposted{
                     display: inline !important;
                 }
+
                 <?php
             }
             if ($datas->status === "draft") {
@@ -29,6 +30,9 @@
             }
             .btn-posted {
                 background-color: #00a65a !important;
+            }
+            .btn-unposted {
+                background-color: #ffcc00 !important;
             }
         </style>
     </head>
@@ -100,13 +104,6 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4"><label class="form-label required">QTY</label></div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <input type="text" name="qty" id="qty"  class="form-control input-sm qty" required value="<?= number_format($datas->qty, 2) ?>"
-                                                       class="form-control input-sm text-right" <?= ($datas->status === "draft") ? "" : "readonly" ?>/>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label class="form-label required">Nilai Sisa</label></div>
                                             <div class="col-xs-8 col-md-8">
                                                 <input type="text" name="nilai_sisa" id="nilai_sisa"  class="form-control input-sm nilai_sisa" value="<?= number_format($datas->nilai_sisa, 2) ?>"
@@ -160,9 +157,7 @@
                                                         <div class="col-xs-4"><label class="form-label required">Umur Asset</label></div>
                                                         <div class="col-xs-8 col-md-8">
                                                             <div class="input-group">
-                                                                <select class="form-control input-sm umur" name="umur" <?= ($datas->status === "draft") ? "" : "disabled" ?>>
-                                                                    <option value="<?= $datas->umur_aset ?>" selected><?= $datas->umur_aset ?></option>
-                                                                </select>
+                                                                <input class="form-control input-sm umur" name="umur" value="<?= $datas->umur_aset ?>" readonly>
                                                                 <span class="input-group-addon">Tahun</span>
                                                             </div>
                                                         </div>
@@ -177,9 +172,7 @@
                                                         <div class="col-xs-4"><label class="form-label required">Tarif</label></div>
                                                         <div class="col-xs-8 col-md-8">
                                                             <div class="input-group">
-                                                                <select class="form-control input-sm tarif" name="tarif" <?= ($datas->status === "draft") ? "" : "disabled" ?>>
-                                                                    <option value="<?= $datas->tarif_penyusutan ?>" selected><?= $datas->tarif_penyusutan ?></option>
-                                                                </select>
+                                                                <input class="form-control input-sm tarif" name="tarif" value="<?= $datas->tarif_penyusutan ?>" readonly>
                                                                 <span class="input-group-addon">%</span>
                                                             </div>
 
@@ -240,28 +233,36 @@
                                                         <table id="tbl-penyu-sm" class="table table-striped">
                                                             <thead>
                                                                 <tr>
+                                                                    <th>No</th>
                                                                     <th class="no">No Jurnal</th>
-                                                                    <th>Penyusutan (Tahun)</th>
+                                                                    <th>Ref Note</th>
                                                                     <th>Tgl Penyusutan</th>
-                                                                    <th>Penyusutan (Bulan)</th>
+                                                                    <th  class="text-right" style="text-align: right">Penyusutan (Bulan)</th>
                                                                     <th>Status Jurnal</th>
                                                                     <th>#</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 <?php
+                                                                $no = 0;
+                                                                $totalPenyusutan = 0;
                                                                 foreach ($jurnals as $key => $value) {
+                                                                    $no += 1;
                                                                     $jrnl = str_replace("/", "_", $value->no_jurnal);
+                                                                    $totalPenyusutan += $value->penyusutan_bulan;
                                                                     ?>
                                                                     <tr>
+                                                                        <td>
+                                                                            <?= $no ?>
+                                                                        </td>
                                                                         <td>
                                                                             <?= $value->no_jurnal ?> &nbsp;<span class="open-modal" data-jurnal="<?= $value->no_jurnal ?>">
                                                                                 <i class="fa fa-external-link" style="color:blue;cursor: pointer;"></i>
                                                                             </span>
                                                                         </td>
-                                                                        <td> <?= number_format($value->penyusutan_thn) ?></td>
+                                                                        <td> <?= $value->reff_note ?></td>
                                                                         <td><?= $value->penyusutan_tgl ?></td>
-                                                                        <td><?= number_format($value->penyusutan_bulan) ?></td>
+                                                                        <td  class="text-right" style="text-align: right"><?= number_format($value->penyusutan_bulan) ?></td>
                                                                         <td class="sts-jurnal-<?= $jrnl ?>"><?= $value->status_jurnal ?></td>
                                                                         <td>
                                                                             <?php
@@ -279,6 +280,22 @@
                                                                 }
                                                                 ?>
                                                             </tbody>
+                                                            <tfoot>
+                                                                <tr>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="3">
+
+                                                                    </td>
+                                                                    <td>
+                                                                        Total Penyusutan
+                                                                    </td>
+                                                                    <td class="text-right">
+                                                                        <?= number_format(round($totalPenyusutan), 2) ?>
+                                                                    </td>
+                                                                </tr>
+                                                            </tfoot>
                                                         </table>
                                                     </div>
                                                     <?php
@@ -287,10 +304,11 @@
                                                     <table id="tbl-penyu-sl" class="table table-striped">
                                                         <thead>
                                                             <tr>
+                                                                <th>No</th>
                                                                 <th class="no">No Jurnal</th>
-                                                                <th>Penyusutan (Tahun)</th>
+                                                                <th>Reff note</th>
                                                                 <th>Tgl Penyusutan</th>
-                                                                <th>Penyusutan (Bulan)</th>
+                                                                <th  class="text-right" style="text-align: right">Penyusutan (Bulan)</th>
                                                                 <th>Status Jurnal</th>
                                                                 <th>#</th>
                                                             </tr>
@@ -300,22 +318,27 @@
                                                             $temp = 0;
                                                             $totalTahunan = 0;
                                                             $totalBulanan = 0;
+                                                            $totalPenyusutan = 0;
+                                                            $no = 0;
                                                             foreach ($jurnals as $key => $value) {
+                                                                $no += 1;
+                                                                $totalPenyusutan += $value->penyusutan_bulan;
                                                                 $jrnl = str_replace("/", "_", $value->no_jurnal);
                                                                 ?>
                                                                 <tr>
+                                                                    <td>
+                                                                        <?= $no ?>
+                                                                    </td>
                                                                     <td>
                                                                         <?= $value->no_jurnal ?> &nbsp;<span class="open-modal" data-jurnal="<?= $value->no_jurnal ?>">
                                                                             <i class="fa fa-external-link" style="color:blue;cursor: pointer;"></i>
                                                                         </span>
                                                                     </td>
-                                                                    <td>
-                                                                        <?= number_format($value->penyusutan_thn, 2); ?>
-                                                                    </td>
+                                                                    <td> <?= $value->reff_note ?></td>
                                                                     <td>
                                                                         <?= $value->penyusutan_tgl ?>
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="text-right" style="text-align: right">
                                                                         <?= number_format($value->penyusutan_bulan, 2) ?>
                                                                     </td>
                                                                     <td class="sts-jurnal-<?= $jrnl ?>"><?= $value->status_jurnal ?></td>
@@ -335,6 +358,22 @@
                                                             }
                                                             ?>
                                                         </tbody>
+                                                        <tfoot>
+                                                            <tr>
+
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="3">
+
+                                                                </td>
+                                                                <td>
+                                                                    Total Penyusutan
+                                                                </td>
+                                                                <td class="text-right">
+                                                                    <?= number_format(round($totalPenyusutan), 2) ?>
+                                                                </td>
+                                                            </tr>
+                                                        </tfoot>
                                                     </table>
                                                     <?php
                                                 }
@@ -347,6 +386,7 @@
                     </form>
                 </div>
                 <button style="display: none" class="posted-data"></button>
+                <button style="display: none" class="unposted-data"></button>
             </section>
 
         </div>
@@ -394,8 +434,9 @@
                     iDisplayLength: 12,
                     ordering: false,
                     searching: false,
-                    lengthChange: false,
-                    dom: "<'row'<'col-sm-5'i><'col-sm-7'<'#colvis'>p>>B",
+                    lengthChange: true,
+                    lengthMenu: [[12, 50, -1],[12, 50, "All"]],
+                    dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-4'B><'col-sm-8'i>>",
                     buttons: [
                         {
                             "text": '<i class="fa fa-check"> <span>Posted</span>',
@@ -404,6 +445,13 @@
                                 $(".posted-data").trigger("click");
                             }
                         },
+                        {
+                            "text": '<i class="fa fa-check"> <span>unPosted</span>',
+                            "className": "btn-unposted btn-sm",
+                            "action": function (e, dt, node, config) {
+                                $(".unposted-data").trigger("click");
+                            }
+                        }
                     ],
                     "fnDrawCallback": function () {
                         $(".open-modal").on("click", function () {
@@ -458,8 +506,9 @@
                 $("#tbl-penyu-sl").DataTable({
                     iDisplayLength: 12,
                     ordering: false,
-                    lengthChange: false,
-                    dom: 'Bfrtip',
+                    lengthChange: true,
+                    lengthMenu: [[12, 50, -1],[12, 50, "All"]],
+                    dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-4'B><'col-sm-8'i>>",
                     buttons: [
                         {
                             "text": '<i class="fa fa-check"> <span>Posted</span>',
@@ -468,6 +517,13 @@
                                 $(".posted-data").trigger("click");
                             }
                         },
+                        {
+                            "text": '<i class="fa fa-check"> <span>unPosted</span>',
+                            "className": "btn-unposted btn-sm",
+                            "action": function (e, dt, node, config) {
+                                $(".unposted-data").trigger("click");
+                            }
+                        }
                     ],
                     "fnDrawCallback": function () {
                         $(".open-modal").on("click", function () {
@@ -567,8 +623,8 @@
                 });
                 $(".kategori").on("change", function () {
                     $(".kelompok").val(null).trigger('change');
-                    $(".umur").val(null).trigger('change');
-                    $(".tarif").val(null).trigger('change');
+                    $(".umur").val("");
+                    $(".tarif").val("");
                 });
                 $(".kelompok").select2({
                     placeholder: "Pilih",
@@ -602,78 +658,37 @@
 
                 });
                 $(".kelompok").on("change", function () {
-                    $(".umur").val(null).trigger('change');
-                    $(".tarif").val(null).trigger('change');
+                    $(".umur").val("");
+                    $(".tarif").val("");
+                    setUmurAset();
                 });
                 $(".penyusutan").on("change", function () {
-                    $(".umur").val(null).trigger('change');
-                    $(".tarif").val(null).trigger('change');
+                    $(".umur").val("");
+                    $(".tarif").val("");
+                    setUmurAset();
                 });
-                $(".umur").select2({
-                    placeholder: "Pilih",
-                    allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
+                const setUmurAset = (() => {
+                    $.ajax({
                         type: "GET",
                         url: "<?php echo base_url(); ?>accounting/asettetap/kategori_kelompok",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term,
-                                param: encodeURIComponent("kategori='" + $(".kategori").val() + "' and kelompok='" + $(".kelompok").val() + "'")
-                            };
-                        },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                results.push({
-                                    id: item.umur_tahun,
-                                    text: item.umur_tahun
-                                });
-                            });
-                            return {
-                                results: results
-                            };
+                        data: {
+                            param: encodeURIComponent("kategori='" + $(".kategori").val() + "' and kelompok='" + $(".kelompok").val() + "'")
                         },
                         error: function (xhr, ajaxOptions, thrownError) {
-                        }
-                    }
-                });
-                $(".umur").on("change", function () {
-                    $(".tarif").val(null).trigger('change');
-                });
-                $(".tarif").select2({
-                    placeholder: "Pilih",
-                    allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
-                        type: "GET",
-                        url: "<?php echo base_url(); ?>accounting/asettetap/kategori_kelompok",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term,
-                                param: encodeURIComponent("kategori='" + $(".kategori").val() + "' and kelompok='" + $(".kelompok").val() + "' and umur_tahun='" + $(".umur").val() + "'")
-                            };
+                            $(".umur").val("");
+                            $(".tarif").val("");
                         },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                var key = $(".penyusutan:checked").val();
-                                results.push({
-                                    id: item[key],
-                                    text: item[key]
-                                });
-                            });
-                            return {
-                                results: results
-                            };
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
-                        }
-                    }
+                        success: ((data) => {
+                            var key = $(".penyusutan:checked").val();
+                            var umur = (data.data[0] && data.data[0]['umur_tahun']) === undefined ? "" : data.data[0]['umur_tahun'];
+                            var tarif = (data.data[0] && data.data[0][key]) === undefined ? "" : data.data[0][key];
+                            $(".umur").val(umur);
+                            $(".tarif").val(tarif);
+                        })
 
+                    });
                 });
+                
                 $("#btn-simpan").on("click", function (e) {
                     e.preventDefault();
                     $(".btn-save").trigger("click");
@@ -746,6 +761,7 @@
                             unblockUI(function () {}, 500);
                         },
                         error: function (xhr, ajaxOptions, thrownError) {
+                             alert_notify(xhr.responseJSON.icon, xhr.responseJSON.message, xhr.responseJSON.type, function () {});
                         },
                         success: ((data) => {
                             window.location.reload();
@@ -753,32 +769,40 @@
                     });
                 }
                 );
-                $(".posted-data").on("click", function () {
-                    confirmRequest("Jurnal Entries", "Posted Semua Jurnal ?", function () {
-                        $.ajax({
-                            url: "<?= base_url("accounting/asettetap/update_status_jurnals/{$id}") ?>",
-                            dataType: 'JSON',
-                            type: "post",
-                            data: {
-                                status: "posted"
-                            },
-                            beforeSend: function (xhr) {
-                                please_wait((() => {
 
-                                }));
-                            },
-                            complete: function (jqXHR, textStatus) {
-                                unblockUI(function () {}, 500);
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
-                            },
-                            success: ((data) => {
-                                window.location.reload();
-                            })
-                        });
+                const postedData = ((status) => {
+                    $.ajax({
+                        url: "<?= base_url("accounting/asettetap/update_status_jurnals/{$id}") ?>",
+                        dataType: 'JSON',
+                        type: "post",
+                        data: {
+                            status: status
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait((() => {
+
+                            }));
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 500);
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                        },
+                        success: ((data) => {
+                            window.location.reload();
+                        })
                     });
                 });
-                
+                $(".posted-data").on("click", function () {
+                    confirmRequest("Jurnal Entries", "Posted Semua Jurnal ?", function () {
+                        postedData("posted");
+                    });
+                });
+                $(".unposted-data").on("click", function () {
+                    confirmRequest("Jurnal Entries", "unPosted Semua Jurnal ?", function () {
+                        postedData("unposted");
+                    });
+                });
                 $("#btn-cancel").on("click", function () {
                     confirmRequest("Aset Tetap", "Batalkan Aset Tetap ? ", function () {
                         $.ajax({
@@ -801,7 +825,7 @@
                         });
                     });
                 });
-                
+
             }
             );
         </script>

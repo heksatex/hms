@@ -3,7 +3,7 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
         <style>
-            
+
             #btn-done,#btn-cancel{
                 display: none;
             }
@@ -73,13 +73,6 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">QTY</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="qty" id="qty"  class="form-control input-sm qty" required
-                                                           class="form-control input-sm text-right"/>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label required">Nilai Sisa</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="nilai_sisa" id="nilai_sisa"  class="form-control input-sm nilai_sisa" value="0"
@@ -130,8 +123,7 @@
                                                             <div class="col-xs-4"><label class="form-label required">Umur Asset</label></div>
                                                             <div class="col-xs-8 col-md-8">
                                                                 <div class="input-group">
-                                                                    <select class="form-control input-sm umur" name="umur">
-                                                                    </select>
+                                                                    <input class="form-control input-sm umur" name="umur" readonly>
                                                                     <span class="input-group-addon">Tahun</span>
                                                                 </div>
                                                             </div>
@@ -147,8 +139,7 @@
                                                             <div class="col-xs-4"><label class="form-label required">Tarif</label></div>
                                                             <div class="col-xs-8 col-md-8">
                                                                 <div class="input-group">
-                                                                    <select class="form-control input-sm tarif" name="tarif">
-                                                                    </select>
+                                                                    <input class="form-control input-sm tarif" name="tarif" readonly>
                                                                     <span class="input-group-addon">%</span>
                                                                 </div>
 
@@ -278,8 +269,8 @@
                 });
                 $(".kategori").on("change", function () {
                     $(".kelompok").val(null).trigger('change');
-                    $(".umur").val(null).trigger('change');
-                    $(".tarif").val(null).trigger('change');
+                    $(".umur").val("");
+                    $(".tarif").val("");
                 });
 
                 $(".kelompok").select2({
@@ -314,84 +305,39 @@
 
                 });
                 $(".kelompok").on("change", function () {
-                    $(".umur").val(null).trigger('change');
-                    $(".tarif").val(null).trigger('change');
+                    $(".umur").val("");
+                    $(".tarif").val("");
+                    setUmurAset();
                 });
 
                 $(".penyusutan").on("change", function () {
-                    $(".umur").val(null).trigger('change');
-                    $(".tarif").val(null).trigger('change');
+                    $(".umur").val("");
+                    $(".tarif").val("");
+                    setUmurAset();
                 });
 
-                $(".tarif").select2({
-                    placeholder: "Pilih",
-                    allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
+                const setUmurAset = (() => {
+                    $.ajax({
                         type: "GET",
                         url: "<?php echo base_url(); ?>accounting/asettetap/kategori_kelompok",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term,
-                                param: encodeURIComponent("kategori='" + $(".kategori").val() + "' and kelompok='" + $(".kelompok").val() + "' and umur_tahun='" + $(".umur").val() + "'")
-                            };
-                        },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                var key = $(".penyusutan:checked").val();
-                                results.push({
-                                    id: item[key],
-                                    text: item[key]
-                                });
-                            });
-                            return {
-                                results: results
-                            };
+                        data: {
+                            param: encodeURIComponent("kategori='" + $(".kategori").val() + "' and kelompok='" + $(".kelompok").val() + "'")
                         },
                         error: function (xhr, ajaxOptions, thrownError) {
-                        }
-                    }
-
-                });
-
-
-                $(".umur").select2({
-                    placeholder: "Pilih",
-                    allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
-                        type: "GET",
-                        url: "<?php echo base_url(); ?>accounting/asettetap/kategori_kelompok",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term,
-                                param: encodeURIComponent("kategori='" + $(".kategori").val() + "' and kelompok='" + $(".kelompok").val() + "'")
-                            };
+                            $(".umur").val("");
+                            $(".tarif").val("");
                         },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                results.push({
-                                    id: item.umur_tahun,
-                                    text: item.umur_tahun
-                                });
-                            });
-                            return {
-                                results: results
-                            };
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
-                        }
-                    }
-                });
+                        success: ((data) => {
+                            var key = $(".penyusutan:checked").val();
+                            var umur = (data.data[0] && data.data[0]['umur_tahun']) === undefined ? "" : data.data[0]['umur_tahun'];
+                            var tarif = (data.data[0] && data.data[0][key]) === undefined ? "" : data.data[0][key];
+                            $(".umur").val(umur);
+                            $(".tarif").val(tarif);
+                        })
 
-                $(".umur").on("change", function () {
-                    $(".tarif").val(null).trigger('change');
+                    });
                 });
-
+                
                 setCoa(".akun_aset");
                 setCoa(".akun_penyusutan");
                 setCoa(".akun_akum");

@@ -41,15 +41,6 @@ class Asettetap extends MY_Controller {
             ]
         ],
         [
-            'field' => 'qty',
-            'label' => 'Qty',
-            'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
-            'errors' => [
-                'required' => '{field} Harus dipilih',
-                "regex_match" => "{field} harus berupa number / desimal"
-            ]
-        ],
-        [
             'field' => 'harga',
             'label' => 'Harga',
             'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
@@ -136,7 +127,7 @@ class Asettetap extends MY_Controller {
             }
             $data["jurnals"] = $model->setTables("acc_aset_tetap_jurnal")
                             ->setJoins("acc_jurnal_entries", "acc_jurnal_entries.kode = no_jurnal", "left")
-                            ->setSelects(["acc_aset_tetap_jurnal.*", "acc_jurnal_entries.status as status_jurnal"])
+                            ->setSelects(["acc_aset_tetap_jurnal.*", "acc_jurnal_entries.status as status_jurnal,reff_note"])
                             ->setWheres(["id_aset" => $data["datas"]->id])->getData();
             $this->load->view('accounting/v_aset_tetap_edit', $data);
         } catch (Exception $ex) {
@@ -228,7 +219,6 @@ class Asettetap extends MY_Controller {
             $tglBeli = $this->input->post("tanggal_beli");
             $tglPakai = $this->input->post("tanggal_pakai");
             $harga = $this->input->post("harga");
-            $qty = $this->input->post("qty");
             $nilaiSisa = $this->input->post("nilai_sisa");
             $kategori = $this->input->post("kategori");
             $kelompok = $this->input->post("kelompok");
@@ -238,10 +228,9 @@ class Asettetap extends MY_Controller {
             $akunAset = $this->input->post("akun_aset");
             $akunAkum = $this->input->post("akun_akum");
             $akunPenyu = $this->input->post("akun_penyusutan");
-            if (!$noAset = $this->token->noUrut('aset_tetap', date('y', strtotime($tglBeli)) . '/' . getRomawi(date('m', strtotime($tglBeli))), true)
-                            ->generate('PA/', '/%04d')->get()) {
+            if (!$noAset = $this->token->noUrut('aset_tetap', date('y', strtotime($tglBeli)) . '/' . getRomawi(date('m', strtotime($tglBeli))), true)->generate('PA/', '/%04d')->get())
                 throw new \Exception("No Aset tidak terbuat", 500);
-            }
+
             $harga = str_replace(",", "", $harga);
             $nilaiSisa = str_replace(",", "", $nilaiSisa);
             $data = [
@@ -250,7 +239,6 @@ class Asettetap extends MY_Controller {
                 "tanggal_beli" => $tglBeli,
                 "tanggal_pakai" => $tglPakai,
                 "harga" => $harga,
-                "qty" => $qty,
                 "kategori" => $kategori,
                 "kelompok" => $kelompok,
                 "metode" => $metode,
@@ -290,7 +278,6 @@ class Asettetap extends MY_Controller {
             $tglBeli = $this->input->post("tanggal_beli");
             $tglPakai = $this->input->post("tanggal_pakai");
             $harga = $this->input->post("harga");
-            $qty = $this->input->post("qty");
             $nilaiSisa = $this->input->post("nilai_sisa");
             $kategori = $this->input->post("kategori");
             $kelompok = $this->input->post("kelompok");
@@ -307,7 +294,6 @@ class Asettetap extends MY_Controller {
                 "tanggal_beli" => $tglBeli,
                 "tanggal_pakai" => $tglPakai,
                 "harga" => $harga,
-                "qty" => $qty,
                 "kategori" => $kategori,
                 "kelompok" => $kelompok,
                 "metode" => $metode,
@@ -462,7 +448,7 @@ class Asettetap extends MY_Controller {
                 throw new \Exception('Debet Dan Kredit Balance', 500);
             }
             $this->_module->startTransaction();
-//            $model->setTables("acc_aset_tetap_jurnal")->setWheres(["no_jurnal" => $jurnal])->update(["penyusutan_bulan"=>$totalDebet]);
+            $model->setTables("acc_aset_tetap_jurnal")->setWheres(["no_jurnal" => $jurnal])->update(["penyusutan_bulan"=>$totalDebet]);
             $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal])->update($headUpdate);
             $model->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();
             $model->saveBatch($itemUpdate);
@@ -518,7 +504,7 @@ class Asettetap extends MY_Controller {
 
             $kode = decrypt_url($id);
             $model = new $this->m_global;
-            $model->setTables("acc_jurnal_entries")->setWheres(["origin" => $kode, "status" => "unposted"])->update(["status" => $status]);
+            $model->setTables("acc_jurnal_entries")->setWheres(["origin" => $kode, "status <>" => "cancel"])->update(["status" => $status]);
 
             $this->_module->gen_history_new($sub_menu, $kode, "edit", "Update Jurnal Ke Status ({$status})", $username);
 //            $this->_module->gen_history_new("jurnalentries", $jurnal, "edit", "Update Status ({$status}) Dari Menu Aset", $username);
@@ -582,12 +568,12 @@ class Asettetap extends MY_Controller {
 
             $model = new $this->m_global;
             $check = $model->setTables("acc_aset_tetap")->setWheres(["no_aset" => $kode])->getDetail();
-            if($check->akun_bbn_penyusutan) 
-                throw new \Exception("Akun Penyusutan Belum Dipilih", 500);
-            if($check->akun_akum_penyusutan) 
-                throw new \Exception("Akun Akumilasi Belum Dipilih", 500);
-            if($check->akun_aset) 
+            if (empty($check->akun_asset))
                 throw new \Exception("Akun Aset Belum Dipilih", 500);
+            if (empty($check->akun_akum_penyusutan))
+                throw new \Exception("Akun Akumulasi Belum Dipilih", 500);
+            if (empty($check->akun_bbn_penyusutan))
+                throw new \Exception("Akun Penyusutan Belum Dipilih", 500);
             $this->_module->startTransaction();
             $logH = [];
             $logD = [];
@@ -764,7 +750,7 @@ class Asettetap extends MY_Controller {
                     $penyusutanFormat = number_format($penyusutan, 2, ",", ".");
                     $textPenyusutan = "Penyusutan : {$awalFormat} x {$tarif}% = {$penyusutanFormat}";
                     $hasil = $awal - $penyusutan;
-                    $hrgBulanan = $hasil / 12;
+                    $hrgBulanan = $penyusutan / 12;
                     $textNilaiAkhir = "Nilai Buku Akhir : {$awalFormat} - {$penyusutanFormat} = " . number_format($hasil, 2, ",", ".");
                     $text = "<div class='list-item-div'>{$textAwal}</div><div class='list-item-div'>$textPenyusutan</div><div class='list-item-div'>$textNilaiAkhir</div>";
                     if ($i == $umur) {

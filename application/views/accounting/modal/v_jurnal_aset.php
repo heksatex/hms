@@ -213,8 +213,8 @@
                         $(".total_debit").val(response.data.debet);
                         $(".total_kredit").val(response.data.kredit);
                     }, 100);
-//                    if (response.status === 200)
-//                        location.reload();
+                    if (response.status === 200)
+                        location.reload();
                 }
         ).catch(err => {
             unblockUI(function () {});
