@@ -176,6 +176,7 @@
                 $("#search").on("click",function(){
                     table.ajax.reload();
                 });
+                $('#tanggal_pakai').val("");
             })
         </script>
     </body>
