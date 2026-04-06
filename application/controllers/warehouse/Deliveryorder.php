@@ -1336,7 +1336,7 @@ class Deliveryorder extends MY_Controller {
             $doid = $this->input->post("doid");
             $model = new $this->m_global;
             $model->setTables("delivery_order_detail dod")->setJoins("delivery_order do", "do.id = dod.do_id")
-                    ->setJoins("picklist_detail pd", "(pd.barcode_id = dod.barcode_id) and (pd.no_pl = do.no_picklist)")
+                    ->setJoins("picklist_detail pd", "(pd.id = dod.picklist_detail_id) and (pd.no_pl = do.no_picklist)")
                     ->setWheres(['dod.do_id' => $doid, 'dod.status' => 'retur'])
                     ->setSelects(["do.no_sj,do.no"])
                     ->setSelects(["pd.kode_produk,no_pl,pd.nama_produk,pd.warna_remark,pd.corak_remark,pd.barcode_id"])
