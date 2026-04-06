@@ -77,7 +77,7 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-jm" id="form-jm" action="<?= base_url('accounting/rekapentries/export') ?>">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
-                                    <div class="form-group tanggal_dibuat" style="display: none;">
+                                    <div class="form-group tanggal_dibuat">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="form-label required">Tanggal Dibuat</label>
@@ -87,7 +87,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group periode" >
+                                    <div class="form-group periode"  style="display: none;">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="form-label required">Periode</label>
@@ -112,11 +112,11 @@
 
                                             </div>
                                             <div class="col-xs-8">
-                                                <label class="btn btn-default">
-                                                    <input type="radio" value="0" class="filter" name="filter" checked/> Dengan Periode
+                                                <label class="btn btn-default" style="display: none;">
+                                                    <input type="radio" value="0" class="filter" name="filter" /> Dengan Periode
                                                 </label> 
                                                 <label class="btn btn-default">
-                                                    <input type="radio" class="filter" name="filter" value="1" /> Dengan Tanggal Dibuat
+                                                    <input type="radio" class="filter" name="filter" value="1" checked/> Dengan Tanggal Dibuat
                                                 </label> 
                                             </div>
                                         </div>
