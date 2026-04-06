@@ -74,7 +74,7 @@ class Rekapentries extends MY_Controller {
     }
 
     public function index() {
-        $data['id_dept'] = '';
+        $data['id_dept'] = 'ACCRE';
         $data['date'] = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d")))) . ' - ' . date('Y-m-d');
         $model = new $this->m_global;
         $model2 = clone $model;
