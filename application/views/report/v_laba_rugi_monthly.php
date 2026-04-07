@@ -86,6 +86,21 @@
             /* Memastikan scrollbar muncul jika kolom banyak */
         }
 
+        /* Membuat kolom Nama Acc tetap terlihat saat scroll ke kanan */
+        /* #example1 th:nth-child(3),
+        #example1 td:nth-child(3) {
+            position: sticky;
+            left: 0;
+            background-color: #fff;
+            z-index: 2;
+            box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        #example1 th:nth-child(3) {
+            z-index: 3;
+            background-color: #f4f4f4;
+        } */
+
 
         /*
     .btn-setTgl {
@@ -133,7 +148,7 @@
                                             <label>Periode</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <select class="form-control input-sm" name="tahun" id="tahun">
+                                            <select class="form-control input-sm" name="tahun_dari" id="tahun_dari">
                                                 <?php
                                                 $thn_skr = date('Y');
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
@@ -142,7 +157,7 @@
                                                 ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <select class="form-control input-sm" name="bulan_dari" id="bulan_dari">
                                                 <?php
                                                 $list_bulan = get_bulan_indo();
@@ -154,7 +169,17 @@
                                         <div class="col-md-1 text-center">
                                             <label>s/d</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
+                                            <select class="form-control input-sm" name="tahun_sampai" id="tahun_sampai">
+                                                <?php
+                                                $thn_skr = date('Y');
+                                                for ($x = $thn_skr; $x >= 2020; $x--) {
+                                                    echo "<option value='$x'>$x</option>";
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
                                             <select class="form-control input-sm" name="bulan_sampai" id="bulan_sampai">
                                                 <?php
                                                 for ($i = 1; $i <= 12; $i++) {
@@ -229,7 +254,7 @@
                                             </table>
 
                                             <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
-                                                <i class="fa fa-refresh fa-spin"></i> Memproses Data...
+                                                <i class="fa fa-refresh fa-spin"></i> Processing...
                                             </div>
                                         </div>
                                     </div>
@@ -292,19 +317,27 @@
             var this_btn = $(this);
 
             // Ambil value dari filter baru
-            var tahun = $('#tahun').val();
+            var tahun_dari = $('#tahun_dari').val();
+            var tahun_sampai = $('#tahun_sampai').val();
             var bulan_dari = parseInt($('#bulan_dari').val());
             var bulan_sampai = parseInt($('#bulan_sampai').val());
 
             // 1. Validasi: Pastikan Tahun terisi (biasanya dropdown selalu ada isi)
-            if (tahun == '') {
+            if (tahun_dari == '' || tahun_sampai == '') {
                 alert_modal_warning('Tahun harus dipilih!');
                 return false;
             }
 
-            // 2. Validasi: Bulan Dari tidak boleh lebih besar dari Bulan Sampai
-            if (bulan_dari > bulan_sampai) {
-                alert_modal_warning('Maaf, Bulan Sampai tidak boleh kurang dari Bulan Dari!');
+            if (bulan_dari == '' || bulan_sampai == '') {
+                alert_modal_warning('Bulan harus dipilih!');
+                return false;
+            }
+
+            let dateStart = new Date(tahun_dari, bulan_dari - 1, 1);
+            let dateEnd = new Date(tahun_sampai, bulan_sampai - 1, 1);
+
+            if (dateStart > dateEnd) {
+                alert_modal_warning('Maaf, Periode Sampai tidak boleh kurang dari Periode Dari!');
                 return false;
             }
 
@@ -330,58 +363,9 @@
         }
 
 
-        function hideChilds(parentKode) {
-            $("#example1 tbody tr").each(function() {
-                if ($(this).data("parent") == parentKode) {
-                    let childKode = $(this).data("kode");
-                    $(this).hide();
-                    // recursive hide
-                    hideChilds(childKode);
-                    // reset icon jadi tutup
-                    $(this).find(".toggle").text("▶");
-                }
-            });
-        }
-
-        function showChilds(parentKode) {
-            $("#example1 tbody tr").each(function() {
-                if ($(this).data("parent") == parentKode) {
-                    $(this).show();
-                }
-            });
-        }
-
-        $(document).on("click", ".toggle", function() {
-
-            let kode = $(this).data("kode");
-            let isOpen = $(this).text() == "▼";
-
-            if (isOpen) {
-
-                // ======================
-                // COLLAPSE (hide semua turunan)
-                // ======================
-
-                hideChilds(kode);
-
-                $(this).text("▶");
-
-            } else {
-
-                // ======================
-                // EXPAND (show child langsung saja)
-                // ======================
-
-                showChilds(kode);
-
-                $(this).text("▼");
-            }
-
-        });
-
-
         function proses_laba_rugi(this_btn) {
-            var tahun = $('#tahun').val();
+            var tahun_dari = parseInt($('#tahun_dari').val());
+            var tahun_sampai = parseInt($('#tahun_sampai').val());
             var bulan_dari = parseInt($('#bulan_dari').val());
             var bulan_sampai = parseInt($('#bulan_sampai').val());
             var check_hidden = $("#hidden_check").is(':checked');
@@ -402,9 +386,10 @@
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('report/labarugimonthly/loadData') ?>", // Arahkan ke function baru
+                url: "<?php echo site_url('report/labarugimonthly/loadData') ?>",
                 data: {
-                    tahun: tahun,
+                    tahun_dari: tahun_dari,
+                    tahun_sampai: tahun_sampai,
                     bulan_dari: bulan_dari,
                     bulan_sampai: bulan_sampai,
                     checkhidden: check_hidden,
@@ -414,25 +399,33 @@
                     $("#example1 tbody").remove();
                     let tbody = $("<tbody />");
 
-                    // Simpan filter untuk keperluan Excel nanti
                     arr_filter = [{
-                        tahun: tahun,
+                        tahun_dari: tahun_dari,
+                        tahun_sampai: tahun_sampai,
                         bulan_dari: bulan_dari,
                         bulan_sampai: bulan_sampai,
                         level: level,
                         checkhidden: check_hidden
                     }];
 
-                    // --- 1. RENDER HEADER BULAN DINAMIS ---
+                    // --- 1. RENDER HEADER DINAMIS (Support Lintas Tahun) ---
                     $(".month-header").remove();
-                    // const namaBulanIndo = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                     const namaBulanIndo = <?php echo json_encode(get_bulan_indo()); ?>;
-                    const tahun_pilih = $('#tahun').val();
 
-                    for (let i = bulan_dari; i <= bulan_sampai; i++) {
-                        console.log(i)
-                        var header_text = namaBulanIndo[i] + " " + tahun_pilih;
+                    // Buat iterasi bulan menggunakan Date
+                    let start = new Date(tahun_dari, bulan_dari - 1, 1);
+                    let end = new Date(tahun_sampai, bulan_sampai - 1, 1);
+                    let totalBulan = 0;
+
+                    let curr = new Date(start);
+                    while (curr <= end) {
+                        let m = curr.getMonth() + 1;
+                        let t = curr.getFullYear();
+                        var header_text = namaBulanIndo[m] + " " + t;
                         $("#header-row").append("<th class='month-header text-right style bb ' style='width: 120px;'>" + header_text + "</th>");
+
+                        curr.setMonth(curr.getMonth() + 1); // ✅ Gunakan .getMonth() di dalam setMonth
+                        totalBulan++;
                     }
 
                     // --- 2. HITUNG INDENTASI ---
@@ -471,7 +464,6 @@
                             });
                         }
 
-                        // Kolom Standar (No, Kode, Nama)
                         tr.append($("<td>").text(key + 1));
                         tr.append($("<td>").text(value.kode_acc));
                         tr.append($("<td>").html(
@@ -480,18 +472,24 @@
                             "</span>"
                         ));
 
-                        // --- 4. LOOPING SALDO PER BULAN ---
-                        for (let m = bulan_dari; m <= bulan_sampai; m++) {
-                            let saldo = value.monthly[m];
-                            let display = (saldo !== null) ? formatNumber(saldo) : "";
+                        // --- 4. LOOPING SALDO LINTAS TAHUN ---
+                        let currData = new Date(start);
+                        while (currData <= end) {
+                            let m = currData.getMonth() + 1;
+                            let t = currData.getFullYear();
+                            let keyDate = t + "-" + m;
+                            let saldo = value.monthly[keyDate];
+
+                            let display = (saldo !== undefined && saldo !== null) ? formatNumber(saldo) : "0.00";
                             tr.append($("<td align='right'>").text(display));
+
+                            currData.setMonth(currData.getMonth() + 1); // ✅ DIPERBAIKI: Jangan setMonth(setMonth())
                         }
 
                         tbody.append(tr);
 
-                        // Spacer Jarak Dinamis
                         if (value.tipe == "total" && levelIndex === 0) {
-                            let totalCol = (bulan_sampai - bulan_dari) + 4;
+                            let totalCol = totalBulan + 3;
                             tbody.append("<tr><td colspan='" + totalCol + "' style='height:30px; border:none;'>&nbsp;</td></tr>");
                         }
                     });
@@ -500,9 +498,16 @@
                     let tr_laba = $("<tr style='background:#f4f4f4; font-weight:bold;'>");
                     tr_laba.append($("<td colspan='3' align='center'>").text("LABA / RUGI BERSIH"));
 
-                    for (let m = bulan_dari; m <= bulan_sampai; m++) {
-                        let laba_m = data.record.laba_bersih_monthly[m] || 0;
+                    let currLaba = new Date(start);
+                    while (currLaba <= end) {
+                        let m = currLaba.getMonth() + 1;
+                        let t = currLaba.getFullYear();
+                        let keyDate = t + "-" + m;
+
+                        let laba_m = data.record.laba_bersih_monthly[keyDate] || 0;
                         tr_laba.append($("<td align='right'>").text(formatNumber(laba_m)));
+
+                        currLaba.setMonth(currLaba.getMonth() + 1); // ✅ DIPERBAIKI
                     }
                     tbody.append(tr_laba);
 
@@ -511,7 +516,6 @@
                     this_btn.button('reset');
                 },
                 error: function(jqXHR) {
-                    console.log(jqXHR.responseText);
                     $("#example1_processing").hide();
                     this_btn.button('reset');
                 }
