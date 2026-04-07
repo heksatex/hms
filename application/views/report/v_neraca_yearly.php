@@ -121,7 +121,7 @@
                 <!--  box content -->
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title"><b>Laba Rugi (Yearly)</b></h3>
+                        <h3 class="box-title"><b>Neraca (Yearly)</b></h3>
                     </div>
                     <div class="box-body">
 
@@ -275,20 +275,39 @@
             var this_btn = $(this);
 
             // Ambil value dari filter baru
-            var tahun_dari = parseInt($('#tahun_dari').val());
-            var tahun_sampai = parseInt($('#tahun_sampai').val());
+            var tahun_dari = $('#tahun_dari').val();
+            var tahun_sampai = $('#tahun_sampai').val();
+            var bulan_dari = parseInt($('#bulan_dari').val());
+            var bulan_sampai = parseInt($('#bulan_sampai').val());
 
-            // Validasi: Tahun Dari tidak boleh lebih besar dari Tahun Sampai
+            // 1. Validasi: Pastikan Tahun terisi (biasanya dropdown selalu ada isi)
+            if (tahun_dari == '' || tahun_sampai == '') {
+                alert_modal_warning('Tahun harus dipilih!');
+                return false;
+            }
+
+            if (bulan_dari == '' || bulan_sampai == '') {
+                alert_modal_warning('Bulan harus dipilih!');
+                return false;
+            }
+
+
+            // 2 Validasi: Tahun & Bulan Dari tidak boleh lebih besar dari Bulan Sampai
             if (tahun_dari > tahun_sampai) {
                 alert_modal_warning('Maaf, Tahun Sampai tidak boleh kurang dari Tahun Dari!');
                 return false;
             }
 
-            //  Jalankan Proses
+            if (tahun_dari == tahun_sampai && bulan_dari > bulan_sampai) {
+                alert_modal_warning('Maaf, Bulan Sampai tidak boleh kurang dari Bulan Dari!');
+                return false;
+            }
+
+            // 3. Jalankan Proses
             arr_filter = []; // Reset filter global
 
             // Panggil fungsi AJAX yang sudah kita rombak tadi
-            proses_laba_rugi(this_btn);
+            proses_neraca(this_btn);
         });
 
 
@@ -305,67 +324,10 @@
             return val < 0 ? "(" + formatted + ")" : formatted;
         }
 
-
-        function hideChilds(parentKode) {
-            $("#example1 tbody tr").each(function() {
-                if ($(this).data("parent") == parentKode) {
-                    let childKode = $(this).data("kode");
-                    $(this).hide();
-                    // recursive hide
-                    hideChilds(childKode);
-                    // reset icon jadi tutup
-                    $(this).find(".toggle").text("▶");
-                }
-            });
-        }
-
-        function showChilds(parentKode) {
-            $("#example1 tbody tr").each(function() {
-                if ($(this).data("parent") == parentKode) {
-                    $(this).show();
-                }
-            });
-        }
-
-        $(document).on("click", ".toggle", function() {
-
-            let kode = $(this).data("kode");
-            let isOpen = $(this).text() == "▼";
-
-            if (isOpen) {
-
-                // ======================
-                // COLLAPSE (hide semua turunan)
-                // ======================
-
-                hideChilds(kode);
-
-                $(this).text("▶");
-
-            } else {
-
-                // ======================
-                // EXPAND (show child langsung saja)
-                // ======================
-
-                showChilds(kode);
-
-                $(this).text("▼");
-            }
-
-        });
-
-
-        function proses_laba_rugi(this_btn) {
-            var tahun_dari = parseInt($('#tahun_dari').val());
-            var tahun_sampai = parseInt($('#tahun_sampai').val());
+        function proses_neraca(this_btn) {
+            var tahun_dari = $('#tahun_dari').val();
+            var tahun_sampai = $('#tahun_sampai').val();
             var check_hidden = $("#hidden_check").is(':checked');
-
-            // Validasi sederhana agar tidak crash jika tahun terbalik
-            if (tahun_dari > tahun_sampai) {
-                alert("Tahun dari tidak boleh lebih besar dari tahun sampai!");
-                return;
-            }
 
             var level = [];
             $("input[name='level[]']:checked").each(function() {
@@ -383,119 +345,124 @@
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('report/labarugiyearly/loadData') ?>",
+                url: "<?php echo site_url('report/neracayearly/loadData') ?>",
                 data: {
                     tahun_dari: tahun_dari,
                     tahun_sampai: tahun_sampai,
-                    hidden_check: check_hidden, // Sesuaikan dengan key di controller
+                    checkhidden: check_hidden,
                     level: level
                 },
                 success: function(data) {
                     $("#example1 tbody").remove();
                     let tbody = $("<tbody />");
 
-                    // Simpan filter untuk keperluan Excel (Yearly)
                     arr_filter = [{
                         tahun_dari: tahun_dari,
                         tahun_sampai: tahun_sampai,
-                        level: level,
-                        checkhidden: check_hidden
+                        checkhidden: check_hidden,
+                        level: level
                     }];
 
                     // --- 1. RENDER HEADER TAHUN DINAMIS ---
                     $(".year-header").remove();
-                    for (let th = tahun_dari; th <= tahun_sampai; th++) {
-                        $("#header-row").append("<th class='year-header text-right style bb' style='width: 120px;'>" + th + "</th>");
+                    for (let t = parseInt(tahun_dari); t <= parseInt(tahun_sampai); t++) {
+                        $("#header-row").append("<th class='year-header text-right style bb' style='width: 150px;'>Tahun " + t + "</th>");
                     }
 
-                    // --- 2. HITUNG INDENTASI ---
+                    // --- 2. LOGIKA INDENTASI DINAMIS ---
                     let allLevels = data.record.record.map(item => item.level);
                     let sortedLevels = [...new Set(allLevels)].sort((a, b) => a - b);
+                    let colSpanTotal = 3 + data.record.period_count; // Kolom Identitas (3) + Jumlah Tahun
 
                     // --- 3. LOOPING DATA ---
                     $.each(data.record.record, function(key, value) {
                         let levelIndex = sortedLevels.indexOf(value.level);
                         let dynamicIndent = levelIndex * 20;
-                        let tr = $("<tr>");
+                        let tr = $("<tr class='coa-row'>");
 
-                        // --- STYLING LEVEL (Sesuai Laporan Bulanan Anda) ---
-                        if (value.level == 1) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#437333"
-                            }); // Hijau
-                        } else if (value.level == 2) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#e78d2d"
-                            }); // Oranye
-                        } else if (value.level == 3) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#2f5fb3"
-                            }); // Biru
-                        } else if (value.level == 4) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#d42459"
-                            }); // Pink
-                        }
+                        // Styling warna berdasarkan level (Tetap sesuai aslinya)
+                        if (value.level == 1) tr.css({
+                            "font-weight": "bold",
+                            "color": "#437333"
+                        });
+                        else if (value.level == 2) tr.css({
+                            "font-weight": "bold",
+                            "color": "#e78d2d"
+                        });
+                        else if (value.level == 3) tr.css({
+                            "font-weight": "bold",
+                            "color": "#2f5fb3"
+                        });
+                        else if (value.level == 4) tr.css({
+                            "font-weight": "bold",
+                            "color": "#d42459"
+                        });
 
-                        // Styling Baris Total
+                        let nama_display = value.nama_acc;
                         if (value.tipe == "total") {
+                            nama_display = "<i>" + value.nama_acc + "</i>";
                             tr.css({
-                                "background-color": "#fdfdfd",
                                 "border-top": "1px double #ccc",
                                 "font-style": "italic"
                             });
                         }
 
-                        // Kolom Standar
+                        // Kolom Identitas
                         tr.append($("<td>").text(key + 1));
                         tr.append($("<td>").text(value.kode_acc));
-                        tr.append($("<td>").html(
-                            "<span style='padding-left:" + dynamicIndent + "px; display:inline-block; white-space:nowrap;'>" +
-                            (value.tipe == 'total' ? "<i>" + value.nama_acc + "</i>" : value.nama_acc) +
-                            "</span>"
-                        ));
+                        tr.append($("<td>").html("<span style='padding-left:" + dynamicIndent + "px'>" + nama_display + "</span>"));
 
-                        // --- 4. LOOPING SALDO PER TAHUN ---
-                        for (let th = tahun_dari; th <= tahun_sampai; th++) {
-                            let saldo = value.yearly[th];
-                            let display = (saldo !== null) ? formatNumber(saldo) : "";
-                            tr.append($("<td align='right'>").text(display));
-                        }
+                        // --- 4. LOOPING KOLOM TAHUN ---
+                        $.each(value.yearly, function(idx, saldo) {
+                            let saldo_display = (saldo !== null) ? formatNumber(saldo) : "";
+                            tr.append($("<td align='right'>").text(saldo_display));
+                        });
 
                         tbody.append(tr);
 
-                        // Spacer jika baris total adalah level teratas (Level 1)
+                        // --- 5. INSERT SPACER DINAMIS (Setelah baris TOTAL level teratas) ---
                         if (value.tipe == "total" && levelIndex === 0) {
-                            let totalCol = (tahun_sampai - tahun_dari) + 4;
-                            tbody.append("<tr><td colspan='" + totalCol + "' style='height:30px; border:none;'>&nbsp;</td></tr>");
+                            let spacer = $("<tr>").append(
+                                $("<td colspan='" + colSpanTotal + "' style='height: 30px; border:none;'>").html("&nbsp;")
+                            );
+                            tbody.append(spacer);
                         }
                     });
 
-                    // --- 5. BARIS LABA BERSIH (FOOTER) ---
-                    let tr_laba = $("<tr style='background:#f4f4f4; font-weight:bold;'>");
-                    tr_laba.append($("<td colspan='3' align='center'>").text("LABA / RUGI BERSIH"));
+                    // --- 6. TAMPILAN TOTAL AKHIR (BALANCE CHECK TAHUNAN) ---
 
-                    for (let th = tahun_dari; th <= tahun_sampai; th++) {
-                        let laba_y = data.record.laba_bersih_yearly[th] || 0;
-                        tr_laba.append($("<td align='right'>").text(formatNumber(laba_y)));
-                    }
-                    tbody.append(tr_laba);
+                    // Fungsi Helper Render Footer untuk Multi-Kolom
+                    const renderFooterRow = (label, dataArray, bgColor = "#f4f4f4") => {
+                        let footerTr = $("<tr style='font-weight:bold; background:" + bgColor + ";'>");
+                        footerTr.append($("<td colspan='3' align='right'>").text(label));
+                        $.each(dataArray, function(idx, val) {
+                            footerTr.append($("<td align='right'>").text(formatNumber(val)));
+                        });
+                        tbody.append(footerTr);
+                    };
 
+                    // Render Total Aset & Pasiva
+                    renderFooterRow("TOTAL ASSET", data.record.total_aset);
+                    renderFooterRow("TOTAL KEWAJIBAN & MODAL", data.record.total_pasiva);
+                    renderFooterRow("SELISIH", data.record.total_selisih);
+
+                  
                     $("#example1").append(tbody);
                     $("#example1_processing").hide();
                     this_btn.button('reset');
                 },
-                error: function(xhr) {
-                    alert("Terjadi kesalahan saat memuat data.");
+                error: function(jqXHR) {
+
+                    alert("Error Generate Data !");
+                    console.log(jqXHR.responseText);
+
                     $("#example1_processing").hide();
                     this_btn.button('reset');
+
                 }
             });
         }
+
 
         $('#btn-excel').click(function() {
             if (arr_filter.length == 0) {
@@ -505,7 +472,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url('report/labarugiyearly/export_excel') ?>",
+                url: "<?php echo site_url('report/neracayearly/export_excel_yearly') ?>",
                 data: {
                     arr_filter: arr_filter
                 },

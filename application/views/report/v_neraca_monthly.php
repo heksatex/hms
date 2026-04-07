@@ -75,7 +75,7 @@
             }
         }
 
-        .year-header {
+        .month-header {
             /* background-color: #e9ecef !important; */
             /* color: #333; */
             min-width: 120px;
@@ -121,7 +121,7 @@
                 <!--  box content -->
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title"><b>Laba Rugi (Yearly)</b></h3>
+                        <h3 class="box-title"><b>Neraca (Monthly)</b></h3>
                     </div>
                     <div class="box-body">
 
@@ -130,29 +130,56 @@
                                 <div class="form-group">
                                     <div class="col-md-12">
                                         <div class="col-md-2">
-                                            <label>Periode Tahun</label>
+                                            <label>Periode</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <select class="form-control input-sm" name="tahun_dari" id="tahun_dari">
                                                 <?php
                                                 $thn_skr = date('Y');
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
-                                                    // Default pilih 3 tahun kebelakang untuk perbandingan
-                                                    $selected = ($x == $thn_skr - 2) ? 'selected' : '';
-                                                    echo "<option value='$x' $selected>$x</option>";
+                                                    echo "<option value='$x'>$x</option>";
                                                 }
                                                 ?>
                                             </select>
                                         </div>
-                                        <div class="col-md-1 text-center">
-                                            <label style="margin-top: 5px;">s/d</label>
+                                        <div class="col-md-2">
+                                            <select class="form-control input-sm" name="bulan_dari" id="bulan_dari">
+                                                <?php
+                                                $list_bulan = get_bulan_indo();
+                                                foreach ($list_bulan as $key => $val): ?>
+                                                    <option value="<?= $key ?>"><?= $val ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-1 text-center">
+                                            <label>s/d</label>
+                                        </div>
+                                        <div class="col-md-2">
                                             <select class="form-control input-sm" name="tahun_sampai" id="tahun_sampai">
                                                 <?php
+                                                $thn_skr = date('Y');
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
-                                                    $selected = ($x == $thn_skr) ? 'selected' : '';
-                                                    echo "<option value='$x' $selected>$x</option>";
+                                                    echo "<option value='$x'>$x</option>";
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <select class="form-control input-sm" name="bulan_sampai" id="bulan_sampai">
+                                                <?php
+                                                for ($i = 1; $i <= 12; $i++) {
+                                                    $selected = ($i == date('n')) ? 'selected' : '';
+
+                                                    // Buat format tanggal dummy "01-bulan-tahun" agar bisa di-explode oleh helper tgl_indo
+                                                    // Kita gunakan str_pad agar bulan 1 jadi 01, bulan 2 jadi 02, dst.
+                                                    $tgl_dummy = "01-" . str_pad($i, 2, "0", STR_PAD_LEFT) . "-" . date('Y');
+
+                                                    // Panggil tgl_indo, lalu ambil bagian tengahnya saja (Nama Bulannya)
+                                                    $hasil_tgl = tgl_indo($tgl_dummy);
+                                                    $pecah_hasil = explode(' ', $hasil_tgl);
+                                                    $nama_bln = $pecah_hasil[1]; // Index 1 adalah nama bulan
+
+                                                    echo "<option value='$i' $selected>$nama_bln</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -275,20 +302,37 @@
             var this_btn = $(this);
 
             // Ambil value dari filter baru
-            var tahun_dari = parseInt($('#tahun_dari').val());
-            var tahun_sampai = parseInt($('#tahun_sampai').val());
+            var tahun_dari = $('#tahun_dari').val();
+            var tahun_sampai = $('#tahun_sampai').val();
+            var bulan_dari = parseInt($('#bulan_dari').val());
+            var bulan_sampai = parseInt($('#bulan_sampai').val());
 
-            // Validasi: Tahun Dari tidak boleh lebih besar dari Tahun Sampai
-            if (tahun_dari > tahun_sampai) {
-                alert_modal_warning('Maaf, Tahun Sampai tidak boleh kurang dari Tahun Dari!');
+            // 1. Validasi: Pastikan Tahun terisi (biasanya dropdown selalu ada isi)
+            if (tahun_dari == '' || tahun_sampai == '') {
+                alert_modal_warning('Tahun harus dipilih!');
                 return false;
             }
 
-            //  Jalankan Proses
+            if (bulan_dari == '' || bulan_sampai == '') {
+                alert_modal_warning('Bulan harus dipilih!');
+                return false;
+            }
+
+
+            // 2 Validasi: Tahun & Bulan Dari tidak boleh lebih besar dari Bulan Sampai
+            let dateStart = new Date(tahun_dari, bulan_dari - 1, 1);
+            let dateEnd = new Date(tahun_sampai, bulan_sampai - 1, 1);
+
+            if (dateStart > dateEnd) {
+                alert_modal_warning('Maaf, Periode Sampai tidak boleh kurang dari Periode Dari!');
+                return false;
+            }
+
+            // 3. Jalankan Proses
             arr_filter = []; // Reset filter global
 
             // Panggil fungsi AJAX yang sudah kita rombak tadi
-            proses_laba_rugi(this_btn);
+            proses_neraca(this_btn);
         });
 
 
@@ -305,67 +349,12 @@
             return val < 0 ? "(" + formatted + ")" : formatted;
         }
 
-
-        function hideChilds(parentKode) {
-            $("#example1 tbody tr").each(function() {
-                if ($(this).data("parent") == parentKode) {
-                    let childKode = $(this).data("kode");
-                    $(this).hide();
-                    // recursive hide
-                    hideChilds(childKode);
-                    // reset icon jadi tutup
-                    $(this).find(".toggle").text("▶");
-                }
-            });
-        }
-
-        function showChilds(parentKode) {
-            $("#example1 tbody tr").each(function() {
-                if ($(this).data("parent") == parentKode) {
-                    $(this).show();
-                }
-            });
-        }
-
-        $(document).on("click", ".toggle", function() {
-
-            let kode = $(this).data("kode");
-            let isOpen = $(this).text() == "▼";
-
-            if (isOpen) {
-
-                // ======================
-                // COLLAPSE (hide semua turunan)
-                // ======================
-
-                hideChilds(kode);
-
-                $(this).text("▶");
-
-            } else {
-
-                // ======================
-                // EXPAND (show child langsung saja)
-                // ======================
-
-                showChilds(kode);
-
-                $(this).text("▼");
-            }
-
-        });
-
-
-        function proses_laba_rugi(this_btn) {
-            var tahun_dari = parseInt($('#tahun_dari').val());
-            var tahun_sampai = parseInt($('#tahun_sampai').val());
+        function proses_neraca(this_btn) {
+            var tahun_dari = $('#tahun_dari').val();
+            var tahun_sampai = $('#tahun_sampai').val();
+            var bulan_dari = parseInt($('#bulan_dari').val());
+            var bulan_sampai = parseInt($('#bulan_sampai').val());
             var check_hidden = $("#hidden_check").is(':checked');
-
-            // Validasi sederhana agar tidak crash jika tahun terbalik
-            if (tahun_dari > tahun_sampai) {
-                alert("Tahun dari tidak boleh lebih besar dari tahun sampai!");
-                return;
-            }
 
             var level = [];
             $("input[name='level[]']:checked").each(function() {
@@ -383,29 +372,41 @@
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('report/labarugiyearly/loadData') ?>",
+                url: "<?php echo site_url('report/neracamonthly/loadData') ?>",
                 data: {
                     tahun_dari: tahun_dari,
                     tahun_sampai: tahun_sampai,
-                    hidden_check: check_hidden, // Sesuaikan dengan key di controller
+                    bulan_dari: bulan_dari,
+                    bulan_sampai: bulan_sampai,
+                    checkhidden: check_hidden,
                     level: level
                 },
                 success: function(data) {
                     $("#example1 tbody").remove();
                     let tbody = $("<tbody />");
 
-                    // Simpan filter untuk keperluan Excel (Yearly)
                     arr_filter = [{
                         tahun_dari: tahun_dari,
                         tahun_sampai: tahun_sampai,
-                        level: level,
-                        checkhidden: check_hidden
+                        bulan_dari: bulan_dari,
+                        bulan_sampai: bulan_sampai,
+                        checkhidden: check_hidden,
+                        level: level
                     }];
 
-                    // --- 1. RENDER HEADER TAHUN DINAMIS ---
-                    $(".year-header").remove();
-                    for (let th = tahun_dari; th <= tahun_sampai; th++) {
-                        $("#header-row").append("<th class='year-header text-right style bb' style='width: 120px;'>" + th + "</th>");
+                    // --- 1. RENDER HEADER BULAN DINAMIS ---
+                    $(".month-header").remove();
+                    const namaBulanIndo = <?php echo json_encode(get_bulan_indo()); ?>;
+
+                    // Re-generate header berdasarkan periode yang dikirim backend
+                    for (let t = parseInt(tahun_dari); t <= parseInt(tahun_sampai); t++) {
+                        let startM = (t == tahun_dari) ? bulan_dari : 1;
+                        let endM = (t == tahun_sampai) ? bulan_sampai : 12;
+
+                        for (let m = startM; m <= endM; m++) {
+                            var header_text = namaBulanIndo[m] + " " + t;
+                            $("#header-row").append("<th class='month-header text-right style bb' style='width: 120px;'>" + header_text + "</th>");
+                        }
                     }
 
                     // --- 2. HITUNG INDENTASI ---
@@ -418,30 +419,24 @@
                         let dynamicIndent = levelIndex * 20;
                         let tr = $("<tr>");
 
-                        // --- STYLING LEVEL (Sesuai Laporan Bulanan Anda) ---
-                        if (value.level == 1) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#437333"
-                            }); // Hijau
-                        } else if (value.level == 2) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#e78d2d"
-                            }); // Oranye
-                        } else if (value.level == 3) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#2f5fb3"
-                            }); // Biru
-                        } else if (value.level == 4) {
-                            tr.css({
-                                "font-weight": "bold",
-                                "color": "#d42459"
-                            }); // Pink
-                        }
+                        // --- FORMAT WARNA TETAP DIPERTAHANKAN ---
+                        if (value.level == 1) tr.css({
+                            "font-weight": "bold",
+                            "color": "#437333"
+                        });
+                        else if (value.level == 2) tr.css({
+                            "font-weight": "bold",
+                            "color": "#e78d2d"
+                        });
+                        else if (value.level == 3) tr.css({
+                            "font-weight": "bold",
+                            "color": "#2f5fb3"
+                        });
+                        else if (value.level == 4) tr.css({
+                            "font-weight": "bold",
+                            "color": "#d42459"
+                        });
 
-                        // Styling Baris Total
                         if (value.tipe == "total") {
                             tr.css({
                                 "background-color": "#fdfdfd",
@@ -450,7 +445,7 @@
                             });
                         }
 
-                        // Kolom Standar
+                        // Kolom Identitas
                         tr.append($("<td>").text(key + 1));
                         tr.append($("<td>").text(value.kode_acc));
                         tr.append($("<td>").html(
@@ -459,43 +454,48 @@
                             "</span>"
                         ));
 
-                        // --- 4. LOOPING SALDO PER TAHUN ---
-                        for (let th = tahun_dari; th <= tahun_sampai; th++) {
-                            let saldo = value.yearly[th];
+                        // --- 4. LOOPING SALDO MONTHLY ---
+                        // Menggunakan data array monthly yang sudah urut dari PHP
+                        $.each(value.monthly, function(i, saldo) {
                             let display = (saldo !== null) ? formatNumber(saldo) : "";
                             tr.append($("<td align='right'>").text(display));
-                        }
+                        });
 
                         tbody.append(tr);
 
-                        // Spacer jika baris total adalah level teratas (Level 1)
+                        // Spacer jika tipe total level paling atas
                         if (value.tipe == "total" && levelIndex === 0) {
-                            let totalCol = (tahun_sampai - tahun_dari) + 4;
+                            let totalCol = value.monthly.length + 3;
                             tbody.append("<tr><td colspan='" + totalCol + "' style='height:30px; border:none;'>&nbsp;</td></tr>");
                         }
                     });
 
-                    // --- 5. BARIS LABA BERSIH (FOOTER) ---
-                    let tr_laba = $("<tr style='background:#f4f4f4; font-weight:bold;'>");
-                    tr_laba.append($("<td colspan='3' align='center'>").text("LABA / RUGI BERSIH"));
+                    // --- 5. FOOTER TOTAL AKHIR (ASET vs PASIVA) ---
+                    const renderFooter = (label, monthlyData, color) => {
+                        let tr = $("<tr style='background:#f4f4f4; font-weight:bold; color:" + color + ";'>");
+                        tr.append($("<td colspan='3' align='right'>").text(label));
+                        $.each(monthlyData, function(i, val) {
+                            tr.append($("<td align='right'>").text(formatNumber(val)));
+                        });
+                        tbody.append(tr);
+                    };
 
-                    for (let th = tahun_dari; th <= tahun_sampai; th++) {
-                        let laba_y = data.record.laba_bersih_yearly[th] || 0;
-                        tr_laba.append($("<td align='right'>").text(formatNumber(laba_y)));
-                    }
-                    tbody.append(tr_laba);
+                    renderFooter("TOTAL ASSET", data.record.total_aset, "");
+                    renderFooter("TOTAL KEWAJIBAN & MODAL", data.record.total_pasiva, "");
+                    renderFooter("SELISIH", data.record.total_selisih, "");
 
                     $("#example1").append(tbody);
                     $("#example1_processing").hide();
                     this_btn.button('reset');
                 },
-                error: function(xhr) {
-                    alert("Terjadi kesalahan saat memuat data.");
+                error: function(jqXHR) {
+                    console.log(jqXHR.responseText);
                     $("#example1_processing").hide();
                     this_btn.button('reset');
                 }
             });
         }
+
 
         $('#btn-excel').click(function() {
             if (arr_filter.length == 0) {
@@ -505,7 +505,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: "<?php echo site_url('report/labarugiyearly/export_excel') ?>",
+                url: "<?php echo site_url('report/neracamonthly/export_excel_monthly') ?>",
                 data: {
                     arr_filter: arr_filter
                 },

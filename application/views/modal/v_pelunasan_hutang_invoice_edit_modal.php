@@ -53,13 +53,13 @@
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Pelunasan (Rp) </label></div>
                     <div class="col-12 col-md-12 col-lg-8">
-                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_rp" id="pelunasan_rp" data-decimal="2" value="<?php echo $get_data->pelunasan_rp; ?>" readonly />
+                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_rp" id="pelunasan_rp" data-decimal="2" value="<?php echo $get_data->pelunasan_rp; ?>"  />
                     </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Pelunasan (Valas) </label></div>
                     <div class="col-12 col-md-12 col-lg-8">
-                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_valas" id="pelunasan_valas" data-decimal="2" value="<?php echo $get_data->pelunasan_valas; ?>" readonly/>
+                        <input type="text" class="form-control input-sm text-right formatAngka" name="pelunasan_valas" id="pelunasan_valas" data-decimal="2" value="<?php echo $get_data->pelunasan_valas; ?>" />
                     </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
