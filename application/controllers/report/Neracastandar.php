@@ -299,7 +299,8 @@ class Neracastandar extends MY_Controller
             $sheet->setCellValue('D' . $rowCount, $total_aset);
             $sheet->getStyle('A' . $rowCount . ':D' . $rowCount)->applyFromArray([
                 'font' => ['bold' => true,],
-                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID]
+                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID],
+                'borders' => ['bottom' => ['style' => PHPExcel_Style_Border::BORDER_THIN]]
             ]);
             $sheet->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
             $rowCount++;
@@ -310,7 +311,8 @@ class Neracastandar extends MY_Controller
             $sheet->setCellValue('D' . $rowCount, $total_pasiva);
             $sheet->getStyle('A' . $rowCount . ':D' . $rowCount)->applyFromArray([
                 'font' => ['bold' => true],
-                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID]
+                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID],
+                'borders' => ['bottom' => ['style' => PHPExcel_Style_Border::BORDER_THIN]]
             ]);
             $sheet->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
             $rowCount++;
@@ -323,7 +325,8 @@ class Neracastandar extends MY_Controller
                 $sheet->setCellValue('D' . $rowCount, $selisih);
                 $sheet->getStyle('A' . $rowCount . ':D' . $rowCount)->applyFromArray([
                     'font' => ['bold' => true],
-                    'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID]
+                    'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID],
+                    'borders' => ['bottom' => ['style' => PHPExcel_Style_Border::BORDER_THIN]]
                 ]);
             } else {
                 $sheet->setCellValue('A' . $rowCount, 'NERACA SEIMBANG (BALANCE)');
@@ -331,7 +334,8 @@ class Neracastandar extends MY_Controller
                 $sheet->getStyle('A' . $rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('A' . $rowCount . ':D' . $rowCount)->applyFromArray([
                     'font' => ['bold' => true],
-                    'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID]
+                    'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID],
+                    'borders' => ['bottom' => ['style' => PHPExcel_Style_Border::BORDER_THIN]]
                 ]);
             }
             $sheet->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');

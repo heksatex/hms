@@ -315,7 +315,7 @@ class Labarugiyearly extends MY_Controller
             // --- 4. BARIS LABA BERSIH ---
             $sheet->setCellValue('A' . $rowCount, 'LABA / RUGI BERSIH');
             $sheet->mergeCells("A{$rowCount}:C{$rowCount}");
-            $sheet->getStyle("A{$rowCount}")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            // $sheet->getStyle("A{$rowCount}")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             $col_laba = 3;
             for ($th = $tahun_dari; $th <= $tahun_sampai; $th++) {
@@ -326,7 +326,8 @@ class Labarugiyearly extends MY_Controller
 
             $sheet->getStyle("A{$rowCount}:{$last_col_letter}{$rowCount}")->applyFromArray([
                 'font' => ['bold' => true],
-                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => 'F4F4F4']]
+                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID],
+                'borders' => ['bottom' => ['style' => PHPExcel_Style_Border::BORDER_THIN]]
             ]);
             $sheet->getStyle("{$first_data_col}{$rowCount}:{$last_col_letter}{$rowCount}")
                 ->getNumberFormat()->setFormatCode('#,##0.00');
