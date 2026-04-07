@@ -136,7 +136,7 @@
                                             <select class="form-control input-sm" name="tahun_dari" id="tahun_dari">
                                                 <?php
                                                 $thn_skr = date('Y');
-                                                for ($x = $thn_skr; $x >= 2015; $x--) {
+                                                for ($x = $thn_skr; $x >= 2020; $x--) {
                                                     // Default pilih 3 tahun kebelakang untuk perbandingan
                                                     $selected = ($x == $thn_skr - 2) ? 'selected' : '';
                                                     echo "<option value='$x' $selected>$x</option>";
@@ -150,7 +150,7 @@
                                         <div class="col-md-3">
                                             <select class="form-control input-sm" name="tahun_sampai" id="tahun_sampai">
                                                 <?php
-                                                for ($x = $thn_skr; $x >= 2015; $x--) {
+                                                for ($x = $thn_skr; $x >= 2020; $x--) {
                                                     $selected = ($x == $thn_skr) ? 'selected' : '';
                                                     echo "<option value='$x' $selected>$x</option>";
                                                 }
@@ -212,7 +212,7 @@
                                             </table>
 
                                             <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
-                                                <i class="fa fa-refresh fa-spin"></i> Memproses Data...
+                                                <i class="fa fa-refresh fa-spin"></i> Processing...
                                             </div>
                                         </div>
                                     </div>
