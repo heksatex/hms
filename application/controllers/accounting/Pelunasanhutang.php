@@ -1385,6 +1385,14 @@ class Pelunasanhutang extends MY_Controller
                                 throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Total Pelunasan (Valas) ', 200);
                             }
 
+                            if($status_bayar == 'partial' && ($pelunasan_rp <= 0 || $pelunasan_valas <= 0)) {
+                                throw new \Exception('Status Bayar tidak bisa diubah ke <b>Partial</b>, Karena Total pelunasan diisi 0 !', 200);
+                            }
+
+                            if($status_bayar == 'lunas' && ($pelunasan_rp <= 0 || $pelunasan_valas <= 0)) {
+                                throw new \Exception('Status Bayar tidak bisa diubah ke <b>Lunas</b>, Karena Total pelunasan diisi 0 !', 200);
+                            }
+
                             if ($status_bayar == 'belum_bayar' && (($pelunasan_rp) > 0 || ($pelunasan_valas) > 0)) {
                                 throw new \Exception('Status Bayar tidak bisa diubah ke <b>Belum Bayar</b>, Karena sudah ada pelunasan !', 200);
                             }
@@ -3373,7 +3381,7 @@ class Pelunasanhutang extends MY_Controller
                                     'id'  => $mt->id_bukti,
                                     'lunas'   => 1
                                 );
-                                $tmp_update3 =  array();
+                                // $tmp_update3 =  array();
                                 array_push($tmp_update3, $data_update3);
                             } else {
                                 throw new \Exception('Nominal Metode Pelunasan Kas  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
