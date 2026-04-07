@@ -387,7 +387,7 @@ class Labarugimonthly extends MY_Controller
             $rowCount++; // Jarak sebelum footer
             $sheet->setCellValue('A' . $rowCount, 'LABA / RUGI BERSIH');
             $sheet->mergeCells("A{$rowCount}:C{$rowCount}");
-            $sheet->getStyle("A$rowCount")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+            // $sheet->getStyle("A$rowCount")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
             $col_laba = 3;
             $curr = clone $startDate;
@@ -407,7 +407,8 @@ class Labarugimonthly extends MY_Controller
             // Style Footer Laba Bersih (Sesuai Monthly: Bold & BG F4F4F4)
             $sheet->getStyle("A{$rowCount}:{$last_col_letter}{$rowCount}")->applyFromArray([
                 'font' => ['bold' => true],
-                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => 'F4F4F4']]
+                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID], 
+                'borders' => ['bottom' => ['style' => PHPExcel_Style_Border::BORDER_THIN]]
             ]);
 
             // --- OUTPUT ---
