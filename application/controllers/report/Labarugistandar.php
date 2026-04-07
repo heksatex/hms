@@ -352,7 +352,8 @@ class Labarugistandar extends MY_Controller
             $sheet->setCellValue('D' . $rowCount, $laba_bersih);
             $sheet->getStyle('A' . $rowCount . ':D' . $rowCount)->applyFromArray([
                 'font' => ['bold' => true],
-                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => 'F4F4F4']]
+                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID],
+                'borders' => ['bottom' => ['style' => PHPExcel_Style_Border::BORDER_THIN]]
             ]);
             $sheet->getStyle('D' . $rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
