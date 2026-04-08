@@ -39,9 +39,6 @@ class M_neraca extends CI_Model
         $start     = $this->periodesaldo->get_start_periode();
         $tgldari   = date("Y-m-d 00:00:00", strtotime($start)); // example 2025-01-01 00:00:00 by table setting
 
-        $tgl_cut_off = date("Y-m-d", strtotime($start));
-        $tgl_filter  = date("Y-m-d", strtotime($tglsampai));
-
         // get saldo debit / credit yang berjalan
         $entries = $this->query_entries($tgldari, $tglsampai);
 
@@ -49,8 +46,7 @@ class M_neraca extends CI_Model
             $this->db->where($where);
         }
 
-        $this->db->select(" coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,
-                            (CASE WHEN $tgl_filter < $tgl_cut_off THEN 0 ELSE  coa.saldo_awal END) AS saldo_awal,
+        $this->db->select(" coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,saldo_awal,
                             COALESCE(jr.total_debit, 0) as total_debit,
                             COALESCE(jr.total_credit, 0) as total_credit,
                             ");
@@ -167,11 +163,9 @@ class M_neraca extends CI_Model
                 coa.saldo_awal as saldo_awal_database,
                 (CASE 
                     WHEN coa.saldo_normal = 'D' THEN 
-                        ( (CASE WHEN $tgl_dari_filter2 < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END) 
-                        + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                        (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
                     WHEN coa.saldo_normal = 'C' THEN
-                        (  (CASE WHEN $tgl_dari_filter2 < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END ) 
-                        + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                        ( coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
                     ELSE coa.saldo_awal 
                 END) as saldo_awal_finish
             ");
@@ -240,9 +234,9 @@ class M_neraca extends CI_Model
             coa.saldo_awal as saldo_awal_database,
             (CASE 
                 WHEN coa.saldo_normal = 'D' THEN 
-                    ((CASE WHEN $tahun_dari < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END)  + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
                 WHEN coa.saldo_normal = 'C' THEN
-                    ((CASE WHEN $tahun_dari < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END)  + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
                 ELSE coa.saldo_awal 
             END) as saldo_awal_finish
         ");
