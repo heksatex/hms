@@ -39,6 +39,9 @@ class M_neraca extends CI_Model
         $start     = $this->periodesaldo->get_start_periode();
         $tgldari   = date("Y-m-d 00:00:00", strtotime($start)); // example 2025-01-01 00:00:00 by table setting
 
+        $tgl_cut_off = date("Y-m-d", strtotime($start));
+        $tgl_filter  = date("Y-m-d", strtotime($tglsampai));
+
         // get saldo debit / credit yang berjalan
         $entries = $this->query_entries($tgldari, $tglsampai);
 
@@ -46,7 +49,8 @@ class M_neraca extends CI_Model
             $this->db->where($where);
         }
 
-        $this->db->select(" coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,coa.saldo_awal,
+        $this->db->select(" coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,
+                            (CASE WHEN $tgl_filter < $tgl_cut_off THEN 0 ELSE  coa.saldo_awal END) AS saldo_awal,
                             COALESCE(jr.total_debit, 0) as total_debit,
                             COALESCE(jr.total_credit, 0) as total_credit,
                             ");
@@ -115,54 +119,19 @@ class M_neraca extends CI_Model
         return $this->get_total_saldo_akhir_posisi_by_coa($tmp_where, $kata_posisi);
     }
 
-    public function get_list_neraca_monthlyx($start_dt, $end_dt, $period_list)
-    {
-
-        $start     = $this->periodesaldo->get_start_periode();
-        $tgldari   = date("Y-m-d 00:00:00", strtotime($start)); // example 2025-01-01 00:00:00 by table setting
-
-        $tgl_dari_filter  = $start_dt->format("Y-m-d");
-        $tgl_sampai_filter = $end_dt->format("Y-m-d");
-
-
-        // get saldo debit / credit yang berjalan
-        $entries = $this->query_entries_2($tgldari, $tgl_sampai_filter);
-
-        $subquery_debit = $this->get_saldo_sblm($tgl_dari_filter, 'D');
-        $subquery_credit = $this->get_saldo_sblm($tgl_dari_filter, 'C');
-
-
-        $this->db->select(" coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,coa.saldo_awal,
-                            ( CASE 
-                                WHEN coa.saldo_normal = 'D' THEN 
-                                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
-                                WHEN coa.saldo_normal = 'C' THEN
-                                    (coa.saldo_awal +  COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
-                                ELSE 
-                                    coa.saldo_awal                             
-                            END ) as saldo_awal_finish
-                            COALESCE(jr.total_debit, 0) as total_debit,
-                            COALESCE(jr.total_credit, 0) as total_credit,
-                            ");
-        $this->db->from('acc_coa coa');
-        $this->db->join("($subquery_debit) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left");
-        $this->db->join("($subquery_credit) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left");
-        $this->db->join("({$entries}) as jr ", "jr.kode_coa = coa.kode_coa", "left");
-        $this->db->order_by('coa.kode_coa');
-        $query = $this->db->get();
-        return $query;
-    }
-
-
     public function get_list_neraca_monthly($start_dt, $end_dt, $period_list)
     {
         // Ambil awal periode sistem (misal saldo awal tahun)
         $start_system = $this->periodesaldo->get_start_periode();
         $tgl_dari_sistem = date("Y-m-d 00:00:00", strtotime($start_system));
 
+        $tgl_cut_off = date("Y-m", strtotime($start_system));
+
         // Tanggal filter dari UI
         $tgl_dari_filter   = $start_dt->format("Y-m-d 00:00:00");
         $tgl_sampai_filter = $end_dt->format("Y-m-t 23:59:59"); // Sampai akhir bulan
+
+        $tgl_dari_filter2  = $start_dt->format("Y-m");
 
         // 1. Subquery untuk Saldo Sebelum Filter (untuk dapat Saldo Awal)
         $subquery_debit = $this->get_saldo_sblm($tgl_dari_filter, 'D');
@@ -198,9 +167,11 @@ class M_neraca extends CI_Model
                 coa.saldo_awal as saldo_awal_database,
                 (CASE 
                     WHEN coa.saldo_normal = 'D' THEN 
-                        (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                        ( (CASE WHEN $tgl_dari_filter2 < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END) 
+                        + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
                     WHEN coa.saldo_normal = 'C' THEN
-                        (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                        (  (CASE WHEN $tgl_dari_filter2 < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END ) 
+                        + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
                     ELSE coa.saldo_awal 
                 END) as saldo_awal_finish
             ");
@@ -253,6 +224,12 @@ class M_neraca extends CI_Model
         $this->db->group_by("jei.kode_coa");
         $subquery_yearly = $this->db->get_compiled_select();
 
+        $start_system = $this->periodesaldo->get_start_periode();
+        $tgl_cut_off = date("Y", strtotime($start_system));
+
+        $tahun_dari  = date("Y", strtotime($tgl_dari_filter));
+
+
         // 5. Main Query: Join COA dengan semua Subquery
         $this->db->select("
             coa.kode_coa, 
@@ -263,9 +240,9 @@ class M_neraca extends CI_Model
             coa.saldo_awal as saldo_awal_database,
             (CASE 
                 WHEN coa.saldo_normal = 'D' THEN 
-                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                    ((CASE WHEN $tahun_dari < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END)  + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
                 WHEN coa.saldo_normal = 'C' THEN
-                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                    ((CASE WHEN $tahun_dari < $tgl_cut_off THEN 0 ELSE coa.saldo_awal END)  + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
                 ELSE coa.saldo_awal 
             END) as saldo_awal_finish
         ");
