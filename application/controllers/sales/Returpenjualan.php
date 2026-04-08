@@ -18,7 +18,7 @@ use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mpdf\Mpdf;
 
 class Returpenjualan extends MY_Controller {
-
+    protected $curr_def_id = 1;
     protected $tipe = [
         "lokal" => "Lokal",
         "ekspor" => "Ekspor",
@@ -119,6 +119,7 @@ class Returpenjualan extends MY_Controller {
         $this->load->driver('cache', array('adapter' => 'file'));
         $this->config->load('additional');
         $this->load->library("token");
+        $this->curr_def_id = $this->config->item('default_curr_id');
     }
 
     public function index() {
@@ -140,6 +141,7 @@ class Returpenjualan extends MY_Controller {
     public function edit($id) {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
+            $data["curr_def_id"] = $this->curr_def_id;
             $data["id"] = $id;
             $data['id_dept'] = 'ACCRPJ';
             $data["tipe"] = $this->tipe;
@@ -454,6 +456,7 @@ class Returpenjualan extends MY_Controller {
             $ids = $this->input->post("ids");
             $nosjold = $this->input->post("no_sj_old");
             $model = new $this->m_global;
+            $check = $model->setTables("acc_retur_penjualan")->setWheres(["no_retur" => $kode])->getDetail();
             $header = [
                 "tipe" => $this->input->post("tipe"),
                 "no_sj" => $nosj,
@@ -528,10 +531,7 @@ class Returpenjualan extends MY_Controller {
                             "diskon_ppn" => $ppn_diskon
                         ];
                     }
-                    if ($header["kurs_nominal"] > 1) {
-
-                        $header["total_piutang_valas"] = round($header["final_total"], 2);
-                        $header["piutang_valas"] = round($header["final_total"], 2);
+                    if ($check->kurs != $this->curr_def_id) {
                         $header["grand_total"] = round($grandTotal, 2);
                         $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon, 2);
                         $header["diskon"] = $alldiskon;
@@ -548,6 +548,9 @@ class Returpenjualan extends MY_Controller {
                         $header["diskon_ppn"] = round($ppn_diskon, 2);
                         $header["ppn"] = round($pajak, 2);
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"], 2);
+                        
+                        $header["total_piutang_valas"] = round($header["final_total"], 2);
+                        $header["piutang_valas"] = round($header["final_total"], 2);
                     } else {
                         $header["grand_total"] = round($grandTotal);
                         $alldiskon = round(($tipediskon === "%") ? ($header["grand_total"] * ($nominalDiskon / 100)) : $nominalDiskon);
@@ -700,7 +703,7 @@ class Returpenjualan extends MY_Controller {
                     $jurnalItems = [];
                     $totalC = 0;
                     $totalD = 0;
-                    $piutang = round($data->final_total * $data->kurs_nominal);
+                    $piutang = round(($data->grand_total + $data->ppn + $data->diskon_ppn) * $data->kurs_nominal);
                     $totalC += $piutang;
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
@@ -709,7 +712,7 @@ class Returpenjualan extends MY_Controller {
                         "partner" => $data->partner_id,
                         "kode_coa" => $getCoaDefault->value,
                         "posisi" => "C",
-                        "nominal_curr" => $data->final_total,
+                        "nominal_curr" => ($data->grand_total + $data->ppn + $data->diskon_ppn),
                         "kurs" => $data->kurs_nominal,
                         "kode_mua" => $data->nama_kurs,
                         "nominal" => $piutang,
@@ -768,7 +771,7 @@ class Returpenjualan extends MY_Controller {
                         );
                     }
                     if ($data->ppn > 0) {
-                        $totalD += round($data->ppn * $data->kurs_nominal, 2);
+                        $totalD +=  round(($data->ppn + $data->diskon_ppn) * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "PPN (Retur)",
@@ -789,7 +792,7 @@ class Returpenjualan extends MY_Controller {
                     foreach ($detail as $key => $value) {
                         $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                         $rowOrder = (count($jurnalItems) + 1);
-                        $totalD += round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2);
+                        $totalD +=  round(($value->jumlah) * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                            "kode" => $jurnal,
                                 "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
@@ -797,10 +800,10 @@ class Returpenjualan extends MY_Controller {
                                 "partner" => $data->partner_id,
                                 "kode_coa" => $value->no_acc,
                                 "posisi" => "D",
-                                "nominal_curr" => $value->jumlah - $value->diskon,
+                                "nominal_curr" => $value->jumlah,
                                 "kurs" => $data->kurs_nominal,
                                 "kode_mua" => $data->nama_kurs,
-                                "nominal" => round(($value->jumlah - $value->diskon) * $data->kurs_nominal, 2),
+                                "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
                                 "row_order" => $rowOrder
                         );
 
@@ -824,7 +827,7 @@ class Returpenjualan extends MY_Controller {
                             "nominal_curr" => abs($hsl),
                             "kurs" => $data->kurs_nominal,
                             "kode_mua" => $data->nama_kurs,
-                            "nominal" => round(abs($hsl) / $data->kurs_nominal, 2),
+                            "nominal" => round(abs($hsl), 2),
                             "row_order" => (count($jurnalItems) + 1)
                         );
                     }

@@ -75,7 +75,7 @@
                         <?= $nama ?>
                     </td>
                     <td>
-                        <?= ($selisih > 0) ? $coa_sk->value :$coa_skr->value?>
+                        <?= ($selisih > 0) ? $coa_sk->value : $coa_skr->value ?>
                     </td>
                     <td class="text-right">
                         <?= ($selisih > 0) ? "0.00" : number_format($nominal, 2) ?>
@@ -131,22 +131,22 @@
                 ?>
                 <tr>
                     <td>
-    <?= $key + 1 ?>
+                        <?= $key + 1 ?>
                     </td>
                     <td>
-    <?= "{$value->nama_menu} {$value->no} ({$nominals} {$curr})" ?>
+                        <?= "{$value->nama_menu} {$value->no} ({$nominals} {$curr})" ?>
                     </td>
                     <td class="text-right">
-    <?= number_format($oldKurs, 2) ?>
+                        <?= number_format($oldKurs, 2) ?>
                     </td>
                     <td class="text-right">
-    <?= number_format($value->nominal * $oldKurs, 2) ?>
+                        <?= number_format($value->nominal * $oldKurs, 2) ?>
                     </td>
                     <td class="text-right">
-    <?= number_format($kurs, 2) ?>
+                        <?= number_format($kurs, 2) ?>
                     </td>
                     <td class="text-right">
-    <?= number_format($value->nominal * $kurs, 2) ?>
+                        <?= number_format($value->nominal * $kurs, 2) ?>
                     </td>
                 </tr>
             <?php }
@@ -156,7 +156,7 @@
 </div>
 
 <div class="col-md-12">
-    <caption>Pelunasan</caption>
+    <caption>Pelunasan (Deposit)</caption>
     <table class="table table-condesed table-hover rlstable  over" width="100%">
         <thead>
         <th>
@@ -196,12 +196,62 @@
                         <?= number_format($kurs, 2) ?>
                     </td>
                     <td class="text-right">
-    <?= number_format(abs($saldo) * $kurs, 2) ?>
+                        <?= number_format(abs($saldo) * $kurs, 2) ?>
                     </td>
 
                 </tr>
-<?php }
-?>
+            <?php }
+            ?>
+        </tbody>
+    </table>
+</div>
+<div class="col-md-12">
+    <caption>Retur Penjualan</caption>
+    <table class="table table-condesed table-hover rlstable  over" width="100%">
+        <thead>
+        <th class="no">
+            No
+        </th>
+        <th class="text-right">
+            Kurs
+        </th>
+        <th class="text-right">
+            Jumlah
+        </th>
+        <th class="text-right">
+            Kurs Baru
+        </th>
+        <th class="text-right">
+            Jumlah Baru
+        </th>
+        </thead>
+        <tbody>
+            <?php
+            foreach ($retur_pen as $key => $value) {
+                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
+                ?>
+                <tr>
+                    <td>
+                        <?= $value->no_retur ?>
+                    </td>
+                    <td class="text-right">
+                        <?= number_format($oldKurs, 2) ?>
+                    </td>
+                    <td class="text-right">
+                        <?= number_format($oldKurs * $value->final_total, 2) ?>
+                    </td>
+                    <td class="text-right">
+                        <?= number_format($kurs, 2) ?>
+                    </td>
+                    <td class="text-right">
+                        <?= number_format($value->final_total * $kurs, 2) ?>
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+
+
         </tbody>
     </table>
 </div>
