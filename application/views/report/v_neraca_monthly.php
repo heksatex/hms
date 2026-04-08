@@ -489,6 +489,7 @@
                     this_btn.button('reset');
                 },
                 error: function(jqXHR) {
+                    alert("Error Generate Data !");
                     console.log(jqXHR.responseText);
                     $("#example1_processing").hide();
                     this_btn.button('reset');
