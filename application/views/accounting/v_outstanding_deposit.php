@@ -63,6 +63,53 @@
                 info: true,
                 autoWidth: false,
                 stateSave: false,
+                dom: "<'row'<'col-sm-2'l><'col-sm-5'B><'col-sm-5'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                buttons: [{
+                    text: '<i class="fa fa-file-excel-o" style="color:green"></i> Export Excel',
+                    className: 'btn btn-success btn-sm',
+                    attr: {
+                        // Menambahkan atribut HTML secara langsung ke elemen button
+                        'id': 'btn-excel-deposit',
+                        'data-loading-text': "<i class='fa fa-spinner fa-spin'></i> processing..."
+                    },
+                    action: function(e, dt, node, config) {
+                        let searchValue = dt.search();
+                        let $btn = $(node); // 'node' adalah elemen tombol itu sendiri
+
+                        $.ajax({
+                            type: 'POST',
+                            url: "<?php echo site_url('accounting/outstandingdeposit/export_excel_deposit') ?>",
+                            data: {
+                                search: searchValue
+                            },
+                            dataType: 'json',
+                            beforeSend: function() {
+                                // Mengaktifkan status loading (fitur bawaan Bootstrap 3)
+                                $btn.button('loading');
+                            },
+                            error: function() {
+                                alert('Error Export Excel');
+                                $btn.button('reset');
+                            },
+                            success: function(data) {
+                                if (data.status == "success") {
+                                    var $a = $("<a>");
+                                    $a.attr("href", data.file);
+                                    $a.attr("download", data.filename);
+                                    $("body").append($a);
+                                    $a[0].click();
+                                    $a.remove();
+                                } else {
+                                    alert(data.message);
+                                }
+                                // Mengembalikan tombol ke keadaan semula
+                                $btn.button('reset');
+                            }
+                        });
+                    }
+                }],
                 ajax: {
                     url: "<?php echo site_url('accounting/outstandingdeposit/list_data_deposit') ?>",
                     type: "POST",
