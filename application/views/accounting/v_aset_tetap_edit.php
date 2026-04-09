@@ -34,6 +34,11 @@
             .btn-unposted {
                 background-color: #ffcc00 !important;
             }
+            .addons {
+                padding: 1px 6px;
+                border-color: transparent !important;
+                background-color:transparent !important;
+            }
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
@@ -117,11 +122,11 @@
                         <div class="box-footer">
                             <div class="box-footer">
                                 <ul class="nav nav-tabs ">
-                                    <li class="<?= ($datas->status ==='draft') ? 'active':"" ?>"><a href="#tab_1" data-toggle="tab">Setting</a></li>
-                                    <li class="<?= ($datas->status !=='draft') ? 'active':"" ?>"><a href="#tab_2" data-toggle="tab">Tabel Penyusutan</a></li>
+                                    <li class="<?= ($datas->status === 'draft') ? 'active' : "" ?>"><a href="#tab_1" data-toggle="tab">Setting</a></li>
+                                    <li class="<?= ($datas->status !== 'draft') ? 'active' : "" ?>"><a href="#tab_2" data-toggle="tab">Tabel Penyusutan</a></li>
                                 </ul>
                                 <div class="tab-content"></br>
-                                    <div class="tab-pane <?= ($datas->status ==='draft') ? 'active':"" ?>" id="tab_1" >
+                                    <div class="tab-pane <?= ($datas->status === 'draft') ? 'active' : "" ?>" id="tab_1" >
                                         <div class="col-md-6 col-xs-12">
                                             <div class="field-group">
                                                 <div class="form-group">
@@ -208,7 +213,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane <?= ($datas->status !=='draft') ? 'active':"" ?>" id="tab_2" >
+                                    <div class="tab-pane <?= ($datas->status !== 'draft') ? 'active' : "" ?>" id="tab_2" >
                                         <div class="field-group">
                                             <button type="button" class="btn btn-success btn-sm btn-generate">Generate</button>
                                         </div>
@@ -233,6 +238,7 @@
                                                         <table id="tbl-penyu-sm" class="table table-striped">
                                                             <thead>
                                                                 <tr>
+                                                                    <th><input type="checkbox" class="check_all"></th>
                                                                     <th>No</th>
                                                                     <th class="no">No Jurnal</th>
                                                                     <th>Ref Note</th>
@@ -249,9 +255,12 @@
                                                                 foreach ($jurnals as $key => $value) {
                                                                     $no += 1;
                                                                     $jrnl = str_replace("/", "_", $value->no_jurnal);
-                                                                    $totalPenyusutan += ($value->status_jurnal === "cancel") ? 0:$value->penyusutan_bulan;
+                                                                    $totalPenyusutan += ($value->status_jurnal === "cancel") ? 0 : $value->penyusutan_bulan;
                                                                     ?>
                                                                     <tr>
+                                                                        <td>
+                                                                            <input type="checkbox" class="check_post" name="check_post" value="<?= $value->no_jurnal ?>">
+                                                                        </td>
                                                                         <td>
                                                                             <?= $no ?>
                                                                         </td>
@@ -262,7 +271,7 @@
                                                                         </td>
                                                                         <td> <?= $value->reff_note ?></td>
                                                                         <td><?= $value->penyusutan_tgl ?></td>
-                                                                        <td  class="text-right" style="text-align: right"><?= number_format($value->penyusutan_bulan,2) ?></td>
+                                                                        <td  class="text-right" style="text-align: right"><?= number_format($value->penyusutan_bulan, 2) ?></td>
                                                                         <td class="sts-jurnal-<?= $jrnl ?>"><?= $value->status_jurnal ?></td>
                                                                         <td>
                                                                             <?php
@@ -292,7 +301,7 @@
                                                                         Total Penyusutan
                                                                     </td>
                                                                     <td class="text-right">
-                                                                        <?= number_format(round($totalPenyusutan,2), 2) ?>
+                                                                        <?= number_format(round($totalPenyusutan, 2), 2) ?>
                                                                     </td>
                                                                 </tr>
                                                             </tfoot>
@@ -304,8 +313,9 @@
                                                     <table id="tbl-penyu-sl" class="table table-striped">
                                                         <thead>
                                                             <tr>
+                                                                <th><input type="checkbox" class="check_all"></th>
                                                                 <th>No</th>
-                                                                <th class="no">No Jurnal</th>
+                                                                <th>No Jurnal</th>
                                                                 <th>Reff note</th>
                                                                 <th>Tgl Penyusutan</th>
                                                                 <th  class="text-right" style="text-align: right">Penyusutan (Bulan)</th>
@@ -322,10 +332,13 @@
                                                             $no = 0;
                                                             foreach ($jurnals as $key => $value) {
                                                                 $no += 1;
-                                                                $totalPenyusutan += ($value->status_jurnal === "cancel") ? 0:$value->penyusutan_bulan;
+                                                                $totalPenyusutan += ($value->status_jurnal === "cancel") ? 0 : $value->penyusutan_bulan;
                                                                 $jrnl = str_replace("/", "_", $value->no_jurnal);
                                                                 ?>
                                                                 <tr>
+                                                                    <td>
+                                                                        <input type="checkbox" class="check_post" name="check_post" value="<?= $value->no_jurnal ?>">
+                                                                    </td>
                                                                     <td>
                                                                         <?= $no ?>
                                                                     </td>
@@ -370,7 +383,7 @@
                                                                     Total Penyusutan
                                                                 </td>
                                                                 <td class="text-right">
-                                                                    <?= number_format(round($totalPenyusutan,2), 2) ?>
+                                                                    <?= number_format(round($totalPenyusutan, 2), 2) ?>
                                                                 </td>
                                                             </tr>
                                                         </tfoot>
@@ -417,7 +430,7 @@
                                     text: item.nama,
                                     children: [{
                                             id: item.kode_coa,
-                                            text: item.kode_coa
+                                            text: item.kode_coa+" - "+item.nama
                                         }]
                                 });
                             });
@@ -435,18 +448,18 @@
                     ordering: false,
                     searching: false,
                     lengthChange: true,
-                    lengthMenu: [[12, 50, -1],[12, 50, "All"]],
+                    lengthMenu: [[12, 50, -1], [12, 50, "All"]],
                     dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-8'B><'col-sm-4'i>>",
                     buttons: [
                         {
-                            "text": '<i class="fa fa-check"> <span>Posted All</span>',
+                            "text": '<i class="fa fa-check"> <span>Posted Checked</span>',
                             "className": "btn-posted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".posted-data").trigger("click");
                             }
                         },
                         {
-                            "text": '<i class="fa fa-check"> <span>unPosted All</span>',
+                            "text": '<i class="fa fa-check"> <span>unPosted Checkeds</span>',
                             "className": "btn-unposted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".unposted-data").trigger("click");
@@ -507,18 +520,18 @@
                     iDisplayLength: 12,
                     ordering: false,
                     lengthChange: true,
-                    lengthMenu: [[12, 50, -1],[12, 50, "All"]],
+                    lengthMenu: [[12, 50, -1], [12, 50, "All"]],
                     dom: "<'row'<'col-sm-4'l><'col-sm-8'p>><'row'<'col-sm-8'B><'col-sm-4'i>>",
                     buttons: [
                         {
-                            "text": '<i class="fa fa-check"> <span>Posted All</span>',
+                            "text": '<i class="fa fa-check"> <span>Posted Checked</span>',
                             "className": "btn-posted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".posted-data").trigger("click");
                             }
                         },
                         {
-                            "text": '<i class="fa fa-check"> <span>unPosted All</span>',
+                            "text": '<i class="fa fa-check"> <span>unPosted Checked</span>',
                             "className": "btn-unposted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".unposted-data").trigger("click");
@@ -688,7 +701,7 @@
 
                     });
                 });
-                
+
                 $("#btn-simpan").on("click", function (e) {
                     e.preventDefault();
                     $(".btn-save").trigger("click");
@@ -761,7 +774,7 @@
                             unblockUI(function () {}, 500);
                         },
                         error: function (xhr, ajaxOptions, thrownError) {
-                             alert_notify(xhr.responseJSON.icon, xhr.responseJSON.message, xhr.responseJSON.type, function () {});
+                            alert_notify(xhr.responseJSON.icon, xhr.responseJSON.message, xhr.responseJSON.type, function () {});
                         },
                         success: ((data) => {
                             window.location.reload();
@@ -770,13 +783,14 @@
                 }
                 );
 
-                const postedData = ((status) => {
+                const postedData = ((status, data) => {
                     $.ajax({
                         url: "<?= base_url("accounting/asettetap/update_status_jurnals/{$id}") ?>",
                         dataType: 'JSON',
                         type: "post",
                         data: {
-                            status: status
+                            status: status,
+                            dt: data.join()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -794,13 +808,28 @@
                     });
                 });
                 $(".posted-data").on("click", function () {
+                    var array = $.map($('input[name="check_post"]:checked'), function (c) {
+                        return c.value;
+                    });
+                    if (array.length < 1) {
+                        alert_notify("fa fa-warning", "Pilih Data", "danger", function () {});
+                        return;
+                    }
                     confirmRequest("Jurnal Entries", "Posted Semua Jurnal ?", function () {
-                        postedData("posted");
+                        postedData("posted", array);
                     });
                 });
                 $(".unposted-data").on("click", function () {
+                    var array = $.map($('input[name="check_post"]:checked'), function (c) {
+                        return c.value;
+                    });
+                    if (array.length < 1) {
+                        alert_notify("fa fa-warning", "Pilih Data", "danger", function () {});
+                        return;
+                    }
+
                     confirmRequest("Jurnal Entries", "unPosted Semua Jurnal ?", function () {
-                        postedData("unposted");
+                        postedData("unposted", array);
                     });
                 });
                 $("#btn-cancel").on("click", function () {
@@ -824,6 +853,15 @@
                             })
                         });
                     });
+                });
+
+                $('.check_all').on('change', function () {
+                    var ck = $(this).is(':checked');
+                    if (ck) {
+                        $(".check_post").prop("checked", ck);
+                    } else {
+                        $(".check_post").prop("checked", ck);
+                    }
                 });
 
             }

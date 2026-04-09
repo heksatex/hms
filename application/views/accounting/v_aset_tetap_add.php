@@ -218,7 +218,7 @@
                                     text: item.nama,
                                     children: [{
                                             id: item.kode_coa,
-                                            text: item.kode_coa
+                                            text: item.kode_coa+" - "+item.nama
                                         }]
                                 });
                             });

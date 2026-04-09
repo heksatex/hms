@@ -1059,7 +1059,9 @@ class Fakturpenjualan extends MY_Controller {
                     $this->_module->gen_history_new("jurnal_entries", $jurnal, "{$stt}", $log, $username);
 
                     if ((double) $data->total_piutang_rp === 0.0000) {
-                        $updateHead = array_merge($updateHead, ["lunas" => 1]);
+                        if (in_array($sjs[0], ["SJM", "SAMPLE"])) {
+                            $updateHead = array_merge($updateHead, ["lunas" => 1]);
+                        }
                     }
                     break;
 

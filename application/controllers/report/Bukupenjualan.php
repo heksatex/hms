@@ -308,9 +308,10 @@ class Bukupenjualan extends MY_Controller {
                     if (isset($data[$key + 1])) {
                         if ($value->kode_coa !== $data[$key + 1]->kode_coa) {
                             $row += 1;
+                            $sheet->setCellValue("J{$row}", "Total {$value->coa}");
                             $sheet->setCellValue("r{$row}", $JumlahValas);
-                            $sheet->setCellValue("s{$row}", $hargaRp);
-                            $sheet->setCellValue("t{$row}", $ppn);
+                            $sheet->setCellValue("s{$row}", $totalHarga);
+                            $sheet->setCellValue("t{$row}", $totalPpn);
                             $sheet->setCellValue("u{$row}", $total);
                             $total = 0;
                             $totalHarga = 0;
@@ -321,9 +322,10 @@ class Bukupenjualan extends MY_Controller {
                         }
                     } else {
                         $row += 1;
+                        $sheet->setCellValue("J{$row}", "Total {$value->coa}");
                         $sheet->setCellValue("r{$row}", $JumlahValas);
-                        $sheet->setCellValue("s{$row}", $hargaRp);
-                        $sheet->setCellValue("t{$row}", $ppn);
+                        $sheet->setCellValue("s{$row}", $totalHarga);
+                        $sheet->setCellValue("t{$row}", $totalPpn);
                         $sheet->setCellValue("u{$row}", $total);
                         $total = 0;
                         $totalHarga = 0;
