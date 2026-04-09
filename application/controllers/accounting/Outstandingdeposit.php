@@ -89,4 +89,95 @@ class Outstandingdeposit extends MY_Controller
 
         echo json_encode(['status' => true]);
     }
+
+    public function export_excel_deposit()
+    {
+        try {
+            // 1. Load Library
+            $this->load->library('excel');
+
+            // 2. Ambil parameter search dari AJAX
+            $search = $this->input->post('search');
+
+            // 3. Ambil data dari model
+            // Pastikan nama model sesuai (m_outstandingdeposit)
+            $records = $this->m_outstandingdeposit->get_all_deposit($search);
+
+            if (empty($records)) {
+                throw new Exception("Data tidak ditemukan atau filter kosong.");
+            }
+
+            ob_start();
+            $object = new PHPExcel();
+            $sheet = $object->setActiveSheetIndex(0);
+            $sheet->setTitle('Outstanding Deposit');
+
+            // --- STYLING ---
+            $styleHeader = [
+                'font' => ['bold' => true],
+                'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER],
+                'borders' => ['allborders' => ['style' => PHPExcel_Style_Border::BORDER_THIN]],
+                'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => 'EAEAEA']]
+            ];
+
+            // --- HEADER LAPORAN ---
+            $sheet->setCellValue('A1', 'DAFTAR OUTSTANDING DEPOSIT');
+            $sheet->mergeCells('A1:H1');
+            $sheet->getStyle("A1")->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle("A1")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+            // --- TABLE HEAD ---
+            $headers = ['No', 'No Pelunasan', 'Customer', 'Tanggal', 'Curr', 'Kurs', 'Total (Rp)', 'Total (Valas)'];
+            $col = 0;
+            foreach ($headers as $h) {
+                $sheet->setCellValueByColumnAndRow($col, 3, $h);
+                $col++;
+            }
+            $sheet->getStyle('A3:H3')->applyFromArray($styleHeader);
+
+            // --- ISI DATA ---
+            $rowIdx = 4;
+            $no = 1;
+            foreach ($records as $row) {
+                $sheet->setCellValue('A' . $rowIdx, $no++);
+
+                // Kolom B: No Pelunasan (String agar tidak jadi scientific notation)
+                $sheet->setCellValueExplicit('B' . $rowIdx, $row->no_pelunasan, PHPExcel_Cell_DataType::TYPE_STRING);
+                $sheet->setCellValue('C' . $rowIdx, $row->partner_nama);
+                $sheet->setCellValue('D' . $rowIdx, $row->tanggal_transaksi);
+                $sheet->setCellValue('E' . $rowIdx, $row->currency);
+
+                // Kolom F, G, H: Angka
+                $sheet->setCellValue('F' . $rowIdx, $row->kurs);
+                $sheet->setCellValue('G' . $rowIdx, $row->total_rp);
+                $sheet->setCellValue('H' . $rowIdx, $row->total_valas);
+
+                // Format angka ribuan (comma separated)
+                $sheet->getStyle('F' . $rowIdx . ':H' . $rowIdx)->getNumberFormat()->setFormatCode('#,##0.00');
+
+                $rowIdx++;
+            }
+
+            // Auto width kolom
+            foreach (range('A', 'H') as $columnID) {
+                $sheet->getColumnDimension($columnID)->setAutoSize(true);
+            }
+
+            // --- GENERATE ---
+            $writer = PHPExcel_IOFactory::createWriter($object, 'Excel2007');
+            $writer->save('php://output');
+            $xlsData = ob_get_contents();
+            ob_end_clean();
+
+            die(json_encode([
+                'status' => 'success',
+                'file' => "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," . base64_encode($xlsData),
+                'filename' => 'Outstanding Deposit.xlsx'
+            ]));
+        } catch (Exception $ex) {
+            // Jika error, kirim pesan ke client
+            if (ob_get_length()) ob_end_clean();
+            die(json_encode(['status' => 'failed', 'message' => $ex->getMessage()]));
+        }
+    }
 }
