@@ -315,7 +315,7 @@
                                                             <tr>
                                                                 <th><input type="checkbox" class="check_all"></th>
                                                                 <th>No</th>
-                                                                <th class="no">No Jurnal</th>
+                                                                <th>No Jurnal</th>
                                                                 <th>Reff note</th>
                                                                 <th>Tgl Penyusutan</th>
                                                                 <th  class="text-right" style="text-align: right">Penyusutan (Bulan)</th>
@@ -430,7 +430,7 @@
                                     text: item.nama,
                                     children: [{
                                             id: item.kode_coa,
-                                            text: item.kode_coa
+                                            text: item.kode_coa+" - "+item.nama
                                         }]
                                 });
                             });
@@ -783,13 +783,14 @@
                 }
                 );
 
-                const postedData = ((status) => {
+                const postedData = ((status, data) => {
                     $.ajax({
                         url: "<?= base_url("accounting/asettetap/update_status_jurnals/{$id}") ?>",
                         dataType: 'JSON',
                         type: "post",
                         data: {
-                            status: status
+                            status: status,
+                            dt: data.join()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -807,15 +808,28 @@
                     });
                 });
                 $(".posted-data").on("click", function () {
-//                var array = $.map($('input[name="check_post"]:checked'), function(c){return c.value; })
-//                console.log(array);
+                    var array = $.map($('input[name="check_post"]:checked'), function (c) {
+                        return c.value;
+                    });
+                    if (array.length < 1) {
+                        alert_notify("fa fa-warning", "Pilih Data", "danger", function () {});
+                        return;
+                    }
                     confirmRequest("Jurnal Entries", "Posted Semua Jurnal ?", function () {
-                        postedData("posted");
+                        postedData("posted", array);
                     });
                 });
                 $(".unposted-data").on("click", function () {
+                    var array = $.map($('input[name="check_post"]:checked'), function (c) {
+                        return c.value;
+                    });
+                    if (array.length < 1) {
+                        alert_notify("fa fa-warning", "Pilih Data", "danger", function () {});
+                        return;
+                    }
+
                     confirmRequest("Jurnal Entries", "unPosted Semua Jurnal ?", function () {
-                        postedData("unposted");
+                        postedData("unposted", array);
                     });
                 });
                 $("#btn-cancel").on("click", function () {
@@ -842,11 +856,11 @@
                 });
 
                 $('.check_all').on('change', function () {
-                console.log($(this).is(':checked'));
-                    if ($(this).is(':checked')) {
-                        $(".check_post").attr("checked","checked");
+                    var ck = $(this).is(':checked');
+                    if (ck) {
+                        $(".check_post").prop("checked", ck);
                     } else {
-                         $(".check_post").removeAttr("checked");
+                        $(".check_post").prop("checked", ck);
                     }
                 });
 
