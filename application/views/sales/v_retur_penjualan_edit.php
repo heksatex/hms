@@ -273,7 +273,7 @@
                                                                     </select>
                                                                 </td>
                                                                 <td>
-                                                                    <select class="form-control input-sm select2-coa edited noacc noacc_<?= $key ?>" style="width:100%" name="noacc[]" disabled>
+                                                                    <select class="form-control input-sm select2-coa edited noacc_<?= $key ?>" style="width:100%" name="noacc[]" disabled>
                                                                         <option></option>
                                                                         <?php
                                                                         if ($value->no_acc !== "") {
@@ -301,8 +301,98 @@
                                                     <tfoot>
                                                         <?php
                                                         if (count($detail) > 0) {
-                                                            ?>
-                                                            <tr>
+                                                            if ($datas->kurs != $curr_def_id) {
+                                                                ?>
+                                                                <tr>
+                                                                    <td colspan="8"></td>
+                                                                    <td class="text-right"><strong>Subtotal</strong></td>
+                                                                    <td class="text-right"><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total, 2) ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->grand_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="7"></td>
+                                                                    <td>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-addon">
+                                                                                %
+                                                                            </span>
+                                                                            <input class="form-control input-sm text-right edited-read"  name="nominaldiskon" value="<?= $datas->nominal_diskon ?>" type="text" readonly>
+                                                                        </div>
+                                                                        <select class="form-control input-sm hide" name="tipediskon">
+                                                                            <option value="%" <?= ($datas->tipe_diskon === "%") ? "selected" : "" ?>>%</option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td class="text-right"><strong>Diskon</strong></td>
+                                                                    <td class="text-right"><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->diskon,2) ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->diskon * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="8"></td>
+                                                                    <td class="text-right"><strong>Subtotal 2</strong></td>
+                                                                    <?php
+                                                                    $subtotal2 = (round($datas->grand_total * $datas->kurs_nominal) - round($datas->diskon * $datas->kurs_nominal));
+                                                                    ?>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total - $datas->diskon, 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($subtotal2, 2, ".", ",") ?>"></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="8"></td>
+                                                                    <td class="text-right"><strong>DPP Nilai Lain</strong></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->dpp_lain,2), 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->dpp_lain * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="7"></td>
+                                                                    <td class="pull-right">
+
+                                                                        <select class="form-control input-sm select2 edited" style="width: 100%" name="tax" id="tax" disabled>
+                                                                            <option value=""></option>
+                                                                            <?php
+                                                                            foreach ($taxs as $k => $tax) {
+                                                                                ?>
+                                                                                <option data-val="<?= $tax->amount ?>" value="<?= $tax->id ?>" <?= ($tax->id === $datas->tax_id) ? "selected" : "" ?> ><?= $tax->nama ?></option>
+                                                                                <?php
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                        <input type="hidden" value="<?= $datas->tax_value ?>" name="tax_value" id="tax_value">
+
+
+                                                                    </td>
+                                                                    <td class="text-right"><strong>Ppn</strong></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn,2), 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->ppn * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Foot Note</td>
+                                                                    <td>
+                                                                        <textarea class="form-control footnote edited-read"  name="footnote" readonly><?= $datas->foot_note ?? "" ?></textarea>
+                                                                    </td>
+                                                                    <td colspan="4"></td>
+                                                                    <td class="text-right">
+                                                                        *Payment Term
+                                                                    </td>
+                                                                    <td class="pull-right">
+                                                                        <select class="form-control input-sm edited" style="width: 100%" title="Payment Term" name="payment_term" id="payment_term" disabled>
+                                                                            <option value=""></option>
+                                                                            <?php
+                                                                            foreach ($payment_term as $k => $term) {
+                                                                                $term = (object) $term;
+                                                                                ?>
+                                                                                <option value="<?= $term->kode ?>" <?= ($term->kode == $datas->payment_term) ? "selected" : "" ?> ><?= $term->nama ?></option>
+                                                                                <?php
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td class="text-right"><strong>Total</strong></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->final_total, 2, ".", ",") ?>"></td>
+                                                                    <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->final_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
+                                                                </tr>
+                                                                <?php
+                                                            } else {
+                                                                ?>
+                                                                <tr>
                                                                 <td colspan="9"></td>
                                                                 <td class="text-right"><strong>Subtotal</strong></td>
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->grand_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
@@ -381,7 +471,8 @@
                                                                 <td class="text-right"><strong>Total</strong></td>
                                                                 <td><input readonly class="form-control input-sm text-right" value="<?= number_format(round($datas->final_total * $datas->kurs_nominal), 2, ".", ",") ?>"></td>
                                                             </tr>
-                                                            <?php
+                                                                <?php
+                                                            }
                                                         }
                                                         ?>
                                                         <tr>
@@ -583,13 +674,13 @@ if ($datas->status == 'confirm') {
     const setNominalCurrency = (() => {
         $("input[data-type='currency']").on({
             keyup: function () {
-                formatCurrency($(this),'',4);
+                formatCurrency($(this), '', 4);
             },
             drop: function () {
-                formatCurrency($(this),'',4);
+                formatCurrency($(this), '', 4);
             },
             blur: function () {
-                formatCurrency($(this), "blur",4);
+                formatCurrency($(this), "blur", 4);
             }
         });
     });
@@ -613,10 +704,10 @@ if ($datas->status == 'confirm') {
 
     $(function () {
         setNominalCurrency();
-
         $("#btn-edit").on("click", function (e) {
             e.preventDefault();
             $("#btn-cancel").show();
+            setCoaItem();
             $(this).hide();
             $(".edited-read").removeAttr("readonly");
             $(".edited").removeAttr("disabled");
@@ -626,9 +717,9 @@ if ($datas->status == 'confirm') {
             $(".select2").select2();
             $(".select2").select2({placeholder: "Pilih",
                 allowClear: true});
-            setCoaItem();
             setPterm();
             editing = true;
+            
         });
         $("#btn-cancel").on("click", function (e) {
             e.preventDefault();

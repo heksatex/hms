@@ -195,13 +195,13 @@ class Exportcoretax extends MY_Controller {
                 $sheetFD->setCellValue("b{$rowFD}", "A");
                 $sheetFD->setCellValue("d{$rowFD}", $uraian);
                 $sheetFD->setCellValue("e{$rowFD}", $value->satuan_ukur);
-                $sheetFD->setCellValue("f{$rowFD}", ($value->harga * $value->kurs_nominal));
+                $sheetFD->setCellValue("f{$rowFD}", number_format($value->harga * $value->kurs_nominal,2,".",""));
                 $sheetFD->setCellValue("g{$rowFD}", $value->qty);
-                $sheetFD->setCellValue("h{$rowFD}", ($value->diskon * $value->kurs_nominal));
-                $sheetFD->setCellValue("i{$rowFD}", (($value->jumlah - $value->diskon) * $value->kurs_nominal));
-                $sheetFD->setCellValue("j{$rowFD}", ($value->dpp_lain) * $value->kurs_nominal);
-                $sheetFD->setCellValue("k{$rowFD}", ($value->tax_value * 100));
-                $sheetFD->setCellValue("l{$rowFD}", ($value->pajak) * $value->kurs_nominal);
+                $sheetFD->setCellValue("h{$rowFD}", number_format($value->diskon * $value->kurs_nominal,2,".",""));
+                $sheetFD->setCellValue("i{$rowFD}", number_format(($value->jumlah - $value->diskon) * $value->kurs_nominal,2,".",""));
+                $sheetFD->setCellValue("j{$rowFD}", number_format(($value->dpp_lain) * $value->kurs_nominal,2,".",""));
+                $sheetFD->setCellValue("k{$rowFD}", number_format($value->tax_value * 100,2,".",""));
+                $sheetFD->setCellValue("l{$rowFD}", number_format($value->pajak * $value->kurs_nominal,2,".",""));
                 $sheetFD->setCellValue("m{$rowFD}", 0.00);
                 $sheetFD->setCellValue("n{$rowFD}", 0.00);
 

@@ -501,10 +501,10 @@ class Asettetap extends MY_Controller {
             $status = $this->input->post("status");
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
-
+            $nos = explode(",",$this->input->post("dt"));
             $kode = decrypt_url($id);
             $model = new $this->m_global;
-            $model->setTables("acc_jurnal_entries")->setWheres(["origin" => $kode, "status <>" => "cancel"])->update(["status" => $status]);
+            $model->setTables("acc_jurnal_entries")->setWheres(["status <>" => "cancel"])->setWhereIn("kode", $nos)->update(["status" => $status]);
 
             $this->_module->gen_history_new($sub_menu, $kode, "edit", "Update Jurnal Ke Status ({$status})", $username);
 //            $this->_module->gen_history_new("jurnalentries", $jurnal, "edit", "Update Status ({$status}) Dari Menu Aset", $username);

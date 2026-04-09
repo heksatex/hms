@@ -225,6 +225,7 @@ class Kursakhirbulan extends MY_Controller {
             $data["curr"] = $curr;
             $data["kas"] = $this->_updatekasView();
             $data["deposit"] = $this->_updateDepositView();
+            $data["retur_pen"]= $this->_updatePenjualanReturView();
             $html = $this->load->view("accounting/v_kursakhirbulan_gen_kas", $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -324,7 +325,7 @@ class Kursakhirbulan extends MY_Controller {
                     . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
                     . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ,"
                     . "acc_pelunasan_piutang app READ,acc_jurnal_entries WRITE,acc_kurs_akhir_bulan_detail WRITE,acc_jurnal_entries READ,"
-                    . "acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ";
+                    . "acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_retur_penjualan arp WRITE";
             $this->_module->lock_tabel($lock);
             $coa = $this->_getSaldo();
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
@@ -450,6 +451,7 @@ class Kursakhirbulan extends MY_Controller {
                 ];
             }
             $this->_updateDeposit();
+            $this->_updatePenjualanRetur();
             $model->setTables("acc_kurs_akhir_bulan_detail")->saveBatch($kursAkhirDetail);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
@@ -541,12 +543,25 @@ class Kursakhirbulan extends MY_Controller {
             $this->_module->unlock_tabel();
         }
     }
+    
+    protected function _updatePenjualanReturView() {
+        try {
+            $bulans = explode("-", $this->input->post("bulan"));
+            $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
+            $curr = $this->input->post("currency");
+            $model = new $this->m_global;
+            return $model->setTables("acc_retur_penjualan arp")->setJoins("currency_kurs ck", "ck.id = arp.kurs")
+                    ->setWheres(["ck.currency"=>$curr,"tanggal <="=>$akhir,"status"=>"draft"])->setSelects(["arp.*"])->getData();
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
 
     protected function _updateDepositView() {
         try {
             $bulans = explode("-", $this->input->post("bulan"));
             $kurs = str_replace(",", "", $this->input->post("kurs"));
-             $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
+            $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
             $curr = $this->input->post("currency");
             $model = new $this->m_global;
             return $model->setTables("acc_pelunasan_piutang app")->setJoins("acc_pelunasan_piutang_summary apps", "app.id = apps.pelunasan_piutang_id")
@@ -590,6 +605,30 @@ class Kursakhirbulan extends MY_Controller {
 
             if (count($update) > 0) {
                 $model->setTables("acc_pelunasan_piutang_summary apps")->updateBatch($update, "id");
+            }
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+    
+    protected function _updatePenjualanRetur() {
+        try {
+            $bulans = explode("-", $this->input->post("bulan"));
+            $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
+            $curr = $this->input->post("currency");
+            $kurs = str_replace(",", "", $this->input->post("kurs"));
+            $model = new $this->m_global;
+            $data =  $model->setTables("acc_retur_penjualan arp")->setJoins("currency_kurs", "currency_kurs.id = arp.kurs")
+                    ->setWheres(["currency_kurs.currency"=>$curr,"tanggal <="=>$akhir,"status"=>"draft"])->setSelects(["arp.*"])->getData();
+            $updates = [];
+            foreach ($data as $key => $value) {
+                $updates[] = [
+                    "id"=>$value->id,
+                    "kurs_akhir"=>$kurs
+                ];
+            }
+            if(count($updates) > 0) {
+                $model->updateBatch($updates, "id");
             }
         } catch (Exception $ex) {
             throw $ex;

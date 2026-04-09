@@ -200,7 +200,7 @@ class Memorialpenbank {
                 $sheet->setCellValue("J{$row}", $value->nominals);
 
                 if (isset($bank[$key + 1])) {
-                    if ($value->kode_coa !== $bank[$key + 1]->kode_coa) {
+                    if ($value->kode_coa_bmd !== $bank[$key + 1]->kode_coa_bmd) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $totalBankValas);
                         $sheet->setCellValue("G{$row}", $totalBankKredit);
