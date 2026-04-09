@@ -695,7 +695,7 @@ class M_pelunasanpiutang extends CI_Model
         if (count($where) > 0) {
             $this->db->where($where);
         }
-        $this->db->select("arp.id, arp.no_retur as no_bukti, arp.create_date as tanggal, ck.currency, arp.kurs as currency_id, arp.kurs_nominal as kurs, (arp.total_piutang_rp ) as total_rp, (arp.total_piutang_valas) as total_valas, 'retur' as tipe2");
+        $this->db->select("arp.id, arp.no_retur as no_bukti, arp.create_date as tanggal, ck.currency, arp.kurs as currency_id, (CASE WHEN arp.kurs_akhir is not NULL and arp.kurs_akhir > 0 THEN arp.kurs_akhir ELSE arp.kurs_nominal END) as kurs, (CASE WHEN arp.kurs_akhir is not NULL and arp.kurs_akhir > 0 THEN (arp.total_piutang_valas * arp.kurs_akhir) ELSE arp.total_piutang_rp END) as total_rp, (arp.total_piutang_valas) as total_valas, 'retur' as tipe2");
         $this->db->from("acc_retur_penjualan arp ");
         $this->db->join("currency_kurs ck ", "arp.kurs = ck.id", "left");
         return $query4_sql = $this->db->get_compiled_select();

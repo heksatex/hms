@@ -654,9 +654,9 @@ class M_bukubesarpembantupiutang extends CI_Model
                 ''
             )
         ) as uraian,
-        IFNULL((sub.total_all), 0) as total_diskon,
+        sum(IFNULL((sub.total_all), 0)) as total_diskon,
         0 as debit,
-        IFNULL((sub.total_all), 0) as credit,
+        sum(IFNULL((sub.total_all), 0)) as credit,
         status, 'fak' as link,
         sum(sub.dpp_diskon) as dpp_diskon,
         sum(sub.ppn_diskon) as ppn_diskon,

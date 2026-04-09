@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No Direct Script Acces Allowed');
+<?php defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 /**
  * 
@@ -22,7 +22,6 @@ class M_outstandingdeposit extends CI_Model
         $this->db->join("partner ", "partner.id = acc_pelunasan_piutang.partner_id", "INNER");
         $this->db->join("acc_pelunasan_piutang_summary ", "acc_pelunasan_piutang_summary.pelunasan_piutang_id = acc_pelunasan_piutang.id", "INNER");
         $this->db->join("acc_pelunasan_piutang_summary_koreksi ", "acc_pelunasan_piutang_summary.id = acc_pelunasan_piutang_summary_koreksi.pelunasan_summary_id", "INNER");
-        
     }
 
     private function _get_datatables_query()
@@ -81,7 +80,23 @@ class M_outstandingdeposit extends CI_Model
         return $this->db->count_all_results();
     }
 
+    public function get_all_deposit($search)
+    {
+        // 1. Panggil query dasar
+        $this->get_query();
 
- 
-    
+        // 2. Tambahkan kondisi pencarian (Search Filter)
+        if (!empty($search)) {
+            $this->db->group_start(); // Gunakan group_start agar kondisi LIKE tidak mengacaukan WHERE sebelumnya
+            $this->db->like('acc_pelunasan_piutang.no_pelunasan', $search);
+            $this->db->or_like('partner.nama', $search);
+            $this->db->or_like('acc_pelunasan_piutang_summary.currency', $search);
+            // Tambahkan kolom lain jika perlu
+            $this->db->group_end();
+        }
+
+        // 3. Eksekusi dan ambil datanya
+        $query = $this->db->get();
+        return $query->result();
+    }
 }
