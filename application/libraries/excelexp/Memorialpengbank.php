@@ -24,6 +24,7 @@ class Memorialpengbank {
     protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
 
     public function _data($model, $datas) {
+         $nt = implode("','", array_merge($this->notList,["utang_giro"]));
         $nt = implode("','", $this->notList);
         try {
             $data = [];
@@ -31,7 +32,7 @@ class Memorialpengbank {
                     ->setJoins("acc_coa acbk", "acbk.kode_coa = bk.kode_coa", "left")
                     ->setJoins("acc_coa acbkd", "acbkd.kode_coa = bkd.kode_coa", "left")
                     ->setWheres(["date(bk.tanggal) >=" => $datas['tanggals'][0], "date(bk.tanggal) <=" => $datas['tanggals'][1], "bk.status" => "confirm"])
-                    ->setWhereRaw("bkd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")
+                    ->setWhereRaw("bkd.kode_coa not in (select '2111.99' as kode_coa union all select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")
                     ->setSelects(["bk.kode_coa,bkd.kode_coa as kode_coa_bkd,sum(case when bkd.kurs <> 1 then nominal else 0 end) as valas,sum(bkd.nominal*bkd.kurs) as nominals",
                         "acbk.nama as nama,acbkd.nama as nama_bkd", "if(partner_nama ='',lain2,partner_nama) as partner"])
                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
@@ -57,7 +58,7 @@ class Memorialpengbank {
             $model->setTables("acc_giro_keluar gk")->setJoins("acc_giro_keluar_detail gkd", "giro_keluar_id = gk.id")
                     ->setJoins("acc_coa acgk", "acgk.kode_coa = gk.kode_coa", "left")
                     ->setJoins("acc_coa acgkd", "acgkd.kode_coa = gkd.kode_coa", "left")
-                    ->setWhereRaw("gkd.kode_coa not in ('{$nt}')")->setGroups(["gkd.kode_coa"])->setOrder(["gkd.kode_coa"])
+                    ->setWhereRaw("gkd.kode_coa not in (select '2111.99' as kode_coa union all select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setGroups(["gkd.kode_coa"])->setOrder(["gkd.kode_coa"])
                     ->setWheres(["date(gk.tanggal) >=" => $datas['tanggals'][0], "date(gk.tanggal) <=" => $datas['tanggals'][1], "gk.status" => "confirm"])
                     ->setSelects(["gk.kode_coa,gkd.kode_coa as kode_coa_gkd,sum(if(gkd.kurs > 1,gkd.nominal,0)) as valas,sum(gkd.nominal*gkd.kurs) as nominals",
                         "acgk.nama as nama,acgkd.nama as nama_gkd", "if(partner_nama ='',lain2,partner_nama) as partner"]);
