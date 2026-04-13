@@ -20,7 +20,8 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 class Memorialpelhutang {
 
     //put your code here
-    protected $list = ["utang_giro", "utang", "um_pembelian"];
+//    protected $list = ["utang_giro", "utang", "um_pembelian"];
+    protected $list = ["utang", "um_pembelian"];
     protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
 
     public function _data($model, $datas) {
@@ -31,7 +32,7 @@ class Memorialpelhutang {
                     ->setJoins("acc_coa acbk", "acbk.kode_coa = bk.kode_coa", "left")
                     ->setJoins("acc_coa acbkd", "acbkd.kode_coa = bkd.kode_coa", "left")
                     ->setWheres(["date(bk.tanggal) >=" => $datas['tanggals'][0], "date(bk.tanggal) <=" => $datas['tanggals'][1], "bk.status" => "confirm"])
-                    ->setWhereRaw("bkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bk.no_bk,bkd.kurs"])
+                    ->setWhereRaw("bkd.kode_coa in (select '2111.01' as kode_coa union all select '2111.02' as kode_coa union all  select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bk.no_bk,bkd.kurs"])
                     ->setSelects(["bkd.kode_coa as kode_coa_bkd,acbkd.nama as nama_bkd,sum(bkd.nominal) as valas,sum(bkd.nominal*bkd.kurs) as nominals,acbk.nama,bk.kode_coa,date(bkd.tanggal) as tanggal"])
                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",GROUP_CONCAT(uraian)) else GROUP_CONCAT(uraian) end as uraian'])
                     ->setGroups(["bkd.kode_coa"])->setOrder(["bkd.kode_coa"]);
@@ -55,7 +56,7 @@ class Memorialpelhutang {
                     ->setJoins("acc_coa acgk", "acgk.kode_coa = gk.kode_coa", "left")
                     ->setJoins("acc_coa acgkd", "acgkd.kode_coa = gkd.kode_coa", "left")
                     ->setWheres(["date(gk.tanggal) >=" => $datas['tanggals'][0], "date(gk.tanggal) <=" => $datas['tanggals'][1], "gk.status" => "confirm"])
-                    ->setWhereRaw("gkd.kode_coa in ('{$nt}')")->setGroups(["gkd.kode_coa"])->setOrder(["gkd.kode_coa"])
+                    ->setWhereRaw("gkd.kode_coa in (select '2111.01' as kode_coa union all select '2111.02' as kode_coa union all  select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setGroups(["gkd.kode_coa"])->setOrder(["gkd.kode_coa"])
                     ->setSelects(["gkd.kode_coa as kode_coa_gkd,acgkd.nama as nama_gkd,sum(gkd.nominal) as valas,sum(gkd.nominal*gkd.kurs) as nominals,acgk.nama", "gk.kode_coa"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,gk.no_gk,gkd.kurs", "date(gkd.tanggal) as tanggal", "transinfo as uraian"]);
             $data["giro_debit"] = $model->getData();
