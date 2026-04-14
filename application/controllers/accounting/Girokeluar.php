@@ -81,7 +81,7 @@ class Girokeluar extends MY_Controller {
     protected function _list_data() {
         try {
             $list = new $this->m_global;
-            $list->setTables("acc_giro_keluar")->setOrder(["acc_giro_keluar.create_date" => "desc"])
+            $list->setTables("acc_giro_keluar")->setOrder(["acc_giro_keluar.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_giro_keluar.status", "left")
                     ->setSearch(["no_gk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_giro_keluar.status"])
