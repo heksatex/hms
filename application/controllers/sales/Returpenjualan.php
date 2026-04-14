@@ -475,7 +475,8 @@ class Returpenjualan extends MY_Controller {
                 "ppn" => 0,
                 "final_total" => 0,
                 "payment_term" => $this->input->post("payment_term"),
-                "foot_note" => $this->input->post("footnote")
+                "foot_note" => $this->input->post("footnote"),
+                "tanggal" => $this->input->post("tanggal")
             ];
             $ppns = 0;
             $detail = [];
