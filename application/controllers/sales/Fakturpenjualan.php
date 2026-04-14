@@ -1083,11 +1083,11 @@ class Fakturpenjualan extends MY_Controller {
                     }
 
                     if ($data->lunas == 1) {
-                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan", 500);
+                        throw new \exception("Data Faktur Penjualan {$data->no_faktur_internal} sudah masuk pada pelunasan", 500);
                     }
                     $fin = $data->final_total * $data->kurs_nominal;
                     if ((double) round($fin) !== (double) $data->piutang_rp) {
-                        throw new \exception("Data Faktur Penjualan {$kode} sudah masuk pada pelunasan.", 500);
+                        throw new \exception("Data Faktur Penjualan {$data->no_faktur_internal} sudah masuk pada pelunasan.", 500);
                     }
 
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data->jurnal])->update(["status" => "unposted",]);
