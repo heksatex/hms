@@ -64,11 +64,12 @@ class Kursakhirbulan extends MY_Controller {
             $model->setTables("acc_jurnal_entries_items")->setJoins("acc_jurnal_entries", 'acc_jurnal_entries_items.kode = acc_jurnal_entries.kode')
                     ->setWheres(["date(acc_jurnal_entries.tanggal_dibuat) >=" => date("Y-m-d", strtotime($start)), "date(acc_jurnal_entries.tanggal_dibuat) <=" => date("Y-m-d", strtotime($akhir)),
                         'status' => 'posted'])
-                    ->setSelects(["posisi, acc_jurnal_entries_items.kode_coa,  IFNULL(SUM(CASE WHEN posisi = 'D' THEN nominal ELSE 0 END),0) AS total_debit,   IFNULL(SUM(CASE WHEN posisi = 'C' THEN nominal ELSE 0 END),0) AS total_credit"])
+                    ->setSelects(["posisi, acc_jurnal_entries_items.kode_coa,IFNULL(SUM(CASE WHEN posisi = 'D' THEN nominal ELSE 0 END),0) AS total_debit,   IFNULL(SUM(CASE WHEN posisi = 'C' THEN nominal ELSE 0 END),0) AS total_credit"])
                     ->setSelects(["IFNULL(SUM(CASE WHEN posisi = 'D' THEN nominal_curr ELSE 0 END),0) AS total_debit_valas,IFNULL(SUM(CASE WHEN posisi = 'C' THEN nominal_curr ELSE 0 END),0) AS total_credit_valas"])
                     ->setGroups(["acc_jurnal_entries_items.kode_coa"]);
             $entriesRp = $model->getQuery();
             $entries = $model->setWheres(["kode_mua" => $curr])->getQuery();
+            
             $starts = $this->periodesaldo->get_start_periode();
             $tgl_dari = date("Y-m-d 00:00:00", strtotime($starts));
             $tgl_sampai = date("Y-m-d 23:59:59", strtotime("-1 day", strtotime($start)));
@@ -116,7 +117,7 @@ class Kursakhirbulan extends MY_Controller {
                                 ELSE coa.saldo_valas
                             END AS saldo_valas_final", "coa.curr as coa_curr"]);
 
-            return $model->getData();
+            return $model->setGroups(["coa.kode_coa"])->getData();
         } catch (Exception $ex) {
             throw $ex;
         }
@@ -551,7 +552,7 @@ class Kursakhirbulan extends MY_Controller {
             $curr = $this->input->post("currency");
             $model = new $this->m_global;
             return $model->setTables("acc_retur_penjualan arp")->setJoins("currency_kurs ck", "ck.id = arp.kurs")
-                    ->setWheres(["ck.currency"=>$curr,"tanggal <="=>$akhir,"status"=>"draft"])->setSelects(["arp.*"])->getData();
+                    ->setWheres(["ck.currency"=>$curr,"tanggal <="=>$akhir,"status"=>"confirm"])->setSelects(["arp.*"])->getData();
         } catch (Exception $ex) {
             throw $ex;
         }
