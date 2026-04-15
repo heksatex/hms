@@ -748,9 +748,17 @@ class M_bukubesarpembantupiutang extends CI_Model
         $total_retur_diskon =  "IFNULL(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) ,0) + IFNULL(ROUND(ROUND(ROUND(sum(ROUND(CAST(retd.qty as DECIMAL(20,4)) * CAST(retd.harga AS DECIMAL(20,4)),2)) * (CAST(ret.nominal_diskon AS DECIMAL(20,4)) / 100),2) * 11 / 12,2) *  CAST(ret.tax_value as DECIMAL(20,4)), 2)  ,0)";
 
 
-        $total_dpp_retur = ($currency === 'valas') ? "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2)" : "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0) * arp.kurs_nominal";
-        $total_ppn_retur = ($currency === 'valas') ? "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2)" : "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0)  * arp.kurs_nominal ";
-        $total_all       = ($currency === 'valas') ? "ROUND(ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2) + ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2),2)" : "ROUND(ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0) + ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0),0) * arp.kurs_nominal ";
+        $dpp_retur = ($currency === 'valas') ? $dpp_retur :  $dpp_retur . " * ret.kurs_nominal" ;
+        $ppn_retur = ($currency === 'valas') ? $ppn_retur :  $ppn_retur . " * ret.kurs_nominal" ;
+        $total_retur = ($currency === 'valas') ? $total_retur :  $total_retur . " * ret.kurs_nominal" ;
+
+        $dpp_retur_diskon = ($currency === 'valas') ? $dpp_retur_diskon :  $dpp_retur_diskon . " * ret.kurs_nominal" ;
+        $ppn_retur_diskon = ($currency === 'valas') ? $ppn_retur_diskon :  $ppn_retur_diskon . " * ret.kurs_nominal" ;
+        $total_retur_diskon = ($currency === 'valas') ? $total_retur_diskon :  $total_retur_diskon . " * ret.kurs_nominal" ;
+
+        $total_dpp_retur = ($currency === 'valas') ? "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2)" : "ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0)";
+        $total_ppn_retur = ($currency === 'valas') ? "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2)" : "ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0)  ";
+        $total_all       = ($currency === 'valas') ? "ROUND(ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,2) + ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,2),2)" : "ROUND((ROUND(arp.dpp_retur  - arp.dpp_retur_diskon,0)) + (ROUND(arp.ppn_retur  - arp.ppn_retur_diskon,0)),0) ";
 
 
         $this->db->where('app.status', 'done');
@@ -772,8 +780,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                 ($total_retur) as total_retur_dpp_ppn,
                 ($dpp_retur_diskon) as dpp_retur_diskon,
                 ($ppn_retur_diskon) as ppn_retur_diskon,
-                ($total_retur_diskon) as total_retur_diskon,
-                ret.kurs_nominal          
+                ($total_retur_diskon) as total_retur_diskon
                 FROM acc_retur_penjualan ret
                 INNER JOIN acc_retur_penjualan_detail retd ON ret.id = retd.retur_id
                 WHERE ret.status = 'confirm' and lunas = 1
