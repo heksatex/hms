@@ -371,38 +371,38 @@
                 }
 
                 $("#total_nominal").val(total);
-                formatCurrency($("#total_nominal"),"blur");
+                formatCurrency($("#total_nominal"), "blur");
             });
 
             const setCurr = (() => {
                 $(".select2-curr").select2({
                     placeholder: "Pilih",
                     allowClear: true,
-    //                    ajax: {
-    //                        dataType: 'JSON',
-    //                        type: "GET",
-    //                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
-    //                        delay: 250,
-    //                        data: function (params) {
-    //                            return{
-    //                                search: params.term
-    //                            };
-    //                        },
-    //                        processResults: function (data) {
-    //                            var results = [];
-    //                            $.each(data.data, function (index, item) {
-    //                                results.push({
-    //                                    id: item.id,
-    //                                    text: item.currency
-    //                                });
-    //                            });
-    //                            return {
-    //                                results: results
-    //                            };
-    //                        },
-    //                        error: function (xhr, ajaxOptions, thrownError) {
-    //                        }
-    //                    }
+                    //                    ajax: {
+                    //                        dataType: 'JSON',
+                    //                        type: "GET",
+                    //                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
+                    //                        delay: 250,
+                    //                        data: function (params) {
+                    //                            return{
+                    //                                search: params.term
+                    //                            };
+                    //                        },
+                    //                        processResults: function (data) {
+                    //                            var results = [];
+                    //                            $.each(data.data, function (index, item) {
+                    //                                results.push({
+                    //                                    id: item.id,
+                    //                                    text: item.currency
+                    //                                });
+                    //                            });
+                    //                            return {
+                    //                                results: results
+                    //                            };
+                    //                        },
+                    //                        error: function (xhr, ajaxOptions, thrownError) {
+                    //                        }
+                    //                    }
                 });
             });
             var buktigiro = [];
@@ -518,8 +518,17 @@
 
                 $(".partner").on("change", function () {
                     var ttt = $(".partner").find(":selected");
+                    var rek = ttt.data().data.nama_rek;
                     $("#partner_name").val(ttt.text());
                     $("#lain_lain").val("");
+                    if (rek !== "") {
+                        var trans = $("#transaksi").val();
+                        if (trans.trim() !== "")
+                            $("#transaksi").val(`${trans} | ${rek}`);
+                        else
+                            $("#transaksi").val(`${rek}`);
+
+                    }
                 });
 
                 $("#partner").select2({
@@ -541,7 +550,8 @@
                             $.each(data.data, function (index, item) {
                                 results.push({
                                     id: item.id,
-                                    text: item.nama
+                                    text: item.nama,
+                                    nama_rek: item.nama_rekening
                                 });
                             });
                             return {
@@ -634,7 +644,7 @@
                             if (row.partner_nama !== "") {
                                 $("#lain_lain").val("");
                                 $("#partner").select2("trigger", "select", {
-                                    data: {id: row.partner_id, text: row.partner_nama}
+                                    data: {id: row.partner_id, text: row.partner_nama,nama_rek : ""}
                                 });
                             } else {
                                 $('#partner').val(null).trigger('change');
