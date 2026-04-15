@@ -699,7 +699,8 @@ if ($datas->status == 'confirm') {
                                     $.each(data.data, function (index, item) {
                                         results.push({
                                             id: item.id,
-                                            text: item.nama
+                                            text: item.nama,
+                                            nama_rek: item.nama_rekening
                                         });
                                     });
                                     return {
@@ -714,8 +715,16 @@ if ($datas->status == 'confirm') {
 
                     $(".partner").on("change", function () {
                         var ttt = $(".partner").find(":selected");
+                        var rek = ttt.data().data.nama_rek;
                         $("#partner_name").val(ttt.text());
                         $("#lain_lain").val("");
+                        if (rek !== "") {
+                            var trans = $("#transaksi").val();
+                            if (trans.trim() !== "")
+                                $("#transaksi").val(`${trans} | ${rek}`);
+                            else
+                                $("#transaksi").val(`${rek}`);
+                        }
                     });
 
                     $(document).on('focus', '.select2', function (e) {
