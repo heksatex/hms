@@ -2509,13 +2509,13 @@ class Pelunasanpiutang extends MY_Controller
                             $rupiah = $get_tot->sum_rp ?? 0;
                             $valas  = $get_tot->sum_valas ?? 0;
 
-                            if ((money_to_int($get_piutang_fak->total_pelunasan_rp) + money_to_int($pelunasan_rp)) > money_to_int($rupiah)) {
-                                throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Total Pelunasan (Rp) ', 200);
-                            }
+                            // if ((money_to_int($get_piutang_fak->total_pelunasan_rp) + money_to_int($pelunasan_rp)) > money_to_int($rupiah)) {
+                            //     throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Total Pelunasan (Rp) ', 200);
+                            // }
 
-                            if ((money_to_int($get_piutang_fak->total_pelunasan_valas) + money_to_int($pelunasan_valas))  > money_to_int($valas)) {
-                                throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Total Pelunasan (Valas) ', 200);
-                            }
+                            // if ((money_to_int($get_piutang_fak->total_pelunasan_valas) + money_to_int($pelunasan_valas))  > money_to_int($valas)) {
+                            //     throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Total Pelunasan (Valas) ', 200);
+                            // }
 
                             if ($status_bayar == 'belum_bayar' && (($pelunasan_rp) > 0 || ($pelunasan_valas) > 0)) {
                                 throw new \Exception('Status Bayar tidak bisa diubah ke <b>Belum Bayar</b>, Karena sudah ada pelunasan !', 200);
