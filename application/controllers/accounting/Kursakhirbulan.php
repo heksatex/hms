@@ -308,7 +308,6 @@ class Kursakhirbulan extends MY_Controller {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
-            $this->_module->startTransaction();
             $model = new $this->m_global;
             $kode = decrypt_url($id);
             $check = $model->setTables("acc_kurs_akhir_bulan")->setWheres(["no" => $kode])->getDetail();
@@ -321,16 +320,20 @@ class Kursakhirbulan extends MY_Controller {
             $_POST["currency"] = $check->curr;
             $_POST["bulan"] = $check->bulan;
             $_POST["kurs"] = $check->kurs;
+            $coa = $this->_getSaldo();
+            $updatekasView = $this->_updateKasView();
+            $updatePelView = $this->_updateDepositView();
             $tanggal = date("Y-m-t H:i:s", strtotime("{$check->bulan}-01"));
+            $this->_module->startTransaction();
             $lock = "token_increment WRITE,main_menu_sub READ, log_history WRITE,acc_kurs_akhir_bulan WRITE,picklist_detail WRITE,acc_jurnal_entries_items WRITE,"
                     . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
-                    . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs READ,"
-                    . "acc_pelunasan_piutang app READ,acc_jurnal_entries WRITE,acc_kurs_akhir_bulan_detail WRITE,acc_jurnal_entries READ,"
-                    . "acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_retur_penjualan arp WRITE";
+                    . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs WRITE,"
+                    . "acc_pelunasan_piutang app READ,acc_jurnal_entries WRITE,acc_kurs_akhir_bulan_detail WRITE,"
+                    . "acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_retur_penjualan arp WRITE,"
+                    . "acc_coa ac1 READ,acc_coa ac2 READ,acc_coa ac3 READ,acc_coa ac4 READ,acc_coa ac5 READ,acc_coa ac6 READ,"
+                    . "currency_kurs ck1 READ,currency_kurs ck2 READ,currency_kurs ck3 READ,currency_kurs ck4 READ,currency_kurs ck5 READ,currency_kurs ck6 READ";
             $this->_module->lock_tabel($lock);
-            $coa = $this->_getSaldo();
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
-            $coaskr = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs_rugi"])->getDetail();
 
             if (!$noJurnal = $this->token->noUrut('jurnal_selisih_kurs', date('ym', strtotime($tanggal)), true)->generate('SK', '/%03d')->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . date('m', strtotime($tanggal)))->get()) {
                 throw new \Exception("No Jurnal tidak terbuat", 500);
@@ -416,8 +419,6 @@ class Kursakhirbulan extends MY_Controller {
                 $noOrder += 1;
             }
             $model->setTables("acc_jurnal_entries_items")->saveBatch($entriesDetail);
-//           
-            $updatekasView = $this->_updateKasView();
             foreach ($updatekasView as $key => $value) {
                 $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
                 $selisih = ($value->nominal * $check->kurs) - ($value->nominal * $oldKurs);
@@ -434,7 +435,6 @@ class Kursakhirbulan extends MY_Controller {
                 ];
             }
             $this->_updatekas();
-            $updatePelView = $this->_updateDepositView();
             foreach ($updatePelView as $key => $value) {
                 $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
                 $saldo = $value->total_piutang - $value->total_pelunasan;
@@ -714,8 +714,8 @@ class Kursakhirbulan extends MY_Controller {
                     ->setWheres([
                         "date(tanggal) <=" => $akhir,
                         "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'piutang|um_penjualan')")
+                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck1 where currency = '{$curr}')")
+                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac1 where jenis_transaksi REGEXP 'piutang|um_penjualan')")
                     ->update(["kurs_akhir" => $kurs]);
 
             //kas keluar
@@ -723,39 +723,39 @@ class Kursakhirbulan extends MY_Controller {
                     ->setWheres([
                         "date(tanggal) <=" => $akhir,
                         "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
+                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck1 where currency = '{$curr}')")
+                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac2 where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
             //bank masuk
             $model->setTables("acc_bank_masuk_detail")
                     ->setWheres([
                         "date(tanggal) <=" => $akhir,
                         "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'piutang|um_penjualan')")->update(["kurs_akhir" => $kurs]);
+                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck3 where currency = '{$curr}')")
+                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac3 where jenis_transaksi REGEXP 'piutang|um_penjualan')")->update(["kurs_akhir" => $kurs]);
 
             //bank keluar
             $model->setTables("acc_bank_keluar_detail")
                     ->setWheres([
                         "date(tanggal) <=" => $akhir,
                         "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
+                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck4 where currency = '{$curr}')")
+                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac4 where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
 
             //giro masuk
             $model->setTables("acc_giro_masuk_detail")
                     ->setWheres([
                         "date(tanggal) <=" => $akhir,
                         "lunas" => 0
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'piutang|um_penjualan')")->update(["kurs_akhir" => $kurs]);
+                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck5 where currency = '{$curr}')")
+                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac5 where jenis_transaksi REGEXP 'piutang|um_penjualan')")->update(["kurs_akhir" => $kurs]);
 
             //giro keluar
             $model->setTables("acc_giro_keluar_detail")
                     ->setWheres([
                         "date(tanggal) <=" => $akhir,
                         "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
+                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck6 where currency = '{$curr}')")
+                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac6 where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
         } catch (Exception $ex) {
             throw $ex;
         }
