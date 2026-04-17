@@ -990,7 +990,8 @@
         let posisi_credit = $("#posisi_credit").val(); // contoh: C
         let posisi_debit = $("#posisi_debit").val(); // contoh: D
         let head_posisi = $("#posisi_head").val() // D/C
-        let head = parseFloat(unformatNumber($("#nominal_head").val())) || 0;
+        let head1 = parseFloat(unformatNumber($("#nominal_head").val())) || 0;
+        let head  = parseFloat(Math.abs(`<?php echo $get_sum->selisih; ?>`));
 
         $("#tabel-koreksi tbody tr").each(function() {
 
@@ -1018,9 +1019,8 @@
                     total_jurnal_2 += nominal;
                 }
 
-
-
             } else {
+                head -= nominal;
                 total_non += nominal;
             }
         });
@@ -1034,6 +1034,7 @@
         let sisa = head - total_all;
 
 
+
         // // ====== SET VALUE ======
         // $("#nominal_jurnal").val(formatNumber(total_jurnal_1));
         // $("#nominal_jurnal2").val(formatNumber(total_jurnal_2));
@@ -1043,6 +1044,14 @@
         // $("#sisa_nominal").text(formatNumber(sisa));
 
         //     // TAMPILKAN HASILNYA
+
+        $("#nominal_head").val(
+            head.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })
+        );
+        
         $("#nominal_credit").val(
             total_jurnal_1.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
