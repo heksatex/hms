@@ -187,8 +187,11 @@ class Bukubank extends MY_Controller {
             $tanggals = $this->input->post("tanggal");
             $curr = $this->input->post("curr");
             
+            $tanggal = explode(" - ", $tanggals);
+            $tgl = date("d-m-Y", strtotime($tanggal[0]))." - ".date("d-m-Y", strtotime($tanggal[1]));
+            
             $sheet->setCellValue("A2", "{$coa} - {$coanama}");
-            $sheet->setCellValue("A3", "Periode : {$tanggals}");
+            $sheet->setCellValue("A3", "Periode : {$tgl}");
             $row = 5;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Tanggal');
@@ -257,9 +260,9 @@ class Bukubank extends MY_Controller {
             $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            $tanggal = $this->input->post("tanggal");
+            
             $writer = new Xlsx($spreadsheet);
-            $filename = "Buku Bank {$tanggal}";
+            $filename = "Buku Bank {$tanggals}";
             $url = "dist/storages/report/acc";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
