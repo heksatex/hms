@@ -244,8 +244,8 @@ class Bukubank extends MY_Controller {
                 $sheet->setCellValue("C{$row}", $no_bukti);
                 $sheet->setCellValue("D{$row}", $partner . $value->uraian);
                 $sheet->setCellValue("E{$row}", $value->kode_coa);
-                $sheet->setCellValue("F{$row}", ($debet == 0) ? "0" : $debet);
-                $sheet->setCellValue("G{$row}", ($kredit == 0) ? "0" : $kredit);
+                $sheet->setCellValue("F{$row}", ($debet == 0) ? "" : $debet);
+                $sheet->setCellValue("G{$row}", ($kredit == 0) ? "" : $kredit);
                 $sheet->setCellValue("H{$row}", $saldos);
 
                 $temp = $value->no_bukti;
