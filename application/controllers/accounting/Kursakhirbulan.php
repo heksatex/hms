@@ -69,7 +69,7 @@ class Kursakhirbulan extends MY_Controller {
                     ->setGroups(["acc_jurnal_entries_items.kode_coa"]);
             $entriesRp = $model->getQuery();
             $entries = $model->setWheres(["kode_mua" => $curr])->getQuery();
-            
+
             $starts = $this->periodesaldo->get_start_periode();
             $tgl_dari = date("Y-m-d 00:00:00", strtotime($starts));
             $tgl_sampai = date("Y-m-d 23:59:59", strtotime("-1 day", strtotime($start)));
@@ -220,13 +220,17 @@ class Kursakhirbulan extends MY_Controller {
             $symcurr = $this->input->post("symcurr");
             $data["kurs"] = str_replace(",", "", $this->input->post("kurs"));
             $model = new $this->m_global;
+            $data["coas"] = $model->setTables("acc_coa")->setWheres(["level" => 5])->setOrder(["nama" => "asc"])->getData();
             $data["coa"] = $this->_getSaldo();
             $data["coa_sk"] = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
             $data["coa_skr"] = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs_rugi"])->getDetail();
             $data["curr"] = $curr;
             $data["kas"] = $this->_updatekasView();
+            $data["umpen"] = $this->_updateUMView("penjualan", "um_penjualan");
+            $data["umpem"] = $this->_updateUMView("pembelian", "um_pembelian");
             $data["deposit"] = $this->_updateDepositView();
-            $data["retur_pen"]= $this->_updatePenjualanReturView();
+            $data["retur_pen"] = $this->_updatePenjualanReturView();
+            $data["retur_pem"] = $this->_updatePembelianReturView();
             $html = $this->load->view("accounting/v_kursakhirbulan_gen_kas", $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -322,16 +326,23 @@ class Kursakhirbulan extends MY_Controller {
             $_POST["kurs"] = $check->kurs;
             $coa = $this->_getSaldo();
             $updatekasView = $this->_updateKasView();
-            $updatePelView = $this->_updateDepositView();
+//            $updatePelView = $this->_updateDepositView();
+//            $umpen = $this->_updateUMView("penjualan", "piutang");
+//            $umpem = $this->_updateUMView("pembelian", "utang");
             $tanggal = date("Y-m-t H:i:s", strtotime("{$check->bulan}-01"));
             $this->_module->startTransaction();
             $lock = "token_increment WRITE,main_menu_sub READ, log_history WRITE,acc_kurs_akhir_bulan WRITE,picklist_detail WRITE,acc_jurnal_entries_items WRITE,"
                     . "acc_coa READ, acc_kas_masuk_detail WRITE, acc_kas_keluar_detail WRITE, acc_bank_masuk_detail WRITE, acc_bank_keluar_detail WRITE,acc_giro_masuk_detail WRITE,acc_giro_keluar_detail WRITE,"
-                    . "acc_bank_masuk bm READ, acc_bank_masuk_detail bmd READ, acc_bank_keluar bk READ,acc_bank_keluar_detail bkd READ, acc_coa coa READ, setting READ,currency_kurs WRITE,"
+                    . "acc_coa coa READ, setting READ,currency_kurs WRITE,"
                     . "acc_pelunasan_piutang app READ,acc_jurnal_entries WRITE,acc_kurs_akhir_bulan_detail WRITE,"
-                    . "acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_retur_penjualan arp WRITE,"
+                    . "acc_pelunasan_piutang_summary apps WRITE,acc_pelunasan_piutang_summary_koreksi appsk READ,acc_retur_penjualan arp WRITE,acc_retur_penjualan arpi WRITE,"
                     . "acc_coa ac1 READ,acc_coa ac2 READ,acc_coa ac3 READ,acc_coa ac4 READ,acc_coa ac5 READ,acc_coa ac6 READ,"
-                    . "currency_kurs ck1 READ,currency_kurs ck2 READ,currency_kurs ck3 READ,currency_kurs ck4 READ,currency_kurs ck5 READ,currency_kurs ck6 READ";
+                    . "currency_kurs ck1 READ,currency_kurs ck2 READ,currency_kurs ck3 READ,currency_kurs ck4 READ,currency_kurs ck5 READ,currency_kurs ck6 READ,"
+                    . "acc_kas_masuk km READ,acc_kas_keluar kk READ,acc_bank_masuk bm READ,acc_bank_keluar bk READ,acc_giro_masuk gm READ,acc_giro_keluar gk READ,"
+                    . "acc_kas_masuk kms READ,acc_kas_keluar kks READ,acc_bank_masuk bms READ,acc_bank_keluar bks READ,acc_giro_masuk gms READ,acc_giro_keluar gks READ,"
+                    . "acc_kas_masuk_detail kmds WRITE,acc_kas_keluar_detail kkds WRITE,acc_bank_masuk_detail bmds WRITE,acc_bank_keluar_detail bkds WRITE,acc_giro_masuk_detail gmds WRITE,acc_giro_keluar_detail gkds WRITE,"
+                    . "acc_kas_masuk_detail kmd WRITE,acc_kas_keluar_detail kkd WRITE,acc_bank_masuk_detail bmd WRITE,acc_bank_keluar_detail bkd WRITE,acc_giro_masuk_detail gmd WRITE,acc_giro_keluar_detail gkd WRITE,"
+                    . "acc_retur_kurs_akhir_bulan WRITE,acc_pelunasan_piutang_akhir_bulan WRITE,acc_kas_bank_giro_kurs_akhir_bulan WRITE,invoice_retur WRITE";
             $this->_module->lock_tabel($lock);
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
 
@@ -376,6 +387,7 @@ class Kursakhirbulan extends MY_Controller {
                 if ($saldoAkhirValas <= 0) {
                     continue;
                 }
+                $nama = "Kurs Akhir Bulan (Saldo Valas : " . number_format($saldoAkhirValas, 2) . " {$check->curr}, Saldo Rp " . number_format($saldoAkhir, 2) . " Kurs : " . number_format($check->kurs, 2) . ")";
                 $kursAkhirDetail[] = [
                     "selisih" => $selisih,
                     "saldo" => $saldoAkhirValas,
@@ -385,10 +397,11 @@ class Kursakhirbulan extends MY_Controller {
                     "kab_id" => $check->id,
                     "no_kab" => $kode,
                     "kode_coa" => $value->kode_coa,
-                    "_segment" => "jurnal"
+                    "_segment" => "jurnal",
+                    "reff_note" => $nama
                 ];
                 //"Kurs Akhir Bulan (Saldo Valas : " . number_format($saldoAkhirValas, 2) . " {$check->curr}, Saldo Rp ".number_format($saldoAkhir, 2)." Kurs : " . number_format($check->kurs, 2) . ")"
-                $nama = "Kurs Akhir Bulan (Saldo Valas : " . number_format($saldoAkhirValas, 2) . " {$check->curr}, Saldo Rp " . number_format($saldoAkhir, 2) . " Kurs : " . number_format($check->kurs, 2) . ")";
+
                 $entriesDetail[] = [
                     "nama" => $nama,
                     "kode" => $noJurnal,
@@ -418,6 +431,132 @@ class Kursakhirbulan extends MY_Controller {
                 ];
                 $noOrder += 1;
             }
+            $umdprtr = $this->input->post("datas");
+            $um = [];
+            $dpst = [];
+            $retur = [];
+            $updateReturPen = [];
+            $updateReturPem = [];
+            foreach ($umdprtr as $key => $val) {
+                $val = (object) $val;
+                if (empty($val->val)) {
+                    throw new \Exception("Coa Harus Dipilih", 500);
+                }
+                $entriesDetail [] = [
+                    "nama" => "{$val->jenis} - {$val->no}",
+                    "kode" => $noJurnal,
+                    "reff_note" => "",
+                    "partner" => "",
+                    "kode_coa" => $val->val,
+                    "kurs" => 1,
+                    "kode_mua" => "IDR",
+                    "posisi" => $val->posisi,
+                    "nominal_curr" => abs($val->selisih),
+                    "nominal" => abs($val->selisih),
+                    "row_order" => $noOrder
+                ];
+                $noOrder += 1;
+
+                switch ($val->jenis) {
+                    case "uangmuka":
+                        if (isset($val->menu)) {
+                            $um[] = [
+                                "kas_id" => $val->ids,
+                                "no_kas" => $val->no,
+                                "no_kab" => $kode,
+                                "nominal" => $val->selisih,
+                                "tipe" => $val->menu
+                            ];
+
+                            $kursAkhirDetail [] = [
+                                "kurs" => $check->kurs,
+                                "curr" => $check->curr,
+                                "kab_id" => $check->id,
+                                "no_kab" => $kode,
+                                "saldo" => $val->saldo,
+                                "saldo_rp" => $val->saldo * $check->kurs,
+                                "selisih" => $val->selisih,
+                                "kode_coa" => $val->val,
+                                "_segment" => $val->menu,
+                                "reff_note" => $val->no
+                            ];
+                        }
+                        break;
+                    case "deposit":
+                        if (isset($val->menu)) {
+                            $dpst[] = [
+                                "no_pelunasan" => $val->no,
+                                "no_kab" => $kode,
+                                "nominal" => $val->selisih
+                            ];
+                            $kursAkhirDetail [] = [
+                                "kurs" => $check->kurs,
+                                "curr" => $check->curr,
+                                "kab_id" => $check->id,
+                                "no_kab" => $kode,
+                                "saldo" => $val->saldo,
+                                "saldo_rp" => $val->saldo * $check->kurs,
+                                "selisih" => $val->selisih,
+                                "kode_coa" => $val->val,
+                                "_segment" => $val->menu,
+                                "reff_note" => $val->no
+                            ];
+                        }
+
+                        break;
+                    case "retur":
+                        if (isset($val->menu)) {
+                            $retur[] = [
+                                "retur_id" => $val->ids,
+                                "no_kab" => $kode,
+                                "no_retur" => $val->no,
+                                "nominal" => $val->selisih,
+                                "tipe" => $val->menu
+                            ];
+
+                            $kursAkhirDetail [] = [
+                                "kurs" => $check->kurs,
+                                "curr" => $check->curr,
+                                "kab_id" => $check->id,
+                                "no_kab" => $kode,
+                                "saldo" => $val->saldo,
+                                "saldo_rp" => $val->saldo * $check->kurs,
+                                "selisih" => $val->selisih,
+                                "kode_coa" => $val->val,
+                                "_segment" => $val->menu,
+                                "reff_note" => $val->no
+                            ];
+                            if ($val->menu === 'retur_pembelian') {
+                                $updateReturPem[] = [
+                                    "id" => $val->ids,
+                                    "kurs_akhir" => $check->kurs];
+                            } else {
+                                $updateReturPen[] = [
+                                    "id" => $val->ids,
+                                    "kurs_akhir" => $check->kurs
+                                ];
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (count($um) > 0) {
+                $model->setTables("acc_kas_bank_giro_kurs_akhir_bulan")->saveBatch($um);
+            }
+            if (count($dpst) > 0) {
+                $model->setTables("acc_pelunasan_piutang_akhir_bulan")->saveBatch($dpst);
+            }
+            if (count($retur) > 0) {
+                $model->setTables("acc_retur_kurs_akhir_bulan")->saveBatch($retur);
+            }
+            if (count($updateReturPen) > 0) {
+                $model->setTables("acc_retur_penjualan arpi")->updateBatch($updateReturPen, "id");
+            }
+            if (count($updateReturPem) > 0) {
+                $model->setTables("invoice_retur")->updateBatch($updateReturPem, "id");
+            }
             $model->setTables("acc_jurnal_entries_items")->saveBatch($entriesDetail);
             foreach ($updatekasView as $key => $value) {
                 $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
@@ -431,28 +570,66 @@ class Kursakhirbulan extends MY_Controller {
                     "saldo_rp" => $value->nominal * $check->kurs,
                     "selisih" => $selisih,
                     "kode_coa" => $value->kode_coa,
-                    "_segment" => "kasbank"
+                    "_segment" => "kasbank",
+                    "reff_note" => $value->no
                 ];
             }
             $this->_updatekas();
-            foreach ($updatePelView as $key => $value) {
-                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
-                $saldo = $value->total_piutang - $value->total_pelunasan;
-                $selisih = ($saldo * $check->kurs) - ($saldo * $oldKurs);
-                $kursAkhirDetail [] = [
-                    "kurs" => $check->kurs,
-                    "curr" => $check->curr,
-                    "kab_id" => $check->id,
-                    "no_kab" => $kode,
-                    "saldo" => $saldo,
-                    "saldo_rp" => $saldo * $check->kurs,
-                    "selisih" => $selisih,
-                    "kode_coa" => $value->kode_coa,
-                    "_segment" => "pelunasan"
-                ];
-            }
+//            foreach ($updatePelView as $key => $value) {
+//                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
+//                $saldo = $value->total_piutang - $value->total_pelunasan;
+//                $selisih = ($saldo * $check->kurs) - ($saldo * $oldKurs);
+//                $kursAkhirDetail [] = [
+//                    "kurs" => $check->kurs,
+//                    "curr" => $check->curr,
+//                    "kab_id" => $check->id,
+//                    "no_kab" => $kode,
+//                    "saldo" => $saldo,
+//                    "saldo_rp" => $saldo * $check->kurs,
+//                    "selisih" => $selisih,
+//                    "kode_coa" => $value->kode_coa,
+//                    "_segment" => "pelunasan",
+//                    "reff_note" => $value->no_pelunasan
+//                ];
+//            }
             $this->_updateDeposit();
-            $this->_updatePenjualanRetur();
+
+//            foreach ($umpen as $key => $value) {
+//                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
+//                $selisih = ($value->nominal * $check->kurs) - ($value->nominal * $oldKurs);
+//                $kursAkhirDetail [] = [
+//                    "kurs" => $check->kurs,
+//                    "curr" => $check->curr,
+//                    "kab_id" => $check->id,
+//                    "no_kab" => $kode,
+//                    "saldo" => $value->nominal,
+//                    "saldo_rp" => $value->nominal * $check->kurs,
+//                    "selisih" => $selisih,
+//                    "kode_coa" => $value->kode_coa,
+//                    "_segment" => "uangmuka_penjualan",
+//                    "reff_note" => $value->no
+//                ];
+//            }
+            $this->_updateUM("penjualan", "piutang");
+
+//            foreach ($umpem as $key => $value) {
+//                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
+//                $selisih = ($value->nominal * $check->kurs) - ($value->nominal * $oldKurs);
+//                $kursAkhirDetail [] = [
+//                    "kurs" => $check->kurs,
+//                    "curr" => $check->curr,
+//                    "kab_id" => $check->id,
+//                    "no_kab" => $kode,
+//                    "saldo" => $value->nominal,
+//                    "saldo_rp" => $value->nominal * $check->kurs,
+//                    "selisih" => $selisih,
+//                    "kode_coa" => $value->kode_coa,
+//                    "_segment" => "uangmuka_pembelian",
+//                    "reff_note" => $value->no
+//                ];
+//            }
+            $this->_updateUM("pembelian", "utang");
+
             $model->setTables("acc_kurs_akhir_bulan_detail")->saveBatch($kursAkhirDetail);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
@@ -544,7 +721,7 @@ class Kursakhirbulan extends MY_Controller {
             $this->_module->unlock_tabel();
         }
     }
-    
+
     protected function _updatePenjualanReturView() {
         try {
             $bulans = explode("-", $this->input->post("bulan"));
@@ -552,7 +729,7 @@ class Kursakhirbulan extends MY_Controller {
             $curr = $this->input->post("currency");
             $model = new $this->m_global;
             return $model->setTables("acc_retur_penjualan arp")->setJoins("currency_kurs ck", "ck.id = arp.kurs")
-                    ->setWheres(["ck.currency"=>$curr,"tanggal <="=>$akhir,"status"=>"confirm"])->setSelects(["arp.*"])->getData();
+                            ->setWheres(["ck.currency" => $curr, "tanggal <=" => $akhir, "status" => "confirm", "lunas" => 0])->setSelects(["arp.*"])->getData();
         } catch (Exception $ex) {
             throw $ex;
         }
@@ -611,90 +788,84 @@ class Kursakhirbulan extends MY_Controller {
             throw $ex;
         }
     }
-    
-    protected function _updatePenjualanRetur() {
-        try {
-            $bulans = explode("-", $this->input->post("bulan"));
-            $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
-            $curr = $this->input->post("currency");
-            $kurs = str_replace(",", "", $this->input->post("kurs"));
-            $model = new $this->m_global;
-            $data =  $model->setTables("acc_retur_penjualan arp")->setJoins("currency_kurs", "currency_kurs.id = arp.kurs")
-                    ->setWheres(["currency_kurs.currency"=>$curr,"tanggal <="=>$akhir,"status"=>"draft"])->setSelects(["arp.*"])->getData();
-            $updates = [];
-            foreach ($data as $key => $value) {
-                $updates[] = [
-                    "id"=>$value->id,
-                    "kurs_akhir"=>$kurs
-                ];
-            }
-            if(count($updates) > 0) {
-                $model->updateBatch($updates, "id");
-            }
-        } catch (Exception $ex) {
-            throw $ex;
-        }
-    }
 
-    protected function _updatekasView() {
+    protected function _updatekasView($jenisTrans = "") {
         try {
+            $masuk = "piutang";
+            $keluar = "utang";
+            if ($jenisTrans === "um") {
+                $masuk = "um_penjualan";
+                $keluar = "um_pembelian";
+            }
             $bulans = explode("-", $this->input->post("bulan"));
             $curr = $this->input->post("currency");
-            $kurs = str_replace(",", "", $this->input->post("kurs"));
+//            $kurs = str_replace(",", "", $this->input->post("kurs"));
             $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
             //kas masuk
             $model = new $this->m_global;
-            $kasMasuk = $model->setTables("acc_kas_masuk_detail")
-                            ->setSelects(["no_km as no,'Kas Masuk' as nama_menu,kurs,nominal,kurs_akhir,kode_coa"])
+            $kasMasuk = $model->setTables("acc_kas_masuk_detail kmd")
+                            ->setJoins("acc_kas_masuk km", "km.id = kmd.kas_masuk_id")
+                            ->setSelects(["kmd.no_km as no,'Kas_Masuk' as nama_menu,kmd.kurs,kmd.nominal,kmd.kurs_akhir,kmd.kode_coa,kmd.id as ids"])
                             ->setWheres([
-                                "date(tanggal) <=" => $akhir,
-                                "lunas" => 0,
-                            ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                            ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'piutang|um_penjualan')")->getQuery();
+                                "date(kmd.tanggal) <=" => $akhir,
+                                "kmd.lunas" => 0,
+                                "status" => "confirm"
+                            ])->setWhereRaw("kmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                            ->setWhereRaw("kmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$masuk}')")->getQuery();
 
             //kas keluar
-            $kasKeluar = $model->setTables("acc_kas_keluar_detail")
-                            ->setSelects(["no_kk as no,'Kas Keluar' as nama_menu,kurs,nominal,kurs_akhir,kode_coa"])
+            $kasKeluar = $model->setTables("acc_kas_keluar_detail kkd")
+                            ->setJoins("acc_kas_keluar kk", "kk.id = kkd.kas_keluar_id")
+                            ->setSelects(["kkd.no_kk as no,'Kas_Keluar' as nama_menu,kkd.kurs,kkd.nominal,kkd.kurs_akhir,kkd.kode_coa,kkd.id as ids"])
                             ->setWheres([
-                                "date(tanggal) <=" => $akhir,
-                                "lunas" => 0,
-                            ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                            ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'utang|um_pembelian')")->getQuery();
+                                "date(kkd.tanggal) <=" => $akhir,
+                                "kkd.lunas" => 0,
+                                "status" => "confirm"
+                            ])->setWhereRaw("kkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                            ->setWhereRaw("kkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$keluar}')")->getQuery();
             //bank masuk
-            $bankMasuk = $model->setTables("acc_bank_masuk_detail")
-                            ->setSelects(["no_bm as no,'Bank Masuk' as nama_menu,kurs,nominal,kurs_akhir,kode_coa"])
+            $bankMasuk = $model->setTables("acc_bank_masuk_detail bmd")
+                            ->setJoins("acc_bank_masuk bm", "bm.id = bmd.bank_masuk_id")
+                            ->setSelects(["bmd.no_bm as no,'Bank_Masuk' as nama_menu,bmd.kurs,bmd.nominal,bmd.kurs_akhir,bmd.kode_coa,bmd.id as ids"])
                             ->setWheres([
-                                "date(tanggal) <=" => $akhir,
-                                "lunas" => 0,
-                            ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                            ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'piutang|um_penjualan')")->getQuery();
+                                "date(bmd.tanggal) <=" => $akhir,
+                                "bmd.lunas" => 0,
+                                "status" => "confirm"
+                            ])->setWhereRaw("bmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                            ->setWhereRaw("bmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$masuk}')")->getQuery();
 
             //bank keluar
-            $bankKeluar = $model->setTables("acc_bank_keluar_detail")
-                            ->setSelects(["no_bk as no,'Bank Keluar' as nama_menu,kurs,nominal,kurs_akhir,kode_coa"])
+            $bankKeluar = $model->setTables("acc_bank_keluar_detail bkd")
+                            ->setJoins("acc_bank_keluar bk", "bk.id = bkd.bank_keluar_id")
+                            ->setSelects(["bkd.no_bk as no,'Bank_Keluar' as nama_menu,bkd.kurs,bkd.nominal,bkd.kurs_akhir,bkd.kode_coa,bkd.id as ids"])
                             ->setWheres([
-                                "date(tanggal) <=" => $akhir,
-                                "lunas" => 0,
-                            ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                            ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'utang|um_pembelian')")->getQuery();
+                                "date(bkd.tanggal) <=" => $akhir,
+                                "bkd.lunas" => 0,
+                                "status" => "confirm"
+                            ])->setWhereRaw("bkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                            ->setWhereRaw("bkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$keluar}')")->getQuery();
 
             //giro masuk
-            $giroMasuk = $model->setTables("acc_giro_masuk_detail")
-                            ->setSelects(["no_gm as no,'Giro Masuk' as nama_menu,kurs,nominal,kurs_akhir,kode_coa"])
+            $giroMasuk = $model->setTables("acc_giro_masuk_detail gmd")
+                            ->setJoins("acc_giro_masuk gm", "gm.id = gmd.giro_masuk_id")
+                            ->setSelects(["gmd.no_gm as no,'Giro_Masuk' as nama_menu,gmd.kurs,gmd.nominal,gmd.kurs_akhir,gmd.kode_coa,gmd.id as ids"])
                             ->setWheres([
-                                "date(tanggal) <=" => $akhir,
-                                "lunas" => 0
-                            ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                            ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'piutang|um_penjualan')")->getQuery();
+                                "date(gmd.tanggal) <=" => $akhir,
+                                "gmd.lunas" => 0,
+                                "status" => "confirm"
+                            ])->setWhereRaw("gmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                            ->setWhereRaw("gmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$masuk}')")->getQuery();
 
             //giro keluar
-            $giroKeluar = $model->setTables("acc_giro_keluar_detail")
-                            ->setSelects(["no_gk as no,'Giro Keluar' as nama_menu,kurs,nominal,kurs_akhir,kode_coa"])
+            $giroKeluar = $model->setTables("acc_giro_keluar_detail gkd")
+                            ->setJoins("acc_giro_keluar gk", "gk.id = gkd.giro_keluar_id")
+                            ->setSelects(["gkd.no_gk as no,'Giro_Keluar' as nama_menu,gkd.kurs,gkd.nominal,gkd.kurs_akhir,gkd.kode_coa,gkd.id as ids"])
                             ->setWheres([
-                                "date(tanggal) <=" => $akhir,
-                                "lunas" => 0,
-                            ])->setWhereRaw("currency_id = (select id from currency_kurs where currency = '{$curr}')")
-                            ->setWhereRaw("kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'utang|um_pembelian')")->getQuery();
+                                "date(gkd.tanggal) <=" => $akhir,
+                                "gkd.lunas" => 0,
+                                "status" => "confirm"
+                            ])->setWhereRaw("gkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                            ->setWhereRaw("gkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$keluar}')")->getQuery();
 
             return $model->setTables("({$kasMasuk} union all {$kasKeluar} union all {$bankMasuk} union all {$bankKeluar} union all {$giroMasuk} union all {$giroKeluar}) as tbl")->getData();
         } catch (Exception $ex) {
@@ -702,60 +873,255 @@ class Kursakhirbulan extends MY_Controller {
         }
     }
 
-    protected function _updatekas() {
+    protected function _updatekas($jenisTrans = "") {
         try {
+            $masuk = "piutang";
+            $keluar = "utang";
+            if ($jenisTrans === "um") {
+                $masuk = "um_penjualan";
+                $keluar = "um_pembelian";
+            }
             $bulans = explode("-", $this->input->post("bulan"));
             $curr = $this->input->post("currency");
             $kurs = str_replace(",", "", $this->input->post("kurs"));
             //kas masuk
             $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
             $model = new $this->m_global;
-            $model->setTables("acc_kas_masuk_detail")
+            $model->setTables("acc_kas_masuk_detail kmd")
+//                    ->setSelects(["kmd.no_km as no,'Kas Masuk' as nama_menu,kmd.kurs,kmd.nominal,kmd.kurs_akhir,kmd.kode_coa"])
                     ->setWheres([
-                        "date(tanggal) <=" => $akhir,
-                        "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck1 where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac1 where jenis_transaksi REGEXP 'piutang|um_penjualan')")
+                        "date(kmd.tanggal) <=" => $akhir,
+                        "kmd.lunas" => 0,
+                    ])
+                    ->setWhereRaw("kmd.kas_masuk_id in (select id from acc_kas_masuk km where status = 'confirm')")
+                    ->setWhereRaw("kmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                    ->setWhereRaw("kmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$masuk}')")
                     ->update(["kurs_akhir" => $kurs]);
 
             //kas keluar
-            $model->setTables("acc_kas_keluar_detail")
+            $model->setTables("acc_kas_keluar_detail kkd")
+//                    ->setSelects(["kkd.no_kk as no,'Kas Keluar' as nama_menu,kkd.kurs,kkd.nominal,kkd.kurs_akhir,kkd.kode_coa"])
                     ->setWheres([
-                        "date(tanggal) <=" => $akhir,
-                        "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck1 where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac2 where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
+                        "date(kkd.tanggal) <=" => $akhir,
+                        "kkd.lunas" => 0
+                    ])
+                    ->setWhereRaw("kkd.kas_keluar_id in (select id from acc_kas_keluar kk where status = 'confirm')")
+                    ->setWhereRaw("kkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                    ->setWhereRaw("kkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$keluar}')")
+                    ->update(["kurs_akhir" => $kurs]);
             //bank masuk
-            $model->setTables("acc_bank_masuk_detail")
+            $model->setTables("acc_bank_masuk_detail bmd")
+//                    ->setSelects(["bmd.no_bm as no,'Bank Masuk' as nama_menu,bmd.kurs,bmd.nominal,bmd.kurs_akhir,bmd.kode_coa"])
                     ->setWheres([
-                        "date(tanggal) <=" => $akhir,
-                        "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck3 where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac3 where jenis_transaksi REGEXP 'piutang|um_penjualan')")->update(["kurs_akhir" => $kurs]);
+                        "date(bmd.tanggal) <=" => $akhir,
+                        "bmd.lunas" => 0,
+                    ])
+                    ->setWhereRaw("bmd.bank_masuk_id in (select id from acc_bank_masuk bm where status = 'confirm')")
+                    ->setWhereRaw("bmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                    ->setWhereRaw("bmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$masuk}')")
+                    ->update(["kurs_akhir" => $kurs]);
 
             //bank keluar
-            $model->setTables("acc_bank_keluar_detail")
+            $model->setTables("acc_bank_keluar_detail bkd")
+//                    ->setSelects(["bkd.no_bk as no,'Bank Keluar' as nama_menu,bkd.kurs,bkd.nominal,bkd.kurs_akhir,bkd.kode_coa"])
                     ->setWheres([
-                        "date(tanggal) <=" => $akhir,
-                        "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck4 where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac4 where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
+                        "date(bkd.tanggal) <=" => $akhir,
+                        "bkd.lunas" => 0
+                    ])
+                    ->setWhereRaw("bkd.bank_keluar_id in (select id from acc_bank_keluar bk where status = 'confirm')")
+                    ->setWhereRaw("bkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                    ->setWhereRaw("bkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$keluar}')")
+                    ->update(["kurs_akhir" => $kurs]);
 
             //giro masuk
-            $model->setTables("acc_giro_masuk_detail")
+            $model->setTables("acc_giro_masuk_detail gmd")
+//                    ->setSelects(["gmd.no_gm as no,'Giro Masuk' as nama_menu,gmd.kurs,gmd.nominal,gmd.kurs_akhir,gmd.kode_coa"])
                     ->setWheres([
-                        "date(tanggal) <=" => $akhir,
-                        "lunas" => 0
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck5 where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac5 where jenis_transaksi REGEXP 'piutang|um_penjualan')")->update(["kurs_akhir" => $kurs]);
+                        "date(gmd.tanggal) <=" => $akhir,
+                        "gmd.lunas" => 0,
+                    ])
+                    ->setWhereRaw("gmd.giro_masuk_id in (select id from acc_giro_masuk gm where status = 'confirm')")
+                    ->setWhereRaw("gmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                    ->setWhereRaw("gmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'piutang|um_penjualan')")
+                    ->update(["kurs_akhir" => $kurs]);
 
             //giro keluar
-            $model->setTables("acc_giro_keluar_detail")
+            $model->setTables("acc_giro_keluar_detail gkd")
+//                    ->setSelects(["gkd.no_gk as no,'Giro Keluar' as nama_menu,gkd.kurs,gkd.nominal,gkd.kurs_akhir,gkd.kode_coa"])
                     ->setWheres([
-                        "date(tanggal) <=" => $akhir,
-                        "lunas" => 0,
-                    ])->setWhereRaw("currency_id = (select id from currency_kurs ck6 where currency = '{$curr}')")
-                    ->setWhereRaw("kode_coa in (select kode_coa from acc_coa ac6 where jenis_transaksi REGEXP 'utang|um_pembelian')")->update(["kurs_akhir" => $kurs]);
+                        "date(gkd.tanggal) <=" => $akhir,
+                        "gkd.lunas" => 0,
+                    ])
+                    ->setWhereRaw("gkd.giro_keluar_id in (select id from acc_giro_keluar gk where status = 'confirm')")
+                    ->setWhereRaw("gkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                    ->setWhereRaw("gkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP 'utang|um_pembelian')")
+                    ->update(["kurs_akhir" => $kurs]);
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    protected function _updateUMView($jenis, $jenisTrans = "") {
+        try {
+            $bulans = explode("-", $this->input->post("bulan"));
+            $curr = $this->input->post("currency");
+//            $kurs = str_replace(",", "", $this->input->post("kurs"));
+            $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
+            $model = new $this->m_global;
+            if ($jenis === "penjualan") {
+                //kas masuk
+                $query1 = $model->setTables("acc_kas_masuk_detail kmd")
+                                ->setJoins("acc_kas_masuk km", "km.id = kmd.kas_masuk_id")
+                                ->setSelects(["kmd.no_km as no,'Kas_Masuk' as nama_menu,kmd.kurs,kmd.nominal,kmd.kurs_akhir,kmd.kode_coa,kmd.id as ids"])
+                                ->setWheres([
+                                    "date(kmd.tanggal) <=" => $akhir,
+                                    "kmd.lunas" => 0,
+                                    "status" => "confirm"
+                                ])->setWhereRaw("kmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                                ->setWhereRaw("kmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->getQuery();
+                //bank masuk
+                $query2 = $model->setTables("acc_bank_masuk_detail bmd")
+                                ->setJoins("acc_bank_masuk bm", "bm.id = bmd.bank_masuk_id")
+                                ->setSelects(["bmd.no_bm as no,'Bank_Masuk' as nama_menu,bmd.kurs,bmd.nominal,bmd.kurs_akhir,bmd.kode_coa,bmd.id as ids"])
+                                ->setWheres([
+                                    "date(bmd.tanggal) <=" => $akhir,
+                                    "bmd.lunas" => 0,
+                                    "status" => "confirm"
+                                ])->setWhereRaw("bmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                                ->setWhereRaw("bmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->getQuery();
+                //giro masuk
+                $query3 = $model->setTables("acc_giro_masuk_detail gmd")
+                                ->setJoins("acc_giro_masuk gm", "gm.id = gmd.giro_masuk_id")
+                                ->setSelects(["gmd.no_gm as no,'Giro_Masuk' as nama_menu,gmd.kurs,gmd.nominal,gmd.kurs_akhir,gmd.kode_coa,gmd.id as ids"])
+                                ->setWheres([
+                                    "date(gmd.tanggal) <=" => $akhir,
+                                    "gmd.lunas" => 0,
+                                    "status" => "confirm"
+                                ])->setWhereRaw("gmd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                                ->setWhereRaw("gmd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->getQuery();
+            } else {
+                //kas keluar
+                $query1 = $model->setTables("acc_kas_keluar_detail kkd")
+                                ->setJoins("acc_kas_keluar kk", "kk.id = kkd.kas_keluar_id")
+                                ->setSelects(["kkd.no_kk as no,'Kas_Keluar' as nama_menu,kkd.kurs,kkd.nominal,kkd.kurs_akhir,kkd.kode_coa,kkd.id as ids"])
+                                ->setWheres([
+                                    "date(kkd.tanggal) <=" => $akhir,
+                                    "kkd.lunas" => 0,
+                                    "status" => "confirm"
+                                ])->setWhereRaw("kkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                                ->setWhereRaw("kkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->getQuery();
+                //bank keluar
+                $query2 = $model->setTables("acc_bank_keluar_detail bkd")
+                                ->setJoins("acc_bank_keluar bk", "bk.id = bkd.bank_keluar_id")
+                                ->setSelects(["bkd.no_bk as no,'Bank_Keluar' as nama_menu,bkd.kurs,bkd.nominal,bkd.kurs_akhir,bkd.kode_coa,bkd.id as ids"])
+                                ->setWheres([
+                                    "date(bkd.tanggal) <=" => $akhir,
+                                    "bkd.lunas" => 0,
+                                    "status" => "confirm"
+                                ])->setWhereRaw("bkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                                ->setWhereRaw("bkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->getQuery();
+                //giro keluar
+                $query3 = $model->setTables("acc_giro_keluar_detail gkd")
+                                ->setJoins("acc_giro_keluar gk", "gk.id = gkd.giro_keluar_id")
+                                ->setSelects(["gkd.no_gk as no,'Giro_Keluar' as nama_menu,gkd.kurs,gkd.nominal,gkd.kurs_akhir,gkd.kode_coa,gkd.id as ids"])
+                                ->setWheres([
+                                    "date(gkd.tanggal) <=" => $akhir,
+                                    "gkd.lunas" => 0,
+                                    "status" => "confirm"
+                                ])->setWhereRaw("gkd.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                                ->setWhereRaw("gkd.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->getQuery();
+            }
+
+            return $model->setTables("({$query1} union all {$query2} union all {$query3}) as tbl")->getData();
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    protected function _updateUM($jenis, $jenisTrans = "") {
+        try {
+            $bulans = explode("-", $this->input->post("bulan"));
+            $curr = $this->input->post("currency");
+            $kurs = str_replace(",", "", $this->input->post("kurs"));
+            $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
+            $model = new $this->m_global;
+            if ($jenis === "penjualan") {
+                //kas masuk
+                $model->setTables("acc_kas_masuk_detail kmds")
+                        ->setSelects(["kmds.no_km as no,'Kas Masuk' as nama_menu,kmds.kurs,kmds.nominal,kmds.kurs_akhir,kmds.kode_coa,kmds.id as ids"])
+                        ->setWheres([
+                            "date(kmds.tanggal) <=" => $akhir,
+                            "kmds.lunas" => 0
+                        ])
+                        ->setWhereRaw("kmds.kas_masuk_id in (select id from acc_kas_masuk kms where status = 'confirm')")
+                        ->setWhereRaw("kmds.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                        ->setWhereRaw("kmds.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")
+                        ->update(["kurs_akhir" => $kurs]);
+                //bank masuk
+                $model->setTables("acc_bank_masuk_detail bmds")
+                        ->setSelects(["bmds.no_bm as no,'Bank Masuk' as nama_menu,bmds.kurs,bmds.nominal,bmds.kurs_akhir,bmds.kode_coa,bmds.id as ids"])
+                        ->setWheres([
+                            "date(bmds.tanggal) <=" => $akhir,
+                            "bmds.lunas" => 0
+                        ])
+                        ->setWhereRaw("bmds.bank_masuk_id in (select id from acc_bank_masuk bms where status = 'confirm')")
+                        ->setWhereRaw("bmds.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                        ->setWhereRaw("bmds.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->update(["kurs_akhir" => $kurs]);
+                //giro masuk
+                $model->setTables("acc_giro_masuk_detail gmds")
+                        ->setSelects(["gmds.no_gm as no,'Giro Masuk' as nama_menu,gmds.kurs,gmds.nominal,gmds.kurs_akhir,gmds.kode_coa,gmds.id as ids"])
+                        ->setWheres([
+                            "date(gmds.tanggal) <=" => $akhir,
+                            "gmds.lunas" => 0
+                        ])
+                        ->setWhereRaw("gmds.giro_masuk_id in (select id from acc_giro_masuk gms where status = 'confirm')")
+                        ->setWhereRaw("gmds.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                        ->setWhereRaw("gmds.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->update(["kurs_akhir" => $kurs]);
+            } else {
+                //kas keluar
+                $model->setTables("acc_kas_keluar_detail kkds")
+                        ->setSelects(["kkds.no_kk as no,'Kas Keluar' as nama_menu,kkds.kurs,kkds.nominal,kkds.kurs_akhir,kkds.kode_coa,kkds.id as ids"])
+                        ->setWheres([
+                            "date(kkds.tanggal) <=" => $akhir,
+                            "kkds.lunas" => 0
+                        ])
+                        ->setWhereRaw("kkds.kas_keluar_id in (select id from acc_kas_keluar kks where status = 'confirm')")
+                        ->setWhereRaw("kkds.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                        ->setWhereRaw("kkds.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->update(["kurs_akhir" => $kurs]);
+                //bank keluar
+                $model->setTables("acc_bank_keluar_detail bkds")
+                        ->setSelects(["bkds.no_bk as no,'Bank Keluar' as nama_menu,bkds.kurs,bkds.nominal,bkds.kurs_akhir,bkds.kode_coa,bkds.id as ids"])
+                        ->setWheres([
+                            "date(bkds.tanggal) <=" => $akhir,
+                            "bkds.lunas" => 0,
+                        ])
+                        ->setWhereRaw("bkds.bank_keluar_id in (select id from acc_bank_keluar bks where status = 'confirm')")
+                        ->setWhereRaw("bkds.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                        ->setWhereRaw("bkds.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->update(["kurs_akhir" => $kurs]);
+                //giro keluar
+                $model->setTables("acc_giro_keluar_detail gkds")
+                        ->setSelects(["gkds.no_gk as no,'Giro Keluar' as nama_menu,gkds.kurs,gkds.nominal,gkds.kurs_akhir,gkds.kode_coa,gkds.id as ids"])
+                        ->setWheres([
+                            "date(gkds.tanggal) <=" => $akhir,
+                            "gkds.lunas" => 0
+                        ])
+                        ->setWhereRaw("gkds.giro_keluar_id in (select id from acc_giro_keluar gks where status = 'confirm')")
+                        ->setWhereRaw("gkds.currency_id = (select id from currency_kurs where currency = '{$curr}')")
+                        ->setWhereRaw("gkds.kode_coa in (select kode_coa from acc_coa where jenis_transaksi REGEXP '{$jenisTrans}')")->update(["kurs_akhir" => $kurs]);
+            }
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    protected function _updatePembelianReturView() {
+        try {
+            $bulans = explode("-", $this->input->post("bulan"));
+            $akhir = date("Y-m-t", strtotime("{$bulans[0]}-{$bulans[1]}-01"));
+            $curr = $this->input->post("currency");
+            $model = new $this->m_global;
+            return $model->setTables("invoice_retur arp")->setJoins("currency_kurs ck", "ck.id = arp.matauang")
+                            ->setWheres(["ck.currency" => $curr, "date(created_at) <=" => $akhir, "status" => "done", "lunas" => 0])->setSelects(["arp.*"])->getData();
         } catch (Exception $ex) {
             throw $ex;
         }
