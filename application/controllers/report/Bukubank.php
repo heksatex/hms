@@ -188,7 +188,7 @@ class Bukubank extends MY_Controller {
             $curr = $this->input->post("curr");
             
             $tanggal = explode(" - ", $tanggals);
-            $tgl = date("d-m-Y", strtotime($tanggal[0]))." - ".date("d-m-Y", strtotime($tanggal[1]));
+            $tgl = date("d-M-Y", strtotime($tanggal[0]))." - ".date("d-M-Y", strtotime($tanggal[1]));
             
             $sheet->setCellValue("A2", "{$coa} - {$coanama}");
             $sheet->setCellValue("A3", "Periode : {$tgl}");
@@ -244,8 +244,8 @@ class Bukubank extends MY_Controller {
                 $sheet->setCellValue("C{$row}", $no_bukti);
                 $sheet->setCellValue("D{$row}", $partner . $value->uraian);
                 $sheet->setCellValue("E{$row}", $value->kode_coa);
-                $sheet->setCellValue("F{$row}", ($debet < 1)? "":$debet);
-                $sheet->setCellValue("G{$row}", ($kredit < 1)? "":$kredit);
+                $sheet->setCellValue("F{$row}", ($debet == 0) ? "0" : $debet);
+                $sheet->setCellValue("G{$row}", ($kredit == 0) ? "0" : $kredit);
                 $sheet->setCellValue("H{$row}", $saldos);
 
                 $temp = $value->no_bukti;
