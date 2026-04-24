@@ -185,6 +185,24 @@ if ($inv->status === "done") {
 
                                                 </div>
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Account Debit</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <select class="form-control select2" name="default_coa" id="default_coa">
+                                                        <option value=""></option>
+                                                        <?php
+                                                        foreach ($coa_piutang as $key => $value) {
+                                                            ?>
+                                                            <option value="<?= $value->kode_coa ?>" <?= ($inv->coa_piutang_dagang === $value->kode_coa) ? "selected" : "" ?> 
+                                                                    <?= ($inv->status === "draft") ? "" : "disabled" ?>><?= "{$value->kode_coa} - {$value->nama}" ?></option>
+                                                                    <?php
+                                                                }
+                                                                ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -533,7 +551,13 @@ if ($inv->status === "done") {
 
                             $(".tax").select2({
                                 allowClear: true,
-                                placeholder: "Pajak"
+                                placeholder: "COA"
+
+                            });
+                            
+                            $("#default_coa").select2({
+                                allowClear: true,
+                                placeholder: "COA"
 
                             });
                             $('.kode_coa').select2({

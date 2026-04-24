@@ -90,6 +90,7 @@ class Debitnote extends MY_Controller {
             $tax = clone $head;
             $model3 = clone $head;
             $model4 = clone $head;
+            $data["coa_piutang"] = $model3->setTables("acc_coa")->setSelects(["kode_coa,nama"])->setWheres(["level" => 5, "jenis_transaksi" => "piutang"])->getData();
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $datas = $head->setTables("invoice_retur")->setJoins("partner", "partner.id = id_supplier", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")
@@ -161,7 +162,7 @@ class Debitnote extends MY_Controller {
             $no_fp = $this->input->post("no_fp");
             $nota_retur = $this->input->post("nota_retur");
             $tanggal_fp = $this->input->post("tanggal_fp");
-
+            $coaDagang = $this->input->post("default_coa");
             $item = [];
             $totals = 0.00;
             $diskons = 0.00;
@@ -225,7 +226,8 @@ class Debitnote extends MY_Controller {
                 "total_rp" => round($hutangrp),
                 "hutang_valas" => $hutangvalas,
                 "hutang_rp" => round($hutangrp),
-                "total_valas" => $grandTotal
+                "total_valas" => $grandTotal,
+                "coa_piutang_dagang" => $coaDagang
             ];
             $head->setTables('invoice_retur')->setWheres(["no_inv_retur" => $kode_decrypt])->update($dataUpdate);
             $bd->setTables("invoice_retur_detail")->updateBatch($item, 'id');
@@ -299,7 +301,7 @@ class Debitnote extends MY_Controller {
                                 ->setJoins("currency_kurs", "currency_kurs.id = invoice_retur.matauang", "left")
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
                                 ->setSelects(["invoice_retur_detail.*", "invoice_retur.id_supplier,invoice_retur.journal as jurnal,dpp_lain,nilai_matauang",
-                                    "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
+                                    "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr,coa_piutang_dagang",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
                                     "partner.nama as nama_supp,tax.ket", "invoice_retur.created_at as invoice_retur_create,invoice_retur.total as total_invoice"])
                                 ->setOrder(["invoice_retur_id"])->getData();
@@ -445,17 +447,17 @@ class Debitnote extends MY_Controller {
                 }
                 $defaultPpn = $model->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
                 $jurnalItems[] = array(
-                    "kode" => $jurnal,
-                    "nama" => "",
-                    "reff_note" => "",
-                    "partner" => $dataItems[0]->id_supplier,
-                    "kode_coa" => ($defaultPpn->value ?? 0),
-                    "posisi" => "D",
-                    "nominal_curr" => ($totalNominal + $tax) / $dataItems[0]->kurs,
-                    "kurs" => $dataItems[0]->kurs,
-                    "kode_mua" => $dataItems[0]->name_curr,
-                    "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
-                    "row_order" => count($jurnalItems) + 1
+                "kode" => $jurnal,
+                "nama" => "",
+                "reff_note" => "",
+                "partner" => $dataItems[0]->id_supplier,
+                "kode_coa" => ($dataItems[0]->coa_piutang_dagang === "") ? $defaultPpn->value : $dataItems[0]->coa_piutang_dagang,
+                "posisi" => "D",
+                "nominal_curr" => ($totalNominal + $tax) / $dataItems[0]->kurs,
+                "kurs" => $dataItems[0]->kurs,
+                "kode_mua" => $dataItems[0]->name_curr,
+                "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
+                "row_order" => count($jurnalItems) + 1
                 );
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);

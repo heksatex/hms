@@ -175,6 +175,24 @@
                                                     <input type="text" name="kurs_nominal" id="kurs_nominal" value="<?= $datas->kurs_nominal ?>" class="form-control input-sm kurs_nominal edited-read" required readonly/>
                                                 </div>
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Account Retur</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <select class="form-control select2" name="default_coa" id="default_coa">
+                                                        <option value=""></option>
+                                                        <?php
+                                                        foreach ($coa_piutang as $key => $value) {
+                                                            ?>
+                                                            <option value="<?= $value->kode_coa ?>" <?= ($datas->coa_retur === $value->kode_coa) ? "selected" : "" ?> 
+                                                                    <?= ($datas->status === "draft") ? "" : "disabled" ?>><?= "{$value->kode_coa} - {$value->nama}" ?></option>
+                                                                    <?php
+                                                                }
+                                                                ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -703,6 +721,11 @@ if ($datas->status == 'confirm') {
     });
 
     $(function () {
+        $("#default_coa").select2({
+                                allowClear: true,
+                                placeholder: "COA"
+
+                            });
         setNominalCurrency();
         $("#btn-edit").on("click", function (e) {
             e.preventDefault();
