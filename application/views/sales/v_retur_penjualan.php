@@ -105,6 +105,9 @@
                                             <th>No SJ</th>
                                             <th>Marketing</th>
                                             <th>Customer</th>
+                                            <th class="text-right">Dpp</th>
+                                            <th class="text-right">Ppn</th>
+                                            <th class="text-right">Total</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -112,6 +115,7 @@
                             </div>
                         </div>
                     </div>
+                    <button type="button" class="hide export-data"></button>
                 </section>
             </div>
         </div>
@@ -143,11 +147,59 @@
                     },
                     columnDefs: [
                         {
-                            "targets": [0,6],
+                            "targets": [0,9],
                             "orderable": false
                         }
+                    ],
+                            dom: 'Bfrtip',
+                    buttons: [
+                        'pageLength',
+                        {
+                            "text": '<i class="fa fa-print"> <span>Export</span>',
+                            "className": "btn-export btn-sm",
+                            "action": function (e, dt, node, config) {
+                                $(".export-data").trigger("click");
+                            }
+                        },
+                                // Other buttons like 'copy', 'csv', 'excel', 'pdf', 'print'
                     ]
                 });
+                
+                $(".export-data").on("click", function () {
+                    $.ajax({
+                        type: "post",
+                        url: "<?php echo base_url(); ?>sales/returpenjualan/export",
+                        data: {
+                            tanggal: tanggal,
+                            marketing: $("#marketing").val(),
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait((() => {
+
+                            }));
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 200);
+                        },
+                        success: ((data) => {
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        })
+                    });
+                });
+                
+                
                 $("#reset").on("click", function (e) {
                     e.preventDefault();
                     tanggal = "";
