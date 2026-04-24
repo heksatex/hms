@@ -456,7 +456,8 @@ class Kursakhirbulan extends MY_Controller {
                     "row_order" => $noOrder
                 ];
                 $noOrder += 1;
-
+                if (isset($val->menu))
+                    $nm = "Kurs : " . number_format($val->kurs, 2) . " Jumlah : " . number_format(($val->kurs * $val->saldo), 2) . ", Kurs Baru : " . number_format($check->kurs, 2) . " Jumlah Baru : " . number_format(($check->kurs * $val->saldo), 2);
                 switch ($val->jenis) {
                     case "uangmuka":
                         if (isset($val->menu)) {
@@ -478,7 +479,7 @@ class Kursakhirbulan extends MY_Controller {
                                 "selisih" => $val->selisih,
                                 "kode_coa" => $val->val,
                                 "_segment" => $val->menu,
-                                "reff_note" => $val->no
+                                "reff_note" => str_replace("_", " ", $val->menu) . " {$val->no} ({$nm})"
                             ];
                         }
                         break;
@@ -499,7 +500,7 @@ class Kursakhirbulan extends MY_Controller {
                                 "selisih" => $val->selisih,
                                 "kode_coa" => $val->val,
                                 "_segment" => $val->menu,
-                                "reff_note" => $val->no
+                                "reff_note" => str_replace("_", " ", $val->menu) . " {$val->no} ({$nm})"
                             ];
                         }
 
@@ -524,7 +525,7 @@ class Kursakhirbulan extends MY_Controller {
                                 "selisih" => $val->selisih,
                                 "kode_coa" => $val->val,
                                 "_segment" => $val->menu,
-                                "reff_note" => $val->no
+                                "reff_note" => str_replace("_", " ", $val->menu) . " {$val->no} ({$nm})"
                             ];
                             if ($val->menu === 'retur_pembelian') {
                                 $updateReturPem[] = [
@@ -561,6 +562,7 @@ class Kursakhirbulan extends MY_Controller {
             foreach ($updatekasView as $key => $value) {
                 $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
                 $selisih = ($value->nominal * $check->kurs) - ($value->nominal * $oldKurs);
+                $nm = "Kurs : " . number_format($oldKurs, 2) . " Jumlah : " . number_format(($oldKurs * $value->nominal), 2) . ", Kurs Baru : " . number_format($check->kurs, 2) . " Jumlah Baru : " . number_format(($check->kurs * $value->nominal), 2);
                 $kursAkhirDetail [] = [
                     "kurs" => $check->kurs,
                     "curr" => $check->curr,
@@ -571,63 +573,12 @@ class Kursakhirbulan extends MY_Controller {
                     "selisih" => $selisih,
                     "kode_coa" => $value->kode_coa,
                     "_segment" => "kasbank",
-                    "reff_note" => $value->no
+                    "reff_note" => "Kas/Bank/Giro {$value->no} ({$nm})"
                 ];
             }
             $this->_updatekas();
-//            foreach ($updatePelView as $key => $value) {
-//                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
-//                $saldo = $value->total_piutang - $value->total_pelunasan;
-//                $selisih = ($saldo * $check->kurs) - ($saldo * $oldKurs);
-//                $kursAkhirDetail [] = [
-//                    "kurs" => $check->kurs,
-//                    "curr" => $check->curr,
-//                    "kab_id" => $check->id,
-//                    "no_kab" => $kode,
-//                    "saldo" => $saldo,
-//                    "saldo_rp" => $saldo * $check->kurs,
-//                    "selisih" => $selisih,
-//                    "kode_coa" => $value->kode_coa,
-//                    "_segment" => "pelunasan",
-//                    "reff_note" => $value->no_pelunasan
-//                ];
-//            }
             $this->_updateDeposit();
-
-//            foreach ($umpen as $key => $value) {
-//                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
-//                $selisih = ($value->nominal * $check->kurs) - ($value->nominal * $oldKurs);
-//                $kursAkhirDetail [] = [
-//                    "kurs" => $check->kurs,
-//                    "curr" => $check->curr,
-//                    "kab_id" => $check->id,
-//                    "no_kab" => $kode,
-//                    "saldo" => $value->nominal,
-//                    "saldo_rp" => $value->nominal * $check->kurs,
-//                    "selisih" => $selisih,
-//                    "kode_coa" => $value->kode_coa,
-//                    "_segment" => "uangmuka_penjualan",
-//                    "reff_note" => $value->no
-//                ];
-//            }
             $this->_updateUM("penjualan", "piutang");
-
-//            foreach ($umpem as $key => $value) {
-//                $oldKurs = ($value->kurs_akhir > 0) ? $value->kurs_akhir : $value->kurs;
-//                $selisih = ($value->nominal * $check->kurs) - ($value->nominal * $oldKurs);
-//                $kursAkhirDetail [] = [
-//                    "kurs" => $check->kurs,
-//                    "curr" => $check->curr,
-//                    "kab_id" => $check->id,
-//                    "no_kab" => $kode,
-//                    "saldo" => $value->nominal,
-//                    "saldo_rp" => $value->nominal * $check->kurs,
-//                    "selisih" => $selisih,
-//                    "kode_coa" => $value->kode_coa,
-//                    "_segment" => "uangmuka_pembelian",
-//                    "reff_note" => $value->no
-//                ];
-//            }
             $this->_updateUM("pembelian", "utang");
 
             $model->setTables("acc_kurs_akhir_bulan_detail")->saveBatch($kursAkhirDetail);
