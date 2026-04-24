@@ -161,7 +161,7 @@ class Returpenjualan extends MY_Controller {
                             ->setJoins("acc_coa", "kode_coa = no_acc", "left")
                             ->setWheres(["retur_id" => $data['datas']->id])
                             ->setSelects(["fjd.*", "acc_coa.nama as coa_nama"])->getData();
-
+            $data["coa_piutang"] = $model->setTables("acc_coa")->setSelects(["kode_coa,nama"])->setWheres(["level" => 5, "jenis_transaksi" => "piutang"])->getData();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $data["taxs"] = $model->setTables("tax")->setWheres(["type_inv" => "sale"])->setOrder(["nama" => "asc"])->getData();
             $data["uom"] = $model->setTables("uom")->setSelects(["short"])->setWheres(["jual" => "yes"])->getData();
@@ -232,15 +232,15 @@ class Returpenjualan extends MY_Controller {
             ));
         }
     }
-
-    public function list_data() {
+    
+    
+    protected function _listData() {
         try {
-            $data = array();
             $model = new $this->m_global;
             $model->setTables("acc_retur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_retur_penjualan.status", "left")
                     ->setOrder(["acc_retur_penjualan.tanggal" => "desc"])->setSearch(["no_retur", "no_sj", "partner_nama"])
-                    ->setOrders([null, "no_retur", "tanggal", "no_sj", "marketing_nama", "partner_nama"])->setSelects(["acc_retur_penjualan.*", "nama_status"]);
-            $no = $_POST['start'];
+                    ->setOrders([null, "no_retur", "tanggal", "no_sj", "marketing_nama", "partner_nama","grand_total","ppn","total_piutang_rp"])
+                    ->setSelects(["acc_retur_penjualan.*", "nama_status"]);
             $tanggal = $this->input->post("tanggal");
             $marketing = $this->input->post("marketing");
             if ($tanggal !== "") {
@@ -250,10 +250,23 @@ class Returpenjualan extends MY_Controller {
             if ($marketing !== "") {
                 $model->setWheres(["marketing_kode" => $marketing]);
             }
+            return $model;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+    
+    public function list_data() {
+        try {
+            $data = array();
+            $model = $this->_listData();
+            $no = $_POST['start'];
             foreach ($model->getData() as $key => $value) {
                 $no += 1;
                 $kode_encrypt = encrypt_url($value->no_retur);
                 $fk = $value->no_retur;
+                $dpp = $value->grand_total * $value->kurs_nominal;
+                $ppn = $value->ppn * $value->kurs_nominal;
                 $data [] = [
                     $no,
                     "<a href='" . base_url("sales/returpenjualan/edit/{$kode_encrypt}") . "'>{$fk}</a>",
@@ -261,6 +274,9 @@ class Returpenjualan extends MY_Controller {
                     $value->no_sj,
                     $value->marketing_nama,
                     $value->partner_nama,
+                             number_format($dpp, 2),
+                    number_format($ppn, 2),
+                    number_format($value->total_piutang_rp, 2),
                     $value->nama_status
                 ];
             }
@@ -402,6 +418,7 @@ class Returpenjualan extends MY_Controller {
             $users = (object) $this->session->userdata('nama');
             $noAcc = $this->input->post("noacc");
             $nominalDiskon = $this->input->post("nominaldiskon");
+            $coaRetur = $this->input->post("default_coa");
             unset($this->valForm[2]); //unset validation  no faktur
             if ($nominalDiskon !== "") {
                 $this->valForm = array_merge($this->valForm, [
@@ -476,7 +493,8 @@ class Returpenjualan extends MY_Controller {
                 "final_total" => 0,
                 "payment_term" => $this->input->post("payment_term"),
                 "foot_note" => $this->input->post("footnote"),
-                "tanggal" => $this->input->post("tanggal")
+                "tanggal" => $this->input->post("tanggal"),
+                "coa_retur"=>$coaRetur
             ];
             $ppns = 0;
             $detail = [];
