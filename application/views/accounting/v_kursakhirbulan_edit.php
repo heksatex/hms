@@ -5,6 +5,25 @@
             #btn-confirm{
                 display: none;
             }
+            table.treetable span {
+                background-position: center left;
+                background-repeat: no-repeat;
+                padding: .2em 0 .2em 1.5em;
+            }
+            table.treetable span.folder {
+                background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAGrSURBVDjLxZO7ihRBFIa/6u0ZW7GHBUV0UQQTZzd3QdhMQxOfwMRXEANBMNQX0MzAzFAwEzHwARbNFDdwEd31Mj3X7a6uOr9BtzNjYjKBJ6nicP7v3KqcJFaxhBVtZUAK8OHlld2st7Xl3DJPVONP+zEUV4HqL5UDYHr5xvuQAjgl/Qs7TzvOOVAjxjlC+ePSwe6DfbVegLVuT4r14eTr6zvA8xSAoBLzx6pvj4l+DZIezuVkG9fY2H7YRQIMZIBwycmzH1/s3F8AapfIPNF3kQk7+kw9PWBy+IZOdg5Ug3mkAATy/t0usovzGeCUWTjCz0B+Sj0ekfdvkZ3abBv+U4GaCtJ1iEm6ANQJ6fEzrG/engcKw/wXQvEKxSEKQxRGKE7Izt+DSiwBJMUSm71rguMYhQKrBygOIRStf4TiFFRBvbRGKiQLWP29yRSHKBTtfdBmHs0BUpgvtgF4yRFR+NUKi0XZcYjCeCG2smkzLAHkbRBmP0/Uk26O5YnUActBp1GsAI+S5nRJJJal5K1aAMrq0d6Tm9uI6zjyf75dAe6tx/SsWeD//o2/Ab6IH3/h25pOAAAAAElFTkSuQmCC);
+            }
+            table.treetable tr.collapsed span.indenter a {
+                background-image: url(data:image/png;base64,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);
+            }
+
+            table.treetable tr.expanded span.indenter a {
+                background-image: url(data:image/png;base64,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);
+            }
+            caption {
+                border-bottom: 2px solid red !important;
+                font-weight: 600;
+            }
         </style>
         <?php
         $this->load->view("admin/_partials/head.php");
@@ -19,7 +38,7 @@
             <?php
         }
         ?>
-
+        <link rel="stylesheet" type="text/css" href="<?= base_url('dist/css/ludo-treetable.css'); ?>" />
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -45,166 +64,172 @@
                 <section class="content">
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-kurs" id="form-kurs" action="<?= base_url("accounting/kursakhirbulan/update/{$id}") ?>">
-                        <input type="hidden" name="ids" value="<?= $datas->id ?>">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"><?= $datas->no ?> </h3>
-                        </div>
-                        <div class="box-body">
-                            <div class="col-md-8col-xs-12">
-                                <div class="col-md-6 col-xs-12">
-                                    <div class="field-group">
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">Bulan</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input name="bulan" id="bulan" class="form-control input-sm" type="month" value="<?= $datas->bulan ?>" <?= ($datas->status === "confirm") ? "readonly" : "" ?>>
+                            <input type="hidden" name="ids" value="<?= $datas->id ?>">
+                            <div class="box-header with-border">
+                                <h3 class="box-title"><?= $datas->no ?> </h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="col-md-8col-xs-12">
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="field-group">
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4"><label class="form-label required">Bulan</label></div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input name="bulan" id="bulan" class="form-control input-sm" type="month" value="<?= $datas->bulan ?>" <?= ($datas->status === "confirm") ? "readonly" : "" ?>>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">Currency</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="hidden" name="symcurr" id="symcurr">
-                                                    <select class="form-control input-sm currency" name="currency" id="currency" style="width: 100%" <?= ($datas->status === "confirm") ? "disabled" : "" ?>>
-                                                        <option value="<?= $datas->curr ?>" selected><?= $datas->curr ?></option>
-                                                    </select>
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4"><label class="form-label required">Currency</label></div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input type="hidden" name="symcurr" id="symcurr">
+                                                        <select class="form-control input-sm currency" name="currency" id="currency" style="width: 100%" <?= ($datas->status === "confirm") ? "disabled" : "" ?>>
+                                                            <option value="<?= $datas->curr ?>" selected><?= $datas->curr ?></option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6 col-xs-12">
-                                    <div class="field-group">
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">Kurs</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input name="kurs" id="kurs" <?= ($datas->status === "confirm") ? "readonly" : "" ?>
-                                                           class="form-control input-sm" type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="<?= number_format($datas->kurs, 2, ".", ",") ?>">
-                                                    <button type="submit" class="btn-simpan" style="display: none;"></button>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="field-group">
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4"><label class="form-label required">Kurs</label></div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input name="kurs" id="kurs" <?= ($datas->status === "confirm") ? "readonly" : "" ?>
+                                                               class="form-control input-sm" type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' value="<?= number_format($datas->kurs, 2, ".", ",") ?>">
+                                                        <button type="submit" class="btn-simpan" style="display: none;"></button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="box-footer bf">
-                            <div class="col-md-12">
-                                <ul class="nav nav-tabs " >
-                                    <li class="active"><a href="#tab_1" data-toggle="tab">Detail</a></li>
-                                    <li><a href="#tab_2" data-toggle="tab">Jurnal</a></li>
-                                </ul>
-                                <div class="tab-content"><br>
-                                    <div class="tab-pane active" id="tab_1" >
-                                        <table class="table table-condesed table-hover rlstable  over" width="100%">
-                                            <thead>
-                                            <th class="no">
-                                                No
-                                            </th>
-                                            <th>
-                                                Saldo
-                                            </th>
-                                            <th>
-                                                Saldo RP
-                                            </th>
-                                            <th>
-                                                Kurs
-                                            </th>
-                                            <th>
-                                                Coa
-                                            </th>
-                                            <th class="text-right">
-                                                Selisih
-                                            </th>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $no = 0;
-                                                foreach ($detail as $key => $value) {
-                                                    $no++;
-                                                    ?>
-                                                    <tr>
-                                                        <td>
-                                                            <?= $no ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= number_format($value->saldo,4)." {$value->curr}" ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= number_format($value->saldo_rp,2) ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $value->kurs ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $value->kode_coa ?>
-                                                        </td>
-                                                        <td class="text-right">
-                                                            <?= number_format($value->selisih, 2) ?>
-                                                        </td>
-                                                    </tr>
+                            <div class="box-footer bf">
+                                <div class="col-md-12">
+                                    <ul class="nav nav-tabs " >
+                                        <li class="active"><a href="#tab_1" data-toggle="tab">Detail</a></li>
+                                        <li><a href="#tab_2" data-toggle="tab">Jurnal</a></li>
+                                    </ul>
+                                    <div class="tab-content"><br>
+                                        <div class="tab-pane active" id="tab_1" >
+                                            <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                                <thead>
+                                                <th class="no">
+                                                    No
+                                                </th>
+                                                <th>
+                                                    Note
+                                                </th>
+                                                <th>
+                                                    Saldo
+                                                </th>
+                                                <th>
+                                                    Saldo RP
+                                                </th>
+                                                <th>
+                                                    Kurs
+                                                </th>
+                                                <th>
+                                                    Coa
+                                                </th>
+                                                <th class="text-right">
+                                                    Selisih
+                                                </th>
+                                                </thead>
+                                                <tbody>
                                                     <?php
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="tab-pane" id="tab_2">
-                                        <table class="table table-condesed table-hover rlstable  over" width="100%">
-                                            <caption>
-                                                No Jurnal : <?= $datas === "" ? "":"{$datas->no_jurnal}" ?>
-                                            </caption>
-                                            <thead>
-                                            <th class="no">
-                                                No
-                                            </th>
-                                            <th>
-                                                Nama
-                                            </th>
-                                            <th>
-                                                Coa
-                                            </th>
-                                            <th class="text-right">
-                                                D
-                                            </th>
-                                            <th class="text-right">
-                                                C
-                                            </th>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $no = 0;
-                                                foreach ($jurnal as $key => $value) {
-                                                    $no++;
+                                                    $no = 0;
+                                                    foreach ($detail as $key => $value) {
+                                                        $no++;
+                                                        ?>
+                                                        <tr>
+                                                            <td>
+                                                                <?= $no ?>
+                                                            </td>
+                                                            <td>
+                                                                <?= "{$value->_segment} - {$value->reff_note}" ?>
+                                                            </td>
+                                                            <td>
+                                                                <?= number_format($value->saldo, 4) . " {$value->curr}" ?>
+                                                            </td>
+                                                            <td>
+                                                                <?= number_format($value->saldo_rp, 2) ?>
+                                                            </td>
+                                                            <td>
+                                                                <?= number_format($value->kurs, 2) ?>
+                                                            </td>
+                                                            <td>
+                                                                <?= $value->kode_coa ?>
+                                                            </td>
+                                                            <td class="text-right">
+                                                                <?= number_format($value->selisih, 2) ?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                    }
                                                     ?>
-                                                    <tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="tab-pane" id="tab_2">
+                                            <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                                <caption>
+                                                    No Jurnal : <?= $datas === "" ? "" : "{$datas->no_jurnal}" ?>
+                                                </caption>
+                                                <thead>
+                                                <th class="no">
+                                                    No
+                                                </th>
+                                                <th>
+                                                    Nama
+                                                </th>
+                                                <th>
+                                                    Coa
+                                                </th>
+                                                <th class="text-right">
+                                                    D
+                                                </th>
+                                                <th class="text-right">
+                                                    C
+                                                </th>
+                                                </thead>
+                                                <tbody>
+                                                    <?php
+                                                    $no = 0;
+                                                    foreach ($jurnal as $key => $value) {
+                                                        $no++;
+                                                        ?>
+                                                        <tr>
 
 
-                                                        <td>
-                                                            <?= $no ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $value->nama ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $value->kode_coa ?>
-                                                        </td>
-                                                        <td class="text-right">
-                                                            <?= number_format(($value->posisi === "D") ? $value->nominal : 0, 2) ?>
-                                                        </td>
-                                                        <td class="text-right">
-                                                            <?= number_format(($value->posisi === "C") ? $value->nominal : 0, 2) ?>
-                                                        </td>
-                                                    </tr>
-                                                    <?php
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
+                                                            <td>
+                                                                <?= $no ?>
+                                                            </td>
+                                                            <td>
+                                                                <?= $value->nama ?>
+                                                            </td>
+                                                            <td>
+                                                                <?= $value->kode_coa ?>
+                                                            </td>
+                                                            <td class="text-right">
+                                                                <?= number_format(($value->posisi === "D") ? $value->nominal : 0, 2) ?>
+                                                            </td>
+                                                            <td class="text-right">
+                                                                <?= number_format(($value->posisi === "C") ? $value->nominal : 0, 2) ?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         </form>
                     </div>
 
@@ -215,6 +240,7 @@
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
+                <script type="text/javascript" src="<?= base_url('dist/js/ludo-treetable.js'); ?>"></script>
                 <?php
                 if (in_array($user->level, ["Super Administrator"])) {
                     $this->load->view("admin/_partials/footer_new.php");
@@ -242,6 +268,14 @@
                         $("#btn-simpan").hide();
                         if (data.count > 0)
                             $("#btn-simpan").show();
+
+//                        $("#tbl-um").treetable({expandable: true});
+//                        $("#tbl-dp").treetable({expandable: true});
+//                        $("#tbl-rtr").treetable({expandable: true});
+                        $(".select22").select2({
+                            allowClear: true,
+                            placeholder: "Pilih"
+                        });
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {});
@@ -331,11 +365,31 @@
                         );
 
                 $("#btn-confirm").unbind("click").off("click").on("click", function () {
+                    var data = [];
+                    const jurnal_um = document.querySelectorAll(".jurnal_um");
+                    jurnal_um.forEach((element) => {
+                        var dt = Object.assign({}, element.dataset);
+                        dt.val = element.value;
+                        data.push(dt);
+                    });
+                    const jurnal_dep = document.querySelectorAll(".jurnal_dep");
+                    jurnal_dep.forEach((element) => {
+                        var dt = Object.assign({}, element.dataset);
+                        dt.val = element.value;
+                        data.push(dt);
+                    });
+                    const jurnal_rtr = document.querySelectorAll(".jurnal_rtr");
+                    jurnal_rtr.forEach((element) => {
+                        var dt = Object.assign({}, element.dataset);
+                        dt.val = element.value;
+                        data.push(dt);
+                    });
                     confirmRequest("Kurs Akhir Bulan", "Confirm Kurs Akhir Bulan ? ", function () {
                         $.ajax({
                             url: "<?= base_url("accounting/kursakhirbulan/confirm/{$id}") ?>",
-
+                            dataType: 'json',
                             type: "POST",
+                            data: {datas: data},
                             beforeSend: function (xhr) {
                                 please_wait(function () {
 

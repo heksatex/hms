@@ -459,7 +459,7 @@
                             }
                         },
                         {
-                            "text": '<i class="fa fa-check"> <span>unPosted Checkeds</span>',
+                            "text": '<i class="fa fa-check"> <span>unPosted Checked</span>',
                             "className": "btn-unposted btn-sm",
                             "action": function (e, dt, node, config) {
                                 $(".unposted-data").trigger("click");

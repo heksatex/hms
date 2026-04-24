@@ -196,11 +196,13 @@
                 </tr>
             </tfoot>
         </table>
+        </br>
         <div id="row">
-            <div id="column">
-
+            <div id="column" style="text-align: left">
+                <?= nl2br($head->foot_note) ?>
             </div>
         </div>
+        </br>
         <div id="row">
             <div id="column" style="text-align: center">
                 Penerima : 
