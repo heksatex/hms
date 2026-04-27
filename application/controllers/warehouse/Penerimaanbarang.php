@@ -665,13 +665,14 @@ class Penerimaanbarang extends MY_Controller
 
                         if ($deptid !== 'RCV') {
                             $tgl_update = $tgl;
-                        } else {
-                            $cek = $this->m_penerimaanBarang->get_data_by_code($kode);
+                        } 
+                        // else {
+                            // $cek = $this->m_penerimaanBarang->get_data_by_code($kode);
 
-                            if (date('Y-m-d', strtotime($cek->tanggal)) === date('Y-m-d', strtotime($cek->tanggal_transaksi))) {
-                                $tgl_update = $tgl;
-                            }
-                        }
+                            // if (date('Y-m-d', strtotime($cek->tanggal)) === date('Y-m-d', strtotime($cek->tanggal_transaksi))) {
+                            //     $tgl_update = $tgl;
+                            // }
+                        // }
 
                         if ($tgl_update) {
                             $this->m_penerimaanBarang
