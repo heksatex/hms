@@ -1355,11 +1355,11 @@ class M_bukubesarpembantupiutang extends CI_Model
         $sub_query_akhir_bulan = $this->get_saldo_pelunasan_kurs_akhir_bulan($where_kab, ['acp.partner_id'], $currency);
         $where_kab_retur    = ['arp.status' => 'confirm', 'akab.status' => 'confirm', 'arpab.tipe'=>'retur_penjualan'];
         $sub_query_akhir_bulan_retur = $this->get_saldo_retur_kurs_akhir_bulan($where_kab_retur, ['arp.partner_id'], $currency);
-        $where_kab_kas    = ['akm.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'kas_masuk'];
+        $where_kab_kas    = ['akm.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'uang_muka_penjualan_kas_masuk'];
         $sub_query_akhir_bulan_kas = $this->get_saldo_kas_kurs_akhir_bulan($where_kab_kas, ['akm.partner_id'], $currency);
-        $where_kab_giro    = ['agm.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'giro_masuk'];
+        $where_kab_giro    = ['agm.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'uang_muka_penjualan_giro_masuk'];
         $sub_query_akhir_bulan_giro = $this->get_saldo_giro_kurs_akhir_bulan($where_kab_giro, ['agm.partner_id'], $currency);
-        $where_kab_bank    = ['abm.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'bank_masuk'];
+        $where_kab_bank    = ['abm.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'uang_muka_penjualan_bank_masuk'];
         $sub_query_akhir_bulan_bank = $this->get_saldo_bank_kurs_akhir_bulan($where_kab_bank, ['abm.partner_id'], $currency);
 
         $this->db->select("

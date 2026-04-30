@@ -660,11 +660,11 @@ class M_bukubesarpembantuutang extends CI_Model
         $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, array('aph.partner_id', 'aphs.id'), $currency);
         $where_split    = ['aphs.mode'=> 'split',  'aph.status' => 'done', 'aphs.keterangan <> ' => '', 'aphs.tipe_currency' => $where_tipe_cur,   'aphsk.head' => 'false','ack.koreksi_bb' => 'true'];
         $sub_query_split  = $this->get_saldo_koreksi_split($where_split, ['aph.partner_id', 'aphs.id'], $currency);  
-        $where_kab_kas    = ['akk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'kas_keluar'];
+        $where_kab_kas    = ['akk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'uang_muka_pembelian_kas_keluar'];
         $sub_query_akhir_bulan_kas = $this->get_saldo_kas_kurs_akhir_bulan($where_kab_kas, ['akk.partner_id'], $currency);
-        $where_kab_giro    = ['agk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'giro_keluar'];
+        $where_kab_giro    = ['agk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'uang_muka_pembelian_giro_keluar'];
         $sub_query_akhir_bulan_giro = $this->get_saldo_giro_kurs_akhir_bulan($where_kab_giro, ['agk.partner_id'], $currency);
-        $where_kab_bank    = ['abk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'bank_keluar'];
+        $where_kab_bank    = ['abk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'uang_muka_pembelian_bank_keluar'];
         $sub_query_akhir_bulan_bank = $this->get_saldo_bank_kurs_akhir_bulan($where_kab_bank, ['abk.partner_id'], $currency);
         $where_kab_retur    = ['arp.status' => 'done', 'akab.status' => 'confirm', 'arpab.tipe' => 'retur_pembelian'];
         $sub_query_akhir_bulan_retur = $this->get_saldo_retur_kurs_akhir_bulan($where_kab_retur, ['arp.id_supplier'], $currency);
