@@ -464,10 +464,191 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->jOIN("acc_pelunasan_hutang_summary_koreksi aphsk", "aphs.id = aphsk.pelunasan_summary_id", "INNER");
         $this->db->JOIN("acc_pelunasan_koreksi ack","aphsk.koreksi_id = ack.kode","left");
         return $this->db->get_compiled_select();
+    }
 
 
+    function get_saldo_kas_kurs_akhir_bulan(array $where = [], array $group = [], string $currency = '')
+    {
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        if (count($group)) {
+            $this->db->group_by($group);
+        }
 
+        if ($currency === 'valas') {
+            $this->db->where('akab.curr', 'IDR');
+        } else {
+            $this->db->where_not_in('akab.curr', 'IDR');
+        }
 
+        $this->db->select("akab.id as id_bukti,  akab.no as no_bukti, 
+                            CONCAT(LAST_DAY(CONCAT(akab.bulan,'-01')), ' 00:00:00') as  tanggal_transaksi,  akk.partner_id as id_partner,
+                            CONCAT('Kurs Akhir Bulan : ' , akk.no_kk , ' ',akab.curr , ' ',akab.kurs) as uraian,
+                            IFNULL(sum(ab.nominal),0) as total_koreksi,
+                           SUM(
+                                CASE 
+                                    WHEN ab.nominal < 0 THEN ABS(ab.nominal)
+                                    ELSE 0
+                                END
+                            ) as debit,
+
+                           SUM(
+                                CASE 
+                                    WHEN ab.nominal > 0 THEN ab.nominal
+                                    ELSE 0
+                                END
+                            ) as credit,
+                            CASE 
+                                WHEN akab.status = 'confirm' THEN 'done'
+                                ELSE akab.status
+                            END AS status, 
+                            'kab' as link,
+                            'Rp' as tipe_currency");
+        $this->db->from("acc_kas_keluar akk");
+        $this->db->join("acc_kas_keluar_detail akkd", "akkd.kas_keluar_id = akk.id", "inner");
+        $this->db->join("acc_kas_bank_giro_kurs_akhir_bulan ab", "akkd.id =  ab.kas_id", "INNER");
+        $this->db->join("acc_kurs_akhir_bulan akab", "akab.no = ab.no_kab", "INNER");
+        $sql = $this->db->get_compiled_select();
+        return $sql;
+    }
+
+    function get_saldo_giro_kurs_akhir_bulan(array $where = [], array $group = [], string $currency = '')
+    {
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        if (count($group)) {
+            $this->db->group_by($group);
+        }
+
+        if ($currency === 'valas') {
+            $this->db->where('akab.curr', 'IDR');
+        } else {
+            $this->db->where_not_in('akab.curr', 'IDR');
+        }
+
+        $this->db->select("akab.id as id_bukti,  akab.no as no_bukti, 
+                            CONCAT(LAST_DAY(CONCAT(akab.bulan,'-01')), ' 00:00:00') as  tanggal_transaksi,  agk.partner_id as id_partner,
+                            CONCAT('Kurs Akhir Bulan : ' , agk.no_gk , ' ',akab.curr , ' ',akab.kurs) as uraian,
+                            IFNULL(sum(ab.nominal),0) as total_koreksi,
+                           SUM(
+                                CASE 
+                                    WHEN ab.nominal < 0 THEN ABS(ab.nominal)
+                                    ELSE 0
+                                END
+                            ) as debit,
+
+                           SUM(
+                                CASE 
+                                    WHEN ab.nominal > 0 THEN ab.nominal
+                                    ELSE 0
+                                END
+                            ) as credit,
+                            CASE 
+                                WHEN akab.status = 'confirm' THEN 'done'
+                                ELSE akab.status
+                            END AS status, 
+                            'kab' as link,
+                            'Rp' as tipe_currency");
+        $this->db->from("acc_giro_keluar agk");
+        $this->db->join("acc_giro_keluar_detail agkd", "agkd.giro_keluar_id = agk.id", "inner");
+        $this->db->join("acc_kas_bank_giro_kurs_akhir_bulan ab", "agkd.id =  ab.kas_id", "INNER");
+        $this->db->join("acc_kurs_akhir_bulan akab", "akab.no = ab.no_kab", "INNER");
+        $sql = $this->db->get_compiled_select();
+        return $sql;
+    }
+
+    
+    function get_saldo_bank_kurs_akhir_bulan(array $where = [], array $group = [], string $currency = '')
+    {
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        if (count($group)) {
+            $this->db->group_by($group);
+        }
+
+        if ($currency === 'valas') {
+            $this->db->where('akab.curr', 'IDR');
+        } else {
+            $this->db->where_not_in('akab.curr', 'IDR');
+        }
+
+        $this->db->select("akab.id as id_bukti,  akab.no as no_bukti, 
+                            CONCAT(LAST_DAY(CONCAT(akab.bulan,'-01')), ' 00:00:00')as  tanggal_transaksi,  abk.partner_id as id_partner,
+                            CONCAT('Kurs Akhir Bulan : ' , abk.no_bk , ' ',akab.curr , ' ',akab.kurs) as uraian,
+                            IFNULL(sum(ab.nominal),0) as total_koreksi,
+                            SUM(
+                                CASE 
+                                    WHEN ab.nominal < 0 THEN ABS(ab.nominal)
+                                    ELSE 0
+                                END
+                            ) as debit,
+
+                            SUM(
+                                CASE 
+                                    WHEN ab.nominal > 0 THEN ab.nominal
+                                    ELSE 0
+                                END
+                            ) as credit,
+                            CASE 
+                                WHEN akab.status = 'confirm' THEN 'done'
+                                ELSE akab.status
+                            END AS status, 
+                            'kab' as link,
+                            'Rp' as tipe_currency");
+        $this->db->from("acc_bank_keluar abk");
+        $this->db->join("acc_bank_keluar_detail abkd", "abkd.bank_keluar_id = abk.id", "inner");
+        $this->db->join("acc_kas_bank_giro_kurs_akhir_bulan ab", "abkd.id =  ab.kas_id", "INNER");
+        $this->db->join("acc_kurs_akhir_bulan akab", "akab.no = ab.no_kab", "INNER");
+        $sql = $this->db->get_compiled_select();
+        return $sql;
+    }
+
+    function get_saldo_retur_kurs_akhir_bulan(array $where = [], array $group = [], string $currency = '')
+    {
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        if (count($group)) {
+            $this->db->group_by($group);
+        }
+
+        if ($currency === 'valas') {
+            $this->db->where('akab.curr', 'IDR');
+        } else {
+            $this->db->where_not_in('akab.curr', 'IDR');
+        }
+
+        $this->db->select("akab.id as id_bukti, akab.no as no_bukti, 
+                            CONCAT(LAST_DAY(CONCAT(akab.bulan,'-01')), ' 00:00:00')  as  tanggal_transaksi,  arp.id_supplier as id_partner,
+                            CONCAT('Kurs Akhir Bulan : ' , akab.curr , ' '  ,akab.kurs) as uraian,
+                            IFNULL(sum(arpab.nominal),0) as total_koreksi,
+                           SUM(
+                                CASE 
+                                    WHEN arpab.nominal < 0 THEN ABS(arpab.nominal)
+                                    ELSE 0
+                                END
+                            ) as debit,
+
+                           SUM(
+                                CASE 
+                                    WHEN arpab.nominal > 0 THEN arpab.nominal
+                                    ELSE 0
+                                END
+                            ) as credit,
+                            CASE 
+                                WHEN akab.status = 'confirm' THEN 'done'
+                                ELSE akab.status
+                            END AS status,
+                            'kab' as link,
+                            'Rp' as tipe_currency");
+        $this->db->from("invoice_retur arp");
+        $this->db->join("acc_retur_kurs_akhir_bulan arpab", "arp.id =  arpab.retur_id", "INNER");
+        $this->db->join("acc_kurs_akhir_bulan akab", "akab.no = arpab.no_kab", "INNER");
+        $sql = $this->db->get_compiled_select();
+        return $sql;
     }
 
 
@@ -479,6 +660,14 @@ class M_bukubesarpembantuutang extends CI_Model
         $sub_query_normal = $this->get_saldo_koreksi_normal($where_normal, array('aph.partner_id', 'aphs.id'), $currency);
         $where_split    = ['aphs.mode'=> 'split',  'aph.status' => 'done', 'aphs.keterangan <> ' => '', 'aphs.tipe_currency' => $where_tipe_cur,   'aphsk.head' => 'false','ack.koreksi_bb' => 'true'];
         $sub_query_split  = $this->get_saldo_koreksi_split($where_split, ['aph.partner_id', 'aphs.id'], $currency);  
+        $where_kab_kas    = ['akk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'kas_keluar'];
+        $sub_query_akhir_bulan_kas = $this->get_saldo_kas_kurs_akhir_bulan($where_kab_kas, ['akk.partner_id'], $currency);
+        $where_kab_giro    = ['agk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'giro_keluar'];
+        $sub_query_akhir_bulan_giro = $this->get_saldo_giro_kurs_akhir_bulan($where_kab_giro, ['agk.partner_id'], $currency);
+        $where_kab_bank    = ['abk.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'bank_keluar'];
+        $sub_query_akhir_bulan_bank = $this->get_saldo_bank_kurs_akhir_bulan($where_kab_bank, ['abk.partner_id'], $currency);
+        $where_kab_retur    = ['arp.status' => 'done', 'akab.status' => 'confirm', 'arpab.tipe' => 'retur_pembelian'];
+        $sub_query_akhir_bulan_retur = $this->get_saldo_retur_kurs_akhir_bulan($where_kab_retur, ['arp.id_supplier'], $currency);
 
         $this->db->select("
                         (id_bukti)        AS id_bukti,
@@ -494,7 +683,7 @@ class M_bukubesarpembantuutang extends CI_Model
                         (status)          AS status,
                         (link)            AS link,
                         ");
-        $this->db->FROM("( ({$sub_query_normal}) UNION ALL ({$sub_query_split})) as t");
+        $this->db->FROM("( ({$sub_query_normal}) UNION ALL ({$sub_query_split}) UNION ALL ({$sub_query_akhir_bulan_kas}) UNION ALL ({$sub_query_akhir_bulan_giro}) UNION ALL ({$sub_query_akhir_bulan_bank}) UNION ALL ({$sub_query_akhir_bulan_retur}) ) as t");
 
         if(count($where) > 0) {
             $this->db->where($where);
@@ -504,7 +693,8 @@ class M_bukubesarpembantuutang extends CI_Model
             $this->db->group_by($group);
         }
         $sql = $this->db->get_compiled_select();
-        // die($sql);
+        // var_dump($sql);
+        // die; 
         return $sql;
     }
 
@@ -589,7 +779,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $this->db->join("($subquery_um) as um", "um.id_partner = p.id", "left");
         $this->db->join("($subquery_koreksi_sblm) as koreksi_sblm", "koreksi_sblm.id_partner = p.id", "left");
         $this->db->join("($subquery_koreksi) as koreksi", "koreksi.id_partner = p.id", "left");
-        $this->db->order_by('p.nama');
+        $this->db->order_by('p.nama');      
         $query = $this->db->get();
         return $query->result();
 
@@ -622,7 +812,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $subquery_pelunasan    = $this->get_saldo_pelunasan($where_pelunasan, 'aph.no_pelunasan',$currency);
         $subquery_retur        = $this->get_saldo_retur($where_retur, 'aph.no_pelunasan',$currency);
         $subquery_um           = $this->get_saldo_um($where_um,'aph.no_pelunasan',$currency);
-        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'no_bukti',$currency);
+        $subquery_koreksi       = $this->get_saldo_koreksi($where_koreksi, 'no_bukti, id_partner',$currency);
 
         if(count($where) > 0){
             $this->db->where($where);
@@ -631,7 +821,7 @@ class M_bukubesarpembantuutang extends CI_Model
         $union_sql = $subquery_invoice . ' UNION ALL ' . $subquery_pelunasan . ' UNION ALL ' . $subquery_retur . ' UNION ALL ' . $subquery_um . ' UNION ALL ' . $subquery_koreksi;
 
         $this->db->SELECT('id_bukti, no_bukti, tgl, id_partner, uraian, debit, credit, status, link');
-        $this->db->from('(' . $union_sql . ') as sub');
+        $this->db->from(" ( ({$subquery_invoice}) UNION ALL ({$subquery_pelunasan}) UNION ALL ({$subquery_retur}) UNION ALL ({$subquery_um}) UNION ALL ({$subquery_koreksi}) ) as sub");
         $this->db->order_by('tgl','asc');
         $this->db->order_by('debit','desc');
         // $this->db->order_by('credit','asc');
