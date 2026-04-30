@@ -416,13 +416,15 @@
                                     linkUrl = "<?php echo site_url('accounting/pelunasanhutang/edit/') ?>" + value2.no_bukti_ecr;
                                 } else if (value2.link === 'inv') {
                                     linkUrl = "<?php echo site_url('purchase/invoice/edit/') ?>" + value2.id_bukti_ecr;
+                                } else if (value2.link === 'kab') {
+                                    linkUrl = "<?php echo site_url('accounting/kursakhirbulan/edit/') ?>" + value2.id_bukti_ecr;
                                 } else {
                                     linkUrl = "<?php echo site_url('purchase/debitnote/edit/') ?>" + value2.no_bukti_ecr;
                                 }
 
                                 // Buat kolom No Bukti dengan link (buka tab baru)
                                 let noBuktiHtml = value2.no_bukti;
-                                if (value2.link === 'plh' || value2.link === 'invr' || value2.link === 'inv') {
+                                if (value2.link === 'plh' || value2.link === 'invr' || value2.link === 'inv' || value2.link === 'kab') {
                                     noBuktiHtml = `<a href="${linkUrl}" target="_blank">${value2.no_bukti}</a>`;
                                 }
 
