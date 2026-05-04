@@ -7,6 +7,9 @@
             #btn-print{
                 display : none
             }
+            #btn-cancel{
+                display : none
+            }
             <?php
             if ($inv->status === "cancel") {
                 ?>
@@ -21,15 +24,13 @@
                 #btn-simpan,#btn-approve{
                     display : none
                 }
-                #btn-print{
+                #btn-print,#btn-cancel{
                     display : inline
                 }
                 <?php
             }
             ?>
-            #btn-cancel{
-                display : none
-            }
+
 
 
             .no{
@@ -106,6 +107,12 @@
                                     ?>
                                     <button class="btn btn-default btn-sm" type="button" id="btn-update-fp" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         </i>&nbsp;Update Faktur
+                                    </button>
+                                    <?php
+                                } else if ($inv->status === "cancel") {
+                                    ?>
+                                    <button class="btn btn-success btn-sm" type="button" id="btn-draft" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        </i>&nbsp;Simpan Sebagai draft
                                     </button>
                                     <?php
                                 }
@@ -682,7 +689,31 @@
                         $("#form-inv-submit").trigger("click");
                     });
                 });
-
+                $("#btn-draft").off("click").unbind("click").on("click", function () {
+                    confirmRequest("Invoice", "Simpan sebagai Draft ? ", function () {
+                        please_wait(function () {});
+                        $.ajax({
+                            url: "<?= base_url('purchase/invoice/update_status/') ?>",
+                            type: "POST",
+                            data: {
+                                id: "<?= $id ?>",
+                                status: "draft",
+                                jurnal: "<?= $inv->journal ?>",
+                                inv: "<?= $inv->no_invoice ?>",
+                                origin: "<?= $inv->origin ?>",
+                            },
+                            error: function (req, error) {
+                                unblockUI(function () {
+                                    setTimeout(function () {
+                                        alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                    }, 500);
+                                });
+                            }, success: function (data) {
+                                location.reload();
+                            }
+                        });
+                    })
+                });
                 $("#btn-approve").off("click").unbind("click").on("click", function () {
                     confirmRequest("Invoice", "Approve Purchase Invoice ? ", function () {
                         please_wait(function () {});
