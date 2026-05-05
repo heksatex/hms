@@ -345,12 +345,21 @@ class Invoice extends MY_Controller {
             if (!$dataHead) {
                 throw new \Exception('Data Invoice Tidak sesuai', 500);
             }
+            $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
             if ($status === 'cancel') {
-                $cekJurnal = clone $head;
+                if ($dataHead->lunas == 1)
+                    throw new \Exception('Sudah dilakukan pelunasan', 500);
 
-                if ($cekJurnal->setTables("acc_jurnal_entries")->setWheres(["origin" => "{$inv}|{$origin}", "status <>" => $status])->getDetail() !== "null") {
-                    throw new \Exception('Jurnal Tidak Ada', 500);
-                }
+                $cekJurnal = clone $head;
+                $jurnal = $cekJurnal->setTables("acc_jurnal_entries")->setWheres(["origin" => "{$dataHead->no_invoice}|{$dataHead->origin}", "status " => "posted"])->getDetail();
+
+                if ($jurnal)
+                    $cekJurnal->update(["status" => "cancel"]);
+
+                $head->update(["status" => "cancel"]);
+                $this->_module->gen_history(($kodes["kode"] ?? ""), $dataHead->jurnal, 'edit', "Invoice Dibatalkan", $username);
+            } else if ($status === 'draft') {
+                $head->update(["status" => "draft"]);
             } else if ($status === 'done') {
                 $this->form_validation->set_rules($val);
                 if ($this->form_validation->run() == FALSE) {
@@ -363,11 +372,15 @@ class Invoice extends MY_Controller {
 
                 $jurnalDB = new $this->m_global;
                 $items = clone $jurnalDB;
-                if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($now)) . '/' . date('m', strtotime($now)), true)
-                                ->generate("{$kodeJurnal}/", '/%05d')->get()) {
-                    throw new \Exception("No jurnal tidak terbuat", 500);
+                if ($dataHead->jurnal === "") {
+                    if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($now)) . '/' . date('m', strtotime($now)), true)
+                                    ->generate("{$kodeJurnal}/", '/%05d')->get()) {
+                        throw new \Exception("No jurnal tidak terbuat", 500);
+                    }
+                } else {
+                    $jurnal = $dataHead->jurnal;
                 }
-                $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+
                 $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $kode_decrypt])
                                 ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
                                 ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
@@ -383,7 +396,12 @@ class Invoice extends MY_Controller {
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
                     "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => ($dataItems[0]->invoice_create ?? date("Y-m-d H:i:s")), "tipe" => ($dataItems[0]->jurnal ?? ""),
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
-                $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
+                if ($dataHead->jurnal === "") {
+                    $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
+                } else {
+                    $jurnalDB->setTables("acc_jurnal_entries")->setWheres(["kode" => $jurnal, "status" => "cancel"])->update($jurnalData);
+                }
+
 
 //                $jurnalDB->setTables("log_history")->save(
 //                        [
@@ -555,8 +573,10 @@ class Invoice extends MY_Controller {
                 );
                 $jurnalItems[] = $item;
                 $jurnalDBItems = new $this->m_global;
-                $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
+                if ($dataHead->jurnal !== "")
+                    $jurnalDBItems->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $jurnal])->delete();
 
+                $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
                 $log = "Header -> " . logArrayToString("; ", $jurnalData);
                 $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                 $this->_module->gen_history(($kodes["kode"] ?? ""), $jurnal, 'create', $log, $username);

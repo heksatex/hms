@@ -150,7 +150,7 @@
                                                                 <?= $no ?>
                                                             </td>
                                                             <td>
-                                                                <?= "{$value->_segment} - {$value->reff_note}" ?>
+                                                                <?= "{$value->reff_note}" ?>
                                                             </td>
                                                             <td>
                                                                 <?= number_format($value->saldo, 4) . " {$value->curr}" ?>
