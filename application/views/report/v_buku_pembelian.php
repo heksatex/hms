@@ -162,6 +162,7 @@
                                                 <th class='style bb ws'>Currency</th>
                                                 <th class='style bb ws text-right'>Kurs</th>
                                                 <th class='style bb ws text-right'>Harga</th>
+                                                <th class='style bb ws text-right'>Total Valas</th>
                                                 <th class='style bb ws text-right'>DPP</th>
                                                 <th class='style bb ws text-right'>PPN</th>
                                                 <th class='style bb ws text-right'>PPH23</th>
@@ -176,7 +177,7 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td colspan="24">Tidak ada Data</td>
+                                                <td colspan="25">Tidak ada Data</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -342,6 +343,7 @@
                                     $("<td>").text(value.currency),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.kurs.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.harga.toFixed(4))),
+                                    $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.total_valas.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.dpp.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.ppn.toFixed(4))),
                                     $("<td style='min-width:100px; text-align:right;'>").text(formatNumber(value.pph23.toFixed(4))),
@@ -356,7 +358,7 @@
                                 tbody.append(tr);
                             });
                             if (empty == true) {
-                                var tr = $("<tr>").append($("<td colspan='24' >").text('Tidak ada Data'));
+                                var tr = $("<tr>").append($("<td colspan='25' >").text('Tidak ada Data'));
                                 tbody.append(tr);
                             }
                             $("#example1").append(tbody);
