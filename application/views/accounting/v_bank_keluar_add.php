@@ -518,7 +518,7 @@
 
                 $(".partner").on("change", function () {
                     var ttt = $(".partner").find(":selected");
-                    var rek = ttt.data().data.nama_rek;
+                    var rek = ttt.data()?.data?.nama_rek;
                     $("#partner_name").val(ttt.text());
                     $("#lain_lain").val("");
                     if (rek !== "") {
