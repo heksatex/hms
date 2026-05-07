@@ -503,7 +503,7 @@
                     var ttt = $(".partner").find(":selected");
                     $("#lain_lain").val("");
                     $("#partner_name").val(ttt.text());
-                    var namarek = $(".partner :selected").data()?.data.nama_rek;
+                    var namarek = $(".partner :selected").data()?.data?.nama_rek;
                     if ((namarek === '') || (typeof namarek === 'undefined')) {
                         $("#transaksi").val("");
                     } else {
