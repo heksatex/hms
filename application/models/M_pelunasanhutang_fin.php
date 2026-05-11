@@ -2,12 +2,12 @@
 
 use Google\Service\Iam\Oidc;
 
- defined('BASEPATH') or exit('No Direct Script Acces Allowed');
+defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 /**
  * 
  */
-class M_pelunasanhutang extends CI_Model
+class M_pelunasanhutang_fin extends CI_Model
 {
 
     var $column_order = array(null, 'no_pelunasan', 'tanggal_transaksi', 'partner_nama', 'nama_status');
@@ -61,8 +61,8 @@ class M_pelunasanhutang extends CI_Model
     function get_datatables($mmss)
     {
         $this->_get_datatables_query();
+        $this->db->where('pl.dibuat_dari_menu', 'fin');
         $this->db->where("mmss.main_menu_sub_kode", $mmss);
-        $this->db->where('pl.dibuat_dari_menu','acc');
         if (isset($_POST["length"]) && $_POST["length"] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -72,7 +72,7 @@ class M_pelunasanhutang extends CI_Model
     function count_filtered($mmss)
     {
         $this->db->where("mmss.main_menu_sub_kode", $mmss);
-        $this->db->where('pl.dibuat_dari_menu','acc');
+        $this->db->where('pl.dibuat_dari_menu', 'fin');
         $this->_get_datatables_query();
         $query = $this->db->get();
         return $query->num_rows();
@@ -84,7 +84,7 @@ class M_pelunasanhutang extends CI_Model
         $this->db->from("acc_pelunasan_hutang pl");
         $this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pl.status", "inner");
         $this->db->where("mmss.main_menu_sub_kode", $mmss);
-        $this->db->where('pl.dibuat_dari_menu','acc');
+        $this->db->where('pl.dibuat_dari_menu', 'fin');
         return $this->db->count_all_results();
     }
 
@@ -181,7 +181,6 @@ class M_pelunasanhutang extends CI_Model
         $this->db->order_by('row_order', 'asc');
         $this->db->select('id, pelunasan_hutang_id, no_pelunasan, no_invoice, origin, DATE(tanggal_invoice) as tanggal_invoice, currency_id, currency, kurs, total_hutang_valas, total_hutang_rp, sisa_hutang_rp, sisa_hutang_valas, pelunasan_rp, pelunasan_valas, row_order, status_bayar');
         $this->db->from('acc_pelunasan_hutang_invoice');
-
     }
 
     function get_data_invoice_by_code($kode)
@@ -250,7 +249,7 @@ class M_pelunasanhutang extends CI_Model
         $this->db->where('aph.no_pelunasan', $kode);
         $this->db->select('aje.kode, aje.tanggal_dibuat, aje.periode');
         $this->db->from('acc_jurnal_entries aje');
-        $this->db->join('acc_pelunasan_hutang aph', 'aje.kode = aph.no_jurnal','inner');
+        $this->db->join('acc_pelunasan_hutang aph', 'aje.kode = aph.no_jurnal', 'inner');
         $query = $this->db->get();
         $result = $query->row();
         return $result ?: (object)[
@@ -259,11 +258,11 @@ class M_pelunasanhutang extends CI_Model
             'periode' => ''
         ];
     }
-    
+
 
     // var $coa_kas = array('2112.01', '2112.02');
     // var $coa_um = array('1192.01', '1192.02', '1192.03', '1192.99');
-    
+
     var $where_jenis_transaksi_kas = array('utang');
     var $where_jenis_transaksi_um = array('um_pembelian');
 
@@ -384,14 +383,14 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    var $column_order2 = array(null, null, 'no_invoice', 'origin', 'created_at', 'currency', 'invoice.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
-    var $column_search2 = array('no_invoice', 'origin', 'created_at', 'currency', 'invoice.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
+    var $column_order2 = array(null, null, 'no_invoice', 'origin', 'no_po', 'created_at', 'currency', 'invoice.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
+    var $column_search2 = array('no_invoice', 'origin', 'created_at', 'no_po','currency', 'invoice.nilai_matauang', 'total_rp', 'total_valas', 'hutang_rp', 'hutang_valas');
     var $order2         = array('created_at' => 'asc');
 
     function query2()
     {
         $this->db->where('status', 'done');
-        $this->db->select("invoice.id,invoice.no_invoice, invoice.created_at, invoice.order_date, invoice.tanggal_invoice_supp, invoice.no_invoice_supp, invoice.origin, invoice.status, invoice.matauang, currency_kurs.currency, invoice.nilai_matauang, IFNULL(total_rp, 0) as total_hutang_rp, IFNULL(total_valas,0) as total_hutang_valas, IFNULL(hutang_rp,0) as sisa_hutang_rp, IFNULL(hutang_valas,0) as sisa_hutang_valas");
+        $this->db->select("invoice.id,invoice.no_invoice, invoice.created_at, invoice.order_date, invoice.no_po, invoice.tanggal_invoice_supp, invoice.no_invoice_supp, invoice.origin, invoice.status, invoice.matauang, currency_kurs.currency, invoice.nilai_matauang, IFNULL(total_rp, 0) as total_hutang_rp, IFNULL(total_valas,0) as total_hutang_valas, IFNULL(hutang_rp,0) as sisa_hutang_rp, IFNULL(hutang_valas,0) as sisa_hutang_valas");
         $this->db->from("invoice");
         $this->db->join("currency_kurs ", "invoice.matauang = currency_kurs.id", "left");
     }
@@ -553,8 +552,8 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    var $column_order3 = array(null, null, 'no_bukti', 'tanggal','uraian','currency', 'kurs', 'total_rp', 'total_valas');
-    var $column_search3 = array('no_bukti', 'tanggal', 'currency','uraian', 'kurs', 'total_rp', 'total_valas');
+    var $column_order3 = array(null, null, 'no_bukti', 'tanggal', 'uraian', 'currency', 'kurs', 'total_rp', 'total_valas');
+    var $column_search3 = array('no_bukti', 'tanggal', 'currency', 'uraian', 'kurs', 'total_rp', 'total_valas');
     var $order3         = array('tanggal' => 'asc');
 
     function query3($partner, $type)
@@ -774,7 +773,7 @@ class M_pelunasanhutang extends CI_Model
         // Query pertama
         $this->db->select('no_pelunasan, currency_id, currency, kurs');
         $this->db->from('acc_pelunasan_hutang_invoice');
-        if(count($where) > 0){
+        if (count($where) > 0) {
             $this->db->where($where);
         }
         $query1 = $this->db->get_compiled_select();
@@ -782,7 +781,7 @@ class M_pelunasanhutang extends CI_Model
         // Query kedua
         $this->db->select('no_pelunasan, currency_id, currency, kurs');
         $this->db->from('acc_pelunasan_hutang_metode');
-        if(count($where) > 0){
+        if (count($where) > 0) {
             $this->db->where($where);
         }
         $query2 = $this->db->get_compiled_select();
@@ -944,10 +943,10 @@ class M_pelunasanhutang extends CI_Model
         //     $this->db->where_in('kode_coa', $where_in);
         // }
         $this->db->limit(50);
-        $this->db->where('level',5);
+        $this->db->where('level', 5);
         $this->db->group_start();
-            $this->db->like('kode_coa', $name);
-            $this->db->or_like('nama', $name);
+        $this->db->like('kode_coa', $name);
+        $this->db->or_like('nama', $name);
         $this->db->group_end();
         $this->db->order_by('kode_coa', 'asc');
         $this->db->select('*');
@@ -1022,7 +1021,7 @@ class M_pelunasanhutang extends CI_Model
     function get_coa_summary_id($where)
     {
         // $this->db->where('pelunasan_summary_id', $id);
-        if(count($where) > 0){
+        if (count($where) > 0) {
             $this->db->where($where);
         }
         $this->db->select('aphsk.posisi, aphsk.kode_coa, aphsk.nama_coa, aphs.koreksi, aphs.currency_id, aphs.currency, aphs.kurs, aphsk.nominal, aphs.mode, aphsk.koreksi_id, aphsk.head');
@@ -1088,16 +1087,16 @@ class M_pelunasanhutang extends CI_Model
     function get_list_koreksi($tipe_currency = null, $where = null, $tipe = null)
     {
         $this->db->order_by('nama_koreksi', 'asc');
-        if(($where)){
+        if (($where)) {
             $this->db->like('nama_koreksi', $where);
         }
-        if($tipe_currency == 'Rp') { // Rp, VALAS
+        if ($tipe_currency == 'Rp') { // Rp, VALAS
             $this->db->WHERE('show_idr', 'true'); // I
         }
-        if($tipe_currency == 'Valas') { // Rp, VALAS
+        if ($tipe_currency == 'Valas') { // Rp, VALAS
             $this->db->WHERE('show_valas', 'true'); // I
         }
-        if($tipe){
+        if ($tipe) {
             $this->db->WHERE('tipe', $tipe); // um / koreksi
         }
         $query = $this->db->get('acc_pelunasan_koreksi');
@@ -1107,13 +1106,13 @@ class M_pelunasanhutang extends CI_Model
 
     function get_coa_default_by_kode($where)
     {
-        if(count($where) > 0){
+        if (count($where) > 0) {
             $this->db->where($where);
         }
 
         $this->db->select('b.kode_coa, c.nama as nama_coa');
         $this->db->from('acc_pelunasan_koreksi a');
-        $this->db->join('acc_pelunasan_koreksi_coa b','a.id = b.pelunasan_koreksi_id','inner');
+        $this->db->join('acc_pelunasan_koreksi_coa b', 'a.id = b.pelunasan_koreksi_id', 'inner');
         $this->db->join('acc_coa c', 'b.kode_coa = c.kode_coa', 'left');
         $result = $this->db->get();
         return $result->row();
@@ -1121,7 +1120,7 @@ class M_pelunasanhutang extends CI_Model
 
     function cek_metode_pelunasan_group($where)
     {
-        if(count($where) > 0){
+        if (count($where) > 0) {
             $this->db->where($where);
         }
         $this->db->group_by('tipe');
@@ -1135,7 +1134,7 @@ class M_pelunasanhutang extends CI_Model
     function get_koreksi_by_kode($where)
     {
         $this->db->order_by('nama_koreksi', 'asc');
-        if(($where)){
+        if (($where)) {
             $this->db->where($where);
         }
         $query = $this->db->get('acc_pelunasan_koreksi');
@@ -1143,9 +1142,10 @@ class M_pelunasanhutang extends CI_Model
     }
 
 
-    function get_invoice_by_kode($where) {
+    function get_invoice_by_kode($where)
+    {
 
-        if(count($where) > 0){
+        if (count($where) > 0) {
             $this->db->where($where);
         }
         $this->query2();
@@ -1162,7 +1162,7 @@ class M_pelunasanhutang extends CI_Model
             if ($db_error['code'] > 0) {
                 throw new Exception($db_error['message']);
             }
-            
+
             // Cek apakah ada data yang berubah
             if ($this->db->affected_rows() === 0) {
                 throw new Exception("Gagal update: tidak ada data yang diperbarui.");
@@ -1198,7 +1198,7 @@ class M_pelunasanhutang extends CI_Model
 
     function get_kode_jurnal_by_nama($where)
     {
-        if(count($where) > 0){
+        if (count($where) > 0) {
             $this->db->where($where);
         }
         $result = $this->db->get('mst_jurnal');
@@ -1206,21 +1206,21 @@ class M_pelunasanhutang extends CI_Model
     }
 
     function cek_data_metode_valid_by_code($metode, $where)
-    {   
-        if(count($where) > 0) {
+    {
+        if (count($where) > 0) {
             $this->db->where($where);
         }
-        if($metode == 'bank') {
+        if ($metode == 'bank') {
             $this->db->select('acc_bank_keluar.no_bk, acc_bank_keluar_detail.id, acc_bank_keluar_detail.nominal');
             $this->db->FROM('acc_bank_keluar');
             $this->db->join('acc_bank_keluar_detail', 'acc_bank_keluar_detail.bank_keluar_id = acc_bank_keluar.id', 'inner');
             $result = $this->db->get();
-        } else if($metode =='giro') {
+        } else if ($metode == 'giro') {
             $this->db->select('acc_giro_keluar.no_gk, acc_giro_keluar_detail.id, acc_giro_keluar_detail.nominal');
             $this->db->FROM('acc_giro_keluar');
             $this->db->join('acc_giro_keluar_detail', 'acc_giro_keluar_detail.giro_keluar_id = acc_giro_keluar.id', 'inner');
             $result = $this->db->get();
-        } else if($metode =='retur') {
+        } else if ($metode == 'retur') {
             $this->db->select('id, no_inv_retur, total_rp, total_valas, lunas');
             $this->db->FROM('invoice_retur');
             $result = $this->db->get();
@@ -1264,19 +1264,19 @@ class M_pelunasanhutang extends CI_Model
 
     function get_currency_kurs_by_id($id)
     {
-        $this->db->where('id',$id);
+        $this->db->where('id', $id);
         $this->db->order_by('currency', 'asc');
         $query = $this->db->get('currency_kurs');
         return $query->row();
     }
 
 
-    function get_sum_pelunasan_by_kode($no_pelunasan, $tipe_currency) 
+    function get_sum_pelunasan_by_kode($no_pelunasan, $tipe_currency)
     {
-        if($tipe_currency === 'Rp'){
+        if ($tipe_currency === 'Rp') {
             // $this->db->where('currency_id', 1);
             $this->db->select('sum(total_rp) as total');
-        } else{
+        } else {
             $this->db->select('sum(total_valas) as total');
             // $this->db->where('currency_id <>', 1);
         }
@@ -1286,17 +1286,117 @@ class M_pelunasanhutang extends CI_Model
         $query = $this->db->get();
         return $query;
     }
-    
+
 
     function get_list_summary_koreksi_by_id($no_pelunasan, $sum_id)
     {
         $this->db->where('no_pelunasan', $no_pelunasan);
         $this->db->where('pelunasan_summary_id', $sum_id);
-        $this->db->order_by('id','asc');
+        $this->db->order_by('id', 'asc');
         $result = $this->db->get('acc_pelunasan_hutang_summary_koreksi');
         return $result->result();
     }
 
-    
 
+    /// PELUNASAN BARU
+
+    function get_data_kas_bank_by_inv(array $where = [])
+    {
+
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        $group = ["inv.id", "inv.coa_hutang_dagang", "inv.matauang"];
+
+        if (count($group)) {
+            $this->db->group_by($group);
+        }
+        $this->db->select("aphi.no_pelunasan, 
+                        CONCAT('U/ BTB ',SUBSTRING_INDEX(inv.origin,'/',-1)) as uraian, 
+                        inv.coa_hutang_dagang, 
+                        inv.nilai_matauang as kurs,
+                        inv.matauang as currency_id,
+                        ck.currency,
+                        sum(aphi.sisa_hutang_rp) as total_rp, sum(aphi.sisa_hutang_valas) as total_valas,
+                        (CASE		
+                                WHEN inv.matauang = 1 THEN
+                                            sum(aphi.sisa_hutang_rp)
+                                ELSE 
+                                            sum(aphi.sisa_hutang_valas)
+                                END
+                        ) as nominal");
+        $this->db->from('acc_pelunasan_hutang_invoice as aphi');
+        $this->db->join("invoice inv", "aphi.no_invoice = inv.no_invoice", "inner");
+        $this->db->join("currency_kurs ck", "ck.id = inv.matauang", "left");
+
+        $query = $this->db->get();
+        return $query;
+    }
+
+
+
+    function insert_data_pelunasan_hutang_metode_tmp($table, $data_insert)
+    {
+        try {
+            $this->db->insert_batch($table, $data_insert);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
+
+    function insert_data_pelunasan_hutang_metode_tmp_get_id($table, $data_insert)
+    {
+        try {
+            // Gunakan insert biasa (bukan batch) agar bisa ambil ID
+            $this->db->insert($table, $data_insert);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return $this->db->insert_id(); // Mengembalikan ID yang baru saja dibuat
+        } catch (Exception $ex) {
+            return false;
+        }
+    }
+
+    function delete_pelunasan_hutang_metode_tmp_by_kode($table, $where)
+    {
+        try {
+            $this->db->delete($table, $where);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
+
+    function cek_coa_hutang_by_kode($coa)
+    {
+        $this->db->where("kode_coa",$coa);
+        $this->db->select('kode_coa');
+        $this->db->where_in('jenis_transaksi', $this->where_jenis_transaksi_kas);
+        $rows = $this->db->get('acc_coa');
+        return $rows;
+    }
+
+    function get_data_metode_tmp($table, array $where = [])
+    {
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+        $this->db->order_by("id","asc");
+        $this->db->select("*");
+        $this->db->from($table);
+        $query = $this->db->get();
+        return $query;
+    }
+    
 }
