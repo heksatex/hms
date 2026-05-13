@@ -310,7 +310,7 @@ class Pelunasanhutang extends MY_Controller
             }
 
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("acc_pelunasan_hutang WRITE, main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_summary_koreksi WRITE");
+            $this->_module->lock_tabel("acc_pelunasan_hutang WRITE, main_menu_sub READ, log_history WRITE, token_increment WRITE, partner WRITE, user READ, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, acc_pelunasan_hutang_summary_koreksi WRITE, acc_pelunasan_hutang_metode_tmp WRItE, acc_pelunasan_hutang_metode_tmp_item WRITE");
 
             $kode = $this->input->post('kode');
             $partner = $this->input->post('partner');
@@ -385,6 +385,9 @@ class Pelunasanhutang extends MY_Controller
 
                     // hapus summary_koreksi
                     $this->m_pelunasanhutang_fin->delete_pelunasan_hutang_summary_koreksi_by_id(['no_pelunasan' => $kode]);
+
+                    $this->m_pelunasanhutang_fin->delete_pelunasan_hutang_metode_tmp_by_kode('acc_pelunasan_hutang_metode_tmp', ['no_pelunasan' => $kode]);
+                    $this->m_pelunasanhutang_fin->delete_pelunasan_hutang_metode_tmp_by_kode('acc_pelunasan_hutang_metode_tmp_item', ['no_pelunasan' => $kode]);
                 }
 
 
@@ -3935,13 +3938,14 @@ class Pelunasanhutang extends MY_Controller
             $model = new $this->m_global;
 
             $jenis_trans = $this->input->get('jentrans'); // kas / bank
+            $order_by = $this->input->get('order'); // kas / bank
             $wheres = ["level" => 5, "status" => "aktif"];
 
             if (!empty($jenis_trans)) {
                 $wheres["jenis_transaksi"] = $jenis_trans;
             }
 
-            $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])->setSearch(["kode_coa", "nama"])->setWheres($wheres)->setOrder(["nama" => "asc"]);
+            $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])->setSearch(["kode_coa", "nama"])->setWheres($wheres)->setOrder([$order_by => "asc"]);
             $_POST['length'] = 50;
             $_POST['start'] = 0;
             if ($this->input->get('search') !== "") {
@@ -4140,6 +4144,26 @@ class Pelunasanhutang extends MY_Controller
 
                         $callback = array('status' => 'success', 'message' => 'Data Metode Pelunasan berhasil ditambah !', 'icon' => 'fa fa-success', 'type' => 'success');
                     } else {
+
+                        $jenis_log = "cancel";
+                        $note_log  = "Hapus Metode pelunasan";
+                        $data_history = array(
+                            'datelog'   => date("Y-m-d H:i:s"),
+                            'kode'      => $no_pelunasan,
+                            'jenis_log' => $jenis_log,
+                            'note'      => $note_log
+                        );
+                        $this->_module->gen_history_ip($sub_menu, $username, $data_history);
+                        
+                        $result = $this->distribusi_pelunasan_otomatis($no_pelunasan);
+                        if (!empty($result)) {
+                            throw new \Exception('Data Gagal Disimpan2 !', 200);
+                        }
+
+                        $result2 = $this->hitung_summary($no_pelunasan);
+                        if (!empty($result2)) {
+                            throw new \Exception('Summary Gagal di update !', 200);
+                        }
 
                         $callback = array('status' => 'success', 'message' => 'Berhasil Menghapus Metode Pelunasan !', 'icon' => 'fa fa-success', 'type' => 'success');
                     }
