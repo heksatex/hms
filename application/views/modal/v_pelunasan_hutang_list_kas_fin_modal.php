@@ -210,7 +210,7 @@
                 // Tampilkan kembali jika pilih Bank
                 $('#div_jenis_transaksi').fadeIn(200);
             }
-            setCoaItem('no_acc', $val);
+            setCoaItem('no_acc', $val, "nama");
         });
 
         // Ganti kode Anda menjadi seperti ini:
@@ -396,7 +396,7 @@
         });
 
 
-        const setCoaItem = ((klas = "select2-coa", jentrans = "") => {
+        const setCoaItem = ((klas = "select2-coa", jentrans = "", order ="kode_coa") => {
             $("." + klas).select2({
                 placeholder: "Pilih Coa",
                 dropdownParent: $('#tambah_data'),
@@ -409,7 +409,8 @@
                     data: function(params) {
                         return {
                             search: params.term,
-                            jentrans: jentrans
+                            jentrans: jentrans,
+                            order:order
                         };
                     },
                     processResults: function(data) {
