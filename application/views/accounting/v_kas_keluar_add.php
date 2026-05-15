@@ -532,13 +532,14 @@
                             if (row.reff_note !== "")
                                 notes = " - " + row.reff_note;
                             no += 1;
+                            var total = row.total - pjk;
                             var tmplt = $("template.kaskeluar-tmplt-fpt");
                             var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                             var uraian = row.deskripsi + notes;
                             $("#kaskeluar-detail tbody").append(isi_tmplt);
                             $(".po" + no).val(row.id);
                             $(".uraian" + no).val(uraian.toUpperCase());
-                            $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.total));
+                            $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(total));
                             $(".kurs" + no).val(row.nilai_currency);
                             $(".nourut" + no).html(no);
                             $(".fpt" + no).val(row.no_po);
