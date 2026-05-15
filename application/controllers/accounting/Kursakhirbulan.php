@@ -324,6 +324,7 @@ class Kursakhirbulan extends MY_Controller {
             $_POST["currency"] = $check->curr;
             $_POST["bulan"] = $check->bulan;
             $_POST["kurs"] = $check->kurs;
+            
             $coa = $this->_getSaldo();
             $updatekasView = $this->_updateKasView();
 //            $updatePelView = $this->_updateDepositView();
@@ -381,7 +382,7 @@ class Kursakhirbulan extends MY_Controller {
                     $saldoAkhir = $saldoAwal + $totalCredit - $totalDebit;
                 }
 
-                $selisih = ($saldoAwalValas * $check->kurs) - $saldoAkhir;
+                $selisih = ($saldoAkhirValas * $check->kurs) - $saldoAkhir;
                 $nominal = abs($selisih);
 
                 if ($saldoAkhirValas <= 0) {
@@ -431,6 +432,7 @@ class Kursakhirbulan extends MY_Controller {
                 ];
                 $noOrder += 1;
             }
+            throw new \Exception("No Jurnal tidak terbuat", 500);
             $umdprtr = $this->input->post("datas");
             $um = [];
             $dpst = [];

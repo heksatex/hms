@@ -1023,7 +1023,8 @@ class Bankkeluar extends MY_Controller {
                     }
 
                     $this->validasiPin($pin, "Simpan Draft Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
-
+                    
+                    $model->setTables("acc_bank_keluar_detail")->setWheres(["no_bk"=>$kode,"giro_keluar_detail_id >"=>0])->delete();
                     break;
 
                 default:
