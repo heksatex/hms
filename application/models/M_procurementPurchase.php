@@ -228,7 +228,7 @@ class M_procurementPurchase extends CI_Model
 								LEFT JOIN (SELECT po.no_po, pod.kode_cfb
 											FROM purchase_order po 
 											INNER JOIN purchase_order_detail pod ON po.id = pod.po_id
-											WHERE po.status IN ('done','purchase_confirmed') )as po ON po.kode_cfb = ppi.kode_cfb
+											WHERE po.status IN ('done','purchase_confirmed') )as po ON po.kode_cfb = ppi.kode_cfb AND ppi.kode_cfb != ''
 								where ppi.kode_pp = '" . $kode_pp . "' ORDER BY row_order");
 		return $query->result();
 	}
