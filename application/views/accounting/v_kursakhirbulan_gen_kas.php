@@ -230,7 +230,7 @@
                     <td></td>
                     <td>Jurnal UM <?= $value->no ?></td>
                     <td colspan="2">
-                        <select class="form-control input-sm select22 jurnal_um" style="width:80%"
+                        <select class="form-control input-sm select22 jurnal_um" style="width:80%" data-nama_jurnal="koreksi kurs akhir bulan - Uang Muka Penjualan - <?="{$value->no}"?>"
                                 data-posisi="D" data-jenis="uangmuka" data-menu="Uang_Muka_Penjualan_<?= $value->nama_menu ?>" data-kurs="<?= $oldKurs ?>"
                                 data-ids = "<?= $value->ids ?>" data-saldo="<?= $value->nominal ?>" data-no="<?= $value->no ?>" data-selisih="<?= $selisih ?>">
                             <option value=""></option>
@@ -250,7 +250,7 @@
                     <td></td>
                     <td>Jurnal UM <?= $value->no ?></td>
                     <td colspan="2">
-                        <select class="form-control input-sm select22 jurnal_um" style="width:80%"
+                        <select class="form-control input-sm select22 jurnal_um" style="width:80%" data-nama_jurnal="koreksi kurs akhir bulan - Uang Muka Penjualan - <?="{$value->no}"?>"
                                 data-posisi="C" data-jenis="uangmuka" data-no="<?= $value->no ?>" data-selisih="<?= $selisih ?>">
                             <option value=""></option>
                             <?php
@@ -345,7 +345,7 @@
                     <td></td>
                     <td>Jurnal UM <?= $value->no ?></td>
                     <td colspan="2">
-                        <select class="form-control input-sm select22 jurnal_um" style="width:80%"
+                        <select class="form-control input-sm select22 jurnal_um" style="width:80%" data-nama_jurnal="koreksi kurs akhir bulan - Uang Muka Pembelian - <?="{$value->no}"?>"
                                 data-posisi="D" data-jenis="uangmuka" data-menu="Uang_Muka_Pembelian_<?= $value->nama_menu ?>" data-kurs="<?= $oldKurs ?>"
                                 data-ids = "<?= $value->ids ?>" data-saldo="<?= $value->nominal ?>" data-no="<?= $value->no ?>" data-selisih="<?= $selisih ?>">
                             <option value=""></option>
@@ -365,7 +365,7 @@
                     <td></td>
                     <td>Jurnal UM <?= $value->no ?></td>
                     <td colspan="2">
-                        <select class="form-control input-sm select22 jurnal_um" style="width:80%"
+                        <select class="form-control input-sm select22 jurnal_um" style="width:80%" data-nama_jurnal="koreksi kurs akhir bulan - Uang Muka Pembelian - <?="{$value->no}"?>"
                                 data-posisi="C" data-jenis="uangmuka" data-no="<?= $value->no ?>" data-selisih="<?= $selisih ?>">
                             <option value=""></option>
                             <?php
@@ -454,6 +454,7 @@
                     <td>Jurnal Deposit <?= $value->no_pelunasan ?></td>
                     <td colspan="2">
                         <select class="form-control input-sm select22 jurnal_dep" style="width:80%" data-menu="Pelunasan_Piutang" data-kurs="<?= $oldKurs ?>"
+                                data-nama_jurnal="koreksi kurs akhir bulan - <?="{$value->partner_nama} - {$value->no_pelunasan}"?>"
                                 data-posisi="D" data-jenis="deposit" data-saldo="<?= $value->total_pelunasan ?>" data-no="<?= $value->no_pelunasan ?>" data-selisih="<?= $selisih ?>">
                             <option value=""></option>
                             <?php
@@ -471,7 +472,7 @@
                 <tr data-tt-id="<?= "k{$value->no_pelunasan}1" ?>" data-tt-parent-id="<?= "k{$value->no_pelunasan}" ?>">
                     <td>Jurnal Deposit <?= $value->no_pelunasan ?></td>
                     <td colspan="2">
-                        <select class="form-control input-sm select22 jurnal_dep" style="width:80%"
+                        <select class="form-control input-sm select22 jurnal_dep" style="width:80%"  data-nama_jurnal="koreksi kurs akhir bulan - <?="{$value->partner_nama} - {$value->no_pelunasan}"?>"
                                 data-posisi="C" data-jenis="deposit" data-no="<?= $value->no_pelunasan ?>" data-selisih="<?= $selisih ?>">
                             <option value=""></option>
                             <?php
@@ -559,7 +560,7 @@
                     <td colspan="2">Jurnal Retur Penjualan <?= $value->no_retur ?></td>
                     <td colspan="2">
                         <select class="form-control input-sm select22 jurnal_rtr" style="width:80%" data-menu="Retur_Penjualan" data-kurs="<?= $oldKurs ?>"
-                                data-posisi="D" data-ids="<?= $value->id ?>" data-jenis="retur" data-no="<?= $value->no_retur ?>"
+                                data-posisi="D" data-ids="<?= $value->id ?>" data-jenis="retur" data-no="<?= $value->no_retur ?>" data-nama_jurnal="koreksi kurs akhir bulan - Retur Penjualan - <?= $value->no_retur ?>"
                                 data-selisih="<?= $selisih ?>" data-saldo="<?= $value->final_total ?>">
                             <option value=""></option>
                             <?php
@@ -577,7 +578,7 @@
                 <tr data-tt-id="<?= "k{$value->no_retur}1" ?>" data-tt-parent-id="<?= "k{$value->no_retur}" ?>">
                     <td colspan="2">Jurnal Retur Penjualan <?= $value->no_retur ?></td>
                     <td colspan="2">
-                        <select class="form-control input-sm select22 jurnal_rtr" style="width:80%"
+                        <select class="form-control input-sm select22 jurnal_rtr" style="width:80%" data-nama_jurnal="koreksi kurs akhir bulan - Retur Penjualan - <?= $value->no_retur ?>"
                                 data-posisi="C" data-ids="<?= $value->id ?>" data-jenis="retur" data-no="<?= $value->no_retur ?>"
                                 data-selisih="<?= $selisih ?>" >
                             <option value=""></option>
@@ -670,7 +671,7 @@
                     <td colspan="2">Jurnal Retur Pembelian <?= $value->no_inv_retur ?></td>
                     <td colspan="2">
                         <select class="form-control input-sm select22 jurnal_rtr" style="width:80%" data-menu="Retur_Pembelian" data-kurs="<?= $oldKurs ?>"
-                                data-posisi="D" data-ids="<?= $value->id ?>" data-jenis="retur" data-no="<?= $value->no_inv_retur ?>"
+                                data-posisi="D" data-ids="<?= $value->id ?>" data-jenis="retur" data-no="<?= $value->no_inv_retur ?>" data-nama_jurnal="koreksi kurs akhir bulan - Retur Pembelian - <?= $value->no_inv_retur ?>"
                                 data-selisih="<?= $selisih ?>" data-saldo="<?= $value->total_valas ?>">
                             <option value=""></option>
                             <?php
@@ -688,7 +689,7 @@
                 <tr data-tt-id="<?= "k{$value->no_inv_retur}1" ?>" data-tt-parent-id="<?= "k{$value->no_inv_retur}" ?>">
                     <td colspan="2">Jurnal Retur Pembelian <?= $value->no_inv_retur ?></td>
                     <td colspan="2">
-                        <select class="form-control input-sm select22 jurnal_rtr" style="width:80%"
+                        <select class="form-control input-sm select22 jurnal_rtr" style="width:80%" data-nama_jurnal="koreksi kurs akhir bulan - Retur Pembelian - <?= $value->no_inv_retur ?>"
                                 data-posisi="C" data-ids="<?= $value->id ?>" data-jenis="retur" data-no="<?= $value->no_inv_retur ?>" data-selisih="<?= $selisih ?>">
                             <option value=""></option>
                             <?php

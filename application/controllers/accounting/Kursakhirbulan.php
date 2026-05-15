@@ -432,7 +432,6 @@ class Kursakhirbulan extends MY_Controller {
                 ];
                 $noOrder += 1;
             }
-            throw new \Exception("No Jurnal tidak terbuat", 500);
             $umdprtr = $this->input->post("datas");
             $um = [];
             $dpst = [];
@@ -445,7 +444,7 @@ class Kursakhirbulan extends MY_Controller {
                     throw new \Exception("Coa Harus Dipilih", 500);
                 }
                 $entriesDetail [] = [
-                    "nama" => "{$val->jenis} - {$val->no}",
+                    "nama" => "{$val->nama_jurnal}",
                     "kode" => $noJurnal,
                     "reff_note" => "",
                     "partner" => "",
