@@ -385,11 +385,17 @@
                         data.push(dt);
                     });
                     confirmRequest("Kurs Akhir Bulan", "Confirm Kurs Akhir Bulan ? ", function () {
+
                         $.ajax({
                             url: "<?= base_url("accounting/kursakhirbulan/confirm/{$id}") ?>",
                             dataType: 'json',
                             type: "POST",
-                            data: {datas: data},
+                            data: {
+                                datas: data,
+                                bulan: $("#bulan").val(),
+                                currency: $("#currency").val(),
+                                kurs: $("#kurs").val()
+                            },
                             beforeSend: function (xhr) {
                                 please_wait(function () {
 
