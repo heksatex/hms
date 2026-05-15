@@ -360,36 +360,40 @@
                         return;
                     }
 
-                    const dataStatus = new Promise((resolve, reject) => {
-                        let dt = [];
-                        $.each(rows_selected, function (index, rowId) {
-                            var splt = rowId.split("|^");
-                            dt.push(splt[0]);
+                    confirmRequest("CFB", rows_selected.length + " Data yang direject / Cancel. Lanjutkan ? ", function () {
+                        const dataStatus = new Promise((resolve, reject) => {
+                            let dt = [];
+                            $.each(rows_selected, function (index, rowId) {
+                                var splt = rowId.split("|^");
+                                dt.push(splt[0]);
+                            });
+                            resolve(dt);
                         });
-                        resolve(dt);
+
+                        dataStatus.then((rsp) => {
+                            $.ajax({
+                                url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
+                                type: "POST",
+                                data: {
+                                    ids: rsp,
+                                    status: "cancel",
+                                    before_status: "draft"
+                                },
+                                success: function (data) {
+                                    alert_notify(data.icon, data.message, data.type, function () {});
+                                    location.reload();
+//                                table.ajax.reload(null, false);
+                                },
+                                error: function (err) {
+                                    alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                                }
+                            });
+                        }).catch(e => {
+                            alert_notify("fa fa-warning", e.message, "danger", function () {});
+                        });
                     });
 
-                    dataStatus.then((rsp) => {
-                        $.ajax({
-                            url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
-                            type: "POST",
-                            data: {
-                                ids: rsp,
-                                status: "cancel",
-                                before_status: "draft"
-                            },
-                            success: function (data) {
-                                alert_notify(data.icon, data.message, data.type, function () {});
-                                location.reload();
-//                                table.ajax.reload(null, false);
-                            },
-                            error: function (err) {
-                                alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
-                            }
-                        });
-                    }).catch(e => {
-                        alert_notify("fa fa-warning", e.message, "danger", function () {});
-                    });
+
 
 
                 });

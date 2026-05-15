@@ -75,7 +75,7 @@ class Bankmasuk extends MY_Controller {
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank",'status'=>'aktif'])->setOrder(["nama" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank", 'status' => 'aktif'])->setOrder(["nama" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
 
         $this->load->view('accounting/v_bank_masuk_add', $data);
@@ -158,7 +158,7 @@ class Bankmasuk extends MY_Controller {
     protected function _list_data() {
         try {
             $model = new $this->m_global;
-            $model->setTables("acc_bank_masuk")->setOrder(["acc_bank_masuk.tanggal" => "desc","no_bm"=>"desc"])
+            $model->setTables("acc_bank_masuk")->setOrder(["acc_bank_masuk.tanggal" => "desc", "no_bm" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_bank_masuk.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_bank_masuk.status", "left")
                     ->setSearch(["no_bm", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo"])
@@ -169,7 +169,7 @@ class Bankmasuk extends MY_Controller {
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
             $uraian = $this->input->post("uraian");
-            $status = $this->input->post("status"); 
+            $status = $this->input->post("status");
             if ($status !== "") {
                 $model->setWheres(["acc_bank_masuk.status" => "{$status}"]);
             }
@@ -457,7 +457,7 @@ class Bankmasuk extends MY_Controller {
         }
     }
 
-    public function edit($id,$depth = "ACCBM") {
+    public function edit($id, $depth = "ACCBM") {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
@@ -479,7 +479,7 @@ class Bankmasuk extends MY_Controller {
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank",'status'=>'aktif'])->setOrder(["nama" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank", 'status' => 'aktif'])->setOrder(["nama" => "asc"])->getData();
             $data['id_dept'] = $depth;
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -1025,6 +1025,7 @@ class Bankmasuk extends MY_Controller {
                         throw new \exception("Data No Bank Masuk {$kode} dalam status {$head->status}", 500);
                     }
                     $this->validasiPin($pin, "Simpan Draft Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
+                    $model->setTables("acc_bank_masuk_detail")->setWheres(["no_bm" => $kode, "giro_masuk_detail_id >" => 0])->delete();
                     break;
 
                 default:
