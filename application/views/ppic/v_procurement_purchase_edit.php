@@ -251,7 +251,7 @@
                                 <th class="style" style="width:100px; text-align: right;">Qty</th>
                                 <th class="style" width="80px">Uom</th>
                                 <th class="style" width="200px">Notes</th>
-                                <th class="style" width="60px">Status</th>
+                                <th class="style" width="125px">Status</th>
                                 <th class="style" width="60px">kode CFB</th>
                                 <th class="style" style="width: 80px; text-align: center;">
                                   <?php
@@ -279,7 +279,16 @@
                                   <td data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty; ?>" align="right"><?php echo number_format($row->qty, 2) ?></td>
                                   <td data-content="edit" data-id="uom" data-name="Uom" data-isi="<?php echo $row->uom; ?>"><?php echo $row->uom ?></td>
                                   <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_notes); ?>" class="text-wrap width-200"> <?php echo $row->reff_notes ?></td>
-                                  <td><?php echo $row->nama_status; ?></td>
+                                  <td>
+                                    
+                                    <?php if(!empty($row->no_po)) {
+                                            echo $row->nama_status. ' <br> [ '.$row->no_po.' ]'; 
+                                          } else {
+                                            echo $row->nama_status; 
+                                          }
+                                    ?>
+                                
+                                  </td>
                                   <td><?php echo $row->kode_cfb ?></td>
                                   <td align="center">
                                     <?php if ($row->status == 'draft') { ?>

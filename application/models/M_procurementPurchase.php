@@ -219,12 +219,16 @@ class M_procurementPurchase extends CI_Model
 
 	public function get_data_detail_by_code($kode_pp)
 	{
-		$query = $this->db->query("SELECT ppi.*, ms.nama_status, cat.catatan,  nk.nilai, nk.dari, nk.catatan as cat_beli
+		$query = $this->db->query("SELECT ppi.*, ms.nama_status, cat.catatan,  nk.nilai, nk.dari, nk.catatan as cat_beli, po.no_po
 								FROM procurement_purchase_items ppi 
 								INNER JOIN mst_produk mp ON ppi.kode_produk = mp.kode_produk 
 								LEFT JOIN mst_status ms ON ppi.status = ms.kode
 								LEFT JOIN nilai_konversi nk ON ppi.uom_beli = nk.id
 								LEFT JOIN (select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR '#') as catatan from mst_produk_catatan where jenis_catatan = 'pembelian' group by kode_produk) as cat ON cat.kopro = ppi.kode_produk
+								LEFT JOIN (SELECT po.no_po, pod.kode_cfb
+											FROM purchase_order po 
+											INNER JOIN purchase_order_detail pod ON po.id = pod.po_id
+											WHERE po.status IN ('done','purchase_confirmed') )as po ON po.kode_cfb = ppi.kode_cfb
 								where ppi.kode_pp = '" . $kode_pp . "' ORDER BY row_order");
 		return $query->result();
 	}
