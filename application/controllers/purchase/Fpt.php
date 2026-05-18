@@ -25,7 +25,6 @@ class Fpt extends MY_Controller {
         $this->load->model('_module');
         $this->load->model("m_konversiuom");
         $this->load->library("token");
-        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {

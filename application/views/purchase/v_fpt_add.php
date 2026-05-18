@@ -14,18 +14,18 @@
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
-                <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
+                <?php $this->load->view("admin/_partials/main-menu.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
                 $this->load->view("admin/_partials/topbar.php", $data)
                 ?>
             </header>
             <aside class="main-sidebar">
-                <?php $this->load->view("admin/_partials/sidebar-new.php") ?>
+                <?php $this->load->view("admin/_partials/sidebar.php") ?>
             </aside>
             <div class="content-wrapper">
                 <section class="content-header">
-                    <?php $this->load->view("admin/_partials/statusbar-new.php") ?>
+                    <?php $this->load->view("admin/_partials/statusbar.php") ?>
                 </section>
                 <section class="content">
                     <div class="box">

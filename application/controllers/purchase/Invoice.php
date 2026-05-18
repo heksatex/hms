@@ -25,7 +25,6 @@ class Invoice extends MY_Controller {
         $this->load->model('_module');
         $this->config->load('additional');
         $this->load->library("token");
-        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {
@@ -365,9 +364,6 @@ class Invoice extends MY_Controller {
                 $this->form_validation->set_rules($val);
                 if ($this->form_validation->run() == FALSE) {
                     throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
-                }
-                if($dataHead->total ==0) {
-                    throw new \Exception('Total Invoice masih 0, silahkan simpan terlebih dahulu.', 500);
                 }
                 $now = date("Y-m-d H:i:s");
                 if ($kodeJurnal === "") {

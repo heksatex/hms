@@ -130,7 +130,7 @@
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
-                <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
+                <?php $this->load->view("admin/_partials/main-menu.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
                 $this->load->view("admin/_partials/topbar.php", $data)
@@ -138,7 +138,7 @@
             </header>
             <aside class="main-sidebar">
                 <?php
-                $this->load->view("admin/_partials/sidebar-new.php");
+                $this->load->view("admin/_partials/sidebar.php");
                 ?>
             </aside>
             <div class="content-wrapper">
@@ -149,7 +149,7 @@
                         $data["navigation_page"]=true;
                         $data["next_page"]=$next_page ?? "";
                         $data["prev_page"]=$prev_page ?? "";
-                        $this->load->view("admin/_partials/statusbar-new.php", $data);
+                        $this->load->view("admin/_partials/statusbar.php", $data);
                         $totals = 0.00;
                         $diskons = 0.00;
                         $taxes = 0.00;

@@ -20,7 +20,6 @@ class Partner extends MY_Controller {
         $this->load->model('m_user');
         $this->load->model('m_global');
         $this->load->model("m_partner");
-        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {

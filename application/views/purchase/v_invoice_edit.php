@@ -77,7 +77,7 @@
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
-                <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
+                <?php $this->load->view("admin/_partials/main-menu.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
                 $this->load->view("admin/_partials/topbar.php", $data)
@@ -85,7 +85,7 @@
             </header>
             <aside class="main-sidebar">
                 <?php
-                $this->load->view("admin/_partials/sidebar-new.php");
+                $this->load->view("admin/_partials/sidebar.php");
                 ?>
             </aside>
             <div class="content-wrapper">
@@ -93,7 +93,7 @@
                     <div id ="status_bar">
                         <?php
                         $data['jen_status'] = $inv->status;
-                        $this->load->view("admin/_partials/statusbar-new.php", $data);
+                        $this->load->view("admin/_partials/statusbar.php", $data);
                         ?>
                     </div>
                 </section>
