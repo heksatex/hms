@@ -26,7 +26,7 @@ class Requestforquotation extends MY_Controller {
         $this->load->model("m_konversiuom");
         $this->load->library("token");
         $this->load->model("m_global");
-//        $this->config->load('additional');
+        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {
