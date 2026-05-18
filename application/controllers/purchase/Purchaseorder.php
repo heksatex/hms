@@ -35,6 +35,7 @@ class Purchaseorder extends MY_Controller {
         $this->load->library('database/purchase_order', null, 'db_purchase_order');
         $this->table_po = $this->db_purchase_order::table;
         $this->fields_po = $this->db_purchase_order::fields;
+        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
 //4833 2650
@@ -162,7 +163,7 @@ class Purchaseorder extends MY_Controller {
                 $list->setWhereIn("po.status", $status);
                 $statuss = implode(",", $status);
             }
-            
+
             if ($supplier !== "")
                 $list->setWheres(["po.supplier" => $supplier]);
 
@@ -290,6 +291,7 @@ class Purchaseorder extends MY_Controller {
                         if (count($getInv) > 0) {
                             foreach ($getInv as $key => $cekInv) {
                                 if ($cekInv) {
+                                    $totals = 0;
                                     $modelPO = new $this->m_global;
                                     $modelJurnal = clone $modelPO;
                                     $dataDetail = $modelPO->setTables("purchase_order_detail")->setJoins("tax", "tax_id = tax.id", "left")
@@ -323,15 +325,25 @@ class Purchaseorder extends MY_Controller {
                                             $dppvalas = 0;
                                             $totalValas = 0;
                                         }
+//                                        $modelInv->update([
+//                                            "total" => $data->total,
+//                                            "dpp_lain" => $data->dpp_lain,
+//                                            "hutang_rp" => round($hutangrp),
+//                                            "hutang_valas" => round($hutangvalas),
+//                                            "total_valas" => round($totalValas),
+//                                            "total_rp" => round($totalrp),
+//                                            "dpp_lain_rp" => round($dpprp),
+//                                            "dpp_lain_valas" => round($dppvalas)
+//                                        ]);
                                         $modelInv->update([
-                                            "total" => $data->total,
-                                            "dpp_lain" => $data->dpp_lain,
-                                            "hutang_rp" => round($hutangrp),
-                                            "hutang_valas" => round($hutangvalas),
-                                            "total_valas" => round($totalValas),
-                                            "total_rp" => round($totalrp),
-                                            "dpp_lain_rp" => round($dpprp),
-                                            "dpp_lain_valas" => round($dppvalas)
+                                            "total" => 0,
+                                            "dpp_lain" => 0,
+                                            "hutang_rp" => 0,
+                                            "hutang_valas" => 0,
+                                            "total_valas" => 0,
+                                            "total_rp" => 0,
+                                            "dpp_lain_rp" => 0,
+                                            "dpp_lain_valas" =>0
                                         ]);
                                         $this->_module->gen_history("invoice", $cekInv->id, 'edit',
                                                 "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
@@ -670,10 +682,10 @@ class Purchaseorder extends MY_Controller {
             $this->_module->startTransaction();
             $model = new $this->m_global;
             $model2 = clone $model;
-            $checkInvoice = $model2->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "invoice.status <>" => "cancel"])->getDetail();
+            $checkInvoice = $model2->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "invoice.status" => "done"])->getDetail();
             if ($checkInvoice) {
-                if ($checkInvoice->lunas == "1")
-                    throw new \Exception('Data PO sudah ada pelunasan.', 500);
+//                if ($checkInvoice->lunas == "1")
+                    throw new \Exception('Invoice sudah dalam status DONE,silahkan kembalikan ke Draft terlebih dahulu', 500);
             }
             $whereStatus = "'done','cancel'";
             $cek = $model->setTables("purchase_order_edited")
