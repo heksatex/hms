@@ -42,14 +42,14 @@
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
-                <?php $this->load->view("admin/_partials/main-menu.php") ?>
+                <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
                 $this->load->view("admin/_partials/topbar.php", $data)
                 ?>
             </header>
             <aside class="main-sidebar">
-                <?php $this->load->view("admin/_partials/sidebar.php") ?>
+                <?php $this->load->view("admin/_partials/sidebar-new.php") ?>
             </aside>
 
             <div class="content-wrapper">
@@ -189,7 +189,67 @@
                 </section>    
             </div>
             <?php $this->load->view("admin/_partials/modal.php") ?>
+
+            <div class="modal fade lebar_mode" id="confir" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title"></h4>
+                        </div>
+                        <form class="form-horizontal">
+                            <div class="modal-body">
+                                <table class="table table-condesed table-hover rlstable" id="detail_reject" width="100%" style="min-width: 100%">
+                                    <thead>
+                                    <th>
+                                        #
+                                    </th>
+                                    <th>
+                                        Kode PP
+                                    </th>
+                                    <th>
+                                        Produk
+                                    </th>
+                                    <th>
+                                        Qty
+                                    </th>
+                                    <th>
+                                        Note
+                                    </th>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+
+                        <div class="modal-footer">
+                            <button type="button" id="btn-reject" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." class="btn btn-primary btn-sm">Simpan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        <template>
+            <tr>
+                <td>
+                    <input type="checkbox" class="input-sm id_cfb" value="{id}" checked>
+                </td>
+                <td>
+                    {kode_cfb}
+                </td>
+                <td>
+                    {produk}
+                </td>
+                <td>
+                    {qty}
+                </td>
+                <td>
+                    {note}
+                </td>
+            </tr>
+        </template>
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
@@ -360,42 +420,58 @@
                         return;
                     }
 
-                    confirmRequest("CFB", rows_selected.length + " Data yang direject / Cancel. Lanjutkan ? ", function () {
-                        const dataStatus = new Promise((resolve, reject) => {
-                            let dt = [];
-                            $.each(rows_selected, function (index, rowId) {
-                                var splt = rowId.split("|^");
-                                dt.push(splt[0]);
-                            });
-                            resolve(dt);
-                        });
-
-                        dataStatus.then((rsp) => {
-                            $.ajax({
-                                url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
-                                type: "POST",
-                                data: {
-                                    ids: rsp,
-                                    status: "cancel",
-                                    before_status: "draft"
-                                },
-                                success: function (data) {
-                                    alert_notify(data.icon, data.message, data.type, function () {});
-                                    location.reload();
-//                                table.ajax.reload(null, false);
-                                },
-                                error: function (err) {
-                                    alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
-                                }
-                            });
-                        }).catch(e => {
-                            alert_notify("fa fa-warning", e.message, "danger", function () {});
-                        });
+                    $("#confir").modal({
+                        show: true,
+                        backdrop: 'static'
                     });
+                    $('.modal-title').text("List Data Reject");
+                    var tmplt = $("template");
+                    $("#detail_reject tbody").html("");
+                    $.each(rows_selected, function (index, rowId) {
+                        var splt = rowId.split("|^");
+                        let pp = splt[1].split(".");
+                        var isi_tmplt = tmplt.html().replace(/{id}/g, splt[0])
+                                .replace(/{kode_cfb}/g, pp[0]).replace(/{produk}/g, `${splt[2]} - ${splt[9]}`)
+                                .replace(/{qty}/g, `${splt[3]} - ${splt[4]}`).replace(/{note}/g, splt[6]);
+                        $("#detail_reject tbody").append(isi_tmplt);
 
+                    });
+                    $("#btn-reject").on("click", function () {
+                        var datas = [];
+                        $(".id_cfb:checked").each(function () {
+                            datas.push($(this).val());
+                        });
+                        RejectData(datas);
+                    });
+                });
 
+                const RejectData = ((dt) => {
+                    $.ajax({
+                        url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
+                        type: "POST",
+                        data: {
+                            ids: dt,
+                            status: "cancel",
+                            before_status: "draft"
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        success: function (data) {
+                            alert_notify(data.icon, data.message, data.type, function () {});
+                            location.reload();
+//                                table.ajax.reload(null, false);
+                        },
+                        error: function (err) {
+                            alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {
 
+                            }, 100);
 
+                        }
+                    });
                 });
 
                 $(".confirm-order").on("click", function (e) {

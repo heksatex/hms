@@ -53,21 +53,21 @@
     <body class="hold-transition skin-black fixed sidebar-mini" id="block-page">
         <div class="wrapper" >
             <header class="main-header">
-                <?php $this->load->view("admin/_partials/main-menu.php") ?>
+                <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
                 $this->load->view("admin/_partials/topbar.php", $data)
                 ?>
             </header>
             <aside class="main-sidebar">
-                <?php $this->load->view("admin/_partials/sidebar.php") ?>
+                <?php $this->load->view("admin/_partials/sidebar-new.php") ?>
             </aside>
             <div class="content-wrapper" >
                 <section class="content-header"  >
                     <div id ="status_bar">
                         <?php
                         $data['jen_status'] = $datas->status;
-                        $this->load->view("admin/_partials/statusbar.php", $data);
+                        $this->load->view("admin/_partials/statusbar-new.php", $data);
                         ?>
                     </div>
                 </section>
