@@ -23,6 +23,7 @@ class Callforbids extends MY_Controller {
         $this->load->model("m_konversiuom");
         $this->load->model('_module');
         $this->load->model('m_user');
+        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {
