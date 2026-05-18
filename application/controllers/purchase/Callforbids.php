@@ -71,7 +71,8 @@ class Callforbids extends MY_Controller {
 //                $ids = $no;
 //                if (strtolower($field->status) != "cancel") {
                 $ids = $field->id . "|^" . $field->kode_cfb . "." . $field->kode_pp . "|^" . $field->kode_produk . "|^" .
-                        $field->qty . "|^" . $field->uom . "|^" . $field->priority . "|^" . $field->reff_notes . "|^" . $field->warehouse . "|^" . $field->schedule_date . "|^" . $field->status;
+                        $field->qty . "|^" . $field->uom . "|^" . $field->priority . "|^" . $field->reff_notes . "|^" . $field->warehouse . "|^" . $field->schedule_date .
+                        "|^" . $field->nama_produk . "|^" . $field->status;
 //                }
                 $data [] = array(
                     $ids,
