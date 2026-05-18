@@ -25,6 +25,7 @@ class Invoice extends MY_Controller {
         $this->load->model('_module');
         $this->config->load('additional');
         $this->load->library("token");
+        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {

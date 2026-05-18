@@ -35,6 +35,7 @@ class Purchaseorder extends MY_Controller {
         $this->load->library('database/purchase_order', null, 'db_purchase_order');
         $this->table_po = $this->db_purchase_order::table;
         $this->fields_po = $this->db_purchase_order::fields;
+        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
 //4833 2650

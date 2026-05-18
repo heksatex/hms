@@ -23,6 +23,7 @@ class Callforbids extends MY_Controller {
         $this->load->model("m_konversiuom");
         $this->load->model('_module');
         $this->load->model('m_user');
+        $this->load->driver('cache', array('adapter' => 'file'));
     }
 
     public function index() {
@@ -71,7 +72,8 @@ class Callforbids extends MY_Controller {
 //                $ids = $no;
 //                if (strtolower($field->status) != "cancel") {
                 $ids = $field->id . "|^" . $field->kode_cfb . "." . $field->kode_pp . "|^" . $field->kode_produk . "|^" .
-                        $field->qty . "|^" . $field->uom . "|^" . $field->priority . "|^" . $field->reff_notes . "|^" . $field->warehouse . "|^" . $field->schedule_date . "|^" . $field->status;
+                        $field->qty . "|^" . $field->uom . "|^" . $field->priority . "|^" . $field->reff_notes . "|^" . $field->warehouse . "|^" . $field->schedule_date .
+                        "|^" . $field->nama_produk . "|^" . $field->status;
 //                }
                 $data [] = array(
                     $ids,
