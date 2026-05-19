@@ -141,7 +141,7 @@
                 <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
-                $this->load->view("admin/_partials/topbar.php", $data)
+                $this->load->view("admin/_partials/topbar-new.php", $data)
                 ?>
             </div>
             <aside class="main-sidebar">
