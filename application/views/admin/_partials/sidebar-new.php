@@ -80,7 +80,7 @@
 
                     <ul class="treeview-menu">
                         <?php
-                        foreach ($sub_menu->result() as $sub) {
+                        foreach ($sub_menu as $sub) {
                             $active2 = '';
                             if ($get_inisial['inisial_class'] == $sub->inisial_class AND $id == $sub->dept_id) {
                                 $active2 = 'active';
