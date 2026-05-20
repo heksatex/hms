@@ -691,8 +691,10 @@ class Pelunasanhutang extends MY_Controller
         // $partner      = $this->input->post("partner"); // partner_id
         // $type         = $this->input->post('type'); // kas / uang muka
         $curr         = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
+        $cek          = $this->m_pelunasanhutang_fin->get_data_by_code($no_pelunasan);
+        $tgl_transaksi = $cek->tanggal_transaksi ?? date("Y-m-d");
 
-        $view = $this->load->view('modal/v_pelunasan_hutang_list_kas_fin_modal', ["no_pelunasan" => $no_pelunasan, "curr" => $curr], true);
+        $view = $this->load->view('modal/v_pelunasan_hutang_list_kas_fin_modal', ["no_pelunasan" => $no_pelunasan, "curr" => $curr, 'tgl_transaksi' => $tgl_transaksi], true);
         $this->output->set_status_header(200)
             ->set_content_type('application/json', 'utf-8')
             ->set_output(json_encode(['data' => $view]));
