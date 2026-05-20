@@ -579,8 +579,8 @@ class Kursakhirbulan extends MY_Controller {
             }
             $this->_updatekas();
             $this->_updateDeposit();
-            $this->_updateUM("penjualan", "piutang");
-            $this->_updateUM("pembelian", "utang");
+            $this->_updateUM("penjualan", "um_penjualan");
+            $this->_updateUM("pembelian", "um_pembelian");
 
             $model->setTables("acc_kurs_akhir_bulan_detail")->saveBatch($kursAkhirDetail);
             if (!$this->_module->finishTransaction()) {
