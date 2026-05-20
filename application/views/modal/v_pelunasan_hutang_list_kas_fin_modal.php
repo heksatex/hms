@@ -78,7 +78,7 @@
                     <div class="col-md-12 col-xs-12">
                         <div class="col-xs-4"><label class="form-label">Tanggal</label></div>
                         <div class="col-xs-8 col-md-8">
-                            <input type="text" name="tanggal" id="tanggal" class="form-control input-sm" value="<?= date("Y-m-d") ?>" readonly />
+                            <input type="text" name="tanggal" id="tanggal" class="form-control input-sm" value="<?= date("Y-m-d", strtotime($tgl_transaksi)) ?>" readonly />
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12" id="div_jenis_transaksi">
