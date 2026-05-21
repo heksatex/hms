@@ -60,12 +60,13 @@
                                                             <?php
                                                             foreach ($coa as $key => $value) {
                                                                 ?>
-                                                                <option value="<?= $value->kode_coa ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
+                                                                <option data-curr="<?= ($value->curr === "") ? "IDR" :  $value->curr?>" value="<?= $value->kode_coa ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
                                                                 <?php
                                                             }
                                                             ?>
                                                         </select>
                                                         <input type="hidden" name="coa" id="coa">
+                                                        <input type="hidden" name="curr" id="curr">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6 col-xs-12">
@@ -145,7 +146,9 @@
                 });
                 $("#kode_coa").on("change", function () {
                     var selectedText = $(this).find('option:selected').text();
+                    var curr = $(this).find('option:selected').data("curr");
                     $("#coa").val(selectedText);
+                    $("#curr").val(curr);
                 });
                 $("#search").on("click", function () {
                     $.ajax({
@@ -154,7 +157,8 @@
                         data: {
                             tanggal: $("#tanggal").val(),
                             kode_coa: $("#kode_coa").val(),
-                            coa: $("#coa").val()
+                            coa: $("#coa").val(),
+                            curr: $("#curr").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
