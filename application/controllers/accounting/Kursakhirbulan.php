@@ -66,9 +66,8 @@ class Kursakhirbulan extends MY_Controller {
                     ->setSelects(["IFNULL(SUM(CASE WHEN posisi = 'D' THEN nominal_curr ELSE 0 END),0) AS total_debit_valas,IFNULL(SUM(CASE WHEN posisi = 'C' THEN nominal_curr ELSE 0 END),0) AS total_credit_valas"])
                     ->setGroups(["acc_jurnal_entries_items.kode_coa"]);
             $entriesRp = $model->setWheres(["date(acc_jurnal_entries.tanggal_dibuat) >=" => date("Y-m-d", strtotime($start)), "date(acc_jurnal_entries.tanggal_dibuat) <=" => date("Y-m-d", strtotime($akhir)),
-                        'status' => 'posted', "kode_mua" => "IDR"])->getQuery();
-            $entries = $model->setWheres(["date(acc_jurnal_entries.tanggal_dibuat) >=" => date("Y-m-d", strtotime($start)), "date(acc_jurnal_entries.tanggal_dibuat) <=" => date("Y-m-d", strtotime($akhir)),
-                        'status' => 'posted', "kode_mua" => $curr], true)->getQuery();
+                        'status' => 'posted'])->getQuery();
+            $entries = $model->setWheres(["kode_mua" => $curr])->getQuery();
 
             $starts = $this->periodesaldo->get_start_periode();
             $tgl_dari = date("Y-m-d 00:00:00", strtotime($starts));
@@ -77,17 +76,17 @@ class Kursakhirbulan extends MY_Controller {
             $model->setTables("acc_jurnal_entries")->setJoins('acc_jurnal_entries_items', 'acc_jurnal_entries.kode = acc_jurnal_entries_items.kode')->setGroups(["acc_jurnal_entries_items.kode_coa"])
                     ->setSelects(["acc_jurnal_entries_items.kode_coa, SUM(nominal) as total_debit"])
                     ->setSelects(["SUM(nominal_curr) as total_debit_valas"])
-                    ->setWheres(['tanggal_dibuat >= ' => $tgl_dari, 'tanggal_dibuat <= ' => $tgl_sampai, 'status' => 'posted', 'posisi' => "D","kode_mua" => "IDR"]);
+                    ->setWheres(['tanggal_dibuat >= ' => $tgl_dari, 'tanggal_dibuat <= ' => $tgl_sampai, 'status' => 'posted', 'posisi' => "D"]);
             $saldoDebetRp = $model->getQuery();
-            $saldoDebet = $model->setWheres(['tanggal_dibuat >= ' => $tgl_dari, 'tanggal_dibuat <= ' => $tgl_sampai, 'status' => 'posted', 'posisi' => "D","kode_mua" => $curr],true)->getQuery();
+            $saldoDebet = $model->setWheres(["kode_mua" => $curr])->getQuery();
 
             //Kredit
             $model->setTables("acc_jurnal_entries")->setJoins('acc_jurnal_entries_items', 'acc_jurnal_entries_items.kode = acc_jurnal_entries.kode')->setGroups(["acc_jurnal_entries_items.kode_coa"])
                     ->setSelects(["acc_jurnal_entries_items.kode_coa, SUM(nominal) as total_credit"])
                     ->setSelects(["SUM(nominal_curr) as total_credit_valas"])
-                    ->setWheres(['tanggal_dibuat >= ' => $tgl_dari, 'tanggal_dibuat <= ' => $tgl_sampai, 'status' => 'posted', 'posisi' => "C","kode_mua" => "IDR"]);
+                    ->setWheres(['tanggal_dibuat >= ' => $tgl_dari, 'tanggal_dibuat <= ' => $tgl_sampai, 'status' => 'posted', 'posisi' => "C"]);
             $saldoKreditRp = $model->getQuery();
-            $saldoKredit = $model->setWheres(['tanggal_dibuat >= ' => $tgl_dari, 'tanggal_dibuat <= ' => $tgl_sampai, 'status' => 'posted', 'posisi' => "C","kode_mua" => $curr],true)->getQuery();
+            $saldoKredit = $model->setWheres(["kode_mua" => $curr])->getQuery();
             
             $model->setTables("acc_coa coa")
                     ->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
