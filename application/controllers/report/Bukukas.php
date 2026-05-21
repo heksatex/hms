@@ -99,13 +99,14 @@ class Bukukas extends MY_Controller {
     protected function _getSaldoAwal($valas = false) {
         try {
             $coa = $this->input->post("kode_coa");
+            $curr = $this->input->post("curr");
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
             $model->setTables("acc_jurnal_entries_items jei")->setJoins("acc_jurnal_entries je", 'je.kode = jei.kode')
                     ->setWheres(["date(je.tanggal_dibuat) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(je.tanggal_dibuat) <=" => date("Y-m-d", strtotime($tanggals[1])),
                         'je.status' => 'posted'])
-                    ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa]);
+                    ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa,"kode_mua"=>$curr]);
             //
             if ($valas) {
                 $model->setSelects(["jei.posisi, jei.kode_coa,  IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal_curr ELSE 0 END),0) AS total_debit,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal_curr ELSE 0 END),0) AS total_credit"]);
@@ -120,7 +121,7 @@ class Bukukas extends MY_Controller {
             $tgl_dari = date("Y-m-d 00:00:00", strtotime($start));
             $tgl_sampai = date("Y-m-d 23:59:59", strtotime("-1 day", strtotime($tanggals[0])));
             $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
-                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D"]);
+                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D","kode_mua"=>$curr]);
             if ($valas) {
                 $model->setSelects(["jei.kode_coa, SUM(jei.nominal_curr) as total_debit"]);
             } else {
@@ -132,7 +133,7 @@ class Bukukas extends MY_Controller {
             //Kredit
 
             $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
-                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C"]);
+                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C","kode_mua"=>$curr]);
             if ($valas) {
                 $model->setSelects(["jei.kode_coa, SUM(jei.nominal_curr) as total_credit"]);
             } else {
