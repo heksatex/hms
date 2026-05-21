@@ -46,6 +46,8 @@
                 if ($saldoAkhirValas <= 0) {
                     continue;
                 }
+                log_message("error","saldo : {$value->saldo_normal},coa : {$value->kode_coa} , saldoAwalValas : {$saldoAwalValas}, totalDebitValas : {$totalDebitValas}, totalCreditValas : {$totalCreditValas} ,saldoAkhirValas : {$saldoAkhirValas} ,"
+                . "saldoAwal : {$saldoAwal}, totalDebit : {$totalDebit},totalCredit : {$totalCredit}, saldoAkhir : {$saldoAkhir}");
                 $no += 1;
                 $nama = "Kurs Akhir Bulan (Saldo Valas : " . number_format($saldoAkhirValas, 2) . " {$curr}, Saldo Rp " . number_format($saldoAkhir, 2) . " Kurs : " . number_format($kurs, 2) . ")";
                 ?>
