@@ -22,7 +22,7 @@ foreach ($data as $key => $value) {
         <td><?= $value->gudang ?></td>
         <td><?= $value->order_date ?></td>
         <td><?= $value->jenis ?></td>
-        <td><?= "[{$value->kode_produk}] {$value->nama_produk}" ?></td>
+        <td title="<?= "[{$value->kode_produk}] {$value->nama_produk}" ?>" ><?= substr("[{$value->kode_produk}] {$value->nama_produk}", 0,50) ?></td>
         <td><?= number_format($value->qty_beli, 2) . " " . $value->uom_beli ?></td>
         <!--<td><?= $value->nilai_currency ?></td>-->
         <td><?= $value->nama_curr ?></td>
