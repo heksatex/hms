@@ -8,7 +8,7 @@
                 display : none
             }
             #btn-cancel{
-               background-color: #D01616;
+               /*background-color: #D01616;*/
             }
             <?php
             if ($inv->status === "cancel") {
