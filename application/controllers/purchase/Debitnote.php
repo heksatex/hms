@@ -91,7 +91,7 @@ class Debitnote extends MY_Controller {
             $tax = clone $head;
             $model3 = clone $head;
             $model4 = clone $head;
-            $data["coa_piutang"] = $model3->setTables("acc_coa")->setSelects(["kode_coa,nama"])->setWheres(["level" => 5, "jenis_transaksi" => "piutang"])->getData();
+            $data["coa_piutang"] = $model3->setTables("acc_coa")->setSelects(["kode_coa,nama"])->setWheres(["level" => 5, "jenis_transaksi" => "utang"])->getData();
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $datas = $head->setTables("invoice_retur")->setJoins("partner", "partner.id = id_supplier", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")
