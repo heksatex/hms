@@ -128,7 +128,7 @@
 
                                             </td>
                                             <td class="text-bold">
-                                                <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="total_nominal" id="total_nominal" class="form-control input-sm text-right" value="0" readonly />
+                                                <input type="text" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' data-allow-minus="true" name="total_nominal" id="total_nominal" class="form-control input-sm text-right" value="0" readonly />
                                             </td>
                                         </tr>
                                     </tfoot>
@@ -170,7 +170,7 @@
                 </select>
             </td>
             <td>
-                <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm nominal text-right nominal:nourut formatAngka" data-decimal="2" value="0" required />
+                <input type="text" name="nominal[]" pattern="^-?\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'  data-allow-minus="true" class="form-control input-sm nominal text-right nominal:nourut formatAngka" data-decimal="2" value="0" required />
             </td>
             <td class="text-center">
                 <button type="button" class="btn btn-warning btn-sm btn-hitung-pph23" title="Hitung PPH23">
