@@ -163,7 +163,7 @@ class Purchaseorder extends MY_Controller {
                 $list->setWhereIn("po.status", $status);
                 $statuss = implode(",", $status);
             }
-            
+
             if ($supplier !== "")
                 $list->setWheres(["po.supplier" => $supplier]);
 
@@ -332,10 +332,11 @@ class Purchaseorder extends MY_Controller {
                                             "total_valas" => round($totalValas),
                                             "total_rp" => round($totalrp),
                                             "dpp_lain_rp" => round($dpprp),
-                                            "dpp_lain_valas" => round($dppvalas)
+                                            "dpp_lain_valas" => round($dppvalas),
+                                            "status" => "draft"
                                         ]);
                                         $this->_module->gen_history("invoice", $cekInv->id, 'edit',
-                                                "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
+                                                "status draft,update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
                                                 $username);
                                     }
                                     $cekJurnal = $modelJurnal->setTables("acc_jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
