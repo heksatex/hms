@@ -301,7 +301,7 @@
 
             <!-- TANDA TANGAN -->
             <div class="ttd-section">
-                <p>Cimahi, <?= date("d F Y") ?></p>
+                <p>Cimahi, <?= date("d F Y", strtotime($inv->created_at)) ?></p>
                 <p style="font-weight: bold; margin-top: 2px;">PT. HEKSATEX INDAH</p>
 
                 <!-- Area Tanda Tangan & Stempel Fake -->
