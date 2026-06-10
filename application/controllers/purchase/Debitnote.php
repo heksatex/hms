@@ -11,6 +11,10 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  *
  * @author RONI
  */
+require FCPATH . 'vendor/autoload.php';
+
+use Mpdf\Mpdf;
+
 class Debitnote extends MY_Controller {
 
     //put your code here
@@ -148,7 +152,6 @@ class Debitnote extends MY_Controller {
             $noInvSupp = $this->input->post("no_invoice_supp");
             $tglInvSupp = $this->input->post("tanggal_invoice_supp");
             $noSjSupp = $this->input->post("no_sj_supp");
-
             $harga = $this->input->post("harga_satuan");
             $coa = $this->input->post("kode_coa");
             $amount_tax = $this->input->post("amount_tax");
@@ -164,6 +167,7 @@ class Debitnote extends MY_Controller {
             $nota_retur = $this->input->post("nota_retur");
             $tanggal_fp = $this->input->post("tanggal_fp");
             $coaDagang = $this->input->post("default_coa");
+            $tglC = $this->input->post("created_at");
             $item = [];
             $totals = 0.00;
             $diskons = 0.00;
@@ -220,15 +224,15 @@ class Debitnote extends MY_Controller {
             $head = new $this->m_global;
             $bd = clone $head;
             $dataUpdate = [
-                "no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain, "tanggal_fp" => $tanggal_fp,
-                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode, "no_fp" => $no_fp, "nota_retur" => $nota_retur,
+                "created_at" => $tglC, "no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain, "tanggal_fp" => $tanggal_fp,
+                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode, "no_fp" => $no_fp, "nota_retur" => $nota_retur, "total_tax" => $taxes,
                 "dpp_lain_valas" => $dppvalas,
                 "dpp_lain_rp" => round($nilaiDppLain),
                 "total_rp" => round($hutangrp),
                 "hutang_valas" => $hutangvalas,
                 "hutang_rp" => round($hutangrp),
                 "total_valas" => $grandTotal,
-                "coa_piutang_dagang" => $coaDagang
+                "coa_piutang_dagang" => $coaDagang,
             ];
             $head->setTables('invoice_retur')->setWheres(["no_inv_retur" => $kode_decrypt])->update($dataUpdate);
             $bd->setTables("invoice_retur_detail")->updateBatch($item, 'id');
@@ -448,17 +452,17 @@ class Debitnote extends MY_Controller {
                 }
                 $defaultPpn = $model->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
                 $jurnalItems[] = array(
-                "kode" => $jurnal,
-                "nama" => "",
-                "reff_note" => "",
-                "partner" => $dataItems[0]->id_supplier,
-                "kode_coa" => ($dataItems[0]->coa_piutang_dagang === "") ? $defaultPpn->value : $dataItems[0]->coa_piutang_dagang,
-                "posisi" => "D",
-                "nominal_curr" => ($totalNominal + $tax) / $dataItems[0]->kurs,
-                "kurs" => $dataItems[0]->kurs,
-                "kode_mua" => $dataItems[0]->name_curr,
-                "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
-                "row_order" => count($jurnalItems) + 1
+                    "kode" => $jurnal,
+                    "nama" => "",
+                    "reff_note" => "",
+                    "partner" => $dataItems[0]->id_supplier,
+                    "kode_coa" => ($dataItems[0]->coa_piutang_dagang === "") ? $defaultPpn->value : $dataItems[0]->coa_piutang_dagang,
+                    "posisi" => "D",
+                    "nominal_curr" => ($totalNominal + $tax) / $dataItems[0]->kurs,
+                    "kurs" => $dataItems[0]->kurs,
+                    "kode_mua" => $dataItems[0]->name_curr,
+                    "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
+                    "row_order" => count($jurnalItems) + 1
                 );
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
@@ -510,6 +514,45 @@ class Debitnote extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function print($id) {
+        try {
+            $kode_decrypt = decrypt_url($id);
+            $model = new $this->m_global;
+            $data["users"] = $this->input->post("users");
+            $data["inv"] = $model->setTables("invoice_retur")->setJoins("partner", "partner.id = id_supplier", "left")
+                            ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")->setWheres(["no_inv_retur" => $kode_decrypt])
+                            ->setSelects(["invoice_retur.*", "partner.nama as supplier,delivery_street,delivery_city,npwp", "currency as mata_uang"])->getDetail();
+
+            $data["invDetail"] = $model->setTables("invoice_retur_detail")->setWheres(["invoice_retur_id" => $data["inv"]->id])
+                            ->setJoins("tax", "tax.id = tax_id", "left")->setSelects(["invoice_retur_detail.*", "tax.nama as pajak,tax.ket as pajak_ket,amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax"])
+                            ->setOrder(["id"])->getData();
+            $url = "dist/storages/print/invretur";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            
+            $data["alamat"] = $model->setTables("setting")->setWheres(["setting_name"=>"alamat_fp"])->getDetail();
+            $data["npwp"] = $model->setTables("setting")->setWheres(["setting_name"=>"npwp_fp"])->getDetail();
+            ini_set("pcre.backtrack_limit", "50000000");
+            $html = $this->load->view('print/purchase_invoice_retur', $data, true);
+            $mpdf = new Mpdf(['tempDir' => FCPATH . '/tmp']);
+            $mpdf->WriteHTML($html);
+            $pathFile = $url . "/" . str_replace("/", "_", $data["inv"]->no_inv_retur) . ".pdf";
+            $mpdf->Output(FCPATH . $pathFile, "F");
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+        } catch (Exception $ex) {
+            log_message('error', $ex->getMessage());
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            ini_set("pcre.backtrack_limit", "1000000");
         }
     }
 }
