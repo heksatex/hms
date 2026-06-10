@@ -4,33 +4,34 @@
         <?php $this->load->view("admin/_partials/head.php") ?>
         <link href="<?= base_url('dist/css/popup_img.css') ?>" rel="stylesheet">
         <style>
-<?php
-if ($inv->status === "cancel") {
-    ?>
+            #btn-print{
+                display : none;
+            }
+            <?php
+            if ($inv->status === "cancel") {
+                ?>
                 #btn-simpan,#btn-cancel,#btn-approve{
                     display : none
                 }
 
-    <?php
-}
-if ($inv->status === "done") {
-    ?>
+                <?php
+            }
+            if ($inv->status === "done") {
+                ?>
                 #btn-simpan,#btn-approve{
                     display : none
                 }
                 #btn-print{
                     display : inline
                 }
-    <?php
-}
-?>
+                <?php
+            }
+            ?>
             #btn-cancel{
                 display : none
             }
 
-            #btn-print{
-                display : none
-            }
+
 
             .no{
                 width: 0.5% !important;
@@ -131,7 +132,10 @@ if ($inv->status === "done") {
                                                     <label class="form-label">Tgl dibuat</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input class="form-control" value="<?= date("Y-m-d H:i:s", strtotime($inv->created_at)) ?>" disabled>
+                                                    <div class="input-group tgl-def-format">
+                                                        <input type="text" class="form-control pull-right input-sm" id="created_at" name="created_at" value="<?= $inv->created_at ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"><span></i>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -538,8 +542,22 @@ if ($inv->status === "done") {
                         <?php
                         $this->load->view("admin/_partials/footer_new.php");
                         ?>
+                        <?php $this->load->view("admin/_partials/modal.php") ?>
                     </footer>
                     <?php $this->load->view("admin/_partials/js.php") ?>
+
+                    <div style="display: none;" id="pilihan-print">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-default btn-sm print-sj" type="button" data-print="Ronald Adriano"><i class="fa fa-print"></i> Ronald Adriano </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-default btn-sm print-sj" type="button" data-print="William Adriano"><i class="fa fa-print"></i> William Adriano </button>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <script>
                         $(document).ready(function () {
                             $(window).keydown(function (event) {
@@ -554,7 +572,7 @@ if ($inv->status === "done") {
                                 placeholder: "COA"
 
                             });
-                            
+
                             $("#default_coa").select2({
                                 allowClear: true,
                                 placeholder: "COA"
@@ -668,26 +686,40 @@ if ($inv->status === "done") {
                                 });
                             });
 
-                            $("#btn-print").off("click").unbind("click").on("click", function () {
-                                $.ajax({
-                                    url: "<?= base_url('purchase/debitnote/print/' . $id) ?>",
-                                    type: "POST",
-                                    beforeSend: function (xhr) {
-                                        please_wait(function () {});
-                                    },
-                                    success: function (data) {
-                                        unblockUI(function () {});
-                                        window.open(data.url, "_blank").focus();
-
-                                    },
-                                    error: function (req, error) {
-                                        unblockUI(function () {
-                                            setTimeout(function () {
-                                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                                            }, 500);
-                                        });
-                                    }
+                            $("#btn-print").off("click").unbind("click").on("click", function (e) {
+                                e.preventDefault();
+                                $("#print_data").modal({
+                                    show: true,
+                                    backdrop: 'static'
                                 });
+                                $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                                $('.modal-title').text('Pilih Penanggung Jawab');
+                                $(".print_data").html($("#pilihan-print").html());
+                                $(".print-sj").unbind("click").off("click").on("click", function () {
+                                    $.ajax({
+                                        url: "<?= base_url('purchase/debitnote/print/' . $id) ?>",
+                                        type: "POST",
+                                        data: {
+                                            users: $(this).attr("data-print")
+                                        },
+                                        beforeSend: function (xhr) {
+                                            please_wait(function () {});
+                                        },
+                                        success: function (data) {
+                                            unblockUI(function () {});
+                                            window.open(data.url, "_blank").focus();
+
+                                        },
+                                        error: function (req, error) {
+                                            unblockUI(function () {
+                                                setTimeout(function () {
+                                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                                }, 500);
+                                            });
+                                        }
+                                    });
+                                });
+
                             });
 
                             $("#btn-update-fp").unbind("click").off("click").on("click", function () {
