@@ -42,12 +42,12 @@
             }
 
             .header p {
-                font-size: 12px;
+                /*font-size: 12px;*/
                 line-height: 2px;
             }
 
             .header .sub-faktur {
-                font-size: 11px;
+                /*font-size: 11px;*/
             }
 
             /* IDENTITAS STYLE */
