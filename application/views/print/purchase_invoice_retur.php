@@ -126,6 +126,7 @@
 
             .table-total td {
                 border-bottom: 1px solid #000;
+                border-top: 1px solid #000;
                 padding: 4px 6px;
             }
 
@@ -177,6 +178,17 @@
                 line-height: 0.5;
                 font-size: 10px;
                 font-weight: 600;
+            }
+
+
+            #currency {
+                text-align: right;
+            }
+
+            #currency:before {
+                content: "$";
+                float: left;
+                padding-right: 4px;
             }
         </style>
     </head>
@@ -235,9 +247,9 @@
                 <thead>
                     <tr>
                         <th style="width: 6%;">No.</th>
-                        <th style="width: 44%;">NAMA BARANG /<br>JASA KENA PAJAK</th>
+                        <th colspan="2" style="width: 22%;">NAMA BARANG /<br>JASA KENA PAJAK</th>
                         <th style="width: 25%;">HARGA<br>SATUAN</th>
-                        <th style="width: 25%;">JUMLAH</th>
+                        <th colspan="2" style="width: 25%;">JUMLAH</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -253,51 +265,76 @@
                             <td class="valign-top">
                                 <div class="row-barang">
                                     <span><?= $value->nama_produk ?></span>
-                                    <span><?= number_format($value->qty_beli, 2) ?> &nbsp;&nbsp;&nbsp;&nbsp; <?= $value->uom_beli ?></span>
+
                                 </div>
                             </td>
                             <td class="valign-top">
+                                <div class="row-barang">
+                                    <span><?= number_format($value->qty_beli, 2) ?> &nbsp;&nbsp;&nbsp;&nbsp; <?= $value->uom_beli ?></span>
+                                </div>
+                            </td>
+
+                            <td class="valign-top text-right">
                                 <div class="row-harga">
                                     <span><?= $inv->mata_uang ?></span>
                                     <span><?= number_format($value->harga_satuan, 2) ?></span>
                                 </div>
                             </td>
-                            $
-                            <td class="valign-top text-right"><?= number_format($total, 2) ?></td>
+
+                            <td colspan="2" class="valign-top text-right"><div class="row-harga">
+                                    <span><?= $inv->mata_uang ?></span>
+                                    <span><?= number_format($total, 2) ?></span>
+                                </div></td>
                         </tr>
                         <?php
                     }
                     ?>
 
-                    <!-- Baris Kosong 2 -->
-<!--                    <tr>
-                        <td class="text-center">2</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>-->
-
                 </tbody>
+                <tfoot class="table-total">
+                    <tr>
+                        <td colspan="4" style="text-align: left; border-right: none;">Jumlah Harga BKP yang Dikembalikan</td>
+                        <td style="border-right: none; border-left: none;"></td>
+                        <td style="border-right: none; border-left: none;"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: left; border-right: none;">Dasar Pengenaan Pajak</td>
+                        <td>
+                            <span style="padding-right: 5px;"><?= $inv->mata_uang ?></span></td>
+                        <td style="border-right: none;text-align: right;">
+                            <span style="font-weight: bold;"><?= number_format($inv->total - $inv->total_tax, 2) ?></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: left; border-right: none;">Pajak Pertambahan Nilai yang diminta kembali</td>
+                        <td>
+                            <span style="padding-right: 5px;"><?= $inv->mata_uang ?></span></td>
+                        <td style="border-right: none; text-align: right;">
+                            <span style="font-weight: bold;"><?= number_format($inv->total_tax, 2) ?></span>
+                        </td>
+                    </tr>
+                </tfoot>
+
             </table>
 
             <!-- TOTAL & PAJAK -->
-            <table class="table-total">
+<!--            <table class="table-total">
                 <tr>
-                    <td style="width: 70%; text-align: left;">Jumlah Harga BKP yang Dikembalikan</td>
-                    <td style="width: 5%; border-left: 1px solid black;"></td>
-                    <td style="width: 25%; text-align: right;"></td>
+                    <td style="width: 60%; text-align: left;">Jumlah Harga BKP yang Dikembalikan</td>
+                    <td  style="width: 10%;">sasas</td>
+                    <td style="width: 25%; text-align: right;border-left: 1px solid black;"></td>
                 </tr>
                 <tr>
-                    <td style="text-align: left; font-weight: bold;">Dasar Pengenaan Pajak</td>
+                    <td style="width: 70%;text-align: left; font-weight: bold;">Dasar Pengenaan Pajak</td>
                     <td style="border-left: 1px solid black; padding-left: 5px;"><?= $inv->mata_uang ?></td>
-                    <td style="text-align: right; font-weight: bold;"><?= number_format($inv->total - $inv->total_tax, 2) ?></td>
+                    <td style="text-align: right; font-weight: bold;width: 25%; "><?= number_format($inv->total - $inv->total_tax, 2) ?></td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;">Pajak Pertambahan Nilai yang diminta kembali</td>
+                    <td style="width: 70%;text-align: left;">Pajak Pertambahan Nilai yang diminta kembali</td>
                     <td style="border-left: 1px solid black; padding-left: 5px;"><?= $inv->mata_uang ?></td>
-                    <td style="text-align: right;"><?= number_format($inv->total_tax, 2) ?></td>
+                    <td style="text-align: right;width: 25%; "><?= number_format($inv->total_tax, 2) ?></td>
                 </tr>
-            </table>
+            </table>-->
 
             <!-- TANDA TANGAN -->
             <div class="ttd-section">
