@@ -179,6 +179,7 @@ class _module extends CI_Model {
             $month = date("m");
             $year = date("Y");
         }
+        log_message("error","SELECT kode FROM penerimaan_barang WHERE month(tanggal)='{$month}' AND year(tanggal)='{$year}'  AND kode LIKE'%" . $deptid . "%' ORDER BY RIGHT(kode,5) DESC LIMIT 1");
         $result = $this->db->query("SELECT kode FROM penerimaan_barang WHERE month(tanggal)='{$month}' AND year(tanggal)='{$year}'  AND kode LIKE'%" . $deptid . "%' ORDER BY RIGHT(kode,5) DESC LIMIT 1");
         if ($result->num_rows() > 0) {
             $row = $result->row();

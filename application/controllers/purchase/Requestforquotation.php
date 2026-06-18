@@ -791,7 +791,7 @@ class Requestforquotation extends MY_Controller {
                     }
                 }
                 $method_dept = "RCV";
-                $y = date("y", strtotime($data->order_date));
+                $y = date("Y", strtotime($data->order_date));
                 $m = date("m", strtotime($data->order_date));
                 $kode_ = $this->_module->get_kode_penerimaan($method_dept,$m,$y);
                 $get_kode_in = $kode_;
