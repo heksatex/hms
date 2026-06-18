@@ -68,7 +68,7 @@
                                     <?php
                                     foreach ($allMesin as $key => $value) {
                                         ?>
-                                        <option value="<?= $value->dept_id ?>" <?= ($value->dept_id === $dept) ? "selected" : ""?>><?= $value->nama ?></option>
+                                        <option value="<?= $value->dept_id ?>" <?= ($value->dept_id === $dept) ? "selected" : "" ?>><?= $value->nama ?></option>
                                         <?php
                                     }
                                     ?>
@@ -268,17 +268,13 @@
                 });
             });
             var ipSocket = "<?= $ip_socket ?>";
-//            const socket = new WebSocket(`ws://${ipSocket}:8889`);
             const socket = new WebSocket(`${ipSocket}`);
             socket.onopen = function () {
                 console.log("Connected to server");
             };
             socket.onmessage = function (event) {
                 var data = JSON.parse(event.data);
-//                var dept = $("#mesin :selected").val();
-//                console.log(dept);
                 updateContent(data);
-//                document.getElementById("messages").innerHTML += `<p><strong>Server:</strong> ${event.data}</p>`;
             };
             $(function () {
                 $(".mesin-select2").select2({
@@ -315,7 +311,7 @@
                 $("#mesin").on("change", function () {
                     var dept_id = $(this).val();
                     var dept_nama = $("#mesin :selected").text();
-                    location.href = "<?= base_url("report/machinemonitoring") ?>"+`?dept=${dept_id}&nm=${dept_nama}`;
+                    location.href = "<?= base_url("report/machinemonitoring") ?>" + `?dept=${dept_id}&nm=${dept_nama}`;
                 });
             });
         </script>
