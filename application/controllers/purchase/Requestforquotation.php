@@ -229,10 +229,10 @@ class Requestforquotation extends MY_Controller {
             [
                 'field' => 'supplier',
                 'label' => 'Supplier',
-                'rules' => ['required','regex_match[/^[1-9][0-9]*$/]'],
+                'rules' => ['required', 'regex_match[/^[1-9][0-9]*$/]'],
                 'errors' => [
                     'required' => '{field} Harus dipilih',
-                     "regex_match" => "{field} Harus dipilih."
+                    "regex_match" => "{field} Harus dipilih."
                 ]
             ]
         ];
@@ -791,11 +791,11 @@ class Requestforquotation extends MY_Controller {
                     }
                 }
                 $method_dept = "RCV";
-                $y = date("Y", strtotime($data->order_date));
+                $y = date("y", strtotime($data->order_date));
                 $m = date("m", strtotime($data->order_date));
-                $kode_ = $this->_module->get_kode_penerimaan($method_dept,$m,$y);
+                $kode_ = $this->_module->get_kode_penerimaan($method_dept, $m, date("Y", strtotime($data->order_date)));
                 $get_kode_in = $kode_;
-                
+
                 $dgt = substr("00000" . $get_kode_in, -5);
 //                $kodeRcv = $method_dept . "/" . "IN" . "/" . date("y") . date("m") . $dgt;
                 $kodeRcv = "{$method_dept}/IN/{$y}{$m}{$dgt}";
