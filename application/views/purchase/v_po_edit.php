@@ -156,9 +156,9 @@
                         $prd = $_GET["produk"] ?? "";
                         $stt = $_GET["stt"] ?? "";
                         $data['jen_status'] = $po->status;
-                        $data["navigation_page"]=true;
-                        $data["next_page"]=$next_page ?? "";
-                        $data["prev_page"]=$prev_page ?? "";
+                        $data["navigation_page"] = true;
+                        $data["next_page"] = $next_page ?? "";
+                        $data["prev_page"] = $prev_page ?? "";
                         $this->load->view("admin/_partials/statusbar-new.php", $data);
                         $totals = 0.00;
                         $diskons = 0.00;
@@ -218,7 +218,11 @@
                                     }
                                     ?>
 
-                                <?php } ?>
+                                <?php } else if ($po->status === "cancel") {
+                                    ?>
+                                    <button class="btn btn-primary btn-sm btn_draft" data-status="draft"> Jadikan Sebagai Draft </button>
+                                <?php }
+                                ?>
                             </div>
 
                         </div>
@@ -486,11 +490,9 @@
                                                                     if ($setting !== null && $data->dpp === "1") {
                                                                         $taxe += ((($total - $diskon) * 11) / 12) * $data->amount;
 //                                                                        continue;
-                                                                    }
-                                                                    else {
+                                                                    } else {
                                                                         $taxe += ($total - $diskon) * $data->amount;
                                                                     }
-                                                                    
                                                                 }
                                                             }
                                                             $taxes += $taxe;
@@ -530,7 +532,7 @@
                                                                 <td>
                                                                     <div class="form-group">
                                                                         <div class="input-group">
-                                                                            <div class="input-group-addon"><?= number_format($value->qty_beli,2) ?></div>
+                                                                            <div class="input-group-addon"><?= number_format($value->qty_beli, 2) ?></div>
                                                                             <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
                                                                             <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                             <input type="hidden" name="id_konversiuom[<?= $value->id ?>]"  value="<?= $value->id_konversiuom ?>">
@@ -555,10 +557,10 @@
                                                                     </div>
                                                                 </td>
                                                                 <td>
-                                                                    
-                                                                        <input class="form-control pull-right text-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
-                                                                               value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
-                                                                   
+
+                                                                    <input class="form-control pull-right text-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
+                                                                           value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group text-right">
@@ -1010,10 +1012,10 @@
                             });
                         },
                         success: function (data) {
-                            if (data.redirect !== "") {
+                            if (data.redirect !== "")
                                 location.href = data.redirect;
-                            }
-                            location.reload();
+                            else
+                                location.reload();
                         }
 
                     });
@@ -1034,6 +1036,14 @@
                 $("#btn-cancel").off("click").unbind("click").on("click", function () {
                     var status = "cancel";
                     confirmRequest("Purchase Order", "Cancel Purchase Order ? ", function () {
+                        please_wait(function () {});
+                        updateStatus(status);
+                    });
+                });
+
+                $(".btn_draft").off("click").unbind("click").on("click", function () {
+                    var status = "draft";
+                    confirmRequest("Purchase Order", "Kembalikan Ke Draft ? ", function () {
                         please_wait(function () {});
                         updateStatus(status);
                     });
