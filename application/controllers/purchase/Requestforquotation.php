@@ -804,7 +804,7 @@ class Requestforquotation extends MY_Controller {
                 $insertPenerimaanDetail = clone $insertPenerimaan;
                 $dataPenerimaan = [
                     'kode' => $kodeRcv,
-                    'tanggal' => date("Y-m-d H:i:s"),
+                    'tanggal' => $data->order_date,
                     'tanggal_transaksi' => $data->order_date,
                     'tanggal_jt' => date("Y-m-d H:i:s"),
                     'origin' => $kode_decrypt,
