@@ -223,7 +223,7 @@ class Purchaseorder extends MY_Controller {
 //            if ($data->poe_status === "waiting_approve")
 //                throw new \Exception('PO dalam status WAITING APPROVE', 500);
 
-            if ($status !== "cancel") {
+            if (!in_array($status, ["cancel", "draft"])) {
                 if ($data->currency === null) {
                     throw new \Exception('Mata Uang Belum diperbaharui ', 500);
                 }
@@ -238,6 +238,7 @@ class Purchaseorder extends MY_Controller {
             }
             $this->_module->lock_tabel($lockTable);
             $updateDataDetail = [];
+            $direct = "";
             switch ($status) {
                 case "cancel":
                     $podd = new $this->m_po;
@@ -278,6 +279,11 @@ class Purchaseorder extends MY_Controller {
                     if ((int) $inshipment !== (int) $totalItem) {
                         throw new \Exception("Produk Pada RCV In dengan Origin {$kode_decrypt} Tidak dalam status <strong>DONE</strong> semua.", 500);
                     }
+                    break;
+                case "draft":
+                    $model = new $this->m_global;
+                    $model->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->delete();
+                    $direct = base_url("/purchase/requestforquotation/edit/{$id}?produk=&stt=&supplier=");
                     break;
                 case "purchase_confirmed" :
                     $status_ = 'done';
@@ -528,7 +534,7 @@ class Purchaseorder extends MY_Controller {
             }
             $po = new $this->m_po;
             $pod = clone $po;
-            $po->setWheres(["no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->update(["status" => $status]);
+            $po->setWheres(["no_po" => $kode_decrypt])->setWhereRaw("status not in ('retur')")->update(["status" => $status]);
             if (count($updateDataDetail) > 0) {
                 $pod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->updateBatch($updateDataDetail, "id");
             }
@@ -542,7 +548,7 @@ class Purchaseorder extends MY_Controller {
             $this->_module->gen_history($sub_menu, $data->no_po, 'edit', "update status ke " . $status, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success',"redirect"=>$direct)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             $this->output->set_status_header(($ex->getCode() ?? 500))
