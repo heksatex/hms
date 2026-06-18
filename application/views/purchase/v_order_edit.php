@@ -459,7 +459,7 @@
                                                             <tr>
                                                                 <td>
                                                                     <?php
-                                                                    if (count($po_items) > 1) {
+                                                                    if (count($po_items) > 0) {
                                                                         echo ($po->status === "draft") ? "<button type='button' class='btn btn-danger btn-sm delete_item' data-ids='{$value->id}'><fa class='fa fa-trash'></fa></button>" : '';
                                                                     }
                                                                     ?>
