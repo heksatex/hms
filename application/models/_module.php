@@ -173,9 +173,13 @@ class _module extends CI_Model {
         return $dgt;
     }
 
-    public function get_kode_penerimaan($deptid) {
-        $kode = $deptid . "/IN/" . date("y") . date("m");
-        $result = $this->db->query("SELECT kode FROM penerimaan_barang WHERE month(tanggal)='" . date("m") . "' AND year(tanggal)='" . date("Y") . "'  AND kode LIKE'%" . $deptid . "%' ORDER BY RIGHT(kode,5) DESC LIMIT 1");
+    public function get_kode_penerimaan($deptid,$month = "",$year = "") {
+//        $kode = $deptid . "/IN/" . date("y") . date("m");
+        if($month === "" && $year === ""){
+            $month = date("m");
+            $year = date("Y");
+        }
+        $result = $this->db->query("SELECT kode FROM penerimaan_barang WHERE month(tanggal)='{$month}' AND year(tanggal)='{$year}'  AND kode LIKE'%" . $deptid . "%' ORDER BY RIGHT(kode,5) DESC LIMIT 1");
         if ($result->num_rows() > 0) {
             $row = $result->row();
             $dgt = substr($row->kode, -5) + 1;
