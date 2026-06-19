@@ -94,7 +94,7 @@
                                                 <div class="col-xs-8 col-md-8">
                                                     <select class="form-control input-sm select2 trx_intern" name="trx_intern" id="trx_intern">
                                                         <option></option>
-                                                         <option value="tarik_tunai">Tarik Tunai</option>
+                                                        <option value="tarik_tunai">Tarik Tunai</option>
 
                                                     </select>
                                                 </div>
@@ -111,7 +111,7 @@
                                 </div>
                             </div>
                             <div class="box-footer">
-                                <div class="col-md-12 table-responsive over">
+                                <div class="col-md-12 table-responsive over PJAX">
                                     <table class="table table-condesed table-hover rlstable  over" width="100%" id="girokeluar-detail" >
                                         <thead>             
                                         <th class="style no">No.</th>
@@ -325,7 +325,8 @@
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
+                    $("#total_nominal").val(total);
+                    formatCurrency($("#total_nominal"), "blur");
                 });
 
                 $(".btn-add-item").on("click", function (e) {

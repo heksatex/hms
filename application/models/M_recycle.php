@@ -49,22 +49,43 @@ class M_recycle extends CI_Model {
         $this->db->group_by("mph.lot");
     }
 
-    public function getGo(array $where, string $select) {
+//    public function getGo(array $where, string $select) {
+//        $this->db->select($select);
+//        $this->db->from("pengiriman_barang pb");
+//        $this->db->join("pengiriman_barang_items pbi", "(pb.kode = pbi.kode and pbi.status_barang = 'done')");
+//        $this->db->join("stock_move sm", "(sm.move_id = pb.move_id and sm.status = 'done')");
+//        $this->db->join("stock_move_items smi", "smi.move_id = sm.move_id");
+//        $this->db->join("(select mp.kode_produk,mp.nama_produk,mpp.nama as produk_parent,mjk.nama_jenis_kain from mst_produk mp "
+//                . "join mst_produk_parent mpp on mp.id_parent = mpp.id "
+//                . "join mst_jenis_kain mjk on mjk.id = mp.id_jenis_kain) prod", "prod.kode_produk = pbi.kode_produk");
+//        $this->db->join("("
+//                . "select cod.*,warna.nama_warna,ro.nama as nama_route from color_order_detail cod "
+//                . "join warna on warna.id = cod.id_warna "
+//                . "join route_co ro on cod.route_co = ro.kode "
+//                . ") cod", "(cod.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',1)"
+//                . "and cod.row_order = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',-1))", "left");
+//        $this->db->where($where);
+//        $awal = "( select * from (" . $this->db->get_compiled_select();
+//        $awal .= ' UNION SELECT "N/A" ) alias limit 1)';
+//        return $awal;
+//    }
+    
+    public function getGo(array $where, string $select,$whereSMI = "lot = ''") {
         $this->db->select($select);
-        $this->db->from("pengiriman_barang pb");
+        $this->db->from("(SELECT move_id, lot FROM stock_move_items WHERE {$whereSMI}) smi");
+        $this->db->join("stock_move sm", "(sm.move_id = smi.move_id and sm.status = 'done')");
+        $this->db->join("pengiriman_barang pb", "(pb.kode = 'GRG' and pb.status = 'done')");
         $this->db->join("pengiriman_barang_items pbi", "(pb.kode = pbi.kode and pbi.status_barang = 'done')");
-        $this->db->join("stock_move sm", "(sm.move_id = pb.move_id and sm.status = 'done')");
-        $this->db->join("stock_move_items smi", "smi.move_id = sm.move_id");
-        $this->db->join("(select mp.kode_produk,mp.nama_produk,mpp.nama as produk_parent,mjk.nama_jenis_kain from mst_produk mp "
-                . "join mst_produk_parent mpp on mp.id_parent = mpp.id "
-                . "join mst_jenis_kain mjk on mjk.id = mp.id_jenis_kain) prod", "prod.kode_produk = pbi.kode_produk");
-        $this->db->join("("
-                . "select cod.*,warna.nama_warna,ro.nama as nama_route from color_order_detail cod "
-                . "join warna on warna.id = cod.id_warna "
-                . "join route_co ro on cod.route_co = ro.kode "
-                . ") cod", "(cod.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',1)"
-                . "and cod.row_order = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',-1))", "left");
-        $this->db->where($where);
+        $this->db->join("mst_produk mp", "(mp.kode_produk = pbi.kode_produk)");
+        $this->db->join("mst_produk_parent mpp", "(mpp.id = mp.id_parent)");
+        $this->db->join("mst_jenis_kain mjk", "(mjk.id = mp.id_jenis_kain)");
+//        $this->db->join("("
+//                . "select cod.*,ro.nama as nama_route from color_order_detail cod "
+//                . "join route_co ro on cod.route_co = ro.kode "
+//                . ") cod", "(cod.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',1)"
+//                . "and cod.row_order = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',-1))", "left");
+        $this->db->join("color_order_detail cod", "(cod.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3),'|',-2),'|',1) and cod.row_order = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3),'|',-2),'|',-1))","left");
+        $this->db->join("warna w", "w.id = cod.id_warna");
         $awal = "( select * from (" . $this->db->get_compiled_select();
         $awal .= ' UNION SELECT "N/A" ) alias limit 1)';
         return $awal;
