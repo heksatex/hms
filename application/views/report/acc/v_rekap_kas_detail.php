@@ -9,7 +9,7 @@ foreach ($data as $key => $value) {
         <td class="text-capitalize"><?= $kas ?></td>
         <td><?= date("Y-m-d", strtotime($value->tanggal)) ?></td>
         <td><?= ($value->partner_nama === "") ? $value->lain2 : $value->partner_nama ?></td>
-        <td title="<?=$uraian?>" ><?= substr($uraian, 1,50) ?></td>
+        <td title="<?= $uraian ?>" ><?= substr($uraian, 0, 50) ?></td>
         <td><?= $value->kode_coa ?></td>
         <td><?= $value->coa ?></td>
         <td class="text-right"><?= number_format($value->nominal, 2) ?></td>
