@@ -255,18 +255,7 @@ class Recycle extends MY_Controller {
     public function export() {
         try {
             $kp = $this->input->post("kp") ?? [];
-//            $mo = $this->input->post("mo");
-//            $corak = $this->input->post("corak");
-//            $condition = [];
-//            if (!(empty(trim($kp)))) {
-//                $condition = array_merge($condition, ["mph.lot" => $kp]);
-//            }
-//            if (!(empty(trim($mo)))) {
-//                $condition = array_merge($condition, ["mp.kode" => $mo]);
-//            }
-//            if (!(empty(trim($corak)))) {
-//                $condition = array_merge($condition, ["p.nama_produk LIKE" => "%" . $corak . "%"]);
-//            }
+
             if (is_string($kp)) {
                 $kp = json_decode($kp);
             }
@@ -289,8 +278,8 @@ class Recycle extends MY_Controller {
                     $query = $this->m_recycle->detail(array_merge($value, ["lot" => $values->kp]), true);
                     $queryDetail = array_merge($queryDetail, [$query]);
                 }
-                $listKP[] = $this->m_recycle->getGo(["pb.dept_id" => "GRG", "pb.status" => "done", "smi.lot" => $values->kp],
-                        "concat(pb.kode,'#',nama_route,'#',prod.nama_produk,'#',nama_warna,'#',produk_parent,'#',nama_jenis_kain) as go");
+                $listKP[] = $this->m_recycle->getGo([],
+                        "concat(pb.kode,'#',cod.route_co,'#',mp.nama_produk,'#',nama_warna,'#',mpp.nama,'#',nama_jenis_kain) as go","lot = '{$values->kp}'");
                 $detail = $this->m_recycle->getDetail('(' . implode(" ) UNION ALL ( ", $queryDetail) . ')');
                 $data[$keys]->detail = $detail;
                 $queryDetail = [];
@@ -623,16 +612,6 @@ class Recycle extends MY_Controller {
             }
             $perPage = 25;
             $page = $this->input->post("page") ?? 0;
-//            $condition = [];
-//            if (!(empty(trim($kp)))) {
-//                $condition = array_merge($condition, ["mph.lot" => $kp]);
-//            }
-//            if (!(empty(trim($mo)))) {
-//                $condition = array_merge($condition, ["mp.kode" => $mo]);
-//            }
-//            if (!(empty(trim($corak)))) {
-//                $condition = array_merge($condition, ["p.nama_produk LIKE" => "%" . $corak . "%"]);
-//            }
             if (is_string($kp)) {
                 throw new Exception("Silahkan Pilih KP Terlebih dahulu", 500);
             }
@@ -662,8 +641,8 @@ class Recycle extends MY_Controller {
                 $detail = $this->m_recycle->getDetail('(' . implode(" ) UNION ALL ( ", $queryDetail) . ')');
                 $header[$keys]->detail = $detail;
                 $queryDetail = [];
-                $listKP[] = $this->m_recycle->getGo(["pb.dept_id" => "GRG", "pb.status" => "done", "smi.lot" => $values->kp],
-                        "concat(pb.kode,'#',nama_route,'#',prod.nama_produk,'#',nama_warna,'#',produk_parent,'#',nama_jenis_kain) as go");
+                $listKP[] = $this->m_recycle->getGo([],
+                        "concat(pb.kode,'#',cod.route_co,'#',mp.nama_produk,'#',nama_warna,'#',mpp.nama,'#',nama_jenis_kain) as go","lot = '{$values->kp}'");
 //                log_message("error", json_encode($listKP));
             }
             $queryGo = '(' . implode(" ) UNION ALL ( ", $listKP) . ')';
