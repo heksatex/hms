@@ -179,18 +179,15 @@ class Machinemonitoringv2 extends MY_Controller {
         try {
             $model = new $this->m_global;
             $dep = $this->input->post("dept");
+            $day = $this->input->post("days");
             $sampai = date("Y-m-d");
-            $mulai = date("Y-m-d", strtotime("-7 day", strtotime($sampai)));
+            $mulai = date("Y-m-d", strtotime("{$day} day", strtotime($sampai)));
 
             $list = $model->setTables("mesin mst")
                             ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
                             ->setWheres(["date(timelog) >=" => $mulai, "date(timelog) <=" => $sampai, "dept_id" => $dep])
                             ->setSelects(["date(timelog) as tgl,count(state) as total"])
                             ->setSelects(["COUNT(log.state)*SUM(log.state=1) as running"])
-                            ->setSelects(["COUNT(log.state)*SUM(log.state=2) as no_response"])//ganti sama 2 nanti
-                            ->setSelects(["COUNT(log.state)*SUM(log.state=3) as ganti_benang"])
-                            ->setSelects(["COUNT(log.state)*SUM(log.state=4) as problem"])
-                            ->setSelects(["COUNT(log.state)*SUM(log.state=5) as no_order"])
                             ->setGroups(["date(timelog)"])->setOrder(["date(timelog)" => "asc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
