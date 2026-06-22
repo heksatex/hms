@@ -394,6 +394,16 @@
                 });
             });
             loop = 0;
+            const updateData = (() => {
+                return $.ajax({
+                    type: "post",
+                    url: "<?php echo base_url(); ?>report/machinemonitoringv2/ins_timeline",
+
+                    complete: function (jqXHR, textStatus) {
+                        unblockUI(function () {}, 200);
+                    }
+                });
+            });
             async function drawTimeline() {
                 const chartDom = document.getElementById('timeline_tricot');
                 const myChart = echarts.init(chartDom);
@@ -401,6 +411,7 @@
                 var namas = [];
                 var nama_mesin = "", count = 0;
                 const statusColors = JSON.parse('<?= json_encode($status) ?>');
+                updateData();
                 await asData().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
@@ -443,8 +454,8 @@
                         type: 'time',
                         position: 'top',
                         splitLine: {show: true, lineStyle: {color: 'grey'}},
-                        axisLabel: {color: '#999', fontSize: 10,formatter: '{HH}:{mm}'}
-                        
+                        axisLabel: {color: '#999', fontSize: 10, formatter: '{HH}:{mm}'}
+
                     },
                     yAxis: {
                         data: namas,
