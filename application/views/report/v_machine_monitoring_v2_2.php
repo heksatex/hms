@@ -240,7 +240,11 @@
                             <div class="row align-items-center">
                                 <div class="col-md-6 border-end border-light">
                                     <div class="row align-items-center">
-                                        <div class="col-md-12">
+                                        <div class="col-md-4 text-center">
+                                            <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.55rem;">Today's Utilization</div>
+                                            <div class="oee-value persen-today">0%</div>
+                                        </div>
+                                        <div class="col-md-8">
                                             <div class="row g-2">
                                                 <?php
                                                 foreach ($status as $key => $value) {
@@ -260,7 +264,7 @@
                                 <div class="col-md-6 ps-4">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <div class="small fw-bold text-muted text-uppercase" style="font-size: 0.6rem;">30-Day Utilization</div>
-                                        <div class="small fw-bold" style="color: var(--accent-blue); font-size: 0.7rem;">MTD AVG: 81.5%</div>
+                                        <div class="small fw-bold" style="color: var(--accent-blue); font-size: 0.7rem;">MTD AVG: <span class="persen-util">0</span></div>
                                     </div>
                                     <div id="trend_chart"></div>
                                 </div>
@@ -314,8 +318,8 @@
                                 <!--<div class="col-lg-2 col-md-4 col-xs-6">-->
                                 <div class="card card-<?= "d{$value->devid}" ?>" data-durasi_up="<?= $durasis->total_up ?>" data-durasi_down="<?= $durasis->total_down ?>"
                                      data-state="<?= $value->state ?>" data-totaldown = "<?= $ttlDwn ?>" data-total="<?= $value->total ?>" data-uptime="<?= $ttlUp ?>" data-downtime="<?= $ttlDwn ?>"
-                                     style="border: 1px solid <?= $border ?>;">
-                                    <div class="container" style="height: 25%;">
+                                     style="border: 1px solid black;">
+                                    <div class="container container-<?= "d{$value->devid}" ?>" style="height: 20%; background-color: <?= $border ?>; color:#ffffff">
                                         <b><?= "{$value->nama_mesin}" ?></b>
                                     </div>
                                     <img class="img-<?= "d{$value->devid}" ?> center statuss" data-status="<?= $logo ?>" src="<?= base_url("dist/img/{$logo}.png") ?>" alt="Avatar">
@@ -350,7 +354,7 @@
                 spaceBetween: 30,
                 centeredSlides: true,
                 autoplay: {
-                    delay: 25000,
+                    delay: 300000,
                     disableOnInteraction: false
                 },
                 on: {
@@ -404,6 +408,29 @@
                     }
                 });
             });
+            var runToday = 0;
+            var timeRunToday = 0;
+            async function persenToday() {
+                await asDataGrafik(0).then((res) => {
+                    var dt = res.data;
+                    dt.forEach((sd, idx) => {
+                        runToday += (sd.running / sd.total);
+                        timeRunToday += sd.total;
+                    });
+                });
+                updatePersenToday(1, false);
+            }
+            const updatePersenToday = ((state, update = true) => {
+                if (!update) {
+                    timeRunToday += 1;
+                    if (state == 1)
+                        runToday += 1;
+                }
+                var pr = (runToday / timeRunToday) * 100;
+                pr = pr.toFixed(2);
+                $(".persen-today").html(`${pr}%`);
+            })
+
             async function drawTimeline() {
                 const chartDom = document.getElementById('timeline_tricot');
                 const myChart = echarts.init(chartDom);
@@ -500,15 +527,18 @@
 
                 const dates = [];
                 const values = [];
-
+                var persens = 0;
                 await asDataGrafik().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
                         dates.push(moment(sd.tgl).format("DD MMM"));
-                        values.push(((sd.running / sd.total) / sd.total * 100));
+                        var pr = (sd.running / sd.total) / sd.total;
+                        persens += pr;
+                        values.push((pr * 100));
                     });
                 });
-
+                persens = persens.toFixed(2);
+                $(".persen-util").html(`${persens}%`);
                 const option = {
                     grid: {top: 10, bottom: 20, left: 30, right: 10},
                     xAxis: {
@@ -520,7 +550,6 @@
                     },
                     yAxis: {
                         type: 'value',
-                        min: 60, max: 100,
                         axisLabel: {fontSize: 8, color: '#999'},
                         splitLine: {lineStyle: {type: 'dashed'}}
                     },
@@ -569,11 +598,12 @@
                 }, 40);
             }
 
-            const  asDataGrafik = (() => {
+            const  asDataGrafik = ((day = - 30) => {
                 return $.ajax({
                     type: "post",
                     data: {
-                        dept: "<?= $dept ?>"
+                        dept: "<?= $dept ?>",
+                        days: day
                     },
                     url: "<?php echo base_url(); ?>report/machinemonitoringv2/get_grafiks",
                     complete: function (jqXHR, textStatus) {
@@ -598,7 +628,6 @@
                 myElements.forEach(element => {
                     var ee = element.getAttribute("data-status");
                     data[ee] += 1;
-                    console.log(data);
                 });
                 Object.keys(data).forEach(key => {
                     $(`.sum-${key}`).attr("data-val", data[key]);
@@ -650,6 +679,7 @@
                 $.each(data, function (index, val) {
                     var datas = $(`.card-d${val.devid}`).data();
                     if (datas) {
+                        updatePersenToday(datas.state);
                         if (dataMesin[`${val.devid}`] === undefined) {
                             dataMesin[`${val.devid}`] = {
                                 state: parseInt(datas.state),
@@ -716,7 +746,7 @@
                                 $(`.img-d${val.devid}`).attr("data-status", status);
                                 image.fadeIn('fast');
                             });
-                            $(`.card-d${val.devid}`).css("border", `1px solid ${border}`);
+                            $(`.container-d${val.devid}`).css("backgroundColor", `${border}`);
                         }
                         $(`.durasi-d${val.devid}`).html(dtt);
 
@@ -737,7 +767,7 @@
                 var data = JSON.parse(event.data);
                 if (data["version"] != undefined && data["version"] == 2) {
                     updateContents(data["data"]);
-                    if (loop > 35)
+                    if (loop > 10)
                         await drawTimeline();
                 }
 
@@ -752,6 +782,8 @@
 
                 $(".sum-mark_success").attr("data-val",<?= $sumGr ?>);
                 $(".sum-mark_success").html("<?= $sumGr ?>");
+
+                persenToday();
             });
         </script>
     </body>
