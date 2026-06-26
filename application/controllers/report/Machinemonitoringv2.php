@@ -84,7 +84,7 @@ class Machinemonitoringv2 extends MY_Controller {
         $data["allMesin"] = $model->setTables("mesin")
                         ->setJoins("departemen", "departemen.kode = dept_id", "left")->setWheres(["mesin.status_aktif" => "t", "devid_esp > " => 0])
                         ->setSelects(["dept_id", "departemen.nama"])->setGroups(["dept_id"])->getData();
-        
+
         if (date("H:i:s") >= $this->waktuShip1 && date("H:i:s") < $this->waktuShip2) {
             $mulai = date("Y-m-d {$this->waktuShip1}");
         } else if (date("H:i:s") >= $this->waktuShip2 && date("H:i:s") < $this->waktuShip3) {
@@ -154,7 +154,7 @@ class Machinemonitoringv2 extends MY_Controller {
         $data["status"] = $this->status;
         $data["warnaStatus"] = json_encode($this->warnaStatus);
         $data["state"] = json_encode($this->state);
-        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode"=>$dept])->getDetail();
+        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
 //        $this->load->view('report/v_machine_monitoring_v2_1', $data);
         //cobav2_2
         $this->load->view('report/v_machine_monitoring_v2_2', $data);
@@ -255,61 +255,81 @@ class Machinemonitoringv2 extends MY_Controller {
                     $tempEnd = "";
                     $temDept = "";
                     $states = "";
-//                    foreach ($items[$value["id"]] as $k => $val) {
-//                        if ($val["state"] != $states) {
-//                            $tempStt = $this->status[$val["state"]]["warna"];
-//                            $tempStar = $val["start"];
-//                            $tempEnd = $val["end"];
-//                            $temDept = $val["dept_id"];
-//                            $states = $val["state"];
-//                        } else {
-//                            $tempEnd = $val["end"];
-//                            if (!isset($items[$value["id"]][$key + 1])) {
-//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-//                            } else if ($items[$value["id"]][$key + 1]["state"] != $states) {
-//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-//                            }
-//                        }
-//                    }
 
                     foreach ($items[$value["id"]] as $k => $val) {
-                        $loop += 1;
-                        if ($tempStt === "") {
+                        if ($tempStt !== $this->status[$val["state"]]["warna"]) {
+                            if ($tempStt !== "") {
+                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
+                            }
                             $tempStt = $this->status[$val["state"]]["warna"];
                             $tempStar = $val["start"];
                             $tempEnd = $val["end"];
                             $temDept = $val["dept_id"];
+                            $states = $val["state"];
                         } else {
-                            if ($val["status"] === $tempStt) {
-                                $tempEnd = $val["end"];
-                            } else {
-                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                            if($name == "MC1"){
+                            $date1 = strtotime($tempEnd);
+                            $date2 = strtotime($val["start"]);
+                            $interval = $date2 - $date1;
+//                            log_message("error",$tempEnd." - ".$val["start"]." = ".$interval->s);
+//                            }
+                            if ($interval > 100) {
+                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
                                 $tempStt = $this->status[$val["state"]]["warna"];
                                 $tempStar = $val["start"];
                                 $tempEnd = $val["end"];
                                 $temDept = $val["dept_id"];
+                                $states = $val["state"];
+//                                continue;
+                            } else {
+                                $tempEnd = $val["end"];
                             }
-                        }
-
-                        if ($loop === 120) {
-                            $loop = 0;
-                            $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-                            $tempStt = "";
-                            $tempStar = "";
-                            $tempEnd = "";
-                            $temDept = "";
                         }
                         if (!isset($items[$value["id"]][$k + 1])) {
                             if ($tempStt !== "")
-                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
                         }
                     }
+
+//                    foreach ($items[$value["id"]] as $k => $val) {
+//                        $loop += 1;
+//                        if ($tempStt === "") {
+//                            $tempStt = $this->status[$val["state"]]["warna"];
+//                            $tempStar = $val["start"];
+//                            $tempEnd = $val["end"];
+//                            $temDept = $val["dept_id"];
+//                        } else {
+//                            if ($val["status"] === $tempStt) {
+//                                $tempEnd = $val["end"];
+//                            } else {
+//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                                $tempStt = $this->status[$val["state"]]["warna"];
+//                                $tempStar = $val["start"];
+//                                $tempEnd = $val["end"];
+//                                $temDept = $val["dept_id"];
+//                            }
+//                        }
+//
+//                        if ($loop === 120) {
+//                            $loop = 0;
+//                            $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                            $tempStt = "";
+//                            $tempStar = "";
+//                            $tempEnd = "";
+//                            $temDept = "";
+//                        }
+//                        if (!isset($items[$value["id"]][$k + 1])) {
+//                            if ($tempStt !== "")
+//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                        }
+//                    }
                 }
             }
             if (isset($insert[0])) {
-//                log_message("error",json_encode($insert));
-                $model->excQuery("truncate log_mc_timeline");
+                $model->excQuery("LOCK TABLES log_mc_timeline WRITE;");
+                $model->excQuery("truncate log_mc_timeline;");
                 $model->setTables("log_mc_timeline")->saveBatch($insert);
+                $model->excQuery("UNLOCK TABLES;");
             }
         } catch (Exception $ex) {
             log_message("error", json_encode($ex));
