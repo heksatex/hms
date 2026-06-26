@@ -250,7 +250,7 @@
                                                 foreach ($status as $key => $value) {
                                                     ?>
                                                     <div class="col-3"><div class="counter-pill" style="color: <?= $value['warna'] ?>;border-color: <?= $value['warna'] ?>">
-                                                            <div class="c-num stt-<?= $key ?>"><?= $value["jumlah"] ?></div><div class="c-lab"><?= $value["stt"] ?></div>
+                                                            <div class="c-num stt-<?= $key ?>">0</div><div class="c-lab"><?= $value["stt"] ?></div>
 
                                                         </div>
                                                     </div>
@@ -273,7 +273,7 @@
 
                         <div class="chart-card">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="text-uppercase m-0" style="font-size: 0.85rem; font-weight:800; color:var(--muted-text)">CAPTURE 24 JAM (ECHARTS OPTIMIZED)</h5>
+                                <h5 class="text-uppercase m-0" style="font-size: 0.85rem; font-weight:800; color:var(--muted-text)">CAPTURE 24 JAM</h5>
                                 <div class="d-flex">
                                     <?php foreach ($status as $key => $value) {
                                         ?>
@@ -304,7 +304,7 @@
                                 $value->state = $durasis->state;
                                 $border = $status[1]["warna"];
                                 if ($value->state != 1 && $durasis->total_down <= 10) {
-                                    $logo = "mark_warning";
+                                    $logo = "mark_danger";
                                     $border = $status[$value->state]["warna"];
                                     $sumYel += 1;
                                 } else if ($value->state != 1 && $durasis->total_down >= 11) {
@@ -337,6 +337,8 @@
                     </div>
                 </div>
             </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
         </div>
         <div class="autoplay-progress">
             <svg width="100%" height="1px">
@@ -348,21 +350,7 @@
         <script type="text/javascript" src="<?= base_url('dist/js/sliders.js') ?>"></script>
         <script type="text/javascript">
 
-            var countMesin = parseInt("<?= $count_mesin ?>", 10);
-            const progressCircle = document.querySelector('.autoplay-progress svg');
-            var swiper = new Swiper('.mySwiper', {
-                spaceBetween: 30,
-                centeredSlides: true,
-                autoplay: {
-                    delay: 300000,
-                    disableOnInteraction: false
-                },
-                on: {
-                    autoplayTimeLeft(s, time, progress) {
-                        progressCircle.style.setProperty('--progress', 1 - progress);
-                    },
-                }
-            });
+
 
 
             // --- 1. Realtime Clock ---
@@ -382,6 +370,27 @@
                 if (countMesin > 10)
                     initAutoScroll();
             };
+
+            var countMesin = parseInt("<?= $count_mesin ?>", 10);
+            const progressCircle = document.querySelector('.autoplay-progress svg');
+            var swiper = new Swiper('.mySwiper', {
+                allowTouchMove: false,
+                spaceBetween: 30,
+                centeredSlides: true,
+                autoplay: {
+                    delay: 300000,
+                    disableOnInteraction: false
+                },
+                on: {
+                    autoplayTimeLeft(s, time, progress) {
+                        progressCircle.style.setProperty('--progress', 1 - progress);
+                    }
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                }
+            });
 
             // --- 3. Timeline Chart (Custom Series) ---
 
@@ -415,13 +424,13 @@
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
                         runToday += (sd.running / sd.total);
-                        timeRunToday += sd.total;
+                        timeRunToday += parseInt(sd.total);
                     });
                 });
                 updatePersenToday(1, false);
             }
             const updatePersenToday = ((state, update = true) => {
-                if (!update) {
+                if (update) {
                     timeRunToday += 1;
                     if (state == 1)
                         runToday += 1;
@@ -476,12 +485,13 @@
                             return params.marker + params.name;
                         }
                     },
-                    grid: {height: '10%', top: '2%', left: '8%', right: '2%', containLabel: true},
+                    grid: {top: 10, bottom: 20, left: 30, right: 10, height: '10%', containLabel: true},
                     xAxis: {
                         type: 'time',
                         position: 'top',
                         splitLine: {show: true, lineStyle: {color: 'grey'}},
-                        axisLabel: {color: '#999', fontSize: 10, formatter: '{HH}:{mm}'}
+                        axisLabel: {color: '#999', fontSize: 10, formatter: '{HH}:{mm}'},
+                        minorTick: {show: true, splitNumber: 4}
 
                     },
                     yAxis: {
@@ -493,6 +503,7 @@
                     },
                     series: [{
                             type: 'custom',
+                            clickable: true,
                             renderItem: function (params, api) {
                                 let categoryIndex = api.value(0);
                                 let start = api.coord([api.value(1), categoryIndex]);
@@ -517,7 +528,8 @@
                         }]
                 };
                 loop = 0;
-                myChart.setOption(option);
+                myChart.clear();
+                myChart.setOption(option, true);
             }
 
             // --- 4. Trend Chart (Line/Area) ---
@@ -541,6 +553,11 @@
                 $(".persen-util").html(`${persens}%`);
                 const option = {
                     grid: {top: 10, bottom: 20, left: 30, right: 10},
+                    tooltip: {
+                        formatter: function (params) {
+                            return `${params.marker} ${params.name} ${params.value.toFixed(2)} %`;
+                        }
+                    },
                     xAxis: {
                         type: 'category',
                         data: dates,
@@ -551,7 +568,7 @@
                     yAxis: {
                         type: 'value',
                         axisLabel: {fontSize: 8, color: '#999'},
-                        splitLine: {lineStyle: {type: 'dashed'}}
+                        splitLine: {lineStyle: {type: 'dashed'}},
                     },
                     series: [{
                             data: values,
@@ -571,6 +588,17 @@
                 };
 
                 myChart.setOption(option);
+                myChart.getZr().on('click', function (params) {
+                    // Check if a data graphical element was clicked
+                    if (params.target) {
+                        console.log("ads");
+                        // You clicked a specific bar, line symbol, etc.
+                    } else {
+                        console.log("adsss");
+                        // You clicked on the empty chart background
+                    }
+                });
+
             }
 
             // --- 5. Auto Scroll Logic ---
@@ -705,7 +733,7 @@
                                 dataMesin[`${val.devid}`].downtime += 1;
                                 dataMesin[`${val.devid}`].durasi_down += 1;
                                 logo = base + "mark_warning.png";
-                                status = "mark_warning";
+                                status = "mark_danger";
                                 dataMesin[`${val.devid}`].uptime = 0;
                                 dataMesin[`${val.devid}`].durasi_up = 0;
                                 animasi = (dataMesin[`${val.devid}`].durasi_down <= 1) ? true : false;
