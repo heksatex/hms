@@ -166,12 +166,17 @@ class Neracastandar extends MY_Controller
                 ];
             }
         }
+        
+        
+        $start     = $this->periodesaldo->get_start_periode();
+        $tgldari   = date("d-m-Y", strtotime($start));
 
         return [
             "record" => $results,
             "total_aset" => $total_aset,
             "total_pasiva" => $total_pasiva,
-            "tanggal_neraca" => date('d-m-Y', strtotime($tgl_sampai))
+            "tanggal_neraca" => date('d-m-Y', strtotime($tgl_sampai)),
+            'tanggal_dari'  => $tgldari
         ];
     }
 
