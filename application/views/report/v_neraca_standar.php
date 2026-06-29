@@ -307,6 +307,12 @@
                         checkhidden: check_hidden
                     }];
 
+                    arr_filter_bb = [{
+                        tgldari: data.record.tanggal_dari,
+                        tglsampai: data.record.tanggal_neraca,
+                        checkhidden: check_hidden
+                    }];
+
                     // 1. Ambil list level unik dan urutkan untuk indentasi dinamis
                     let allLevels = data.record.record.map(item => item.level);
                     let sortedLevels = [...new Set(allLevels)].sort((a, b) => a - b);
@@ -351,13 +357,20 @@
                         }
 
                         // Saldo sekarang tampil di level terakhir karena perubahan backend
-                        let saldo_display = (value.saldo !== null) ? formatNumber(value.saldo) : "";
+                        let saldo = (value.saldo !== null) ? formatNumber(value.saldo) : "";
+                        let saldo_display = saldo;
+
+                        let link_bb = "viewDetailBB('" + value.kode_acc + "')";
+
+                        if(value.level == 5) {
+                            saldo_display = '<a  href="javascript:void(0)" onclick=' + link_bb + ' " title="lihat detail" style="color:#333">' + saldo_display + '</a>'
+                        } 
 
                         tr.append(
                             $("<td>").text(key + 1),
                             $("<td style='width:50px;'>").text(value.kode_acc),
                             $("<td style='width: 300px'>").html("<span style='padding-left:" + dynamicIndent + "px'>" + nama_display + "</span>"),
-                            $("<td style='width: 150px;' align='right'>").text(saldo_display)
+                            $("<td style='width: 150px;' align='right'>").html(saldo_display)
                         );
 
                         tbody.append(tr);
@@ -421,6 +434,18 @@
                 }
             });
 
+        }
+
+
+        function viewDetailBB(kode_coa) {
+            var arrStr = encodeURIComponent(JSON.stringify(arr_filter_bb));
+
+            if (arr_filter_bb.length == 0) {
+                alert_modal_warning('Generate Data terlebih dahulu !');
+            } else {
+                var url = '<?php echo base_url() ?>report/bukubesar/detail';
+                window.open(url + '?coa=' + kode_coa + '&&params=' + arrStr, '_blank');
+            }
         }
 
         $('#btn-excel').click(function() {

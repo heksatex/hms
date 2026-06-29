@@ -396,6 +396,7 @@
 
                     // --- 1. RENDER HEADER BULAN DINAMIS ---
                     $(".month-header").remove();
+                    let periodeColumns = [];
                     const namaBulanIndo = <?php echo json_encode(get_bulan_indo()); ?>;
 
                     // Re-generate header berdasarkan periode yang dikirim backend
@@ -404,6 +405,11 @@
                         let endM = (t == tahun_sampai) ? bulan_sampai : 12;
 
                         for (let m = startM; m <= endM; m++) {
+
+                            periodeColumns.push({
+                                bulan: m,
+                                tahun: t
+                            });
                             var header_text = namaBulanIndo[m] + " " + t;
                             $("#header-row").append("<th class='month-header text-right style bb' style='width: 120px;'>" + header_text + "</th>");
                         }
@@ -454,11 +460,25 @@
                             "</span>"
                         ));
 
+
                         // --- 4. LOOPING SALDO MONTHLY ---
                         // Menggunakan data array monthly yang sudah urut dari PHP
                         $.each(value.monthly, function(i, saldo) {
-                            let display = (saldo !== null) ? formatNumber(saldo) : "";
-                            tr.append($("<td align='right'>").text(display));
+                            let saldo_display = (saldo !== null) ? formatNumber(saldo) : "";
+                            
+                            if(value.level  === 5 && saldo !== null) {
+                                //style="color:#333"
+
+                                let bulan = periodeColumns[i].bulan;
+                                let tahun = periodeColumns[i].tahun;
+                                saldo_display =
+                                    '<a href="javascript:void(0)" ' +
+                                    'onclick="viewDetailBB(\'' + value.kode_acc + '\',' + bulan + ',' + tahun + ')" ' +
+                                    'title="Lihat Detail" style="color:#333">' +
+                                    formatNumber(saldo) +
+                                    '</a>';
+                            }
+                            tr.append($("<td align='right'>").html(saldo_display));
                         });
 
                         tbody.append(tr);
@@ -495,6 +515,34 @@
                     this_btn.button('reset');
                 }
             });
+        }
+
+
+        var arr_filter_bb = [];
+
+        function viewDetailBB(kode_coa, bulan, tahun) {
+
+            let lastDay = new Date(tahun, bulan, 0).getDate();
+            let checkhidden = $("#hidden_check").is(':checked');
+
+            arr_filter_bb = [{
+                coa: kode_coa,
+                tgldari: tahun + '-' + String(bulan).padStart(2, '0') + '-01',
+                tglsampai: tahun + '-' + String(bulan).padStart(2, '0') + '-' + lastDay,
+                checkhidden: checkhidden,
+            }];
+
+            var arrStr = encodeURIComponent(JSON.stringify(arr_filter_bb));
+
+            if (arr_filter_bb.length == 0) {
+                alert_modal_warning('Generate Data terlebih dahulu !');
+            } else {
+                var url = '<?php echo base_url() ?>report/bukubesar/detail';
+                window.open(
+                    url + '?coa=' + kode_coa + '&params=' + arrStr,
+                    '_blank'
+                );
+            }
         }
 
 
