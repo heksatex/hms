@@ -113,7 +113,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         }
 
         // $this->db->where_in('p.id', array(4195,4435,4494,5132,4210,5166,552));
-        $this->db->select("p.id, p.nama, $cr_condition as saldo_awal_piutang,
+        $this->db->select("p.id, p.nama, p.gol,  pg.golnama, $cr_condition as saldo_awal_piutang,
                         ($cr_condition - IFNULL(kas_um_sblm.total_kas_um,0) + IFNULL(piutang_sblm.total_piutang,0) - IFNULL(pelunasan_sblm.total_pelunasan,0) - IFNULL(retur_sblm.total_retur, 0) - IFNULL(diskon_sblm.total_diskon,0)- IFNULL(um_sblm.total_uang_muka,0) + (IFNULL(koreksi_sblm.total_koreksi,0))) + IFNULL(refund_sblm.total_refund, 0) as saldo_awal_final,
                         IFNULL(piutang.total_piutang,0) as total_piutang,
                         IFNULL(piutang.dpp_piutang,0) as dpp_piutang,
@@ -135,6 +135,7 @@ class M_bukubesarpembantupiutang extends CI_Model
                         IFNULL(refund.total_refund, 0) as total_refund
                         ");
         $this->db->from('partner p');
+        $this->db->JOIN("partner_gol as pg", "pg.id = p.gol", "left");
         $this->db->join("($subquery_faktur_sblm) as piutang_sblm", "piutang_sblm.id_partner = p.id", "left");
         $this->db->join("($subquery_faktur) as piutang", "piutang.id_partner = p.id", "left");
         $this->db->join("($subquery_pelunasan_sblm) as pelunasan_sblm", "pelunasan_sblm.id_partner = p.id", "left");
@@ -155,6 +156,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->JOIN("($subquery_deposit_pel) as depo_pel", "depo_pel.partner_id = p.id", "LEFT");
         $this->db->JOIN("($subquery_refund_sblm) as refund_sblm", "refund_sblm.partner_id = p.id", "LEFT");
         $this->db->JOIN("($subquery_refund) as refund", "refund.partner_id = p.id", "LEFT");
+        $this->db->order_by('p.gol');
         $this->db->order_by('p.nama');
         $query = $this->db->get();
         return $query->result();

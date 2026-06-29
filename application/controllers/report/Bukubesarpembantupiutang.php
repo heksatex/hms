@@ -76,38 +76,72 @@ class Bukubesarpembantupiutang extends MY_Controller
     function proses_data($tgldari, $tglsampai, $checkhidden, $currency)
     {
 
+        // $tgl_dari   = date('Y-m-d 00:00:00', strtotime($tgldari));
+        // $tgl_sampai = date('Y-m-d 23:59:59', strtotime($tglsampai));
+        // $tmp_gol   = [];
+        // $tmp_list_gol  = [];
+        // $list_gol = $this->m_bukubesarpembantupiutang->get_list_golongan();
+        // foreach ($list_gol as $gol) {
+
+        //     $where      = ['p.customer' => 1, 'p.gol' => $gol->id];
+        //     $result = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, [], $currency);
+        //     if ($result) {
+        //         $tmp_gol[] = array(
+        //             'gol_id' => $gol->id,
+        //             'gol_nama' => $gol->golnama,
+        //             'tmp_data' => $result
+        //         );
+        //     }
+        //     // $tmp_data = [];
+        //     $tmp_list_gol[] = $gol->id;
+        // }
+
+        // $where          = ['p.customer' => 1,];
+        // $where_not_in   = ['p.gol' => $tmp_list_gol];
+        // $result2 = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, $where_not_in, $currency);
+        // if ($result2) {
+        //     $tmp_gol[] = array(
+        //         'gol_id' => 0,
+        //         'gol_nama' => 'KOSONG',
+        //         'tmp_data' => $result2
+        //     );
+        // }
+
         $tgl_dari   = date('Y-m-d 00:00:00', strtotime($tgldari));
         $tgl_sampai = date('Y-m-d 23:59:59', strtotime($tglsampai));
-        $tmp_gol   = [];
-        $tmp_list_gol  = [];
-        $list_gol = $this->m_bukubesarpembantupiutang->get_list_golongan();
-        foreach ($list_gol as $gol) {
 
-            $where      = ['p.customer' => 1, 'p.gol' => $gol->id];
-            $result = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, [], $currency);
-            if ($result) {
-                $tmp_gol[] = array(
-                    'gol_id' => $gol->id,
-                    'gol_nama' => $gol->golnama,
-                    'tmp_data' => $result
-                );
+        $where = ['p.customer' => 1];
+        $result = $this->proses_data2($tgl_dari,$tgl_sampai,$checkhidden,$where,[],$currency);
+        $tmp_gol = [];
+
+        foreach ($result as $row) {
+
+            $gol_id   = !empty($row['gol_id']) ? $row['gol_id'] : 0;
+            $gol_nama = !empty($row['gol_nama']) ? $row['gol_nama'] : 'KOSONG';
+
+            if (!isset($tmp_gol[$gol_id])) {
+                $tmp_gol[$gol_id] = [
+                    'gol_id'   => $gol_id,
+                    'gol_nama' => $gol_nama,
+                    'tmp_data' => []
+                ];
             }
-            // $tmp_data = [];
-            $tmp_list_gol[] = $gol->id;
+
+            $tmp_gol[$gol_id]['tmp_data'][] = $row;
         }
 
-        $where          = ['p.customer' => 1,];
-        $where_not_in   = ['p.gol' => $tmp_list_gol];
-        $result2 = $this->proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, $where_not_in, $currency);
-        if ($result2) {
-            $tmp_gol[] = array(
-                'gol_id' => 0,
-                'gol_nama' => 'KOSONG',
-                'tmp_data' => $result2
-            );
+        // urutkan golongan 1,2,3,...
+        ksort($tmp_gol);
+
+        // pindahkan KOSONG (0) ke paling bawah
+        if (isset($tmp_gol[0])) {
+            $kosong = $tmp_gol[0];
+            unset($tmp_gol[0]);
+            $tmp_gol[] = $kosong;
         }
 
-        return $tmp_gol;
+        return array_values($tmp_gol);
+
     }
 
     function proses_data2($tgl_dari, $tgl_sampai, $checkhidden, $where, $not_in = [], $currency)
@@ -133,6 +167,8 @@ class Bukubesarpembantupiutang extends MY_Controller
             $total_refund   = (float) round($datas->total_refund, 2);
             $saldo_akhir   = round($saldo_awal - $total_kas_um + $total_piutang -  $total_pelunasan - $total_retur - $total_diskon - $total_uang_muka + ($total_koreksi) +  $total_refund, 2);
             $tmp_data[] = array(
+                'gol_id'   => $datas->gol,
+                'gol_nama' => $datas->golnama,
                 'id_partner'  => $datas->id,
                 'nama_partner' => $datas->nama,
                 'saldo_awal'  => $saldo_awal,
