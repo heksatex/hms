@@ -365,7 +365,11 @@
 
                     // --- 1. RENDER HEADER TAHUN DINAMIS ---
                     $(".year-header").remove();
+                    let periodeColumns = [];
                     for (let t = parseInt(tahun_dari); t <= parseInt(tahun_sampai); t++) {
+                        periodeColumns.push({
+                            tahun: t
+                        });
                         $("#header-row").append("<th class='year-header text-right style bb' style='width: 150px;'>Tahun " + t + "</th>");
                     }
 
@@ -415,7 +419,18 @@
                         // --- 4. LOOPING KOLOM TAHUN ---
                         $.each(value.yearly, function(idx, saldo) {
                             let saldo_display = (saldo !== null) ? formatNumber(saldo) : "";
-                            tr.append($("<td align='right'>").text(saldo_display));
+
+                             if (value.level == 5 && saldo !== null) {
+                                let tahun = periodeColumns[idx].tahun;
+
+                                saldo_display =
+                                    '<a href="javascript:void(0)" ' +
+                                    'onclick="viewDetailBB(\'' + value.kode_acc + '\',' + tahun + ')" ' +
+                                    'title="Lihat Detail" style="color:#333">' +
+                                    formatNumber(saldo) +
+                                    '</a>';
+                            }
+                            tr.append($("<td align='right'>").html(saldo_display));
                         });
 
                         tbody.append(tr);
@@ -461,6 +476,30 @@
 
                 }
             });
+        }
+
+
+        var arr_filter_bb = [];
+
+        function viewDetailBB(kode_coa, tahun)
+        {
+            let checkhidden = $("#hidden_check").is(':checked');
+
+            arr_filter_bb = [{
+                coa: kode_coa,
+                tgldari: tahun + '-01-01',
+                tglsampai: tahun + '-12-31',
+                checkhidden: checkhidden
+            }];
+
+            var arrStr = encodeURIComponent(JSON.stringify(arr_filter_bb));
+
+            var url = '<?php echo base_url() ?>report/bukubesar/detail';
+
+            window.open(
+                url + '?coa=' + kode_coa + '&params=' + arrStr,
+                '_blank'
+            );
         }
 
 
