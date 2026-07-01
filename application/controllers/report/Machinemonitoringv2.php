@@ -45,7 +45,7 @@ class Machinemonitoringv2 extends MY_Controller {
             'jumlah' => 0
         ],
         '5' => [
-            'stt' => 'Tunggu Benang / No Order',
+            'stt' => 'No Order',
             'warna' => '',
             'jumlah' => 0
         ]
@@ -143,6 +143,7 @@ class Machinemonitoringv2 extends MY_Controller {
                 }
                 continue;
             }
+            $value->status =$this->status[$value->state]["stt"];
             $value->total_up = $value->uptime / $value->total;
             $value->total_down = $value->downtime / $value->total;
             $value->total_up_text = $this->con_min_days($value->total_up);
@@ -160,11 +161,23 @@ class Machinemonitoringv2 extends MY_Controller {
         $this->load->view('report/v_machine_monitoring_v2_2', $data);
     }
 
+    public function detail($dept = "WRD") {
+        $model = new $this->m_global;
+        $dt = $this->input->get("date") ?? date("d M");
+        $data["msn"] = $this->input->get("mesin") ?? "";
+        $data["warnaStatus"] = json_encode($this->warnaStatus);
+        $dateObj = DateTime::createFromFormat("d M Y", "{$dt} " . date("Y"));
+        $data["date"] = $dateObj->format("Y-m-d");
+        $data["mesin"] = $model->setTables("mesin mst")->setWheres(["devid_esp >" => 0, "dept_id" => $dept])->getData();
+        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
+        $this->load->view('report/v_machine_monitoring_v2_2_detail', $data);
+    }
+
     public function get_items() {
         try {
             $model = new $this->m_global;
             $dep = $this->input->post("dept");
-            $items = $model->setTables("log_mc_timeline")->setWheres(["dept_id" => $dep])->getData();
+            $items = $model->setTables("log_mc_timeline")->setWheres(["dept_id" => $dep])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "desc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $items)));
@@ -336,6 +349,100 @@ class Machinemonitoringv2 extends MY_Controller {
         }
     }
 
+    protected function detailQuery() {
+        try {
+            $mesin = $this->input->post("mesin");
+            $tanggal = $this->input->post("date");
+            $tanggals = explode(" - ", $tanggal);
+
+            $model = new $this->m_global;
+
+            $model->setTables("log_mesin")
+                    ->setJoins("mesin", "(mesin.devid_esp = log_mesin.devid and mesin.devid_esp > 0)")
+                    ->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running"])
+                    ->setSelects(["COUNT(IF(state = '2', 1, NULL)) as noresp"])
+                    ->setSelects(["COUNT(IF(state = '3', 1, NULL)) as benang"])
+                    ->setSelects(["COUNT(IF(state = '4', 1, NULL)) as problem"])
+                    ->setSelects(["COUNT(IF(state = '5', 1, NULL)) as noorder"])
+                    ->setSelects(["mesin.nama_mesin as mesin,state,date(timelog) as tgl"])
+                    ->setSearch(["nama_mesin"])
+                    ->setGroups(["devid"])
+                    ->setWheres(["date(timelog) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(timelog) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+            if (!empty($mesin))
+                $model->setWheres(["devid" => $mesin]);
+
+            return $model;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function detail_table() {
+        try {
+            $model = $this->detailQuery();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($model->getData() as $field) {
+                $no++;
+                $data[] = [
+                    $no,
+                    $field->mesin,
+                    $field->running,
+                    $field->noresp,
+                    $field->benang,
+                    $field->problem,
+                    $field->noorder
+                ];
+            }
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => $model->getDataCountAll(),
+                "recordsFiltered" => $model->getDataCountFiltered(),
+                "data" => $data,
+            ));
+            exit();
+        } catch (Exception $ex) {
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => [],
+            ));
+        }
+    }
+
+    public function get_graph() {
+        try {
+            $model = $this->detailQuery()->setGroups(["devid", "date(timelog)"], true);
+            $list = [];
+            $mesin = [];
+            $date = [];
+            foreach ($model->getData() as $key => $value) {
+
+                if (!in_array($value->tgl, $date))
+                    $date[] = $value->tgl;
+                if (!$arr = self::in_array_r($value->mesin, $list)) {
+                    $mesin[] = $value->mesin;
+                    $list[] = [
+                        "name" => $value->mesin,
+                        "type" => "line",
+                        "stack" => "total",
+                        "data" => [$value->running]
+                    ];
+                    continue;
+                }
+
+//                log_message("error",array_keys($arr));
+                array_push($list[array_keys($arr)[0]]["data"], $value->running);
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $list, "mesin" => $mesin, "date" => $date)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
     protected function con_min_days($mins) {
 
         $hours = str_pad(floor($mins / 60), 2, "0", STR_PAD_LEFT);
@@ -353,5 +460,15 @@ class Machinemonitoringv2 extends MY_Controller {
             return "{$mins} Min";
         }
         return "{$hours} Hours, {$mins} Min";
+    }
+
+    protected function in_array_r($needle, $haystack, $strict = false) {
+        foreach ($haystack as $key => $item) {
+            if (($strict ? $item === $needle : $item == $needle) || (is_array($item) && self::in_array_r($needle, $item, $strict))) {
+                return [$key => $item];
+            }
+        }
+
+        return false;
     }
 }
