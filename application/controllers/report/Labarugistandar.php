@@ -199,7 +199,9 @@ class Labarugistandar extends MY_Controller
 
         return [
             "record" => $results,
-            "laba_bersih" => $laba_bersih
+            "laba_bersih" => $laba_bersih,
+            'tanggal_dari'  => date('d-m-Y', strtotime($tgldari)),
+            "tanggal_sampai" => date('d-m-Y', strtotime($tglsampai)),
         ];
     }
 

@@ -197,6 +197,8 @@ class Bukubesar extends MY_Controller
                             'saldo_awal'=>$saldo_awal,
                             'debit'=>$total_debit,
                             'credit'=>$total_credit,
+                            'debit_valas'=> floatval($datas->total_debit_valas),
+                            'credit_valas'=> floatval($datas->total_credit_valas),
                             'saldo_akhir' => floatval($saldo_akhir)
 
             );
@@ -252,6 +254,8 @@ class Bukubesar extends MY_Controller
                     'keterangan' => $datas2->keterangan,
                     'debit' => $debit,
                     'credit' => $credit,
+                    'debit_valas'=> floatval($datas2->total_debit_valas),
+                    'credit_valas'=> floatval($datas2->total_credit_valas),
                     'saldo_akhir' => ($saldo_akhir)
                 );
                 $saldo_awal = $saldo_akhir;
@@ -309,7 +313,9 @@ class Bukubesar extends MY_Controller
                         'origin' => $datas->origin,
                         'keterangan' => $datas->keterangan,
                         'debit_or_credit' => floatval($datas->total), // debit or credit
+                        'debit_or_credit_valas' => floatval($datas->total_valas), // debit or credit
                         'lawan' => $datas2->kode_coa." - ".$datas2->nama_coa,
+                        'lawan_valas' => $datas2->kode_coa." - ".$datas2->nama_coa,
                         'nominal' => floatval($datas2->total)
                     );
 
@@ -322,7 +328,9 @@ class Bukubesar extends MY_Controller
                         'origin' => '',
                         'keterangan' =>'',
                         'debit_or_credit' => '', // debit or credit
+                        'debit_or_credit_valas' => '', // debit or credit
                         'lawan' => $datas2->kode_coa." - ".$datas2->nama_coa,
+                        'lawan_valas' => $datas2->kode_coa." - ".$datas2->nama_coa,
                         'nominal' => floatval($datas2->total)
                     );
                 }
@@ -370,18 +378,18 @@ class Bukubesar extends MY_Controller
 
             // SET JUDUL
             $sheet->SetCellValue('A'.$rowCount, 'PT. HEKSATEX INDAH');
-            $sheet->mergeCells('A'.$rowCount.':h'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':j'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $rowCount++;
 
             $sheet->SetCellValue('A'.$rowCount, 'BUKU BESAR GLOBAL');
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':j'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $rowCount++;
 
             // set periode
             $sheet->SetCellValue('A'.$rowCount, ''.$periode );
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':j'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 
@@ -413,7 +421,7 @@ class Bukubesar extends MY_Controller
                 // )
             );	
 
-            $table_head_columns  = array('No', 'Kode Acc','Nama Acc','Saldo Normal','Saldo Awal','Debit','Credit','Saldo Akhir');
+            $table_head_columns  = array('No', 'Kode Acc','Nama Acc','Saldo Normal','Saldo Awal','Debit Valas','Credit Valas','Debit','Credit','Saldo Akhir');
 			$column = 0;
 			foreach ($table_head_columns as $field) {
 				$object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);  
@@ -421,7 +429,7 @@ class Bukubesar extends MY_Controller
 			}
 	
 			// set width and border
-			$index_header = array('A','B','C','D','E','F','G','H');
+			$index_header = array('A','B','C','D','E','F','G','H','I','J');
 			$loop = 0;
 			foreach ($index_header as $val) {
 
@@ -445,6 +453,8 @@ class Bukubesar extends MY_Controller
             $s_akhir = 0;
             $debit = 0;
             $credit = 0;
+            $debit_valas = 0;
+            $credit_valas = 0;
             $num  = 1;
             $rowCount = $rowCount + 3;
             foreach($data as $row){
@@ -453,19 +463,25 @@ class Bukubesar extends MY_Controller
 				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row['nama_acc']);
 				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row['saldo_normal']);
 				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row['saldo_awal']);
-				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row['debit']);
-				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row['credit']);
-				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row['saldo_akhir']);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row['debit_valas']);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row['credit_valas']);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row['debit']);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row['credit']);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row['saldo_akhir']);
 
 				$object->getActiveSheet()->getStyle('E'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 				$object->getActiveSheet()->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 				$object->getActiveSheet()->getStyle('G'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 				$object->getActiveSheet()->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
                 $s_akhir = $s_akhir + $row['saldo_akhir'];
                 $s_awal = $s_awal + $row['saldo_awal'];
                 $debit = $debit + $row['debit'];
                 $credit = $credit + $row['credit'];
+                $debit_valas = $debit_valas + $row['debit_valas'];
+                $credit_valas = $credit_valas + $row['credit_valas'];
                 $rowCount++;
             }
 
@@ -473,9 +489,11 @@ class Bukubesar extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('A'.$rowCount, '');
             $sheet->mergeCells('A'.$rowCount.':D'.$rowCount);
 			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $s_awal);
-			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $debit);
-			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $credit);
-			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $s_akhir);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $debit_valas);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $credit_valas);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $debit);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $credit);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $s_akhir);
 			
             $object->getActiveSheet()->getStyle('E'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
             $object->getActiveSheet()->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
@@ -578,29 +596,29 @@ class Bukubesar extends MY_Controller
             $periode = tgl_indo(date('d-m-Y',strtotime($tgl_dari))) .' - '.tgl_indo(date('d-m-Y',strtotime($tgl_sampai)));
             // set Judul
             $sheet->SetCellValue('A'.$rowCount, 'PT. HEKSATEX INDAH');
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $rowCount++;
 
             // set Judul
             $sheet->SetCellValue('A'.$rowCount, 'BUKU BESAR DETAIL');
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $rowCount++;
 
 
             // set periode
             $sheet->SetCellValue('A'.$rowCount, $periode );
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             $rowCount = 4;
             $sheet->SetCellValue('A'.$rowCount, $gc->kode_coa.' - '.$gc->nama.' - '.$views);
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             //bold huruf
-            $activeSheet->getStyle("A1:H5")->getFont()->setBold(true);
+            $activeSheet->getStyle("A1:J5")->getFont()->setBold(true);
 
             // Border 
             $styleArray = array(
@@ -632,20 +650,22 @@ class Bukubesar extends MY_Controller
             $num      = 1;
             $total_credit  = 0;
             $total_debit   = 0;
+            $total_credit_valas  = 0;
+            $total_debit_valas   = 0;
             foreach($data as $datas){
 
                 // nama acc
                 $activeSheet->SetCellValue('A'.$rowCount, $datas['kode_acc'] . ' - ' . $datas['nama_acc']);
-                $activeSheet->mergeCells('A'.$rowCount.':H'.$rowCount);
-                $activeSheet->getStyle("A".$rowCount.":H".$rowCount)->getFont()->setBold(true);
+                $activeSheet->mergeCells('A'.$rowCount.':J'.$rowCount);
+                $activeSheet->getStyle("A".$rowCount.":J".$rowCount)->getFont()->setBold(true);
                 $activeSheet->getRowDimension($rowCount)->setRowHeight(24); // height acc
-				$object->getActiveSheet()->getStyle("A".$rowCount.":H".$rowCount)->applyFromArray($styleArrayColor);
+				$object->getActiveSheet()->getStyle("A".$rowCount.":J".$rowCount)->applyFromArray($styleArrayColor);
 
 
                 $rowCount++;
                 // thead
                 $this->create_thead($rowCount, $activeSheet,$activeSheet,$view);
-                $activeSheet->getStyle("A".$rowCount.":H".$rowCount)->getFont()->setBold(true);
+                $activeSheet->getStyle("A".$rowCount.":J".$rowCount)->getFont()->setBold(true);
 
                 // saldo Awal
                 $rowCount++;
@@ -654,8 +674,10 @@ class Bukubesar extends MY_Controller
                 $activeSheet->mergeCells('B'.$rowCount.':E'.$rowCount);
 				$activeSheet->SetCellValue('F'.$rowCount, 0.00);
 				$activeSheet->SetCellValue('G'.$rowCount, 0.00);
-				$activeSheet->SetCellValue('H'.$rowCount, $datas['saldo_awal']);
-				$activeSheet->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+				$activeSheet->SetCellValue('h'.$rowCount, 0.00);
+				$activeSheet->SetCellValue('i'.$rowCount, 0.00);
+				$activeSheet->SetCellValue('j'.$rowCount, $datas['saldo_awal']);
+				$activeSheet->getStyle('j'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
                 $rowCount++;
                 $saldo_akhir = $datas['saldo_awal'];
@@ -666,18 +688,24 @@ class Bukubesar extends MY_Controller
                     	$activeSheet->SetCellValue('C'.$rowCount, $datas2['kode_entries']);
                     	$activeSheet->SetCellValue('D'.$rowCount, $datas2['origin']);
                     	$activeSheet->SetCellValue('E'.$rowCount, $datas2['keterangan']);
-                    	$activeSheet->SetCellValue('F'.$rowCount, $datas2['debit']);
-                    	$activeSheet->SetCellValue('G'.$rowCount, $datas2['credit']);
-                    	$activeSheet->SetCellValue('H'.$rowCount, $datas2['saldo_akhir']);
+                    	$activeSheet->SetCellValue('F'.$rowCount, $datas2['debit_valas']);
+                    	$activeSheet->SetCellValue('G'.$rowCount, $datas2['credit_valas']);
+                    	$activeSheet->SetCellValue('H'.$rowCount, $datas2['debit']);
+                    	$activeSheet->SetCellValue('I'.$rowCount, $datas2['credit']);
+                    	$activeSheet->SetCellValue('J'.$rowCount, $datas2['saldo_akhir']);
 
 				        $activeSheet->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
 				        $activeSheet->getStyle('G'.$rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
 				        $activeSheet->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
+				        $activeSheet->getStyle('I'.$rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
+				        $activeSheet->getStyle('J'.$rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
 
                     $num++;
                     $rowCount++;
                     $total_debit = $total_debit + $datas2['debit'];
                     $total_credit = $total_credit + $datas2['credit'];
+                    $total_debit_valas = $total_debit_valas + $datas2['debit_valas'];
+                    $total_credit_valas = $total_credit_valas + $datas2['credit_valas'];
                     $saldo_akhir = $datas2['saldo_akhir'];
                 }
                 $num=1;
@@ -687,12 +715,16 @@ class Bukubesar extends MY_Controller
                 $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
 				$activeSheet->SetCellValue('C'.$rowCount, $datas['saldo_awal']); // Saldo Awal
                 $activeSheet->SetCellValue('E'.$rowCount, 'Total : ');
-                $activeSheet->SetCellValue('F'.$rowCount, $total_debit);
-                $activeSheet->SetCellValue('G'.$rowCount, $total_credit);
+                $activeSheet->SetCellValue('F'.$rowCount, $total_debit_valas);
+                $activeSheet->SetCellValue('G'.$rowCount, $total_credit_valas);
+                $activeSheet->SetCellValue('H'.$rowCount, $total_debit);
+                $activeSheet->SetCellValue('I'.$rowCount, $total_credit);
 				$activeSheet->getStyle('C'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 				$activeSheet->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 				$activeSheet->getStyle('G'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $object->getActiveSheet()->getStyle("A".$rowCount.":H".$rowCount)->applyFromArray($styleArrayColor);
+				$activeSheet->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+				$activeSheet->getStyle('I'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $object->getActiveSheet()->getStyle("A".$rowCount.":j".$rowCount)->applyFromArray($styleArrayColor);
                 $rowCount++;
 
                 $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Akhir :');
@@ -704,7 +736,7 @@ class Bukubesar extends MY_Controller
                 $activeSheet->SetCellValue('F'.$rowCount, $mutasi_saldo);
 				$activeSheet->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
-                $object->getActiveSheet()->getStyle("A".$rowCount.":H".$rowCount)->applyFromArray($styleArrayColor);
+                $object->getActiveSheet()->getStyle("A".$rowCount.":J".$rowCount)->applyFromArray($styleArrayColor);
                 
 
                 $total_credit  = 0;
@@ -784,29 +816,29 @@ class Bukubesar extends MY_Controller
             $periode = tgl_indo(date('d-m-Y',strtotime($tgl_dari))) .' - '.tgl_indo(date('d-m-Y',strtotime($tgl_sampai)));
             // set Judul
             $sheet->SetCellValue('A'.$rowCount, 'PT. HEKSATEX INDAH');
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $rowCount++;
 
             // set Judul
             $sheet->SetCellValue('A'.$rowCount, 'BUKU BESAR DETAIL');
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $rowCount++;
 
 
             // set periode
             $sheet->SetCellValue('A'.$rowCount, $periode );
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             $rowCount = 4;
             $sheet->SetCellValue('A'.$rowCount, $gc->kode_coa.' - '.$gc->nama.' - '.$views);
-            $sheet->mergeCells('A'.$rowCount.':H'.$rowCount);
+            $sheet->mergeCells('A'.$rowCount.':J'.$rowCount);
             $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             //bold huruf
-            $activeSheet->getStyle("A1:H6")->getFont()->setBold(true);
+            $activeSheet->getStyle("A1:J6")->getFont()->setBold(true);
 
             // Border 
             $styleArray = array(
@@ -854,22 +886,26 @@ class Bukubesar extends MY_Controller
                 $activeSheet->SetCellValue('C' . $rowCount, $datas['kode_entries']);
                 $activeSheet->SetCellValue('D' . $rowCount, $datas['origin']);
                 $activeSheet->SetCellValue('E' . $rowCount, $datas['keterangan']);
-                $activeSheet->SetCellValue('F' . $rowCount, $datas['debit_or_credit']);
-                $activeSheet->SetCellValue('G' . $rowCount, $datas['lawan']);
-                $activeSheet->SetCellValue('H' . $rowCount, $datas['nominal']);
+                $activeSheet->SetCellValue('F' . $rowCount, $datas['debit_or_credit_valas']);
+                $activeSheet->SetCellValue('G' . $rowCount, $datas['lawan_valas']);
+                $activeSheet->SetCellValue('h' . $rowCount, $datas['debit_or_credit']);
+                $activeSheet->SetCellValue('i' . $rowCount, $datas['lawan']);
+                $activeSheet->SetCellValue('j' . $rowCount, $datas['nominal']);
 
                 $activeSheet->getStyle('F' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
                 $activeSheet->getStyle('G' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
                 $activeSheet->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
+                $activeSheet->getStyle('I' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
+                $activeSheet->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
 
                 $num++;
                 $rowCount++;
                 $total_nominal = $total_nominal + $datas['nominal'];
             }
 
-            $activeSheet->SetCellValue('F' . $rowCount, 0.00);
-            $activeSheet->SetCellValue('H' . $rowCount, $total_nominal);
-            $activeSheet->getStyle('H' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
+            // $activeSheet->SetCellValue('F' . $rowCount, 0.00);
+            $activeSheet->SetCellValue('J' . $rowCount, $total_nominal);
+            $activeSheet->getStyle('J' . $rowCount)->getNumberFormat()->setFormatCode('#,##0. 00');
 
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
             $object->save('php://output');
@@ -898,11 +934,11 @@ class Bukubesar extends MY_Controller
     function create_thead($rowCount, $activeSheet, $getSheet,$view)
     {
         if($view == 'N'){
-            $table_head_columns  = array('No', 'Tanggal', 'Kode Entries', 'Origin', 'Keterangan', 'Debit', 'Credit', 'Saldo');
+            $table_head_columns  = array('No', 'Tanggal', 'Kode Entries', 'Origin', 'Keterangan', 'Debit Valas', 'Credit Valas', 'Debit', 'Credit', 'Saldo');
         } else if ($view == 'D'){
-            $table_head_columns  = array('No', 'Tanggal', 'Kode Entries', 'Origin', 'Keterangan', 'Debit', 'Credit (Lawan)', 'Saldo');
+            $table_head_columns  = array('No', 'Tanggal', 'Kode Entries', 'Origin', 'Keterangan', 'Debit Valas', 'Credit Valas (Lawan)', 'Debit', 'Credit (Lawan)', 'Saldo');
         } else {
-            $table_head_columns  = array('No', 'Tanggal', 'Kode Entries', 'Origin', 'Keterangan', 'Credit', 'Debit (Lawan)', 'Saldo');
+            $table_head_columns  = array('No', 'Tanggal', 'Kode Entries', 'Origin', 'Keterangan', 'Credit Valas', 'Debit Valas (Lawan)', 'Credit', 'Debit (Lawan)', 'Saldo');
         }
         $column = 0;
         foreach ($table_head_columns as $field) {
@@ -911,7 +947,7 @@ class Bukubesar extends MY_Controller
         }
 
         // set width and border
-        $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H');
+        $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'i', 'J');
         $loop = 0;
         foreach ($index_header as $val) {
 

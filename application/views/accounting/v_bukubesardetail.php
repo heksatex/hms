@@ -167,14 +167,16 @@
                                                         <th class='style bb' style="min-width: 105px; width:105px;">Kode Entries</th>
                                                         <th class='style bb' style="min-width: 100px; max-width: 220px; width:100px;">Origin</th>
                                                         <th class='style bb' style="min-width: 200px">Keterangan</th>
-                                                        <th class='style bb' style="min-width: 150px; width:100px;">Debit</th>
-                                                        <th class='style bb' style="min-width: 150px; width:100px;">Credit</th>
-                                                        <th class='style bb' style="min-width: 150px; width:100px;">Saldo</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Debit Valas</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Credit Valas</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Debit</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Credit</th>
+                                                        <th class='style bb text-right' style="min-width: 150px; width:100px;">Saldo</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="8">Tidak ada Data</td>
+                                                        <td colspan="10">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -367,6 +369,8 @@
                                 $("<td>").html('SALDO AWAL'),
                                 $("<td align='right'>").text(0.00),
                                 $("<td align='right'>").text(0.00),
+                                $("<td align='right'>").text(0.00),
+                                $("<td align='right'>").text(0.00),
                                 $("<td align='right'>").text(formatNumber(value.saldo_awal.toFixed(2))),
                             );
 
@@ -375,6 +379,8 @@
                             acc = '';
                             debit = 0;
                             credit = 0;
+                            debit_valas = 0;
+                            credit_valas = 0;
                             s_akhir = value.saldo_awal;
                             $.each(value.tmp_data_isi, function(key, value2) {
                                 linkUrl = "<?php echo site_url('accounting/jurnalentries/edit/') ?>" + value2.kode_entries_encr;
@@ -386,6 +392,8 @@
                                     $("<td align=''>").html(noBuktiHtml),
                                     $("<td align=''>").text(value2.origin),
                                     $("<td class='ket-acc'>").text(value2.keterangan),
+                                    $("<td align='right'>").text(formatNumber(value2.debit_valas.toFixed(2))),
+                                    $("<td align='right'>").text(formatNumber(value2.credit_valas.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value2.debit.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value2.credit.toFixed(2))),
                                     $("<td align='right'>").text(formatNumber(value2.saldo_akhir.toFixed(2))),
@@ -393,6 +401,8 @@
                                 tbody.append(tr3);
                                 debit = debit + value2.debit;
                                 credit = credit + value2.credit;
+                                debit_valas = debit_valas + value2.debit_valas;
+                                credit_valas = credit_valas + value2.credit_valas;
                                 s_akhir = value2.saldo_akhir;
                             });
 
@@ -401,6 +411,8 @@
                             var tr4 = $("<tr>").append(
                                 $("<td colspan='4' class='style_space'>").text(''),
                                 $("<td class='style_space text-right'>").html('<b>Total : ' + value.kode_acc + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit_valas.toFixed(2)) + '</b>'),
+                                $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit_valas.toFixed(2)) + '</b>'),
                                 $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit.toFixed(2)) + '</b>'),
                                 $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit.toFixed(2)) + '</b>'),
                                 $("<td class='style_space text-right'>").html('<b>' + formatNumber(s_akhir.toFixed(2)) + '</b>'),
@@ -409,7 +421,7 @@
                         });
 
                         if (empty == true) {
-                            var tr = $("<tr>").append($("<td colspan='8'>").text('Tidak ada Data'));
+                            var tr = $("<tr>").append($("<td colspan='10'>").text('Tidak ada Data'));
                             tbody.append(tr);
                         } else {
                             // tbody.append("<tr><td colspan='8'>&nbsp</td></tr>");
