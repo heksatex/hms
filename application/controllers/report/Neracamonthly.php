@@ -17,6 +17,11 @@ class Neracamonthly extends MY_Controller
     {
         $id_dept        = 'RKNM';
         $data['id_dept'] = $id_dept;
+        $start          = $this->periodesaldo->get_start_periode();
+        $thn_start       = date("Y", strtotime($start));
+        $bln_start       = date("Y", strtotime($start));
+        $data['tahun_start']  = $thn_start;
+        $data['bulan_start']  = $bln_start;
         $this->load->view('report/v_neraca_monthly', $data);
     }
 

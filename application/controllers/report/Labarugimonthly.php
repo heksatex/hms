@@ -9,12 +9,18 @@ class Labarugimonthly extends MY_Controller
     {
         parent::__construct();
         $this->is_loggedin(); //cek apakah user sudah login
+        $this->load->library('periodesaldo');
     }
 
     public function index()
     {
         $id_dept        = 'RKLRM';
         $data['id_dept'] = $id_dept;
+        $start          = $this->periodesaldo->get_start_periode();
+        $thn_start       = date("Y", strtotime($start));
+        $bln_start       = date("Y", strtotime($start));
+        $data['tahun_start']  = $thn_start;
+        $data['bulan_start']  = $bln_start;
         $this->load->view('report/v_laba_rugi_monthly', $data);
     }
 
