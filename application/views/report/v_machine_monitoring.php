@@ -60,9 +60,9 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title"><strong>Mesin Monitoring <?= $dept_nm ?> (Realtime Update)</strong></h3>
+                            <h3 class="box-title"><strong>Mesin Monitoring <?= $departmen->nama ?> (Realtime Update)</strong></h3>
                             <div class="pull-right" id="btn-header">
-                                Mesin : 
+<!--                                Mesin : 
                                 <select class="mesin-select2" id="mesin">
                                     <option value=""></option>
                                     <?php
@@ -72,7 +72,7 @@
                                         <?php
                                     }
                                     ?>
-                                </select>
+                                </select>-->
                                 &nbsp;&nbsp;&nbsp;
                                 Summary : 
                                 <span class="label label-danger sum-mark_danger" style="background-color: red; color: black;" data-val="0">0</span>
