@@ -136,10 +136,12 @@
                                             <select class="form-control input-sm" name="tahun_dari" id="tahun_dari">
                                                 <?php
                                                 $thn_skr = date('Y');
+                                                $thn_start = $tahun_start;
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
                                                     // Default pilih 3 tahun kebelakang untuk perbandingan
-                                                    $selected = ($x == $thn_skr - 2) ? 'selected' : '';
-                                                    echo "<option value='$x' $selected>$x</option>";
+                                                    $disabled = ($x < $thn_start) ? 'disabled' : '';
+                                                    $selected = ($x == $thn_skr - 2  && $disabled == '' ) ? 'selected' : '';
+                                                    echo "<option value='$x' $selected $disabled>$x</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -150,9 +152,11 @@
                                         <div class="col-md-3">
                                             <select class="form-control input-sm" name="tahun_sampai" id="tahun_sampai">
                                                 <?php
+                                                $thn_start = $tahun_start;
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
                                                     $selected = ($x == $thn_skr) ? 'selected' : '';
-                                                    echo "<option value='$x' $selected>$x</option>";
+                                                    $disabled = ($x < $tahun_start) ? 'disabled' : '';
+                                                    echo "<option value='$x' $selected $disabled>$x</option>";
                                                 }
                                                 ?>
                                             </select>

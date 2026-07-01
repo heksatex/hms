@@ -297,11 +297,12 @@
 
                             empty = false;
 
-                            func2 = "view_detail2('" + value.kode_acc + "')";
+                            let link_bb = "view_detail2('" + value.kode_acc + "')";
+                            nama_display = '<a  href="javascript:void(0)" onclick=' + link_bb + ' " title="lihat detail">' + value.nama_acc + '</a>'
                             var tr = $("<tr>").append(
                                 $("<td>").html(no),
                                 $("<td align=''>").text(value.kode_acc),
-                                $("<td align=''>").text(value.nama_acc),
+                                $("<td align=''>").html(nama_display),
                                 $("<td align='right'>").text(formatNumber(value.saldo_awal_debit.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.saldo_awal_credit.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.mutasi_debit.toFixed(2))),

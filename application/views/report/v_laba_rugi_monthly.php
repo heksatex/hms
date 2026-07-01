@@ -151,8 +151,10 @@
                                             <select class="form-control input-sm" name="tahun_dari" id="tahun_dari">
                                                 <?php
                                                 $thn_skr = date('Y');
+                                                $thn_start = $tahun_start;
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
-                                                    echo "<option value='$x'>$x</option>";
+                                                    $disabled  = ($x < $thn_start) ? 'disabled' : '';
+                                                    echo "<option value='$x' $disabled>$x</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -173,8 +175,10 @@
                                             <select class="form-control input-sm" name="tahun_sampai" id="tahun_sampai">
                                                 <?php
                                                 $thn_skr = date('Y');
+                                                $thn_start = $tahun_start;
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
-                                                    echo "<option value='$x'>$x</option>";
+                                                    $disabled  = ($x < $thn_start) ? 'disabled' : '';
+                                                    echo "<option value='$x' $disabled>$x</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -410,6 +414,7 @@
 
                     // --- 1. RENDER HEADER DINAMIS (Support Lintas Tahun) ---
                     $(".month-header").remove();
+                    let periodeColumns = [];
                     const namaBulanIndo = <?php echo json_encode(get_bulan_indo()); ?>;
 
                     // Buat iterasi bulan menggunakan Date
@@ -421,6 +426,10 @@
                     while (curr <= end) {
                         let m = curr.getMonth() + 1;
                         let t = curr.getFullYear();
+                        periodeColumns.push({
+                            bulan: m,
+                            tahun: t
+                        });
                         var header_text = namaBulanIndo[m] + " " + t;
                         $("#header-row").append("<th class='month-header text-right style bb ' style='width: 120px;'>" + header_text + "</th>");
 
@@ -474,15 +483,26 @@
 
                         // --- 4. LOOPING SALDO LINTAS TAHUN ---
                         let currData = new Date(start);
+                        let i = 0;
                         while (currData <= end) {
                             let m = currData.getMonth() + 1;
                             let t = currData.getFullYear();
                             let keyDate = t + "-" + m;
                             let saldo = value.monthly[keyDate];
+                            let display = (saldo !== undefined && saldo !== null) ? formatNumber(saldo) : "";
+                            
+                            if(value.level === 5 && saldo !== null) {
+                                let bulan = periodeColumns[i].bulan;
+                                let tahun = periodeColumns[i].tahun;
+                                display   = '<a href="javascript:void(0)" ' +
+                                    'onclick="viewDetailBB(\'' + value.kode_acc + '\',' + bulan + ',' + tahun + ')" ' +
+                                    'title="Lihat Detail" style="color:#333">' +
+                                    formatNumber(saldo) +
+                                    '</a>';
+                                i++;
+                            }
 
-                            let display = (saldo !== undefined && saldo !== null) ? formatNumber(saldo) : "0.00";
-                            tr.append($("<td align='right'>").text(display));
-
+                            tr.append($("<td align='right'>").html(display));
                             currData.setMonth(currData.getMonth() + 1); // ✅ DIPERBAIKI: Jangan setMonth(setMonth())
                         }
 
@@ -520,6 +540,34 @@
                     this_btn.button('reset');
                 }
             });
+        }
+
+
+        var arr_filter_bb = [];
+
+        function viewDetailBB(kode_coa, bulan, tahun) {
+
+            let lastDay = new Date(tahun, bulan, 0).getDate();
+            let checkhidden = $("#hidden_check").is(':checked');
+
+            arr_filter_bb = [{
+                coa: kode_coa,
+                tgldari: tahun + '-' + String(bulan).padStart(2, '0') + '-01',
+                tglsampai: tahun + '-' + String(bulan).padStart(2, '0') + '-' + lastDay,
+                checkhidden: checkhidden,
+            }];
+
+            var arrStr = encodeURIComponent(JSON.stringify(arr_filter_bb));
+
+            if (arr_filter_bb.length == 0) {
+                alert_modal_warning('Generate Data terlebih dahulu !');
+            } else {
+                var url = '<?php echo base_url() ?>report/bukubesar/detail';
+                window.open(
+                    url + '?coa=' + kode_coa + '&params=' + arrStr,
+                    '_blank'
+                );
+            }
         }
 
 

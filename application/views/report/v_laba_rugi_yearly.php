@@ -136,10 +136,12 @@
                                             <select class="form-control input-sm" name="tahun_dari" id="tahun_dari">
                                                 <?php
                                                 $thn_skr = date('Y');
+                                                $thn_start = $tahun_start;
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
                                                     // Default pilih 3 tahun kebelakang untuk perbandingan
-                                                    $selected = ($x == $thn_skr - 2) ? 'selected' : '';
-                                                    echo "<option value='$x' $selected>$x</option>";
+                                                    $disabled = ($x < $thn_start) ? 'disabled' : '';
+                                                    $selected = ($x == $thn_skr - 2 && $disabled == '') ? 'selected' : '';
+                                                    echo "<option value='$x' $selected $disabled>$x</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -150,9 +152,11 @@
                                         <div class="col-md-3">
                                             <select class="form-control input-sm" name="tahun_sampai" id="tahun_sampai">
                                                 <?php
+                                                $thn_start = $tahun_start;
                                                 for ($x = $thn_skr; $x >= 2020; $x--) {
                                                     $selected = ($x == $thn_skr) ? 'selected' : '';
-                                                    echo "<option value='$x' $selected>$x</option>";
+                                                    $disabled = ($x < $thn_start) ? 'disabled' : '';
+                                                    echo "<option value='$x' $selected $disabled>$x</option>";
                                                 }
                                                 ?>
                                             </select>
@@ -404,7 +408,9 @@
 
                     // --- 1. RENDER HEADER TAHUN DINAMIS ---
                     $(".year-header").remove();
+                    let periodeColumns = [];
                     for (let th = tahun_dari; th <= tahun_sampai; th++) {
+                        periodeColumns.push({tahun : th});
                         $("#header-row").append("<th class='year-header text-right style bb' style='width: 120px;'>" + th + "</th>");
                     }
 
@@ -460,10 +466,22 @@
                         ));
 
                         // --- 4. LOOPING SALDO PER TAHUN ---
+                        let i = 0;
                         for (let th = tahun_dari; th <= tahun_sampai; th++) {
                             let saldo = value.yearly[th];
                             let display = (saldo !== null) ? formatNumber(saldo) : "";
-                            tr.append($("<td align='right'>").text(display));
+
+                            if(value.level === 5 & saldo != null) {
+                                let tahun = periodeColumns[i].tahun;
+                                display =
+                                    '<a href="javascript:void(0)" ' +
+                                    'onclick="viewDetailBB(\'' + value.kode_acc + '\',' + tahun + ')" ' +
+                                    'title="Lihat Detail" style="color:#333">' +
+                                    formatNumber(saldo) +
+                                    '</a>';
+                                i++;
+                            }
+                            tr.append($("<td align='right'>").html(display));
                         }
 
                         tbody.append(tr);
@@ -495,6 +513,29 @@
                     this_btn.button('reset');
                 }
             });
+        }
+
+        var arr_filter_bb = [];
+
+        function viewDetailBB(kode_coa, tahun)
+        {
+            let checkhidden = $("#hidden_check").is(':checked');
+
+            arr_filter_bb = [{
+                coa: kode_coa,
+                tgldari: tahun + '-01-01',
+                tglsampai: tahun + '-12-31',
+                checkhidden: checkhidden
+            }];
+
+            var arrStr = encodeURIComponent(JSON.stringify(arr_filter_bb));
+
+            var url = '<?php echo base_url() ?>report/bukubesar/detail';
+
+            window.open(
+                url + '?coa=' + kode_coa + '&params=' + arrStr,
+                '_blank'
+            );
         }
 
         $('#btn-excel').click(function() {
