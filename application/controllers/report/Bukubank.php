@@ -161,7 +161,6 @@ class Bukubank extends MY_Controller {
             $data["saldo"] = $this->_getSaldoAwal();
             $data["data"] = $model->getData();
             $data["curr"] = $this->input->post("curr");
-            log_message("error", json_encode($data["saldo"]));
             $html = $this->load->view('report/acc/v_buku_bank_detail', $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

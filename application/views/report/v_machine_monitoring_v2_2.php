@@ -2,7 +2,7 @@
 <html lang="id">
     <head>
         <meta charset="UTF-8">
-        <title>HMS - <?= $departmen->nama ?? "" ?> OEE Dashboard (ECharts Version)</title>
+        <title>HMS - <?= $departmen->nama ?? "" ?> OEE Dashboard</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="<?= base_url('dist/css/slider.css'); ?>" />
@@ -57,8 +57,8 @@
             }
             .counter-pill {
                 background: #f8f9fa;
-                border-radius: 8px;
-                padding: 8px 15px;
+                border-radius: 4px;
+                /*padding: 8px 15px;*/
                 border-left: 4px solid #dee2e6;
                 text-align: center;
             }
@@ -95,7 +95,7 @@
                 background-color: var(--card-light);
                 border-radius: 12px;
                 margin: 0 12px;
-                padding: 20px;
+                padding: 10px;
                 border: 1px solid #dee2e6;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.03);
             }
@@ -118,7 +118,7 @@
 
             .legend-pill {
                 padding: 4px 12px;
-                border-radius: 5px;
+                border-radius: 3px;
                 font-size: 0.8rem;
                 font-weight: 700;
                 margin-left: 8px;
@@ -209,17 +209,71 @@
                 .card {
                     width: 10%;
                 }
+                .oee-value {
+                    font-size: 2.5rem;
+                }
+                #trend_chart {
+                    height: 90px;
+                }
+                .c-num {
+                    font-size: 1.4rem;
+                    font-weight: 800;
+                }
+                title {
+                    font-size: 1rem;
+                }
+                .timestamp {
+                    font-size: 1rem;
+                }
+                .summary-wrapper {
+                    margin: 10px;
+                    padding: 12px;
+                }
+                .legend-pill {
+                    padding: 3px 10px;
+                }
             }
             @media screen and (max-width:1000px) {
                 .card {
                     width: 12%;
                 }
+                .oee-value {
+                    font-size: 2rem;
+                }
+                #trend_chart {
+                    height: 80px;
+                }
+                .c-num {
+                    font-size: 1rem;
+                    font-weight: 700;
+                }
+                title {
+                    font-size: 0.8rem;
+                }
+                .timestamp {
+                    font-size: 0.8rem;
+                }
+                .summary-wrapper {
+                    margin: 8px;
+                    padding: 10px;
+                }
+                .legend-pill {
+                    padding: 2px 8px;
+                }
             }
+
+
+
             img.center {
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
                 width: 50%;
+            }
+            span.center {
+                text-align: center;
+                font-size: 0.9rem;
+                font-weight: 600;
             }
             .durasi-text {
                 font-size: 11px;
@@ -248,9 +302,17 @@
                                             <div class="row g-2">
                                                 <?php
                                                 foreach ($status as $key => $value) {
+                                                    $total = 0;
+                                                    foreach ($mesin as $k => $val) {
+                                                        $durasis = $durasi["d{$val->devid}"];
+                                                        if ($durasis->state == $key)
+                                                            $total += 1;
+                                                    }
+                                                    $state[$durasis->state] = $total;
                                                     ?>
-                                                    <div class="col-3"><div class="counter-pill" style="color: <?= $value['warna'] ?>;border-color: <?= $value['warna'] ?>">
-                                                            <div class="c-num stt-<?= $key ?>"><?= $value["jumlah"] ?></div><div class="c-lab"><?= $value["stt"] ?></div>
+                                                    <div class="col-4">
+                                                        <div class="counter-pill" style="color: <?= $value['warna'] ?>;border-color: <?= $value['warna'] ?>">
+                                                            <div class="c-num stt-<?= $key ?>"><?= $total ?></div><div class="c-lab"><?= $value["stt"] ?></div>
 
                                                         </div>
                                                     </div>
@@ -272,8 +334,8 @@
                         </div>
 
                         <div class="chart-card">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="text-uppercase m-0" style="font-size: 0.85rem; font-weight:800; color:var(--muted-text)">CAPTURE 24 JAM (ECHARTS OPTIMIZED)</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="text-uppercase m-0" style="font-size: 0.8rem; font-weight:800; color:var(--muted-text)">CAPTURE 24 JAM</h5>
                                 <div class="d-flex">
                                     <?php foreach ($status as $key => $value) {
                                         ?>
@@ -304,7 +366,7 @@
                                 $value->state = $durasis->state;
                                 $border = $status[1]["warna"];
                                 if ($value->state != 1 && $durasis->total_down <= 10) {
-                                    $logo = "mark_warning";
+                                    $logo = "mark_danger";
                                     $border = $status[$value->state]["warna"];
                                     $sumYel += 1;
                                 } else if ($value->state != 1 && $durasis->total_down >= 11) {
@@ -322,7 +384,8 @@
                                     <div class="container container-<?= "d{$value->devid}" ?>" style="height: 20%; background-color: <?= $border ?>; color:#ffffff">
                                         <b><?= "{$value->nama_mesin}" ?></b>
                                     </div>
-                                    <img class="img-<?= "d{$value->devid}" ?> center statuss" data-status="<?= $logo ?>" src="<?= base_url("dist/img/{$logo}.png") ?>" alt="Avatar">
+                                    <span style="padding-top: 15px" class="center statuss statuss-<?= "d{$value->devid}" ?>" data-status="<?= $value->state ?>"><?= $durasis->status ?></span>
+                                    <!--<img class="img-<?= "d{$value->devid}" ?> center statuss" data-status="<?= $logo ?>" src="<?= base_url("dist/img/{$logo}.png") ?>" alt="Avatar">-->
                                     <div class="container" style="word-wrap: break-word;">
                                         <p title="Downtime Shift Sekarang">Downtime : <span class="down-<?= "d{$value->devid}" ?>"><?= round(($ttlDwn / $value->total) * 100) ?></span> %</p>
                                         <span class="durasi-text durasi-<?= "d{$value->devid}" ?>"><?= ($value->state == 0) ? "Running : {$durasis->total_up_text}" : "Stop : {$durasis->total_down_text}" ?></span>
@@ -337,6 +400,8 @@
                     </div>
                 </div>
             </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
         </div>
         <div class="autoplay-progress">
             <svg width="100%" height="1px">
@@ -348,21 +413,7 @@
         <script type="text/javascript" src="<?= base_url('dist/js/sliders.js') ?>"></script>
         <script type="text/javascript">
 
-            var countMesin = parseInt("<?= $count_mesin ?>", 10);
-            const progressCircle = document.querySelector('.autoplay-progress svg');
-            var swiper = new Swiper('.mySwiper', {
-                spaceBetween: 30,
-                centeredSlides: true,
-                autoplay: {
-                    delay: 300000,
-                    disableOnInteraction: false
-                },
-                on: {
-                    autoplayTimeLeft(s, time, progress) {
-                        progressCircle.style.setProperty('--progress', 1 - progress);
-                    },
-                }
-            });
+
 
 
             // --- 1. Realtime Clock ---
@@ -382,6 +433,27 @@
                 if (countMesin > 10)
                     initAutoScroll();
             };
+
+            var countMesin = parseInt("<?= $count_mesin ?>", 10);
+            const progressCircle = document.querySelector('.autoplay-progress svg');
+            var swiper = new Swiper('.mySwiper', {
+                allowTouchMove: false,
+                spaceBetween: 30,
+                centeredSlides: true,
+                autoplay: {
+                    delay: 300000,
+                    disableOnInteraction: false
+                },
+                on: {
+                    autoplayTimeLeft(s, time, progress) {
+                        progressCircle.style.setProperty('--progress', 1 - progress);
+                    }
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                }
+            });
 
             // --- 3. Timeline Chart (Custom Series) ---
 
@@ -415,13 +487,13 @@
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
                         runToday += (sd.running / sd.total);
-                        timeRunToday += sd.total;
+                        timeRunToday += parseInt(sd.total);
                     });
                 });
                 updatePersenToday(1, false);
             }
             const updatePersenToday = ((state, update = true) => {
-                if (!update) {
+                if (update) {
                     timeRunToday += 1;
                     if (state == 1)
                         runToday += 1;
@@ -476,12 +548,20 @@
                             return params.marker + params.name;
                         }
                     },
-                    grid: {height: '10%', top: '2%', left: '8%', right: '2%', containLabel: true},
+                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '120px', containLabel: true},
                     xAxis: {
                         type: 'time',
                         position: 'top',
                         splitLine: {show: true, lineStyle: {color: 'grey'}},
-                        axisLabel: {color: '#999', fontSize: 10, formatter: '{HH}:{mm}'}
+                        axisLabel: {color: '#999', fontSize: 10, formatter: '{HH}:{mm}'},
+                        minorTick: {show: true, splitNumber: 2, length: 3},
+                        minorSplitLine: {
+                            show: true, // Menampilkan garis grid minor (opsional)
+                            lineStyle: {
+                                color: '#ddd', // Warna garis grid kecil
+                                type: 'dashed'  // Tipe garis grid kecil
+                            }
+                        }
 
                     },
                     yAxis: {
@@ -489,15 +569,17 @@
                         splitLine: {show: true, lineStyle: {color: '#F0F0F0'}},
                         axisLine: {show: false},
                         axisTick: {show: false},
-                        axisLabel: {fontWeight: 'bold', color: '#333'}
+                        axisLabel: {fontWeight: 'bold', color: '#333'},
+                        triggerEvent: true
                     },
                     series: [{
                             type: 'custom',
+                            clickable: true,
                             renderItem: function (params, api) {
                                 let categoryIndex = api.value(0);
                                 let start = api.coord([api.value(1), categoryIndex]);
                                 let end = api.coord([api.value(2), categoryIndex]);
-                                let height = api.size([0, 1])[1] * 0.6; // Tinggi bar 60% dari baris
+                                let height = api.size([0, 1])[1] * 0.9; // Tinggi bar 60% dari baris
 
                                 return {
                                     type: 'rect',
@@ -513,11 +595,20 @@
                             },
                             itemStyle: {opacity: 0.9},
                             encode: {x: [1, 2], y: 0},
-                            data: data
+                            data: data,
+                            triggerEvent: false
                         }]
                 };
                 loop = 0;
-                myChart.setOption(option);
+                myChart.clear();
+                myChart.setOption(option, true);
+                myChart.on('click', function (params) {
+                    // Check if a data graphical element was clicked
+                    if (typeof params.value === "string") {
+                        window.open("<?= base_url('report/machinemonitoringv2/detail?mesin=') ?>" + params.value, "_blank");
+                        // You clicked a specific bar, line symbol, etc.
+                    }
+                });
             }
 
             // --- 4. Trend Chart (Line/Area) ---
@@ -541,6 +632,11 @@
                 $(".persen-util").html(`${persens}%`);
                 const option = {
                     grid: {top: 10, bottom: 20, left: 30, right: 10},
+                    tooltip: {
+                        formatter: function (params) {
+                            return `${params.marker} ${params.name} ${params.value.toFixed(2)} %`;
+                        }
+                    },
                     xAxis: {
                         type: 'category',
                         data: dates,
@@ -571,6 +667,14 @@
                 };
 
                 myChart.setOption(option);
+                myChart.on('click', function (params) {
+                    // Check if a data graphical element was clicked
+                    if (params.name) {
+                        window.open("<?= base_url('report/machinemonitoringv2/detail?date=') ?>" + params.name, "_blank");
+                        // You clicked a specific bar, line symbol, etc.
+                    }
+                });
+
             }
 
             // --- 5. Auto Scroll Logic ---
@@ -705,7 +809,7 @@
                                 dataMesin[`${val.devid}`].downtime += 1;
                                 dataMesin[`${val.devid}`].durasi_down += 1;
                                 logo = base + "mark_warning.png";
-                                status = "mark_warning";
+                                status = "mark_danger";
                                 dataMesin[`${val.devid}`].uptime = 0;
                                 dataMesin[`${val.devid}`].durasi_up = 0;
                                 animasi = (dataMesin[`${val.devid}`].durasi_down <= 1) ? true : false;
@@ -738,16 +842,17 @@
                         }
 
 
-                        if (animasi) {
-                            var image = $(`.img-d${val.devid}`);
-
-                            image.fadeOut("fast", function () {
-                                $(`.img-d${val.devid}`).attr("src", logo);
-                                $(`.img-d${val.devid}`).attr("data-status", status);
-                                image.fadeIn('fast');
-                            });
-                            $(`.container-d${val.devid}`).css("backgroundColor", `${border}`);
-                        }
+//                        if (animasi) {
+//                            var image = $(`.img-d${val.devid}`);
+//
+//                            image.fadeOut("fast", function () {
+//                                $(`.img-d${val.devid}`).attr("src", logo);
+//                                $(`.img-d${val.devid}`).attr("data-status", status);
+//                                image.fadeIn('fast');
+//                            });
+                        $(`.statuss-${val.devid}`).html(stts[val.state]["stt"]);
+                        $(`.container-d${val.devid}`).css("backgroundColor", `${border}`);
+//                        }
                         $(`.durasi-d${val.devid}`).html(dtt);
 
                         //                        $(`.card-d${val.devid}p${val.port}`).attr("data-total", datas.total);

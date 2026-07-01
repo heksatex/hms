@@ -29,11 +29,11 @@ class Machinemonitoring extends MY_Controller {
         $this->load->driver('cache', array('adapter' => 'file'));
     }
 
-    public function index($depth = 'RPTMM') {
-        $dept = $_GET["dept"] ?? "";
-        $dept_nm = $_GET["nm"] ?? "";
+    public function index($dept = "JAC",$depth = 'RPTMM') {
+//        $dept = $dept;
+//        $dept_nm = $_GET["nm"] ?? "";
         $data["dept"] = $dept;
-        $data["dept_nm"] = $dept_nm;
+        $data["dept_nm"] = "";
 
         $ip = $_SERVER['REMOTE_ADDR']; // Mengambil IP pengunjung
 
@@ -116,6 +116,7 @@ class Machinemonitoring extends MY_Controller {
                         ->setJoins("departemen", "departemen.kode = dept_id", "left")->setWheres(["mesin.status_aktif" => "t", "port_ard > " => 0])
                         ->setSelects(["dept_id", "departemen.nama"])->setGroups(["dept_id"])->getData();
 //        log_message("error",json_encode($durasi));
+        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
         $this->load->view('report/v_machine_monitoring', $data);
     }
 

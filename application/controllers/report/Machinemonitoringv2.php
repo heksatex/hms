@@ -45,7 +45,7 @@ class Machinemonitoringv2 extends MY_Controller {
             'jumlah' => 0
         ],
         '5' => [
-            'stt' => 'Tunggu Benang / No Order',
+            'stt' => 'No Order',
             'warna' => '',
             'jumlah' => 0
         ]
@@ -84,7 +84,7 @@ class Machinemonitoringv2 extends MY_Controller {
         $data["allMesin"] = $model->setTables("mesin")
                         ->setJoins("departemen", "departemen.kode = dept_id", "left")->setWheres(["mesin.status_aktif" => "t", "devid_esp > " => 0])
                         ->setSelects(["dept_id", "departemen.nama"])->setGroups(["dept_id"])->getData();
-        
+
         if (date("H:i:s") >= $this->waktuShip1 && date("H:i:s") < $this->waktuShip2) {
             $mulai = date("Y-m-d {$this->waktuShip1}");
         } else if (date("H:i:s") >= $this->waktuShip2 && date("H:i:s") < $this->waktuShip3) {
@@ -143,6 +143,7 @@ class Machinemonitoringv2 extends MY_Controller {
                 }
                 continue;
             }
+            $value->status =$this->status[$value->state]["stt"];
             $value->total_up = $value->uptime / $value->total;
             $value->total_down = $value->downtime / $value->total;
             $value->total_up_text = $this->con_min_days($value->total_up);
@@ -154,17 +155,29 @@ class Machinemonitoringv2 extends MY_Controller {
         $data["status"] = $this->status;
         $data["warnaStatus"] = json_encode($this->warnaStatus);
         $data["state"] = json_encode($this->state);
-        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode"=>$dept])->getDetail();
+        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
 //        $this->load->view('report/v_machine_monitoring_v2_1', $data);
         //cobav2_2
         $this->load->view('report/v_machine_monitoring_v2_2', $data);
+    }
+
+    public function detail($dept = "WRD") {
+        $model = new $this->m_global;
+        $dt = $this->input->get("date") ?? date("d M");
+        $data["msn"] = $this->input->get("mesin") ?? "";
+        $data["warnaStatus"] = json_encode($this->warnaStatus);
+        $dateObj = DateTime::createFromFormat("d M Y", "{$dt} " . date("Y"));
+        $data["date"] = $dateObj->format("Y-m-d");
+        $data["mesin"] = $model->setTables("mesin mst")->setWheres(["devid_esp >" => 0, "dept_id" => $dept])->getData();
+        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
+        $this->load->view('report/v_machine_monitoring_v2_2_detail', $data);
     }
 
     public function get_items() {
         try {
             $model = new $this->m_global;
             $dep = $this->input->post("dept");
-            $items = $model->setTables("log_mc_timeline")->setWheres(["dept_id" => $dep])->getData();
+            $items = $model->setTables("log_mc_timeline")->setWheres(["dept_id" => $dep])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "desc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $items)));
@@ -255,64 +268,178 @@ class Machinemonitoringv2 extends MY_Controller {
                     $tempEnd = "";
                     $temDept = "";
                     $states = "";
-//                    foreach ($items[$value["id"]] as $k => $val) {
-//                        if ($val["state"] != $states) {
-//                            $tempStt = $this->status[$val["state"]]["warna"];
-//                            $tempStar = $val["start"];
-//                            $tempEnd = $val["end"];
-//                            $temDept = $val["dept_id"];
-//                            $states = $val["state"];
-//                        } else {
-//                            $tempEnd = $val["end"];
-//                            if (!isset($items[$value["id"]][$key + 1])) {
-//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-//                            } else if ($items[$value["id"]][$key + 1]["state"] != $states) {
-//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-//                            }
-//                        }
-//                    }
 
                     foreach ($items[$value["id"]] as $k => $val) {
-                        $loop += 1;
-                        if ($tempStt === "") {
+                        if ($tempStt !== $this->status[$val["state"]]["warna"]) {
+                            if ($tempStt !== "") {
+                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
+                            }
                             $tempStt = $this->status[$val["state"]]["warna"];
                             $tempStar = $val["start"];
                             $tempEnd = $val["end"];
                             $temDept = $val["dept_id"];
+                            $states = $val["state"];
                         } else {
-                            if ($val["status"] === $tempStt) {
-                                $tempEnd = $val["end"];
-                            } else {
-                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                            if($name == "MC1"){
+                            $date1 = strtotime($tempEnd);
+                            $date2 = strtotime($val["start"]);
+                            $interval = $date2 - $date1;
+//                            log_message("error",$tempEnd." - ".$val["start"]." = ".$interval->s);
+//                            }
+                            if ($interval > 100) {
+                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
                                 $tempStt = $this->status[$val["state"]]["warna"];
                                 $tempStar = $val["start"];
                                 $tempEnd = $val["end"];
                                 $temDept = $val["dept_id"];
+                                $states = $val["state"];
+//                                continue;
+                            } else {
+                                $tempEnd = $val["end"];
                             }
-                        }
-
-                        if ($loop === 120) {
-                            $loop = 0;
-                            $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-                            $tempStt = "";
-                            $tempStar = "";
-                            $tempEnd = "";
-                            $temDept = "";
                         }
                         if (!isset($items[$value["id"]][$k + 1])) {
                             if ($tempStt !== "")
-                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
                         }
                     }
+
+//                    foreach ($items[$value["id"]] as $k => $val) {
+//                        $loop += 1;
+//                        if ($tempStt === "") {
+//                            $tempStt = $this->status[$val["state"]]["warna"];
+//                            $tempStar = $val["start"];
+//                            $tempEnd = $val["end"];
+//                            $temDept = $val["dept_id"];
+//                        } else {
+//                            if ($val["status"] === $tempStt) {
+//                                $tempEnd = $val["end"];
+//                            } else {
+//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                                $tempStt = $this->status[$val["state"]]["warna"];
+//                                $tempStar = $val["start"];
+//                                $tempEnd = $val["end"];
+//                                $temDept = $val["dept_id"];
+//                            }
+//                        }
+//
+//                        if ($loop === 120) {
+//                            $loop = 0;
+//                            $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                            $tempStt = "";
+//                            $tempStar = "";
+//                            $tempEnd = "";
+//                            $temDept = "";
+//                        }
+//                        if (!isset($items[$value["id"]][$k + 1])) {
+//                            if ($tempStt !== "")
+//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
+//                        }
+//                    }
                 }
             }
             if (isset($insert[0])) {
-//                log_message("error",json_encode($insert));
-                $model->excQuery("truncate log_mc_timeline");
+                $model->excQuery("LOCK TABLES log_mc_timeline WRITE;");
+                $model->excQuery("truncate log_mc_timeline;");
                 $model->setTables("log_mc_timeline")->saveBatch($insert);
+                $model->excQuery("UNLOCK TABLES;");
             }
         } catch (Exception $ex) {
             log_message("error", json_encode($ex));
+        }
+    }
+
+    protected function detailQuery() {
+        try {
+            $mesin = $this->input->post("mesin");
+            $tanggal = $this->input->post("date");
+            $tanggals = explode(" - ", $tanggal);
+
+            $model = new $this->m_global;
+
+            $model->setTables("log_mesin")
+                    ->setJoins("mesin", "(mesin.devid_esp = log_mesin.devid and mesin.devid_esp > 0)")
+                    ->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running"])
+                    ->setSelects(["COUNT(IF(state = '2', 1, NULL)) as noresp"])
+                    ->setSelects(["COUNT(IF(state = '3', 1, NULL)) as benang"])
+                    ->setSelects(["COUNT(IF(state = '4', 1, NULL)) as problem"])
+                    ->setSelects(["COUNT(IF(state = '5', 1, NULL)) as noorder"])
+                    ->setSelects(["mesin.nama_mesin as mesin,state,date(timelog) as tgl"])
+                    ->setSearch(["nama_mesin"])
+                    ->setGroups(["devid"])
+                    ->setWheres(["date(timelog) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(timelog) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+            if (!empty($mesin))
+                $model->setWheres(["devid" => $mesin]);
+
+            return $model;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function detail_table() {
+        try {
+            $model = $this->detailQuery();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($model->getData() as $field) {
+                $no++;
+                $data[] = [
+                    $no,
+                    $field->mesin,
+                    $field->running,
+                    $field->noresp,
+                    $field->benang,
+                    $field->problem,
+                    $field->noorder
+                ];
+            }
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => $model->getDataCountAll(),
+                "recordsFiltered" => $model->getDataCountFiltered(),
+                "data" => $data,
+            ));
+            exit();
+        } catch (Exception $ex) {
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => [],
+            ));
+        }
+    }
+
+    public function get_graph() {
+        try {
+            $model = $this->detailQuery()->setGroups(["devid", "date(timelog)"], true);
+            $list = [];
+            $mesin = [];
+            $date = [];
+            foreach ($model->getData() as $key => $value) {
+
+                if (!in_array($value->tgl, $date))
+                    $date[] = $value->tgl;
+                if (!$arr = self::in_array_r($value->mesin, $list)) {
+                    $mesin[] = $value->mesin;
+                    $list[] = [
+                        "name" => $value->mesin,
+                        "type" => "line",
+                        "stack" => "total",
+                        "data" => [$value->running]
+                    ];
+                    continue;
+                }
+
+//                log_message("error",array_keys($arr));
+                array_push($list[array_keys($arr)[0]]["data"], $value->running);
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $list, "mesin" => $mesin, "date" => $date)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
@@ -333,5 +460,15 @@ class Machinemonitoringv2 extends MY_Controller {
             return "{$mins} Min";
         }
         return "{$hours} Hours, {$mins} Min";
+    }
+
+    protected function in_array_r($needle, $haystack, $strict = false) {
+        foreach ($haystack as $key => $item) {
+            if (($strict ? $item === $needle : $item == $needle) || (is_array($item) && self::in_array_r($needle, $item, $strict))) {
+                return [$key => $item];
+            }
+        }
+
+        return false;
     }
 }
