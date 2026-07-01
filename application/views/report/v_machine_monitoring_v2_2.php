@@ -301,6 +301,7 @@
                                         <div class="col-md-8">
                                             <div class="row g-2">
                                                 <?php
+                                                $states = [];
                                                 foreach ($status as $key => $value) {
                                                     $total = 0;
                                                     foreach ($mesin as $k => $val) {
@@ -308,7 +309,7 @@
                                                         if ($durasis->state == $key)
                                                             $total += 1;
                                                     }
-                                                    $state[$durasis->state] = $total;
+                                                    $states["{$durasis->state}"] = $total;
                                                     ?>
                                                     <div class="col-4">
                                                         <div class="counter-pill" style="color: <?= $value['warna'] ?>;border-color: <?= $value['warna'] ?>">
@@ -318,6 +319,7 @@
                                                     </div>
                                                     <?php
                                                 }
+                                                $state = json_encode($states);
                                                 ?>
                                             </div>
                                         </div>
@@ -738,7 +740,7 @@
                     $(`.sum-${key}`).html(data[key]);
                     //                    console.log(key, data[key]); // Prints "name Jean-Luc Picard" then "rank Captain"
                 });
-                var dt = JSON.parse('<?= $state ?>');
+                var dt = JSON.parse(`<?= $state ?>`);
                 dataMesin.forEach(el => {
                     dt[el.state] += 1;
                 });
