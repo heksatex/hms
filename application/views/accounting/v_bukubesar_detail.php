@@ -162,14 +162,16 @@
                                                         <th class='style bb resizable' style="min-width: 105px; width:105px;">Kode Entries</th>
                                                         <th class='style bb resizable' style="min-width: 100px; max-width: 220px; width:100px;">Origin</th>
                                                         <th class='style bb resizable' style="min-width: 200px">Keterangan</th>
-                                                        <th class='style bb resizable' style="min-width: 150px; width:100px;" id="posisi">Debit</th>
-                                                        <th class='style bb resizable' style="min-width: 150px; width:100px;" id="lawan">Credit</th>
-                                                        <th class='style bb resizable' style="min-width: 150px; width:100px;">Saldo</th>
+                                                        <th class='style bb resizable text-right' style="min-width: 150px; width:100px;" id="posisi_valas">Debit Valas</th>
+                                                        <th class='style bb resizable text-right' style="min-width: 150px; width:100px;" id="lawan_valas">Credit Valas</th>
+                                                        <th class='style bb resizable text-right' style="min-width: 150px; width:100px;" id="posisi">Debit</th>
+                                                        <th class='style bb resizable text-right' style="min-width: 150px; width:100px;" id="lawan">Credit</th>
+                                                        <th class='style bb resizable text-right' style="min-width: 150px; width:100px;">Saldo</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="8">Tidak ada Data</td>
+                                                        <td colspan="10">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -267,6 +269,12 @@
             const kolomLawan = document.getElementById('lawan');
             kolomPosisi.textContent = 'Debit';
             kolomLawan.textContent = 'Credit (Lawan)';
+
+            const kolomPosisiValas = document.getElementById('posisi_valas');
+            const kolomLawanValas = document.getElementById('lawan_valas');
+            kolomPosisiValas.textContent = 'Debit Valas';
+            kolomLawanValas.textContent = 'Credit Valas (Lawan)';
+
             process_bukubesar_detail('D', this_btn);
         });
 
@@ -277,6 +285,12 @@
             const kolomLawan = document.getElementById('lawan');
             kolomPosisi.textContent = 'Credit';
             kolomLawan.textContent = 'Debit (Lawan)';
+            
+            const kolomPosisiValas = document.getElementById('posisi_valas');
+            const kolomLawanValas = document.getElementById('lawan_valas');
+            kolomPosisiValas.textContent = 'Credit Valas';
+            kolomLawanValas.textContent = 'Debit Valas (Lawan)';
+
             process_bukubesar_detail('C', this_btn);
         });
 
@@ -287,6 +301,10 @@
             const kolomLawan = document.getElementById('lawan');
             kolomPosisi.textContent = 'Debit';
             kolomLawan.textContent = 'Credit';
+            const kolomPosisiValas = document.getElementById('posisi_valas');
+            const kolomLawanValas = document.getElementById('lawan_valas');
+            kolomPosisiValas.textContent = 'Debit Valas';
+            kolomLawanValas.textContent = 'Credit Valas';
             process_bukubesar_detail('N', this_btn);
         });
 
@@ -365,6 +383,8 @@
                                     $("<td>").html('SALDO AWAL'),
                                     $("<td align='right'>").text(0.00),
                                     $("<td align='right'>").text(0.00),
+                                    $("<td align='right'>").text(0.00),
+                                    $("<td align='right'>").text(0.00),
                                     $("<td align='right'>").text(formatNumber(value.saldo_awal.toFixed(2))),
                                 );
 
@@ -373,6 +393,8 @@
                                 acc = '';
                                 debit = 0;
                                 credit = 0;
+                                debit_valas = 0;
+                                credit_valas = 0;
                                 s_akhir = value.saldo_awal;
                                 let linkUrl = '#';
                                 $.each(value.tmp_data_isi, function(key, value2) {
@@ -387,6 +409,8 @@
                                         $("<td style='max-width:20px'>").html(noBuktiHtml),
                                         $("<td style=''>").text(value2.origin),
                                         $("<td class='ket-acc'>").text(value2.keterangan),
+                                        $("<td align='right'>").text(formatNumber(value2.debit_valas.toFixed(2))),
+                                        $("<td align='right'>").text(formatNumber(value2.credit_valas.toFixed(2))),
                                         $("<td align='right'>").text(formatNumber(value2.debit.toFixed(2))),
                                         $("<td align='right'>").text(formatNumber(value2.credit.toFixed(2))),
                                         $("<td align='right'>").text(formatNumber(value2.saldo_akhir.toFixed(2))),
@@ -394,6 +418,8 @@
                                     tbody.append(tr3);
                                     debit = debit + value2.debit;
                                     credit = credit + value2.credit;
+                                    debit_valas = debit_valas + value2.debit_valas;
+                                    credit_valas = credit_valas + value2.credit_valas;
                                     s_akhir = value2.saldo_akhir;
                                 });
 
@@ -402,6 +428,8 @@
                                 var tr4 = $("<tr>").append(
                                     $("<td colspan='4' class='style_space'>").text(''),
                                     $("<td class='style_space text-right'>").html('<b>Total : ' + value.kode_acc + '</b>'),
+                                    $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit_valas.toFixed(2)) + '</b>'),
+                                    $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit_valas.toFixed(2)) + '</b>'),
                                     $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit.toFixed(2)) + '</b>'),
                                     $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit.toFixed(2)) + '</b>'),
                                     $("<td class='style_space text-right'>").html('<b>' + formatNumber(s_akhir.toFixed(2)) + '</b>'),
@@ -410,7 +438,7 @@
                             });
 
                             if (empty == true) {
-                                var tr = $("<tr>").append($("<td colspan='8'>").text('Tidak ada Data'));
+                                var tr = $("<tr>").append($("<td colspan='10'>").text('Tidak ada Data'));
                                 tbody.append(tr);
                             }
 
@@ -437,6 +465,7 @@
             $("#example1 tbody").remove();
             let no = 1;
             let empty = true;
+            let total_debit_or_credit_valas = 0;
             let total_debit_or_credit = 0;
             let total_nominal = 0;
             let s_awal = 0;
@@ -454,12 +483,14 @@
                 origin = value.origin;
                 keterangan = value.keterangan;
                 debit_or_credit = (value.debit_or_credit === '') ? '' : formatNumber(value.debit_or_credit.toFixed(2));
+                debit_or_credit_valas = (value.debit_or_credit_valas === '') ? '' : formatNumber(value.debit_or_credit_valas.toFixed(2));
                 lawan = value.lawan;
+                lawan_valas = value.lawan_valas;
                 nominal = (isNaN(value.nominal)) ? '0' : formatNumber(value.nominal.toFixed(2));
                 // nominal = value.nominal;
 
                 if (tmp_kode_entries != kode_entries && no != 1) {
-                    var tr = $("<tr>").append($("<td colspan='8' class='style_space'>").html('&nbsp'));
+                    var tr = $("<tr>").append($("<td colspan='10' class='style_space'>").html('&nbsp'));
                     tbody.append(tr);
                     no = 1;
                 }
@@ -478,6 +509,8 @@
                     $("<td style='max-width:20px'>").html(noBuktiHtml),
                     $("<td align=''>").text(origin),
                     $("<td class='ket-acc'>").text(keterangan),
+                    $("<td align='right'>").text((debit_or_credit_valas)),
+                    $("<td align='left'>").text(lawan_valas),
                     $("<td align='right'>").text((debit_or_credit)),
                     $("<td align='left'>").text(lawan),
                     $("<td align='right'>").text((nominal)),
@@ -486,6 +519,7 @@
 
 
                 total_debit_or_credit = total_debit_or_credit + ((value.debit_or_credit === '') ? 0 : value.debit_or_credit);
+                total_debit_or_credit_valas = total_debit_or_credit_valas + ((value.debit_or_credit_valas === '') ? 0 : value.debit_or_credit_valas);
                 total_nominal = total_nominal + value.nominal;
                 // s_akhir = value2.saldo_akhir;
                 // console.log(no);
@@ -495,13 +529,15 @@
 
 
             if (empty == true) {
-                var tr = $("<tr>").append($("<td colspan='8'>").text('Tidak ada Data'));
+                var tr = $("<tr>").append($("<td colspan='10'>").text('Tidak ada Data'));
                 tbody.append(tr);
             } else {
-                var tr = $("<tr>").append($("<td class='style_space' colspan='8'>").html("&nbsp"));
+                var tr = $("<tr>").append($("<td class='style_space' colspan='10'>").html("&nbsp"));
                 tbody.append(tr);
                 var tr4 = $("<tr>").append(
                     $("<td colspan='5' class=''>").text(''),
+                    $("<td class=' text-right'>").html('<b>' + formatNumber(total_debit_or_credit_valas.toFixed(2)) + '</b>'),
+                    $("<td class=' text-right'>").html(''),
                     $("<td class=' text-right'>").html('<b>' + formatNumber(total_debit_or_credit.toFixed(2)) + '</b>'),
                     $("<td class=' text-right'>").html(''),
                     $("<td class=' text-right'>").html('<b>' + formatNumber(total_nominal.toFixed(2)) + '</b>'),

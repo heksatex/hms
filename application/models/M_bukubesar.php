@@ -23,7 +23,11 @@ class M_bukubesar extends CI_Model
             $this->db->where('je.tanggal_dibuat <=',$tglsampai);
         }
         $this->db->where('je.status','posted');
-        $this->db->select("jei.posisi, jei.kode_coa,  IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit,   IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit");
+        $this->db->select("jei.posisi, jei.kode_coa, 
+         IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit,   
+         IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit, 
+         IFNULL(SUM(CASE WHEN jei.posisi = 'D' AND jei.kode_mua <> 'IDR' THEN jei.nominal_curr ELSE 0 END),0) AS total_debit_valas,
+         IFNULL(SUM(CASE WHEN jei.posisi = 'C' AND jei.kode_mua <> 'IDR' THEN jei.nominal_curr ELSE 0 END),0) AS total_credit_valas");
         $this->db->from("acc_jurnal_entries_items jei");
         $this->db->join("acc_jurnal_entries je",'je.kode = jei.kode');
         $this->db->group_by('jei.kode_coa');
@@ -149,7 +153,9 @@ class M_bukubesar extends CI_Model
                                 ELSE coa.saldo_awal
                             END AS saldo_awal_final,
                             COALESCE(jr.total_debit, 0) as total_debit,
-                            COALESCE(jr.total_credit, 0) as total_credit");
+                            COALESCE(jr.total_credit, 0) as total_credit,
+                            COALESCE(jr.total_debit_valas, 0) as total_debit_valas,
+                            COALESCE(jr.total_credit_valas, 0) as total_credit_valas");
         $this->db->from('acc_coa coa');
         $this->db->join("($subquery_debit) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left");
         $this->db->join("($subquery_credit) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left");
@@ -247,7 +253,10 @@ class M_bukubesar extends CI_Model
                                 ELSE coa.saldo_awal
                             END AS saldo_awal_final,
                             COALESCE(jr.total_debit, 0) as total_debit,
-                            COALESCE(jr.total_credit, 0) as total_credit");
+                            COALESCE(jr.total_credit, 0) as total_credit,
+                            COALESCE(jr.total_credit_valas, 0) as total_credit_valas,
+                            COALESCE(jr.total_debit_valas, 0) as total_debit_valas
+                            ");
         $this->db->from('acc_coa coa');
         $this->db->join("($subquery_debit) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left");
         $this->db->join("($subquery_credit) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left");
@@ -271,8 +280,11 @@ class M_bukubesar extends CI_Model
             $this->db->where($where);
         }
        
-        $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, IF(prt.nama is null or  prt.nama = '',  IF(je.reff_note ='',jei.nama,CONCAT('[',je.reff_note,']', IF(jei.nama!= '', CONCAT(' - ', jei.nama), ' ' ))), CONCAT('[',prt.nama,']',' ', jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))) as keterangan,,
-                            jei.kode_coa, coa.nama as nama_coa, jei.posisi,  if(jei.posisi = 'D',  jei.nominal, 0) as total_debit, if(jei.posisi = 'C', jei.nominal, 0) as total_credit");
+        $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, CONCAT( IF(prt.nama is null or  prt.nama = '',  IF(je.reff_note ='',jei.nama,CONCAT('[',je.reff_note,']', IF(jei.nama!= '', CONCAT(' - ', jei.nama), ' ' ))), CONCAT('[',prt.nama,']',' ', jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))), IF(jei.kode_mua <> 'IDR', CONCAT(' - ', jei.kode_mua, ' ',FORMAT(jei.kurs, 2) COLLATE  utf8mb4_unicode_ci),'') ) as keterangan,
+                            jei.kode_coa, coa.nama as nama_coa, jei.posisi,  if(jei.posisi = 'D',  jei.nominal, 0) as total_debit, 
+                            if(jei.posisi = 'C', jei.nominal, 0) as total_credit,
+                            if(jei.posisi = 'C' AND jei.kode_mua <> 'IDR', jei.nominal_curr, 0) as total_credit_valas,
+                            if(jei.posisi = 'D' AND jei.kode_mua <> 'IDR', jei.nominal_curr, 0) as total_debit_valas");
         $this->db->from("acc_jurnal_entries je");
         $this->db->join("acc_jurnal_entries_items jei","jei.kode = je.kode","inner");
         $this->db->join("acc_coa coa","coa.kode_coa = jei.kode_coa","inner");
@@ -292,8 +304,8 @@ class M_bukubesar extends CI_Model
 
         $this->db->where("jei.nominal <> 0");
 
-        $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, IF(prt.nama is null or  prt.nama = '',  CONCAT('[',je.reff_note,']',' - ',jei.nama), CONCAT('[',prt.nama,']',' ',jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))) as keterangan,
-                            jei.kode_coa, coa.nama as nama_coa, jei.posisi,  IFNULL(CASE WHEN jei.posisi = '{$view}' THEN jei.nominal ELSE 0 END,0) AS total");
+        $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, CONCAT(IF(prt.nama is null or  prt.nama = '',  CONCAT('[',je.reff_note,']',' - ',jei.nama), CONCAT('[',prt.nama,']',' ',jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))), ' ', IF(jei.kode_mua <> 'IDR', CONCAT( jei.kode_mua, ' ',FORMAT(jei.kurs, 2) COLLATE  utf8mb4_unicode_ci),'')) as keterangan,
+                            jei.kode_coa, coa.nama as nama_coa, jei.posisi,  IFNULL(CASE WHEN jei.posisi = '{$view}' THEN jei.nominal ELSE 0 END,0) AS total,   IFNULL(CASE WHEN jei.posisi = '{$view}' AND jei.kode_mua <> 'IDR' THEN jei.nominal_curr ELSE 0 END,0) AS total_valas ");
         $this->db->from("acc_jurnal_entries je");
         $this->db->join("acc_jurnal_entries_items jei","jei.kode = je.kode","inner");
         $this->db->join("acc_coa coa","coa.kode_coa = jei.kode_coa","inner");

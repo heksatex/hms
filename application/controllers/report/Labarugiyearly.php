@@ -9,12 +9,16 @@ class Labarugiyearly extends MY_Controller
     {
         parent::__construct();
         $this->is_loggedin(); //cek apakah user sudah login
+        $this->load->library('periodesaldo');
     }
 
     public function index()
     {
         $id_dept        = 'RKLRY';
+        $start          = $this->periodesaldo->get_start_periode();
+        $tgl_start       = date("Y", strtotime($start));
         $data['id_dept'] = $id_dept;
+        $data['tahun_start'] = $tgl_start;
         $this->load->view('report/v_laba_rugi_yearly', $data);
     }
 

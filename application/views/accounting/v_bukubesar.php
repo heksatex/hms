@@ -121,16 +121,18 @@
                                                         <th class='style bb' style="min-width: 5px">Kode Acc</th>
                                                         <th class='style bb' style="min-width: 200px">Nama Acc</th>
                                                         <th class='style bb' style="min-width: 10px">Saldo Normal</th>
-                                                        <th class='style bb' style="min-width: 150px">Saldo Awal</th>
-                                                        <th class='style bb' style="min-width: 150px">Debit</th>
-                                                        <th class='style bb' style=" min-width: 150px">Credit</th>
-                                                        <th class='style bb' style="min-width: 150px">Saldo Akhir</th>
+                                                        <th class='style bb text-right' style="min-width: 150px">Saldo Awal</th>
+                                                        <th class='style bb text-right' style="min-width: 100px">Debit Valas</th>
+                                                        <th class='style bb text-right' style="min-width: 100px">Credit Valas</th>
+                                                        <th class='style bb text-right' style="min-width: 150px">Debit</th>
+                                                        <th class='style bb text-right' style=" min-width: 150px">Credit</th>
+                                                        <th class='style bb text-right' style="min-width: 150px">Saldo Akhir</th>
                                                         <!-- <th class='style bb' style=" min-width: 100px; text-align:right">dcr</th> -->
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
-                                                        <td colspan="8">Tidak ada Data</td>
+                                                        <td colspan="10">Tidak ada Data</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -258,6 +260,8 @@
                         let credit = 0;
                         let s_awal = 0;
                         let s_akhir = 0;
+                        let debit_valas = 0;
+                        let credit_valas = 0;
                         let tbody = $("<tbody />");
 
                         arr_filter.push({
@@ -281,6 +285,8 @@
                                 $("<td>").html('<a  href="javascript:void(0)" onclick=' + func2 + ' ">' + value.nama_acc + '</a>'),
                                 $("<td align=''>").text(value.saldo_normal),
                                 $("<td align='right'>").text(formatNumber(value.saldo_awal.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.debit_valas.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(value.credit_valas.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.debit.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.credit.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.saldo_akhir.toFixed(2))),
@@ -291,18 +297,22 @@
                             s_awal = s_awal + value.saldo_awal;
                             debit = debit + value.debit;
                             credit = credit + value.credit;
+                            debit_valas = debit_valas + value.debit_valas;
+                            credit_valas = credit_valas + value.credit_valas;
                             s_akhir = s_akhir + value.saldo_akhir;
                         });
 
                         if (empty == true) {
-                            var tr = $("<tr>").append($("<td colspan='8'>").text('Tidak ada Data'));
+                            var tr = $("<tr>").append($("<td colspan='10'>").text('Tidak ada Data'));
                             tbody.append(tr);
                         } else {
-                            tbody.append("<tr><td colspan='8'>&nbsp</td></tr>");
+                            tbody.append("<tr><td colspan='10'>&nbsp</td></tr>");
                             tr2 = $("<tr>").append(
                                 $("<td colspan='4'>").text(''),
                                 $("<td align='right'>").text(formatNumber(s_awal.toFixed(2))),
                                 // $("<td align='right'>").text(''),
+                                $("<td align='right'>").text(formatNumber(debit_valas.toFixed(2))),
+                                $("<td align='right'>").text(formatNumber(credit_valas.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(debit.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(credit.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(s_akhir.toFixed(2))),
