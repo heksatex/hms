@@ -301,14 +301,16 @@
                                         <div class="col-md-8">
                                             <div class="row g-2">
                                                 <?php
+                                                $state = [];
                                                 foreach ($status as $key => $value) {
+                                                    $state[$key] = 0;
                                                     $total = 0;
                                                     foreach ($mesin as $k => $val) {
                                                         $durasis = $durasi["d{$val->devid}"];
+
                                                         if ($durasis->state == $key)
                                                             $total += 1;
                                                     }
-                                                    $state[$durasis->state] = $total;
                                                     ?>
                                                     <div class="col-4">
                                                         <div class="counter-pill" style="color: <?= $value['warna'] ?>;border-color: <?= $value['warna'] ?>">
@@ -318,6 +320,7 @@
                                                     </div>
                                                     <?php
                                                 }
+                                                $state = json_encode($state);
                                                 ?>
                                             </div>
                                         </div>
@@ -378,7 +381,7 @@
                                 }
                                 ?>
                                 <!--<div class="col-lg-2 col-md-4 col-xs-6">-->
-                                <div class="card card-<?= "d{$value->devid}" ?>" data-durasi_up="<?= $durasis->total_up ?>" data-durasi_down="<?= $durasis->total_down ?>"
+                                <div class="card cardstatus card-<?= "d{$value->devid}" ?>" data-durasi_up="<?= $durasis->total_up ?>" data-durasi_down="<?= $durasis->total_down ?>"
                                      data-state="<?= $value->state ?>" data-totaldown = "<?= $ttlDwn ?>" data-total="<?= $value->total ?>" data-uptime="<?= $ttlUp ?>" data-downtime="<?= $ttlDwn ?>"
                                      style="border: 1px solid black;">
                                     <div class="container container-<?= "d{$value->devid}" ?>" style="height: 20%; background-color: <?= $border ?>; color:#ffffff">
@@ -724,6 +727,8 @@
 
             const updateSummary = (() => {
                 const myElements = document.querySelectorAll('.statuss');
+                var stt = <?= $state ?>;
+                const dt = typeof stt === "string" ? JSON.parse(stt) : stt;
                 var data = {
                     mark_success: 0,
                     mark_warning: 0,
@@ -732,15 +737,12 @@
                 myElements.forEach(element => {
                     var ee = element.getAttribute("data-status");
                     data[ee] += 1;
+                    dt[ee] += 1;
                 });
                 Object.keys(data).forEach(key => {
                     $(`.sum-${key}`).attr("data-val", data[key]);
                     $(`.sum-${key}`).html(data[key]);
                     //                    console.log(key, data[key]); // Prints "name Jean-Luc Picard" then "rank Captain"
-                });
-                var dt = JSON.parse('<?= $state ?>');
-                dataMesin.forEach(el => {
-                    dt[el.state] += 1;
                 });
                 Object.keys(dt).forEach(key => {
                     $(`.stt-${key}`).html(dt[key]);
