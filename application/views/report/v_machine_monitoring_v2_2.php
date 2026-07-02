@@ -744,6 +744,7 @@
                     $(`.sum-${key}`).html(data[key]);
                     //                    console.log(key, data[key]); // Prints "name Jean-Luc Picard" then "rank Captain"
                 });
+                console.log(dt);
                 Object.keys(dt).forEach(key => {
                     $(`.stt-${key}`).html(dt[key]);
                 });
@@ -852,7 +853,9 @@
 //                                $(`.img-d${val.devid}`).attr("data-status", status);
 //                                image.fadeIn('fast');
 //                            });
-                        $(`.statuss-${val.devid}`).html(stts[val.state]["stt"]);
+//                        console.log(val.devid);
+                        $(`.statuss-d${val.devid}`).html(stts[val.state]["stt"]);
+                        $(`.statuss-d${val.devid}`).attr("data-status", val.state);
                         $(`.container-d${val.devid}`).css("backgroundColor", `${border}`);
 //                        }
                         $(`.durasi-d${val.devid}`).html(dtt);

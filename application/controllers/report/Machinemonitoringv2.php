@@ -102,7 +102,7 @@ class Machinemonitoringv2 extends MY_Controller {
                 ->setSelects(["nama_mesin,count(state) as total,state,devid,no_mesin,dept_id,mc_id"])
                 ->setSelects(["COUNT(log.state)*SUM(log.state<>1) as downtime"])
                 ->setSelects(["COUNT(log.state)*SUM(log.state=1) as uptime"])
-                ->setGroups(["devid"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"]);
+                ->setGroups(["devid"])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "asc", "MAX(timelog)" => "desc"]);
         $model->setWheres(["dept_id" => $dept]);
         $data["mesin"] = $model->getData();
         $data["count_mesin"] = count($data["mesin"]);
