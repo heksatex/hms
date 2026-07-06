@@ -551,12 +551,12 @@
                             return params.marker + params.name;
                         }
                     },
-                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '120px', containLabel: true},
+                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '20%', containLabel: true},
                     xAxis: {
                         type: 'time',
                         position: 'top',
                         splitLine: {show: true, lineStyle: {color: 'grey'}},
-                        axisLabel: {color: '#999', fontSize: 10, formatter: '{HH}:{mm}'},
+                        axisLabel: {color: '#999', fontSize : 12, formatter: '{HH}:{mm}'},
                         minorTick: {show: true, splitNumber: 2, length: 3},
                         minorSplitLine: {
                             show: true, // Menampilkan garis grid minor (opsional)
@@ -572,7 +572,7 @@
                         splitLine: {show: true, lineStyle: {color: '#F0F0F0'}},
                         axisLine: {show: false},
                         axisTick: {show: false},
-                        axisLabel: {fontWeight: 'bold', color: '#333'},
+                        axisLabel: {fontWeight: 'bold', color: '#333', fontSize: 15},
                         triggerEvent: true
                     },
                     series: [{
@@ -582,7 +582,7 @@
                                 let categoryIndex = api.value(0);
                                 let start = api.coord([api.value(1), categoryIndex]);
                                 let end = api.coord([api.value(2), categoryIndex]);
-                                let height = api.size([0, 1])[1] * 0.9; // Tinggi bar 60% dari baris
+                                let height = api.size([0, 1])[1] * 0.8; // Tinggi bar 60% dari baris
 
                                 return {
                                     type: 'rect',
@@ -744,7 +744,6 @@
                     $(`.sum-${key}`).html(data[key]);
                     //                    console.log(key, data[key]); // Prints "name Jean-Luc Picard" then "rank Captain"
                 });
-                console.log(dt);
                 Object.keys(dt).forEach(key => {
                     $(`.stt-${key}`).html(dt[key]);
                 });
