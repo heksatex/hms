@@ -129,5 +129,18 @@ class M_stockQuants extends CI_Model {
         $result = $this->db->get();
         return $result->row();
     }
+
+    public function get_data_stock_quant_by_kode(array $where = [])
+    {
+
+        if($where) {
+            $this->db->where($where);
+        }
+        $this->db->group_by('lot');
+        $this->db->select("kode_produk, nama_produk, lot, sum(qty) as total_qty, sum(qty2) as total_qty2");
+        $this->db->from('stock_quant');
+        $result = $this->db->get();
+        return $result->row();
+    }
     
 }

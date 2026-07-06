@@ -5,8 +5,11 @@
         <div class="col-xs-12">
           <center><button type="button" id="print-knitting" class="btn btn-default btn-sm"> <i class="fa fa-barcode"></i> Tricot / Jacquard</button></center>
         </div> 
-         <div class="col-xs-12">
+        <div class="col-xs-12">
           <center><button type="button" id="print-gjd" class="btn btn-default btn-sm"> <i class="fa fa-barcode"></i> Gudang Jadi</button></center>
+        </div>  
+        <div class="col-xs-12">
+          <center><button type="button" id="print-bng" class="btn btn-default btn-sm"> <i class="fa fa-barcode"></i> Benang</button></center>
         </div>  
       </div>
     </div>
@@ -23,6 +26,14 @@
       window.open(url+'?quant_id='+ quant_id,'_blank');
       $('#print_data').modal('hide');
   });  
+
+  $("#print-bng").click(function () {
+      event.preventDefault;
+      var quant_id = `<?php echo encrypt_url($quant_id) ?>`;
+      var url      = `<?php echo base_url() ?>warehouse/stockquants/print_benang`;
+      window.open(url + '?quant_id=' + quant_id, '_blank');
+      $("#print_data").modal('hide');
+  });
 
 
   $("#print-gjd").unbind( "click" );
