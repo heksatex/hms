@@ -72,21 +72,22 @@ class Deliverymutasi extends MY_Controller {
                 }
             }
 
-            if ($customer !== null || $customer !== "") {
+            if ($customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
-            if ($corak !== null || $corak !== "") {
+            if ($corak !== "") {
                 $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
             }
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
-            if ($nodo !== null || $nodo !== "") {
+            if ($nodo !== "") {
                 $condition = array_merge($condition, ['ddo.no LIKE' => '%' . $nodo . '%']);
             }
-            if ($nosj !== null || $nosj !== "") {
+            if ($nosj !== "") {
                 $condition = array_merge($condition, ['ddo.no_sj LIKE' => '%' . $nosj . '%']);
             }
+            
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, "1");
             $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, "1");
             $paging = [
@@ -99,6 +100,7 @@ class Deliverymutasi extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $data)));
         } catch (Exception $ex) {
+            
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'danger', "data" => [])));
@@ -166,19 +168,19 @@ class Deliverymutasi extends MY_Controller {
                     $condition = array_merge($condition, ["dod.status in ('" . implode("','", $in) . "')" => null]);
                 }
             }
-            if ($customer !== null || $customer !== "") {
+            if ($customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
-            if ($corak !== null || $corak !== "") {
+            if ($corak !== "") {
                 $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
             }
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
-            if ($nodo !== null || $nodo !== "") {
+            if ($nodo !== "") {
                 $condition = array_merge($condition, ['ddo.no LIKE' => '%' . $nodo . '%']);
             }
-            if ($nosj !== null || $nosj !== "") {
+            if ($nosj !== "") {
                 $condition = array_merge($condition, ['ddo.no_sj LIKE' => '%' . $nosj . '%']);
             }
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, "1");

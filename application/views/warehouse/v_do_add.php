@@ -120,6 +120,7 @@
                                                                     <option value="SJ/HI/07">SJ/HI/07</option>
                                                                     <option value="SAMPLE/HI">SAMPLE/HI</option>
                                                                     <option value="SJM/HI/07">SJM/HI/07</option>
+                                                                    <option value="SJT/HI/07">SJT/HI/07</option>
                                                                     <option value="MAKLOON/HI">MAKLOON/HI</option>
 
                                                                     <?php

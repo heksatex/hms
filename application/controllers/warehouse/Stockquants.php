@@ -85,7 +85,7 @@ class Stockquants extends MY_Controller
 
                     // get data stock_quant by quant_id sebelumnya
                     $sq   = $this->m_stockQuants->get_stock_quant_by_kode($quant_id);
-
+                    $tmp_update = array();
                     if(empty($sq)){
                         throw new \Exception("Data Produk tidak ditemukan !", 200);
                     }else{
@@ -107,19 +107,38 @@ class Stockquants extends MY_Controller
                             }else if(!empty($cek_pl)){
                                 throw new \Exception('Data Lot '.$lot.' Sudah Masuk PL !', 200);
                             }else if($create_date_barcode > $date_migrasi){
-                                throw new \Exception(" Data Lot / Barcode  tidak bisa dirubah karena Lot  / Barcode ini dibuat seletelah Migrasi Stock  !", 200);
+                                if($sq->reff_note != $reff_note){
+                                    $data_update[] = array(
+                                            'quant_id'  => $quant_id,
+                                            'reff_note' => $reff_note
+                                    );
+                                    array_push($tmp_update, $data_update);
+                                    $this->m_stockQuants->update_data_sock_quant($data_update);
+
+
+                                    $jenis_log   = "edit";        
+                                    $note_log    = 'Update Reff Note :  '.$sq->reff_note.'<b> -> </b>' .$reff_note;
+                                    $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, addslashes($note_log), $username);
+                    
+                                    $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan ! ', 'icon' =>'fa fa-check', 'type' => 'success');
+
+                                } else{
+                                    throw new \Exception(" Data Lot / Barcode  tidak bisa dirubah karena Lot  / Barcode ini dibuat seletelah Migrasi Stock  ! <br> Data yang bisa diubah hanya Reff Note", 200);
+                                }
                             }
 
                         }
-                        $note_before = $sq->kode_produk.' '.$sq->nama_produk.' '.$sq->corak_remark.' '.$sq->warna_remark.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty_jual.' '.$sq->uom_jual.' '.$sq->qty2_jual.' '.$sq->uom2_jual.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
-        
-                        $this->m_stockQuants->update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi, $corak_remark,$warna_remark, $qty_jual, $uom_jual, $qty2_jual, $uom2_jual);
-        
-                        $jenis_log   = "edit";        
-                        $note_log    = $note_before.'<br> <b> -> </b>'. $sq->kode_produk.' '.$nama_produk.'  '.$corak_remark.'  '.$warna_remark.'  '.$lot.'  '.$nama_grade.' '.$qty_jual.' '.$uom_jual.' '.$qty2_jual.' '.$uom2_jual.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
-                        $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, addslashes($note_log), $username);
-        
-                        $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan ! ', 'icon' =>'fa fa-check', 'type' => 'success');
+                        if(empty($tmp_update)){
+                            $note_before = $sq->kode_produk.' '.$sq->nama_produk.' '.$sq->corak_remark.' '.$sq->warna_remark.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty_jual.' '.$sq->uom_jual.' '.$sq->qty2_jual.' '.$sq->uom2_jual.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
+            
+                            $this->m_stockQuants->update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi, $corak_remark,$warna_remark, $qty_jual, $uom_jual, $qty2_jual, $uom2_jual);
+            
+                            $jenis_log   = "edit";        
+                            $note_log    = $note_before.'<br> <b> -> </b>'. $sq->kode_produk.' '.$nama_produk.'  '.$corak_remark.'  '.$warna_remark.'  '.$lot.'  '.$nama_grade.' '.$qty_jual.' '.$uom_jual.' '.$qty2_jual.' '.$uom2_jual.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
+                            $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, addslashes($note_log), $username);
+            
+                            $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan ! ', 'icon' =>'fa fa-check', 'type' => 'success');
+                        }
                     }
     
                 }

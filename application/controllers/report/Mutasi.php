@@ -1254,15 +1254,20 @@ class Mutasi extends MY_Controller
                     $count_child_head  = 10;
                 }
             }
+            $re = "";
+            if($departemen == 'DYE2R'){
+                $re = " Reproses";
+            }
+
             // penerimaan
-            $head_in_dept[]   = array('nama'=> 'GRG','child' => $child, );
-            $head_in_dept[]   = array('nama'=> 'SET (FIN)','child' => $child, );
-            $head_in[]        = array('nama' => 'IN (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head,'row'=>3);
+            $head_in_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'SET'.$re.' (FIN)','child' => $child, );
+            $head_in[]        = array('nama' => 'IN'.$re.' (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head,'row'=>3);
             
             // pengiriman
-            $head_out_dept[]   = array('nama'=> 'FIN','child' => $child, );
-            $head_out_dept[]   = array('nama'=> 'GRG (Retur)','child' => $child, );
-            $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head,'row'=>3);
+            $head_out_dept[]   = array('nama'=> 'FIN'.$re,'child' => $child, );
+            $head_out_dept[]   = array('nama'=> 'GRG'.$re.' (Retur)','child' => $child, );
+            $head_out[]        = array('nama' => 'OUT'.$re.' (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head,'row'=>3);
 
             if($departemen == 'DYE2'){
                 $dept_dept_in  = array('grg','set');
@@ -1315,6 +1320,11 @@ class Mutasi extends MY_Controller
             
         }else if($departemen == 'FIN' || $departemen == 'FINR'){
 
+            $re = "";
+            if($departemen == 'FINR'){
+                $re = " Reproses";
+            }
+
             if($view == 'Global' || $view == 'DetailProduk'){
                 if($excel == true){
                     $count_child_head1  = 16; // jml kolom penerimaan
@@ -1356,11 +1366,11 @@ class Mutasi extends MY_Controller
                     $count_child_head2  = 15;// jml kolom pengiriman
                 }
                 // detail proses
-                $head_process_dept[]   = array('nama'=> 'SET','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'FIN','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'BRS','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'FBR','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'PAD','child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'SET'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'FIN'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'BRS'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'FBR'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'PAD'.$re,'child' => $child, );
                 if($excel == true){
                     $count_childx = 30;
                 }else{
@@ -1369,17 +1379,19 @@ class Mutasi extends MY_Controller
                 $head_process[]        = array('nama' => 'Detail Process', 'child' => $head_process_dept, 'count_child'=>$count_childx,'row'=>3);
             }
 
+            
+
             // penerimaan
-            $head_in_dept[]   = array('nama'=> 'GRG','child' => $child, );
-            $head_in_dept[]   = array('nama'=> 'DYE','child' => $child, );
-            $head_in[]        = array('nama' => 'IN (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head1,'row'=>3);
+            $head_in_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'DYE'.$re,'child' => $child, );
+            $head_in[]        = array('nama' => 'IN'.$re.' (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head1,'row'=>3);
 
     
             // pengiriman
-            $head_out_dept[]   = array('nama'=> 'INS2','child' => $child, );
-            $head_out_dept[]   = array('nama'=> 'GRG','child' => $child, );
-            $head_out_dept[]   = array('nama'=> 'DYE','child' => $child, );
-            $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
+            $head_out_dept[]   = array('nama'=> 'INS2'.$re,'child' => $child, );
+            $head_out_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
+            $head_out_dept[]   = array('nama'=> 'DYE'.$re,'child' => $child, );
+            $head_out[]        = array('nama' => 'OUT'.$re.' (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
 
             // $field .= 'in_grg_lot,in_dye_lot,out_ins2_lot,out_grg_lot,out_dye_lot,';
 
@@ -1436,6 +1448,11 @@ class Mutasi extends MY_Controller
         
         }else if($departemen == 'DF' || $departemen =='DFR'){// DF or
 
+            $re = "";
+            if($departemen == 'DFR'){
+                $re = " Reproses";
+            }
+
             if($view == 'Global' || $view == 'DetailProduk'){
                
                 if($excel == true){ // tidak di pakai sudah, setting kembali di saat export excel
@@ -1478,12 +1495,12 @@ class Mutasi extends MY_Controller
                 // $field .= 'hph_pad_lot, hph_pad_proses, hph_pad_qty1, hph_pad_qty1_uom, hph_pad_qty2, hph_pad_qty2_uom, hph_pad_qty_opname, hph_pad_qty_opname_uom,';
                 
                 // detail proses
-                $head_process_dept[]   = array('nama'=> 'DYE','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'SET','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'FIN','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'BRS','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'FBR','child' => $child, );
-                $head_process_dept[]   = array('nama'=> 'PAD','child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'DYE'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'SET'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'FIN'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'BRS'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'FBR'.$re,'child' => $child, );
+                $head_process_dept[]   = array('nama'=> 'PAD'.$re,'child' => $child, );
                 if($excel == true){
                     $count_childx = 30;
                 }else{
@@ -1494,7 +1511,7 @@ class Mutasi extends MY_Controller
             }
 
             // penerimaan
-            $head_in_dept[]   = array('nama'=> 'GRG','child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
             $head_in[]        = array('nama' => 'IN (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head1,'row'=>3);
 
 
@@ -1503,8 +1520,8 @@ class Mutasi extends MY_Controller
             if($departemen == 'DFR'){
                 $head_out_dept[]   = array('nama'=> 'INS2 Reproses','child' => $child, );
             }
-            $head_out_dept[]   = array('nama'=> 'GRG','child' => $child, );
-            $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
+            $head_out_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
+            $head_out[]        = array('nama' => 'OUT'.$re.' (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
 
             // $field .= 'in_grg_lot,out_ins2_lot,out_grg_lot,';
             // $field .= 'in_grg_proses, in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
@@ -1557,9 +1574,14 @@ class Mutasi extends MY_Controller
             
 
         }else{// INS2 or INS2R
+            
+            $re = "";
+            if($departemen == 'INS2R'){
+                $re = " Reproses";
+            }
 
             if($departemen == 'INS2'){
-                $kolom_in = 6;
+                $kolom_in = 10;
             } else {
                 $kolom_in = 5;
             }
@@ -1585,20 +1607,24 @@ class Mutasi extends MY_Controller
             }
 
             // penerimaan
-            $head_in_dept[]   = array('nama'=> 'GRG','child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
             if($departemen == 'INS2'){
                 $head_in_dept[]   = array('nama'=> 'GRG Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'SET Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'PAD Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'FIN Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'FBR Reproses','child' => $child, );
             }
-            $head_in_dept[]   = array('nama'=> 'SET','child' => $child, );
-            $head_in_dept[]   = array('nama'=> 'PAD','child' => $child, );
-            $head_in_dept[]   = array('nama'=> 'FIN','child' => $child, );
-            $head_in_dept[]   = array('nama'=> 'FBR','child' => $child, );
-            $head_in[]        = array('nama' => 'IN (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head1,'row'=>3);
+            $head_in_dept[]   = array('nama'=> 'SET'.$re,'child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'PAD'.$re,'child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'FIN'.$re,'child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'FBR'.$re,'child' => $child, );
+            $head_in[]        = array('nama' => 'IN'.$re.' (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head1,'row'=>3);
 
     
             // pengiriman
             $head_out_dept[]   = array('nama'=> 'GJD','child' => $child, );
-            $head_out_dept[]   = array('nama'=> 'GRG','child' => $child, );
+            $head_out_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
             $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
 
             // $field .= 'in_grg_lot,in_grg_r_lot,in_set_lot,in_pad_lot,in_fin_lot,in_fbr_lot,';
@@ -1615,11 +1641,11 @@ class Mutasi extends MY_Controller
             // $field .= 'out_grg_proses, out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
 
             if($departemen == 'INS2'){
-                $dept_dept_in  = array('grg','grg_r','set','pad','fin','fbr');
+                $dept_dept_in  = array('grg','grg_r','set_r','pad_r','fin_r','fbr_r','set','pad','fin','fbr');
                 $dept_dept_out = array('gjd','grg');
                 $mutasi_dept = 'acc_mutasi_ins2_1_';
                 // untuk looping view
-                $field_dept_in[]  = array('grg','grg_r','set','pad','fin','fbr');
+                $field_dept_in[]  = $dept_dept_in;
                 $field_dept_out[] = array('gjd','grg');
             } else { //INS2R
                 $dept_dept_in  = array('grg_r','set_r','pad_r','fin_r','fbr_r');

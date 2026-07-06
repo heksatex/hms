@@ -141,6 +141,19 @@ class M_stockQuants extends CI_Model {
         $this->db->from('stock_quant');
         $result = $this->db->get();
         return $result->row();
+
+    function update_data_sock_quant($data)
+    {
+        try {
+            $this->db->update_batch('stock_quant', $data, 'quant_id');
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
     }
     
 }

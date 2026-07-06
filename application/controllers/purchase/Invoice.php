@@ -432,7 +432,7 @@ class Invoice extends MY_Controller {
                     }
                 }
                 foreach ($dataItems as $key => $value) {
-                    if ($value->account === null) {
+                    if ($value->account === null || $value->account === "") {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
                     }
                     $nominal = (round($value->harga_satuan * $value->qty_beli, 2) - $value->diskon);
@@ -699,8 +699,8 @@ class Invoice extends MY_Controller {
                 throw new Exception('Data Tidak ditemukan', 500);
             }
             $hasilKurang = $getDetail->qty_beli - $qty;
-            if ($hasilKurang < 1) {
-                throw new Exception('Hasil Split QTY Kurang dari 1', 500);
+            if ($hasilKurang <= 0) {
+                throw new Exception('Hasil Split QTY Kurang dari 0', 500);
             }
             $model->update(["qty_beli" => $hasilKurang]);
             unset($getDetail->id);
