@@ -1076,6 +1076,92 @@ class Stockquants extends MY_Controller
     }
 
 
+    function print_benang()
+    {
+
+        $id       = $this->input->get('quant_id');
+        $quant_id = decrypt_url($id);
+
+        $sq       = $this->_module->get_stock_quant_by_id($quant_id)->row_array();
+
+        $kode_produk = $sq['kode_produk'];
+        $nama_produk = $sq['nama_produk'];
+        $lot         = $sq['lot'];
+        $lokasi      = $sq['lokasi']; // ex : WRD/Stock
+        $nama_grade  = $sq['nama_grade'];
+
+
+        $get_dt  = $this->m_stockQuants->get_data_stock_quant_by_kode(['kode_produk' => $kode_produk, 'lot' => $lot, 'lokasi' => $lokasi]);
+
+        $qty_sum    = $get_dt->total_qty;
+        $qty2_sum   = $get_dt->total_qty2;
+        
+        $this->load->library('Pdf');//load library pdf
+
+        $pdf = new PDF_Code128('p','mm',array(60,80));
+
+
+        $pdf->SetMargins(0,0,0);
+        $pdf->SetAutoPageBreak(False);
+        $pdf->AddPage();
+        $pdf->SetFont('Arial','B',15,'C');
+
+        //get origin_mo
+
+        $loop = 1;
+        $heightNama = 0; 
+        $enter         = 1;
+        $enter_barcode = 18;
+
+            $pdf->SetFont('Arial','B',15,'C');
+        
+            $pdf->setXY(0,3+$heightNama);
+            $pdf->Multicell(60,5,$kode_produk,0,'C');
+
+            $pdf->SetFont('Arial','B',15,'C');
+
+            $pdf->setXY(0,5+$heightNama+5);
+            $pdf->Multicell(60,5,$nama_produk,0,'C');
+            
+            $pdf->setXY(0,5+$heightNama+15);
+            $pdf->Multicell(60,5,'Lot : '.$lot,0,'C');
+         
+            $pdf->SetFont('Arial','B',13,'C');
+            $pdf->setXY(0,5+$heightNama+25);
+            $pdf->Multicell(60,3,'Qty1 Total : '.number_format($qty_sum,2),0,'C');
+            
+            $pdf->setXY(0,5+$heightNama+25);
+            $pdf->Multicell(60,3,'',0,'C');
+
+            $heightNama    = $heightNama + 40;
+            $enter_barcode = $enter_barcode + 40;
+
+             $pdf->SetFont('Arial','B',15,'C');
+        
+            $pdf->setXY(0,3+$heightNama);
+            $pdf->Multicell(60,5,$kode_produk,0,'C');
+
+            $pdf->SetFont('Arial','B',15,'C');
+
+            $pdf->setXY(0,5+$heightNama+5);
+            $pdf->Multicell(60,5,$nama_produk,0,'C');
+            
+            $pdf->setXY(0,5+$heightNama+15);
+            $pdf->Multicell(60,5,'Lot : '.$lot,0,'C');
+         
+            $pdf->SetFont('Arial','B',13,'C');
+            $pdf->setXY(0,5+$heightNama+25);
+            $pdf->Multicell(60,3,'Qty1 Total : '.number_format($qty_sum,2),0,'C');
+            
+            $pdf->setXY(0,5+$heightNama+25);
+            $pdf->Multicell(60,3,'',0,'C');
+       
+
+        $pdf->output();
+
+    }
+
+
 
  
 

@@ -1268,32 +1268,25 @@ class Penerimaanbarang extends MY_Controller
                     $orig = $this->input->post('origin');
                     $po = new m_po;
                     $dataPO = $po->setWheres(["no_po" => $orig,])->setWhereRaw("purchase_order_detail.status not in ('cancel','retur')")
-                        ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
-                        ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and penerimaan_barang_items.status_barang='done' "
-                            . "and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk and penerimaan_barang_items.kode_pp = purchase_order_detail.kode_pp)")
-                        ->setJoins("penerimaan_barang", "penerimaan_barang_items.kode = penerimaan_barang.kode")
-                        ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
-                        ->setJoins("tax", "tax.id = purchase_order_detail.tax_id", "left")
-                        ->setJoins("nilai_konversi", "nilai_konversi.id = purchase_order_detail.id_konversiuom", "left")
-                        ->setJoins("stock_move_items as smi", "(smi.move_id = penerimaan_barang.move_id and smi.origin_prod = penerimaan_barang_items.origin_prod)", "left")
-                        ->setOrder(["no_po"])
-                        ->setSelects([
-                            "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
-                            "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value",
-                            "smi.qty as qty_dtg",
-                            "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency,purchase_order.total as po_total",
-                            "penerimaan_barang_items.*",
-                            "amount,tax.id as pajak_id",
-                            "dpp_lain",
-                            "tax.dpp as dpp_tax",
-                            "tax_lain_id",
-                            "nilai_konversi.nilai",
-                            "purchase_order.jenis as jenis_po",
-                            "konversi_aktif",
-                            "pembilang",
-                            "penyebut"
-                        ])->setGroups(["smi.quant_id"])
-                        ->getData();
+                            ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
+                            ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and penerimaan_barang_items.status_barang='done' "
+                                    . "and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk and penerimaan_barang_items.kode_pp = purchase_order_detail.kode_pp)")
+                            ->setJoins("penerimaan_barang", "penerimaan_barang_items.kode = penerimaan_barang.kode")
+                            ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
+                            ->setJoins("tax", "tax.id = purchase_order_detail.tax_id", "left")
+                            ->setJoins("nilai_konversi", "nilai_konversi.id = purchase_order_detail.id_konversiuom", "left")
+                            ->setJoins("stock_move_items as smi", "(smi.move_id = penerimaan_barang.move_id and smi.origin_prod = penerimaan_barang_items.origin_prod)", "left")
+                            ->setOrder(["no_po"])
+                            ->setSelects([
+                                "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
+                                "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value",
+                                "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency,purchase_order.total as po_total",
+                                "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain", "tax.dpp as dpp_tax", "tax_lain_id", "nilai_konversi.nilai", "purchase_order.jenis as jenis_po",
+                                "konversi_aktif", "pembilang", "penyebut", "sum(smi.qty) as qty_dtg"
+                            ])
+//                                    ->setGroups(["smi.quant_id"])
+                            ->setGroups(["penerimaan_barang_items.kode_pp","smi.kode_produk"])
+                            ->getData();
                     if (is_null($dataPO)) {
                         throw new \Exception("No PO {$orig} tidak ditemukan.", 500);
                     }
@@ -2594,21 +2587,17 @@ class Penerimaanbarang extends MY_Controller
             //            $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
             $modelItems = new $this->m_global;
             $items = $modelItems->setTables("stock_move_items smi")
-                ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
-                ->setJoins("stock_quant sq", "smi.quant_id = sq.quant_id")
-                ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode and pbi.origin_prod = smi.origin_prod")
-                ->setJoins("nilai_konversi nk", "nk.id = pbi.id_konversiuom", "left")
-                ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
-                ->setOrder(["smi.row_order"])
-                ->setSelects([
-                    "smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty",
-                    "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note",
-                    "nilai_konversiuom as nilai,pbi.uom_beli",
-                    "konversi_aktif",
-                    "pembilang",
-                    "penyebut"
-                ])
-                ->setGroups(["smi.quant_id"])->getData();
+                            ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
+                            ->setJoins("stock_quant sq", "smi.quant_id = sq.quant_id")
+                            ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode and pbi.origin_prod = smi.origin_prod")
+                            ->setJoins("nilai_konversi nk", "nk.id = pbi.id_konversiuom", "left")
+                            ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
+                            ->setOrder(["smi.row_order"])
+                            ->setSelects([
+                                "smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, sum(smi.qty) as qty",
+                                "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note", "nilai_konversiuom as nilai,pbi.uom_beli",
+                                "konversi_aktif", "pembilang", "penyebut"])
+                            ->setGroups(["pbi.kode_pp","smi.kode_produk"])->getData();
             foreach ($items as $keyss => $item) {
                 $kodeProduk = str_split($item->kode_produk, 12);
                 foreach ($kodeProduk as $key => $value) {
@@ -3127,7 +3116,21 @@ class Penerimaanbarang extends MY_Controller
                 $tanggal_transaksi = $head->tanggal_transaksi;
                 $tanggal_jt = $head->tanggal_jt;
             }
-            $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
+            // $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
+
+            $model = new $this->m_global;
+            $items = $model->setTables("stock_move_items smi")
+                            ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
+                            ->setJoins("stock_quant sq", "smi.quant_id = sq.quant_id")
+                            ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode and pbi.origin_prod = smi.origin_prod")
+                            ->setJoins("nilai_konversi nk", "nk.id = pbi.id_konversiuom", "left")
+                            ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
+                            ->setOrder(["smi.row_order"])
+                            ->setSelects([
+                                "smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, sum(smi.qty) as qty",
+                                "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note", "nilai_konversiuom as nilai,pbi.uom_beli",
+                                "konversi_aktif", "pembilang", "penyebut"])
+                            ->setGroups(["pbi.kode_pp","smi.kode_produk"])->getData();
 
             $modelItemsKodePP = new $this->m_global;
             $kodePP = $modelItemsKodePP->setTables("stock_move_items smi")
