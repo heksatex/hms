@@ -12,12 +12,16 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  * @author RONI
  */
 require FCPATH . 'vendor/autoload.php';
-
+require_once APPPATH . '/third_party/vendor/autoload.php';
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 use Mpdf\Mpdf;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Returpenjualan extends MY_Controller {
+
     protected $curr_def_id = 1;
     protected $tipe = [
         "lokal" => "Lokal",
@@ -232,14 +236,13 @@ class Returpenjualan extends MY_Controller {
             ));
         }
     }
-    
-    
+
     protected function _listData() {
         try {
             $model = new $this->m_global;
             $model->setTables("acc_retur_penjualan")->setJoins("mst_status", "mst_status.kode = acc_retur_penjualan.status", "left")
                     ->setOrder(["acc_retur_penjualan.tanggal" => "desc"])->setSearch(["no_retur", "no_sj", "partner_nama"])
-                    ->setOrders([null, "no_retur", "tanggal", "no_sj", "marketing_nama", "partner_nama","grand_total","ppn","total_piutang_rp"])
+                    ->setOrders([null, "no_retur", "tanggal", "no_sj", "marketing_nama", "partner_nama", "grand_total", "ppn", "total_piutang_rp"])
                     ->setSelects(["acc_retur_penjualan.*", "nama_status"]);
             $tanggal = $this->input->post("tanggal");
             $marketing = $this->input->post("marketing");
@@ -255,7 +258,7 @@ class Returpenjualan extends MY_Controller {
             throw $ex;
         }
     }
-    
+
     public function list_data() {
         try {
             $data = array();
@@ -274,7 +277,7 @@ class Returpenjualan extends MY_Controller {
                     $value->no_sj,
                     $value->marketing_nama,
                     $value->partner_nama,
-                             number_format($dpp, 2),
+                    number_format($dpp, 2),
                     number_format($ppn, 2),
                     number_format($value->total_piutang_rp, 2),
                     $value->nama_status
@@ -494,7 +497,7 @@ class Returpenjualan extends MY_Controller {
                 "payment_term" => $this->input->post("payment_term"),
                 "foot_note" => $this->input->post("footnote"),
                 "tanggal" => $this->input->post("tanggal"),
-                "coa_retur"=>$coaRetur
+                "coa_retur" => $coaRetur
             ];
             $ppns = 0;
             $detail = [];
@@ -567,7 +570,7 @@ class Returpenjualan extends MY_Controller {
                         $header["diskon_ppn"] = round($ppn_diskon, 2);
                         $header["ppn"] = round($pajak, 2);
                         $header["final_total"] = round(($header["grand_total"] - $header["diskon"]) + $header["ppn"], 2);
-                        
+
                         $header["total_piutang_valas"] = round($header["final_total"], 2);
                         $header["piutang_valas"] = round($header["final_total"], 2);
                     } else {
@@ -790,7 +793,7 @@ class Returpenjualan extends MY_Controller {
                         );
                     }
                     if ($data->ppn > 0) {
-                        $totalD +=  round(($data->ppn + $data->diskon_ppn) * $data->kurs_nominal, 2);
+                        $totalD += round(($data->ppn + $data->diskon_ppn) * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
                             "kode" => $jurnal,
                             "nama" => "PPN (Retur)",
@@ -811,19 +814,19 @@ class Returpenjualan extends MY_Controller {
                     foreach ($detail as $key => $value) {
                         $warna = ($value->warna === "") ? "" : " / {$value->warna}";
                         $rowOrder = (count($jurnalItems) + 1);
-                        $totalD +=  round(($value->jumlah) * $data->kurs_nominal, 2);
+                        $totalD += round(($value->jumlah) * $data->kurs_nominal, 2);
                         $jurnalItems[] = array(
-                           "kode" => $jurnal,
-                                "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
-                                "reff_note" => "",
-                                "partner" => $data->partner_id,
-                                "kode_coa" => $value->no_acc,
-                                "posisi" => "D",
-                                "nominal_curr" => $value->jumlah,
-                                "kurs" => $data->kurs_nominal,
-                                "kode_mua" => $data->nama_kurs,
-                                "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
-                                "row_order" => $rowOrder
+                            "kode" => $jurnal,
+                            "nama" => "{$value->uraian}{$warna} / {$value->qty} {$value->uom}",
+                            "reff_note" => "",
+                            "partner" => $data->partner_id,
+                            "kode_coa" => $value->no_acc,
+                            "posisi" => "D",
+                            "nominal_curr" => $value->jumlah,
+                            "kurs" => $data->kurs_nominal,
+                            "kode_mua" => $data->nama_kurs,
+                            "nominal" => round($value->jumlah * $data->kurs_nominal, 2),
+                            "row_order" => $rowOrder
                         );
 
                         $fakturJurnal[] = array(
@@ -1205,6 +1208,72 @@ class Returpenjualan extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function export() {
+        try {
+            $filter = "";
+            $tanggal = $this->input->post("tanggal");
+            $mkt = $this->input->post("marketing");
+            if (!empty($this->input->post("tanggal")))
+                $filter .= "Tanggal : {$tanggal}; ";
+//            if (!empty($this->input->post("tanggal")))
+//                $filter .= "Marketing : {$tanggal}; ";
+
+            $model = $this->_listData();
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue("A1", $filter);
+            $row = 3;
+            $sheet->setCellValue("A{$row}", 'No');
+            $sheet->setCellValue("B{$row}", 'No Retur');
+            $sheet->setCellValue("c{$row}", 'Tanggal');
+            $sheet->setCellValue("d{$row}", 'No SJ');
+            $sheet->setCellValue("r{$row}", 'Marketing');
+            $sheet->setCellValue("f{$row}", 'Customer');
+            $sheet->setCellValue("g{$row}", 'Dpp');
+            $sheet->setCellValue("h{$row}", 'Ppn');
+            $sheet->setCellValue("i{$row}", 'Total');
+            $sheet->setCellValue("j{$row}", 'Status');
+            $noUrut = 0;
+            foreach ($model->getData() as $key => $value) {
+                $row += 1;
+                $noUrut += 1;
+                $dpp = $value->grand_total * $value->kurs_nominal;
+                $ppn = $value->ppn * $value->kurs_nominal;
+
+                $sheet->setCellValue("A{$row}", $noUrut);
+                $sheet->setCellValue("B{$row}", $value->no_retur);
+                $sheet->setCellValue("C{$row}", $value->tanggal);
+                $sheet->setCellValue("d{$row}", $value->no_sj);
+                $sheet->setCellValue("e{$row}", $value->marketing_nama);
+                $sheet->setCellValue("f{$row}", $value->partner_nama);
+                $sheet->setCellValue("g{$row}", $dpp);
+                $sheet->setCellValue("h{$row}", $ppn);
+                $sheet->setCellValue("i{$row}", $value->total_piutang_rp);
+                $sheet->setCellValue("j{$row}", $value->nama_status);
+            }
+            if ($noUrut > 0) {
+                $sheet->getStyle("G4:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                $sheet->getStyle("H4:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                $sheet->getStyle("I4:I{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            }
+            $filename = "Retur Penjualan {$tanggal}";
+            $url = "dist/storages/report/sales";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 }
