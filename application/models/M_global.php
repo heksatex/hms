@@ -91,7 +91,7 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setSelects(array $selects,$clearBefore = false) {
+    public function setSelects(array $selects, $clearBefore = false) {
         if ($clearBefore) {
             $this->selects = [];
         }
@@ -146,7 +146,7 @@ class M_global extends CI_Model {
         }
 
         foreach ($this->search as $key => $value) {
-            if (isset( $_POST['search']['value']) && $_POST['search']['value']) {
+            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
                 if ($key === 0) {
                     $this->db->group_start();
                     $this->db->like($value, $_POST['search']['value']);
@@ -276,7 +276,7 @@ class M_global extends CI_Model {
         $this->db->update_batch($this->table, $data, $index);
     }
 
-    public function update(array $data) {
+    public function update(array $data, &$affected = 0) {
         try {
             if (count($this->wheres) > 0) {
                 $this->db->where($this->wheres);
@@ -293,6 +293,7 @@ class M_global extends CI_Model {
             }
             $this->db->set($data);
             $this->db->update($this->table);
+            $affected = $this->db->affected_rows();
             return "";
         } catch (Exception $ex) {
             return $ex->getMessage();
