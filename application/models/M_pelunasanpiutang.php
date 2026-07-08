@@ -1311,4 +1311,21 @@ class M_pelunasanpiutang extends CI_Model
         return $query->total ?? 0;
     }
 
+
+    function get_sum_pelunasan_by_kode($no_pelunasan, $tipe_currency)
+    {
+        if ($tipe_currency === 'Rp') {
+            // $this->db->where('currency_id', 1);
+            $this->db->select('sum(total_rp) as total');
+        } else {
+            $this->db->select('sum(total_valas) as total');
+            // $this->db->where('currency_id <>', 1);
+        }
+        $this->db->where('no_pelunasan', $no_pelunasan);
+
+        $this->db->from('acc_pelunasan_piutang_metode');
+        $query = $this->db->get();
+        return $query;
+    }
+
 }

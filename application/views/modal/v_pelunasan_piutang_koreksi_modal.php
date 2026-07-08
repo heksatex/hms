@@ -659,7 +659,7 @@
                 data: function(params) {
                     return {
                         name: params.term || "",
-                        tipe: tipe,
+                        // tipe: tipe,
                         currency: currency
                     };
                 },
@@ -740,6 +740,7 @@
         let checkbox = row.find('.alat-pelunasan');
         let setposisiField = row.find('td:eq(5)');
         let posisiField = row.find('.posisi_item');
+        let setNominalField  = row.find('td:eq(3)');
         // simpan data get_coa
         row.attr("data-get-coa", get_coa);
         // alert(get_coa);
@@ -760,6 +761,16 @@
         } else {
             checkbox.prop("checked", false).prop("disabled", true);
         }
+
+        if (koreksi_id == 'uang_muka') {
+            let nominal_um = `<?php echo $sum_pelunasan->total ?>`;
+            setNominalField.html(`<input type="text" name="nominal[]" class="form-control nominal-input text-right formatAngka input-sm"  data-decimal="2" value="${nominal_um}" readonly>`);
+        } else {
+            setNominalField.html('<input type="text" name="nominal[]" class="form-control nominal-input text-right formatAngka input-sm"  data-decimal="2">');
+        }
+
+        bindFormatAngka();
+        bindFormatAngka(row[0]) 
 
         if (get_coa === 'false') {
             // HAPUS select & ganti input text kosong
