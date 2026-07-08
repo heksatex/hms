@@ -66,7 +66,7 @@ class Kaskeluar extends MY_Controller {
         $model = new $this->m_global;
 //        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas",'status'=>'aktif'])->setOrder(["kode_coa" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas", 'status' => 'aktif'])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_keluar_add', $data);
     }
@@ -101,7 +101,7 @@ class Kaskeluar extends MY_Controller {
     protected function _list_data() {
         try {
             $list = new $this->m_global;
-            $list->setTables("acc_kas_keluar")->setOrder(["acc_kas_keluar.tanggal" => "desc","no_kk"=>"desc"])
+            $list->setTables("acc_kas_keluar")->setOrder(["acc_kas_keluar.tanggal" => "desc", "no_kk" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_keluar.status", "left")
                     ->setSearch(["acc_kas_keluar.no_kk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_keluar.status"])
@@ -111,7 +111,7 @@ class Kaskeluar extends MY_Controller {
             $nobukti = $this->input->post("no_bukti");
             $customer = $this->input->post("customer");
             $uraian = $this->input->post("uraian");
-            $status = $this->input->post("status"); 
+            $status = $this->input->post("status");
             if ($status !== "") {
                 $list->setWheres(["acc_kas_keluar.status" => "{$status}"]);
             }
@@ -237,7 +237,7 @@ class Kaskeluar extends MY_Controller {
         }
     }
 
-    public function edit($id,$depth = "ACCKK") {
+    public function edit($id, $depth = "ACCKK") {
         try {
             $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
@@ -260,7 +260,7 @@ class Kaskeluar extends MY_Controller {
                     ->getData();
 //            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
 //                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas",'status'=>'aktif'])->setOrder(["kode_coa" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas", 'status' => 'aktif'])->setOrder(["kode_coa" => "asc"])->getData();
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["origin" => $kode])->getDetail();
             $data['id_dept'] = $depth;
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
@@ -404,7 +404,7 @@ class Kaskeluar extends MY_Controller {
             $log .= "\n";
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
-            
+
             $class = $this->uri->segment(1);
             $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
             $url = site_url("{$class}/kaskeluar/edit/{$id}");
@@ -553,7 +553,7 @@ class Kaskeluar extends MY_Controller {
         try {
             $model = new $this->m_global;
             $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])->setSearch(["kode_coa", "nama"])
-                    ->setWheres(["level" => 5,'status'=>'aktif'])->setOrder(["kode_coa" => "asc"]);
+                    ->setWheres(["level" => 5, 'status' => 'aktif'])->setOrder(["kode_coa" => "asc"]);
             $_POST['length'] = 50;
             $_POST['start'] = 0;
             if ($this->input->get('search') !== "") {
@@ -599,7 +599,7 @@ class Kaskeluar extends MY_Controller {
     public function get_partner() {
         try {
             $model = new $this->m_global;
-            $model->setTables("partner")->setSelects(["id", "nama","nama_rekening"])->setOrder(["nama" => "asc"])->setSearch(["nama","nama_rekening"]);
+            $model->setTables("partner")->setSelects(["id", "nama", "nama_rekening"])->setOrder(["nama" => "asc"])->setSearch(["nama", "nama_rekening"]);
             if ($this->input->get('search') !== "") {
 //                $model->setWheres(["nama LIKE" => "%{$this->input->get('search')}%"]);
                 $_POST['search']['value'] = $this->input->get('search');
