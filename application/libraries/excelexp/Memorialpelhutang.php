@@ -36,11 +36,14 @@ class Memorialpelhutang {
                     ->setSelects(["bkd.kode_coa as kode_coa_bkd,acbkd.nama as nama_bkd,sum(bkd.nominal) as valas,sum(bkd.nominal*bkd.kurs) as nominals,acbk.nama,bk.kode_coa,date(bkd.tanggal) as tanggal"])
                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",GROUP_CONCAT(uraian)) else GROUP_CONCAT(uraian) end as uraian'])
                     ->setGroups(["bkd.kode_coa"])->setOrder(["bkd.kode_coa"]);
+            if (!empty($datas["fbank"])) {
+                $model->setWheres(["bk.kode_coa" => $datas["fbank"]]);
+            }
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setGroups(["bk.kode_coa", "bkd.no_bk"], true)->setOrder(["bk.kode_coa", "bkd.no_bk"], true)
-                        ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bk.jenis_transaksi) else bk.jenis_transaksi end as uraian']);
+                            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bk.jenis_transaksi) else bk.jenis_transaksi end as uraian']);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
@@ -59,6 +62,9 @@ class Memorialpelhutang {
                     ->setWhereRaw("gkd.kode_coa in (select '2111.01' as kode_coa union all select '2111.02' as kode_coa union all  select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setGroups(["gkd.kode_coa"])->setOrder(["gkd.kode_coa"])
                     ->setSelects(["gkd.kode_coa as kode_coa_gkd,acgkd.nama as nama_gkd,sum(gkd.nominal) as valas,sum(gkd.nominal*gkd.kurs) as nominals,acgk.nama", "gk.kode_coa"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,gk.no_gk,gkd.kurs", "date(gkd.tanggal) as tanggal", "transinfo as uraian"]);
+                    if (!empty($datas["fbank"])) {
+                $model->setWheres(["gk.kode_coa" => $datas["fbank"]]);
+            }
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":

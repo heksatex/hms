@@ -36,6 +36,9 @@ class Memorialpelpiutang {
                     ->setSelects(["bmd.kode_coa as kode_coa_bmd,acbmd.nama as nama_bmd,if(bmd.kurs > 1,sum(bmd.nominal),0) as valas,sum(bmd.nominal*bmd.kurs) as nominals,acbm.nama,bm.kode_coa,date(bmd.tanggal) as tanggal"])
                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bm.jenis_transaksi) else bm.jenis_transaksi end as uraian'])
                     ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
+                    if (!empty($datas["fbank"])) {
+                $model->setWheres(["bm.kode_coa" => $datas["fbank"]]);
+            }
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
@@ -59,6 +62,9 @@ class Memorialpelpiutang {
                     ->setWhereRaw("gmd.kode_coa in (select '1161.01' as kode_coa union all select '1161.02' as kode_coa union all select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setGroups(["gm.kode_coa"])->setOrder(["gm.kode_coa"])
                     ->setSelects(["gmd.kode_coa as kode_coa_gmd,acgmd.nama as nama_gmd,if(gmd.kurs > 1,sum(gmd.nominal),0) as valas,sum(gmd.nominal*gmd.kurs) as nominals,acgm.nama", "gm.kode_coa"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,gm.no_gm,gmd.kurs", "date(gmd.tanggal) as tanggal", "transinfo as uraian"]);
+                    if (!empty($datas["fbank"])) {
+                $model->setWheres(["gm.kode_coa" => $datas["fbank"]]);
+            }
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
