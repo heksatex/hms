@@ -62,7 +62,7 @@ class Memorialpenbank {
                     ->setSelects(["gm.kode_coa,acgm.nama,gmd.kode_coa as kode_coa_gmd,acgmd.nama as nama_gmd,sum(if(gmd.kurs > 1,gmd.nominal,0)) as valas,sum(gmd.nominal*gmd.kurs) as nominals"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,gm.no_gm,gmd.kurs", "date(gmd.tanggal) as tanggal", "transinfo as uraian"])
                     ->setWhereRaw("gmd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}') and kode_coa <> '1161.99' )")->setGroups(["gm.kode_coa"])->setOrder(["gm.kode_coa"]);
-            if (!empty($datas["fbank"])) {
+                    if (!empty($datas["fbank"])) {
                 $model->setWheres(["gm.kode_coa" => $datas["fbank"]]);
             }
             $data["giro_debit"] = $model->getData();
