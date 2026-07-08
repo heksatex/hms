@@ -262,7 +262,7 @@
                         })
                     });
                 });
-
+                const filterBank = ["pen_b","peng_b","pel_p","pel_h"];
                 $("#jurnal").on("select2:select", function (e) {
                     $('#fbank').val(null).trigger('change');
                     if (NoDetailDebit.includes(e.params.data.id)) {
@@ -277,7 +277,7 @@
                         $(".filter-kredit-text").html("Rekap Kredit");
                     }
 
-                    if (e.params.data.text.includes("Bank"))
+                    if (filterBank.includes(e.params.data.id))
                         $(".advanceds").show();
                     else
                         $(".advanceds").hide();
