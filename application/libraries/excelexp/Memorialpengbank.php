@@ -24,7 +24,7 @@ class Memorialpengbank {
     protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
 
     public function _data($model, $datas) {
-         $nt = implode("','", array_merge($this->notList,["utang_giro"]));
+        $nt = implode("','", array_merge($this->notList, ["utang_giro"]));
 //        $nt = implode("','", $this->notList);
         try {
             $data = [];
@@ -37,6 +37,9 @@ class Memorialpengbank {
                         "acbk.nama as nama,acbkd.nama as nama_bkd", "if(partner_nama ='',lain2,partner_nama) as partner"])
                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",uraian) else uraian end as uraian'])
                     ->setGroups(["bkd.kode_coa"])->setOrder(["bkd.kode_coa"]);
+            if (!empty($datas["fbank"])) {
+                $model->setWheres(["bk.kode_coa" => $datas["fbank"]]);
+            }
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
@@ -58,15 +61,20 @@ class Memorialpengbank {
             $model->setTables("acc_giro_keluar gk")->setJoins("acc_giro_keluar_detail gkd", "giro_keluar_id = gk.id")
                     ->setJoins("acc_coa acgk", "acgk.kode_coa = gk.kode_coa", "left")
                     ->setJoins("acc_coa acgkd", "acgkd.kode_coa = gkd.kode_coa", "left")
-                    ->setWhereRaw("gkd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}') and kode_coa <> '2111.99' )")->setGroups(["gkd.kode_coa"])->setOrder(["gkd.kode_coa"])
+                    ->setWhereRaw("gkd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}') and kode_coa <> '2111.99' )")
                     ->setWheres(["date(gk.tanggal) >=" => $datas['tanggals'][0], "date(gk.tanggal) <=" => $datas['tanggals'][1], "gk.status" => "confirm"])
+                    ->setGroups(["gkd.kode_coa"])->setOrder(["gkd.kode_coa"])
                     ->setSelects(["gk.kode_coa,gkd.kode_coa as kode_coa_gkd,sum(if(gkd.kurs > 1,gkd.nominal,0)) as valas,sum(gkd.nominal*gkd.kurs) as nominals",
                         "acgk.nama as nama,acgkd.nama as nama_gkd", "if(partner_nama ='',lain2,partner_nama) as partner"]);
+            if (!empty($datas["fbank"])) {
+                $model->setWheres(["gk.kode_coa" => $datas["fbank"]]);
+            }
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setSelects(["transinfo as uraian,gkd.no_gk,gkd.tanggal,kurs"]);
                     $model->setGroups(["gkd.id", "gkd.no_gk"], true)->setOrder(["gk.kode_coa", "gkd.no_gk"], true);
+
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":

@@ -58,6 +58,10 @@
                 width :200px;
             }
 
+            .advanceds {
+                display: none;
+            }
+
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -122,6 +126,50 @@
                                                     <input  name="filter" type="radio" value="detail_2" class="form control" >&nbsp;<strong>Rekap Debet</strong></label>
                                             </div>
                                         </div>
+
+                                        <div class="col-md-12 advanceds ">
+                                            <div class="col-md-12 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;cursor:pointer;">
+                                                <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                                                    <label>
+                                                        <i class="showAdvanced glyphicon glyphicon-triangle-bottom">&nbsp;</i>Filter
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <br>
+                                            <div class="col-md-12">
+                                                <div class="panel panel-default" style="margin-bottom: 0px;">
+                                                    <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                                                        <div class="panel-body" style="padding: 5px">
+                                                            <div id="form-filter" class="form-horizontal form-filter">
+                                                                <div class="col-md-6">
+                                                                    <div class="form-group">
+                                                                        <div class="col-md-12 col-xs-12">
+                                                                            <div class="col-xs-3">
+                                                                                <label class="form-label">Bank</label>
+                                                                            </div>
+                                                                            <div class="col-xs-9 col-md-9">
+                                                                                <select class="form-control input-sm select2" style="width:100%" name="fbank" id="fbank">
+                                                                                    <option value=""></option>
+                                                                                    <?php
+                                                                                    foreach ($bank as $key => $value) {
+                                                                                        ?>
+                                                                                        <option value="<?= $value->kode_coa ?>"><?= $value->nama ?></option>
+                                                                                        <?php
+                                                                                    }
+                                                                                    ?>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -129,6 +177,7 @@
                                     <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="export" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o"  style="color:green"></i> Excel</button>
                                 </div>
                             </form>
+
                             <div class="row">
                                 <div class="col-md-12 table-responsive example1 divListviewHead">
                                     <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
@@ -165,8 +214,8 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script>
-            var NoDetailDebit = ["pen_kb", "peng_kb","pen_kv", "peng_kv"];
-            var NoDetailKredit = ["peng_kb","peng_kv"];
+            var NoDetailDebit = ["pen_kb", "peng_kb", "pen_kv", "peng_kv"];
+            var NoDetailKredit = ["peng_kb", "peng_kv"];
             $(function () {
                 var cek = 0;
                 $('input[name="periode"]').daterangepicker({
@@ -214,19 +263,24 @@
                     });
                 });
 
-                $("#jurnal").on("select2:select", function () {
-                    if (NoDetailDebit.includes($("#jurnal").val())) {
+                $("#jurnal").on("select2:select", function (e) {
+                    $('#fbank').val(null).trigger('change');
+                    if (NoDetailDebit.includes(e.params.data.id)) {
                         $(".filter-debet").hide();
                     } else {
                         $(".filter-debet").show();
                     }
 
-                    if (NoDetailKredit.includes($("#jurnal").val())) {
+                    if (NoDetailKredit.includes(e.params.data.id)) {
                         $(".filter-kredit-text").html("Rekap Debet");
                     } else {
                         $(".filter-kredit-text").html("Rekap Kredit");
                     }
 
+                    if (e.params.data.text.includes("Bank"))
+                        $(".advanceds").show();
+                    else
+                        $(".advanceds").hide();
 //                    filters();
 //                    search();
                 });
@@ -242,7 +296,8 @@
                             jurnal: $("#jurnal").val(),
                             detail: $("#detail").is(":checked") ? 1 : 0,
                             jurnal_nm: $("#jurnal :selected").text(),
-                            filter: $("input[name='filter']:checked").val()
+                            filter: $("input[name='filter']:checked").val(),
+                            fbank: $("#fbank").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {

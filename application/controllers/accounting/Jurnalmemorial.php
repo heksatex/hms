@@ -49,7 +49,7 @@ class Jurnalmemorial extends MY_Controller {
         $this->load->library('excelexp/Memorialpenjualan', null, 'penj');
 //        $this->data = new $this->m_global;
     }
-    
+
     public function check_berdasarkan($str, $periode): bool {
         if (empty($str) && empty($this->input->post($periode))) {
             $this->form_validation->set_message('check_berdasarkan', 'Pilih Salah satu Tanggal dibuat / Periode');
@@ -78,6 +78,8 @@ class Jurnalmemorial extends MY_Controller {
     public function index() {
         $data['id_dept'] = '';
         $data['jurnal'] = $this->jm;
+        $model = new $this->m_global();
+        $data["bank"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank", "level" => 5])->getData();
         $this->load->view('accounting/v_rpt_jurnal_memorial', $data);
     }
 
@@ -109,103 +111,61 @@ class Jurnalmemorial extends MY_Controller {
             $this->tanggals = explode(" - ", $tanggal);
             $this->filter = $this->input->post("filter");
             $this->jurnal = $this->input->post("jurnal");
+            $fbank = $this->input->post("fbank") ?? "";
             $view = "";
+            $data["fbank"] = $fbank;
+            $data["jurnal"] = $this->jm[$this->jurnal];
+            $data["periode"] = $tanggal;
+            $data["tanggals"] = $this->tanggals;
+            $data["filter"] = $this->filter;
             $model = new $this->m_global;
             switch ($this->jurnal) {
                 case "pen_kb":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->penkasbesar->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_kas_besar_{$this->filter}", $data, true);
                     break;
                 case "peng_kb":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->pengkasbesar->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_kas_besar_keluar_{$this->filter}", $data, true);
                     break;
                 case "pen_b":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->penbank->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_penerimaan_bank_{$this->filter}", $data, true);
                     break;
                 case "peng_b":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->pengbank->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pengeluaran_bank_{$this->filter}", $data, true);
                     break;
                 case "pen_g":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->pengiro->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_penerimaan_giro_{$this->filter}", $data, true);
                     break;
                 case "peng_g":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->penggiro->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pengiriman_giro_{$this->filter}", $data, true);
                     break;
 
                 case "pen_kv":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->penkasvalas->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_penerimaan_kasvalas_{$this->filter}", $data, true);
                     break;
                 case "peng_kv":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->pengkasvalas->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pengeluaran_kasvalas_{$this->filter}", $data, true);
                     break;
                 case "pel_p":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->pelpiutang->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pelunasan_piutang_{$this->filter}", $data, true);
                     break;
                 case "pel_h":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->pelhutang->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pelunasan_hutang_{$this->filter}", $data, true);
                     break;
                 case "pemb":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->pemb->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pembelian_{$this->filter}", $data, true);
                     break;
                 case "penj":
-                    $data["jurnal"] = $this->jm[$this->jurnal];
-                    $data["periode"] = $tanggal;
-                    $data["tanggals"] = $this->tanggals;
-                    $data["filter"] = $this->filter;
                     $data["data"] = $this->penj->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_penjualan_{$this->filter}", $data, true);
                     break;
@@ -388,7 +348,7 @@ class Jurnalmemorial extends MY_Controller {
                     else
                         $view = $this->pelhutang->_detail_2($data, $filename);
                     break;
-                    case "pemb":
+                case "pemb":
                     $data["jurnal"] = $this->jm[$this->jurnal];
                     $data["periode"] = $tanggal;
                     $data["tanggals"] = $this->tanggals;
@@ -402,7 +362,7 @@ class Jurnalmemorial extends MY_Controller {
                     else
                         $view = $this->pemb->_detail_2($data, $filename);
                     break;
-                    case "penj":
+                case "penj":
                     $data["jurnal"] = $this->jm[$this->jurnal];
                     $data["periode"] = $tanggal;
                     $data["tanggals"] = $this->tanggals;
