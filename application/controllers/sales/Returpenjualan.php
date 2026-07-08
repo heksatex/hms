@@ -1230,7 +1230,7 @@ class Returpenjualan extends MY_Controller {
             $sheet->setCellValue("B{$row}", 'No Retur');
             $sheet->setCellValue("c{$row}", 'Tanggal');
             $sheet->setCellValue("d{$row}", 'No SJ');
-            $sheet->setCellValue("r{$row}", 'Marketing');
+            $sheet->setCellValue("e{$row}", 'Marketing');
             $sheet->setCellValue("f{$row}", 'Customer');
             $sheet->setCellValue("g{$row}", 'Dpp');
             $sheet->setCellValue("h{$row}", 'Ppn');
