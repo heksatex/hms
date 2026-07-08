@@ -25,6 +25,13 @@
                 white-space: nowrap;
             }
 
+            #tblgiro.rp tr > *:nth-child(6),#tblgiro.rp tr > *:nth-child(7),
+            #tblgiro.rp tr > *:nth-child(8),#tblgiro.rp tr > *:nth-child(9)
+            {
+                display: none;
+            }
+
+
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse" >
@@ -102,9 +109,13 @@
                                             <th class="style bb ws">No Bukti</th>
                                             <th class="style bb ws">Uraian</th>
                                             <th class="style bb ws">No Acc</th>
+                                            <th class="style bb ws">Kurs</th>
                                             <th class="style bb ws text-right">Debet</th>
                                             <th class="style bb ws text-right">Kredit</th>
                                             <th class="style bb ws text-right">Saldo</th>
+                                            <th class="style bb ws text-right">Debet Rp</th>
+                                            <th class="style bb ws text-right">Kredit Rp</th>
+                                            <th class="style bb ws text-right">Saldo Rp</th>
                                         </tr>
                                         <tbody id="tBody" class="ws">
 
@@ -143,11 +154,16 @@
                 $(".no_acc").on("change", function () {
                     $("#curr").val("");
                 });
-                $(".no_acc").on("select2:select", function () {
+                var RP = ["", "IDR"];
+                $(".no_acc").on("select2:select", function (e) {
                     var symbol = $('#kode_coa').find(':selected').data().curr;
                     var namaCoa = $('#kode_coa').find(':selected').data().coanama;
                     $("#curr").val(symbol);
                     $("#coanama").val(namaCoa);
+                    if (RP.includes(symbol))
+                        $("#tblgiro").addClass("rp");
+                    else
+                        $("#tblgiro").removeClass("rp");
                 });
 
                 $("#search").on("click", function () {
