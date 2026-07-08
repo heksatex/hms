@@ -223,13 +223,20 @@ class Rekapentries extends MY_Controller {
 //            $periodes = $this->input->post("periode");
 
             if ($detail === "0") {
-                $reloadedSheet = $spreadsheet->getActiveSheet();
-                $reloadedSheet->removeColumnByIndex(3, 3);
-                $reloadedSheet->removeColumnByIndex(4, 3);
+//                $reloadedSheet = $spreadsheet->getActiveSheet();
+//                $reloadedSheet->removeColumnByIndex(3, 3);
+//                $reloadedSheet->removeColumnByIndex(4, 3);
+                $sheet->removeColumn('J');
+                $sheet->removeColumn('I');
+                $sheet->removeColumn('H');
+                $sheet->removeColumn('E');
+                $sheet->removeColumn('D');
+                $sheet->removeColumn('C');
+                
+                
             }
             $nm = $periodes ?? $tanggal;
             $nm = str_replace("/", "_", $nm);
-            $writer = new Xlsx($spreadsheet);
             $filename = "rekap_entries_{$nm}";
             $url = "dist/storages/report/rekap_entries";
             if (!is_dir(FCPATH . $url)) {

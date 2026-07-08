@@ -1228,12 +1228,14 @@ class Pelunasanpiutang extends MY_Controller
                         } else {
                             $dt = $this->m_pelunasanpiutang->get_data_metode_pelunasan_by_id($cek->partner_id, $type, ['no_bukti' => $no_bukti_ex, 'id' => $id_bukti_ex]);
 
-                            $data_update = [
-                                'no_pelunasan'      => $no_pelunasan,
-                                'tanggal_transaksi' => $dt->tanggal,
-                            ];
+                            if ($type !== 'um') {
+                                $data_update = [
+                                    'no_pelunasan'      => $no_pelunasan,
+                                    'tanggal_transaksi' => $dt->tanggal,
+                                ];
+                                $update = $this->m_pelunasanpiutang->update_data_pelunasan_piutang([$data_update]);
+                            }
 
-                            $update = $this->m_pelunasanpiutang->update_data_pelunasan_piutang([$data_update]);
                             // if (!$update['status']) {
                             //     throw new \Exception('Gagal memperbarui data Pelunasan: ' . $update['message'], 500);
                             // }
@@ -1822,6 +1824,9 @@ class Pelunasanpiutang extends MY_Controller
         // get Coa Head D/C       
         $coa_default_head = $this->coaHead($get_sum->selisih);
 
+        //get_sum_peluansan
+        $get_sum_pelunasan = $this->m_pelunasanpiutang->get_sum_pelunasan_by_kode($no_pelunasan, $tipe_currency)->row();
+
         // $coa_default_debit = $this->get_coa_default($jenis_koreksi, $get_sum, 'D', $no_pelunasan);
         // $coa_default_credit = $this->get_coa_default($jenis_koreksi, $get_sum, 'C', $no_pelunasan);
 
@@ -1829,7 +1834,7 @@ class Pelunasanpiutang extends MY_Controller
         // $get_coa_debit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'D', 'koreksi' => $jenis_koreksi])->row();
         // $get_coa_credit  = $this->m_pelunasanpiutang->get_coa_summary_id(['pelunasan_summary_id' => $id, 'posisi' => 'C',  'koreksi' => $jenis_koreksi])->row();
         $koreksi   = 'normal'; // normal or split
-        $view = $this->load->view('modal/v_pelunasan_piutang_koreksi_modal', ["id_summary" => $id, "no_pelunasan" => $no_pelunasan, 'tipe_koreksi' => $tipe_koreksi, 'get_sum' => $get_sum, 'tipe_currency' => $tipe_currency, 'coa_head' => $coa_default_head, 'koreksi' => $koreksi], true);
+        $view = $this->load->view('modal/v_pelunasan_piutang_koreksi_modal', ["id_summary" => $id, "no_pelunasan" => $no_pelunasan, 'tipe_koreksi' => $tipe_koreksi, 'get_sum' => $get_sum, 'tipe_currency' => $tipe_currency, 'coa_head' => $coa_default_head, 'koreksi' => $koreksi, 'sum_pelunasan' => $get_sum_pelunasan], true);
         $this->output->set_status_header(200)
             ->set_content_type('application/json', 'utf-8')
             ->set_output(json_encode(['data' => $view]));
@@ -2526,14 +2531,14 @@ class Pelunasanpiutang extends MY_Controller
                                 throw new \Exception('Status Bayar tidak bisa diubah ke <b>Partial</b>, Karena Total Pelunasan sama dengan Sisa Piutang !', 200);
                             }
 
-                            if ($status_bayar == 'lunas') {
-                                $cek = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
-                                foreach ($cek as $ck) {
-                                    if ($ck->keterangan == 'Uang Muka') {
-                                        throw new \Exception('Status Bayar tidak bisa diubah ke <b>Lunas</b>, Karena Pelunasan memakai <b>Uang Muka</b> !', 200);
-                                    }
-                                }
-                            }
+                            // if ($status_bayar == 'lunas') {
+                            //     $cek = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
+                            //     foreach ($cek as $ck) {
+                            //         if ($ck->keterangan == 'Uang Muka') {
+                            //             throw new \Exception('Status Bayar tidak bisa diubah ke <b>Lunas</b>, Karena Pelunasan memakai <b>Uang Muka</b> !', 200);
+                            //         }
+                            //     }
+                            // }
 
                             $update = $this->m_pelunasanpiutang->update_pelunasan_faktur_by_kode($tmp_update, $no_pelunasan);
 

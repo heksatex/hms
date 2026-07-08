@@ -806,7 +806,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->where('app.status', 'done');
         // $this->db->where('apps.tipe_currency', 'Rp');
         $this->db->SELECT("app.id as id_bukti,app.id as id_bukti_ecr, app.no_pelunasan as no_bukti, app.tanggal_transaksi as tgl, app.partner_id as id_partner,  
-                        CONCAT('Uang Muka : ', (SELECT GROUP_CONCAT(no_faktur) as group_faktur FROM acc_pelunasan_piutang_faktur WHERE pelunasan_piutang_id = app.id), ' ',  
+                        CONCAT('Uang Muka : ', COALESCE((SELECT GROUP_CONCAT(no_faktur) as group_faktur FROM acc_pelunasan_piutang_faktur WHERE pelunasan_piutang_id = app.id),'Jadi Deposit'), ' ',  
                         IF('$currency' = 'valas', 
                                 GROUP_CONCAT(' - ',(SELECT GROUP_CONCAT(no_bukti) as group_no FROM acc_pelunasan_piutang_metode WHERE pelunasan_piutang_id = app.id),' Curr: ', (SELECT currency FROM currency_kurs WHERE id = apps.currency_id), '  Kurs: ', apps.kurs,' '), 
                                 GROUP_CONCAT(' - ',(SELECT GROUP_CONCAT(no_bukti) as group_no FROM acc_pelunasan_piutang_metode WHERE pelunasan_piutang_id = app.id))
@@ -1341,6 +1341,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $this->db->join("acc_pelunasan_piutang_akhir_bulan apab", "acp.no_pelunasan =  apab.no_pelunasan", "INNER");
         $this->db->join("acc_kurs_akhir_bulan akab", "akab.no = apab.no_kab", "INNER");
         $sql = $this->db->get_compiled_select();
+        // return var_dump($sql);
         return $sql;
     }
 
@@ -1354,7 +1355,7 @@ class M_bukubesarpembantupiutang extends CI_Model
         $where_split = ['apps.mode <>' => 'normal', 'app.status' => 'done', 'apps.keterangan <> ' => "", 'apps.tipe_currency' => $where_tipe_cur,  'appsk.head' => 'false', 'appsk.alat_pelunasan' => 'false', 'ack.koreksi_bb' => 'true'];
         $sub_query_split  = $this->get_saldo_koreksi_split($where_split, ['app.partner_id', 'apps.id'], $currency);
         $where_kab    = ['acp.status' => 'done', 'akab.status' => 'confirm'];
-        $sub_query_akhir_bulan = $this->get_saldo_pelunasan_kurs_akhir_bulan($where_kab, ['acp.partner_id'], $currency);
+        $sub_query_akhir_bulan = $this->get_saldo_pelunasan_kurs_akhir_bulan($where_kab, ['acp.partner_id', 'akab.id'], $currency);
         $where_kab_retur    = ['arp.status' => 'confirm', 'akab.status' => 'confirm', 'arpab.tipe'=>'retur_penjualan'];
         $sub_query_akhir_bulan_retur = $this->get_saldo_retur_kurs_akhir_bulan($where_kab_retur, ['arp.partner_id'], $currency);
         $where_kab_kas    = ['akm.status' => 'confirm', 'akab.status' => 'confirm', 'ab.tipe' => 'uang_muka_penjualan_kas_masuk'];
@@ -1433,7 +1434,8 @@ class M_bukubesarpembantupiutang extends CI_Model
     }
 
 
-    var $where_jenis_transaksi_refund = array('piutang');
+    var $where_jenis_transaksi_refund = array('piutang', 'um_penjualan');
+    
 
     function get_list_coa_by_transaksi()
     {

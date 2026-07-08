@@ -106,13 +106,12 @@ class Bukukas extends MY_Controller {
             $model->setTables("acc_jurnal_entries_items jei")->setJoins("acc_jurnal_entries je", 'je.kode = jei.kode')
                     ->setWheres(["date(je.tanggal_dibuat) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(je.tanggal_dibuat) <=" => date("Y-m-d", strtotime($tanggals[1])),
                         'je.status' => 'posted'])
-                    ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa,"kode_mua"=>$curr]);
-            //
-            if ($valas) {
-                $model->setSelects(["jei.posisi, jei.kode_coa,  IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal_curr ELSE 0 END),0) AS total_debit,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal_curr ELSE 0 END),0) AS total_credit"]);
-            } else {
-                $model->setSelects(["jei.posisi, jei.kode_coa,  IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit"]);
-            }
+                    ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa, "kode_mua" => $curr])
+                    ->setSelects(["jei.posisi, jei.kode_coa"]);
+
+            $model->setSelects(["IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal_curr ELSE 0 END),0) AS total_debit_valas,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal_curr ELSE 0 END),0) AS total_credit_valas"]);
+
+            $model->setSelects(["IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit"]);
 
             $entries = $model->getQuery();
 
@@ -121,24 +120,21 @@ class Bukukas extends MY_Controller {
             $tgl_dari = date("Y-m-d 00:00:00", strtotime($start));
             $tgl_sampai = date("Y-m-d 23:59:59", strtotime("-1 day", strtotime($tanggals[0])));
             $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
-                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D","kode_mua"=>$curr]);
-            if ($valas) {
-                $model->setSelects(["jei.kode_coa, SUM(jei.nominal_curr) as total_debit"]);
-            } else {
-                $model->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_debit"]);
-            }
+                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D", "kode_mua" => $curr]);
+            $model->setSelects(["jei.kode_coa, SUM(jei.nominal_curr) as total_debit_valas"]);
+            $model->setSelects(["SUM(jei.nominal) as total_debit"]);
 
             $saldoDebet = $model->getQuery();
 
             //Kredit
 
             $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
-                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C","kode_mua"=>$curr]);
-            if ($valas) {
-                $model->setSelects(["jei.kode_coa, SUM(jei.nominal_curr) as total_credit"]);
-            } else {
-                $model->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit"]);
-            }
+                    ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C", "kode_mua" => $curr]);
+
+            $model->setSelects(["SUM(jei.nominal_curr) as total_credit_valas"]);
+
+            $model->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit"]);
+
             $saldoKredit = $model->getQuery();
 
             $model->setTables("acc_coa coa")->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
@@ -147,23 +143,28 @@ class Bukukas extends MY_Controller {
                     ->setOrder(["coa.kode_coa" => "asc"])->setWheres(["coa.kode_coa" => $coa])
                     ->setSelects(["coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,coa.saldo_awal,COALESCE(debit_sbl.total_debit, 0) as total_debit_sbl",
                         "COALESCE(credit_sbl.total_credit, 0) as total_credit_sbl", "COALESCE(jr.total_debit, 0) as total_debit", "COALESCE(jr.total_credit, 0) as total_credit"]);
-            if ($valas) {
-                $model->setSelects(["CASE 
+
+            //valas
+            $model->setSelects(["COALESCE(debit_sbl.total_debit_valas, 0) as total_debit_valas_sbl",
+                "COALESCE(credit_sbl.total_credit_valas, 0) as total_credit_valas_sbl",
+                "COALESCE(jr.total_debit_valas, 0) as total_debit_valas",
+                "COALESCE(jr.total_credit_valas, 0) as total_credit_valas"]);
+
+            $model->setSelects(["CASE 
                                 WHEN coa.saldo_normal = 'D' THEN 
-                                    (coa.saldo_valas + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                                    (coa.saldo_valas + COALESCE(debit_sbl.total_debit_valas, 0) - COALESCE(credit_sbl.total_credit_valas, 0))
                                 WHEN coa.saldo_normal = 'C' THEN 
-                                    (coa.saldo_valas + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                                    (coa.saldo_valas + COALESCE(credit_sbl.total_credit_valas, 0) - COALESCE(debit_sbl.total_debit_valas, 0))
                                 ELSE coa.saldo_valas
-                            END AS saldo_awal_final"]);
-            } else {
-                $model->setSelects(["CASE 
+                            END AS saldo_awal_valas_final"]);
+
+            $model->setSelects(["CASE 
                                 WHEN coa.saldo_normal = 'D' THEN 
                                     (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
                                 WHEN coa.saldo_normal = 'C' THEN 
                                     (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
                                 ELSE coa.saldo_awal
                             END AS saldo_awal_final"]);
-            }
 
             return $model->getDetail();
         } catch (Exception $ex) {
@@ -205,7 +206,7 @@ class Bukukas extends MY_Controller {
             }
             $model = $this->_query();
             $data = $model->getData();
-            
+
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $saldos = 0;
@@ -214,7 +215,7 @@ class Bukukas extends MY_Controller {
             $coas = explode(" - ", $ccoa);
             $tanggals = $this->input->post("tanggal");
             $tanggal = explode(" - ", $tanggals);
-            $tgl = date("d-M-Y", strtotime($tanggal[0]))." - ".date("d-M-Y", strtotime($tanggal[1]));
+            $tgl = date("d-M-Y", strtotime($tanggal[0])) . " - " . date("d-M-Y", strtotime($tanggal[1]));
             $sheet->setCellValue("A2", "{$coa} - {$coas[1]}");
             $sheet->setCellValue("A3", "Periode : {$tgl}");
             $row = 5;
@@ -223,70 +224,149 @@ class Bukukas extends MY_Controller {
             $sheet->setCellValue("C{$row}", 'No Bukti');
             $sheet->setCellValue("D{$row}", 'Uraian');
             $sheet->setCellValue("E{$row}", 'No Acc');
-            $sheet->setCellValue("F{$row}", 'Debet');
-            $sheet->setCellValue("G{$row}", 'Kredit');
-            $sheet->setCellValue("H{$row}", 'Saldo');
+            $sheet->setCellValue("F{$row}", 'Kurs');
+            $sheet->setCellValue("G{$row}", 'Debet');
+            $sheet->setCellValue("H{$row}", 'Kredit');
+            $sheet->setCellValue("I{$row}", 'Saldo');
+            if ($valas) {
+                $sheet->setCellValue("J{$row}", 'Debet Rp');
+                $sheet->setCellValue("K{$row}", 'Kredit Rp');
+                $sheet->setCellValue("L{$row}", 'Saldo Rp');
+            }
 
             if (count($data) > 0) {
                 $data_saldo = $this->_getSaldoAwal($valas);
                 $saldos = floatval($data_saldo->saldo_awal_final);
                 $row += 1;
-                $sheet->setCellValue("D{$row}", "Saldo Awal");
-                $sheet->setCellValue("F{$row}", "");
-                $sheet->setCellValue("G{$row}", "");
-                $sheet->setCellValue("H{$row}", $saldos);
+                if (!$valas) {
+                    $sheet->setCellValue("E{$row}", "Saldo Awal");
+                    $sheet->setCellValue("I{$row}", $saldos);
+                } else {
+                    $saldosValas = floatval($data_saldo->saldo_awal_valas_final);
+                    $sheet->setCellValue("E{$row}", "Saldo Awal");
+                    $sheet->setCellValue("I{$row}", $saldosValas);
+                    $sheet->setCellValue("J{$row}", '');
+                    $sheet->setCellValue("K{$row}", '');
+                    $sheet->setCellValue("L{$row}", $saldos);
+                }
             }
-
-
-
             $kredits = 0;
             $debets = 0;
             $temp = "";
             $noUrut = 0;
-            foreach ($data as $key => $value) {
-                $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
-                $row += 1;
-                $showUrut = "";
-                $no_bukti = "";
-                $dt = "";
-                if ($value->no_bukti !== $temp) {
-                    $noUrut++;
-                    $showUrut = $noUrut;
-                    $no_bukti = $value->no_bukti;
-                    $dt = $value->tanggal;
-                }
-                $saldo = 0;
-                $debet = 0;
-                $kredit = 0;
-                if ($value->posisi === "D") {
-                    $debet = $value->nominal;
-                    $debets += $debet;
-                } else {
-                    $kredit = $value->nominal;
-                    $kredits += $kredit;
-                }
-                $saldos += ($debet - $kredit);
-                $sheet->setCellValue("A{$row}", $showUrut);
-                $sheet->setCellValue("B{$row}", $dt);
-                $sheet->setCellValue("C{$row}", $no_bukti);
-                $sheet->setCellValue("D{$row}", "{$partner}{$value->uraian}");
-                $sheet->setCellValue("E{$row}", $value->kode_coa);
-                $sheet->setCellValue("F{$row}", ($debet == 0) ? "" : $debet);
-                $sheet->setCellValue("G{$row}", ($kredit == 0) ? "" : $kredit);
-                $sheet->setCellValue("H{$row}", $saldos);
+            if (!$valas) {
+                foreach ($data as $key => $value) {
+                    $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
+                    $row += 1;
+                    $showUrut = "";
+                    $no_bukti = "";
+                    $dt = "";
+                    if ($value->no_bukti !== $temp) {
+                        $noUrut++;
+                        $showUrut = $noUrut;
+                        $no_bukti = $value->no_bukti;
+                        $dt = $value->tanggal;
+                    }
+                    $debet = 0;
+                    $kredit = 0;
+                    if ($value->posisi === "D") {
+                        $debet = $value->nominal;
+                        $debets += $debet;
+                    } else {
+                        $kredit = $value->nominal;
+                        $kredits += $kredit;
+                    }
+                    $saldos += ($debet - $kredit);
+                    $sheet->setCellValue("A{$row}", $showUrut);
+                    $sheet->setCellValue("B{$row}", $dt);
+                    $sheet->setCellValue("C{$row}", $no_bukti);
+                    $sheet->setCellValue("D{$row}", "{$partner}{$value->uraian}");
+                    $sheet->setCellValue("E{$row}", $value->kode_coa);
+                    $sheet->setCellValue("F{$row}", $value->kurs);
+                    $sheet->setCellValue("G{$row}", ($debet == 0) ? "" : $debet);
+                    $sheet->setCellValue("H{$row}", ($kredit == 0) ? "" : $kredit);
+                    $sheet->setCellValue("I{$row}", $saldos);
 
-                $temp = $value->no_bukti;
+                    $temp = $value->no_bukti;
+                }
+            } else {
+                $kreditsRp = 0;
+                $debetsRp = 0;
+                $saldosRp = 0;
+                foreach ($data as $key => $value) {
+                    $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
+                    $row += 1;
+                    $showUrut = "";
+                    $no_bukti = "";
+                    $dt = "";
+                    if ($value->no_bukti !== $temp) {
+                        $noUrut++;
+                        $showUrut = $noUrut;
+                        $no_bukti = $value->no_bukti;
+                        $dt = $value->tanggal;
+                    }
+                    $debet = 0;
+                    $kredit = 0;
+                    $debetRp = 0;
+                    $kreditRp = 0;
+
+                    if ($value->posisi === "D") {
+                        $debet = $value->nominal;
+                        $debets += $debet;
+
+                        $debetRp = $value->nominal * $value->kurs;
+                        $debetsRp += $debetRp;
+                    } else {
+                        $kredit = $value->nominal;
+                        $kredits += $kredit;
+
+                        $kreditRp = $value->nominal * $value->kurs;
+                        $kreditsRp += $kreditRp;
+                    }
+                    $saldosValas += ($debet - $kredit);
+                    $saldos += ($debetRp - $kreditRp);
+                    $sheet->setCellValue("A{$row}", $showUrut);
+                    $sheet->setCellValue("B{$row}", $dt);
+                    $sheet->setCellValue("C{$row}", $no_bukti);
+                    $sheet->setCellValue("D{$row}", "{$partner}{$value->uraian}");
+                    $sheet->setCellValue("E{$row}", $value->kode_coa);
+                    $sheet->setCellValue("F{$row}", $value->kurs);
+                    $sheet->setCellValue("G{$row}", ($debet == 0) ? "" : $debet);
+                    $sheet->setCellValue("H{$row}", ($kredit == 0) ? "" : $kredit);
+                    $sheet->setCellValue("I{$row}", $saldosValas);
+
+                    $sheet->setCellValue("J{$row}", ($debetRp == 0) ? "" : $debetRp);
+                    $sheet->setCellValue("K{$row}", ($kreditRp == 0) ? "" : $kreditRp);
+                    $sheet->setCellValue("L{$row}", $saldos);
+
+                    $temp = $value->no_bukti;
+                }
             }
             if (count($data) > 0) {
                 $row += 1;
-                $sheet->setCellValue("D{$row}", "Saldo Akhir");
-                $sheet->setCellValue("F{$row}", $debets);
-                $sheet->setCellValue("G{$row}", $kredits);
-                $sheet->setCellValue("H{$row}", $saldos);
-
-                $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-                $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-                $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                if (!$valas) {
+                    $sheet->setCellValue("D{$row}", "Saldo Akhir");
+                    $sheet->setCellValue("G{$row}", $debets);
+                    $sheet->setCellValue("H{$row}", $kredits);
+                    $sheet->setCellValue("I{$row}", $saldos);
+                    $sheet->getStyle("G2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("H2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("I2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                } else {
+                    $sheet->setCellValue("D{$row}", "Saldo Akhir");
+                    $sheet->setCellValue("G{$row}", $debets);
+                    $sheet->setCellValue("H{$row}", $kredits);
+                    $sheet->setCellValue("I{$row}", $saldosValas);
+                    $sheet->setCellValue("J{$row}", $debetsRp);
+                    $sheet->setCellValue("K{$row}", $kreditsRp);
+                    $sheet->setCellValue("L{$row}", $saldos);
+                    $sheet->getStyle("G2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("H2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("I2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("j2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("k2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                    $sheet->getStyle("l2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+                }
             }
 
 
