@@ -2,6 +2,9 @@
 <html lang="id">
     <head>
         <meta charset="UTF-8">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
         <title>HMS - <?= $departmen->nama ?? "" ?> OEE Dashboard</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
@@ -556,7 +559,7 @@
                         type: 'time',
                         position: 'top',
                         splitLine: {show: true, lineStyle: {color: 'grey'}},
-                        axisLabel: {color: '#999', fontSize : 12, formatter: '{HH}:{mm}'},
+                        axisLabel: {color: '#999', fontSize: 12, formatter: '{HH}:{mm}'},
                         minorTick: {show: true, splitNumber: 2, length: 3},
                         minorSplitLine: {
                             show: true, // Menampilkan garis grid minor (opsional)
@@ -781,7 +784,6 @@
             var dataMesin = [];
             const updateContents = ((data) => {
                 var stts = JSON.parse('<?= json_encode($status) ?>');
-                var base = "<?= base_url("dist/img/") ?>";
                 $.each(data, function (index, val) {
                     var datas = $(`.card-d${val.devid}`).data();
                     if (datas) {
@@ -791,57 +793,38 @@
                                 state: parseInt(datas.state),
                                 total: parseInt(datas.total),
                                 totaldown: parseInt(datas.downtime),
-                                durasi_down: datas.durasi_down,
+                                durasi_down: parseInt(datas.downtime),
                                 uptime: datas.uptime,
-                                durasi_up: datas.durasi_up
+                                durasi_up: parseInt(datas.durasi_up)
                             };
                         }
                         var stt = datas.state;
                         dataMesin[`${val.devid}`].state = parseInt(val.state);
                         dataMesin[`${val.devid}`].total += 1;
                         dataMesin[`${val.devid}`].totaldown += 1;
-                        var animasi = false;
                         var dtt = "";
                         var border = stts[val.state]["warna"];
-                        ;
-                        var status = "mark_success";
-                        var logo = base + "/mark_success.png";
                         switch (true) {
-                            case (parseInt(val.state) != 1 && dataMesin[`${val.devid}`].durasi_down <= 9):
+                            case (parseInt(val.state) != 1):
                                 dataMesin[`${val.devid}`].downtime += 1;
                                 dataMesin[`${val.devid}`].durasi_down += 1;
-                                logo = base + "mark_warning.png";
-                                status = "mark_danger";
                                 dataMesin[`${val.devid}`].uptime = 0;
                                 dataMesin[`${val.devid}`].durasi_up = 0;
-                                animasi = (dataMesin[`${val.devid}`].durasi_down <= 1) ? true : false;
                                 var dt = converMinute(dataMesin[`${val.devid}`].durasi_down);
                                 dtt = "Stop : " + dt.join();
 //                                    border = stt[dataMesin[`${val.devid}`].state]["warna"];
-                                break;
-                            case (parseInt(val.state) != 1 && dataMesin[`${val.devid}`].durasi_down >= 10) :
-                                logo = base + "mark_danger.png";
-                                status = "mark_danger";
-                                dataMesin[`${val.devid}`].downtime += 1;
-                                dataMesin[`${val.devid}`].durasi_down += 1;
-                                dataMesin[`${val.devid}`].uptime = 0;
-                                dataMesin[`${val.devid}`].durasi_up = 0;
-                                animasi = (dataMesin[`${val.devid}`].durasi_down <= 11) ? true : false;
-                                var dt = converMinute(dataMesin[`${val.devid}`].durasi_down);
-                                dtt = "Stop : " + dt.join();
-//                                    border = "red";
                                 break;
                             default:
                                 dataMesin[`${val.devid}`].uptime += 1;
                                 dataMesin[`${val.devid}`].durasi_up += 1;
                                 dataMesin[`${val.devid}`].downtime = 0;
                                 dataMesin[`${val.devid}`].durasi_down = 0;
-                                status = "mark_success";
-                                animasi = (stt != val.state) ? true : false;
                                 var dt = converMinute(dataMesin[`${val.devid}`].durasi_up);
                                 dtt = "Running : " + dt.join();
                                 break;
                         }
+
+
 
 
 //                        if (animasi) {
