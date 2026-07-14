@@ -206,7 +206,7 @@ class Bukukas extends MY_Controller {
             }
             $model = $this->_query();
             $data = $model->getData();
-            
+
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $saldos = 0;
@@ -215,7 +215,7 @@ class Bukukas extends MY_Controller {
             $coas = explode(" - ", $ccoa);
             $tanggals = $this->input->post("tanggal");
             $tanggal = explode(" - ", $tanggals);
-            $tgl = date("d-M-Y", strtotime($tanggal[0]))." - ".date("d-M-Y", strtotime($tanggal[1]));
+            $tgl = date("d-M-Y", strtotime($tanggal[0])) . " - " . date("d-M-Y", strtotime($tanggal[1]));
             $sheet->setCellValue("A2", "{$coa} - {$coas[1]}");
             $sheet->setCellValue("A3", "Periode : {$tgl}");
             $row = 5;
@@ -228,17 +228,13 @@ class Bukukas extends MY_Controller {
             $sheet->setCellValue("G{$row}", 'Kredit');
             $sheet->setCellValue("H{$row}", 'Saldo');
 
-            if (count($data) > 0) {
-                $data_saldo = $this->_getSaldoAwal($valas);
-                $saldos = floatval($data_saldo->saldo_awal_valas_final);
-                $row += 1;
-                $sheet->setCellValue("D{$row}", "Saldo Awal");
-                $sheet->setCellValue("F{$row}", "");
-                $sheet->setCellValue("G{$row}", "");
-                $sheet->setCellValue("H{$row}", $saldos);
-            }
-
-
+            $data_saldo = $this->_getSaldoAwal($valas);
+            $saldos = floatval($data_saldo->saldo_awal_valas_final);
+            $row += 1;
+            $sheet->setCellValue("D{$row}", "Saldo Awal");
+            $sheet->setCellValue("F{$row}", "");
+            $sheet->setCellValue("G{$row}", "");
+            $sheet->setCellValue("H{$row}", $saldos);
 
             $kredits = 0;
             $debets = 0;
