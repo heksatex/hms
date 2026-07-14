@@ -149,12 +149,13 @@
                                                                                 <label class="form-label">Bank</label>
                                                                             </div>
                                                                             <div class="col-xs-9 col-md-9">
+                                                                                <input type="hidden" name="curr" id="curr">
                                                                                 <select class="form-control input-sm select2" style="width:100%" name="fbank" id="fbank">
                                                                                     <option value=""></option>
                                                                                     <?php
                                                                                     foreach ($bank as $key => $value) {
                                                                                         ?>
-                                                                                        <option value="<?= $value->kode_coa ?>"><?= $value->nama ?></option>
+                                                                                        <option data-curr="<?= $value->curr ?>"  value="<?= $value->kode_coa ?>"><?= $value->nama ?></option>
                                                                                         <?php
                                                                                     }
                                                                                     ?>
@@ -247,7 +248,8 @@
                         type: "GET",
                         data: {
                             jm: $("#jurnal").val(),
-                            filter: $('input[name="filter"]:checked').val()
+                            filter: $('input[name="filter"]:checked').val(),
+                            curr: $("#fbank :selected").data('curr')
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -262,7 +264,7 @@
                         })
                     });
                 });
-                const filterBank = ["pen_b","peng_b","pel_p","pel_h"];
+                const filterBank = ["pen_b", "peng_b", "pel_p", "pel_h"];
                 $("#jurnal").on("select2:select", function (e) {
                     $('#fbank').val(null).trigger('change');
                     if (NoDetailDebit.includes(e.params.data.id)) {
@@ -297,7 +299,8 @@
                             detail: $("#detail").is(":checked") ? 1 : 0,
                             jurnal_nm: $("#jurnal :selected").text(),
                             filter: $("input[name='filter']:checked").val(),
-                            fbank: $("#fbank").val()
+                            fbank: $("#fbank").val(),
+                            curr: $("#fbank :selected").data('curr')
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -331,6 +334,7 @@
                 formrd.addEventListener(
                         "submit",
                         (event) => {
+                    $("#curr").val($("#fbank :selected").data('curr'));
                     please_wait(function () {});
                     request("form-jm").then(
                             response => {
