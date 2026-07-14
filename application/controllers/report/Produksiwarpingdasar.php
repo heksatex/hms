@@ -318,9 +318,9 @@ class Produksiwarpingdasar extends MY_Controller
 
        if(!empty($where)){
 
-	        $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done')  AND".$where;
+	        $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel')  AND".$where;
         }else{
-	        $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done') ";
+	        $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel') ";
         }
 
         $items = $this->m_produksiWarpingDasar->get_list_produksi_by_dept($where);
@@ -360,6 +360,13 @@ class Produksiwarpingdasar extends MY_Controller
 
         	/*
 			*/
+			$dept_tujuan = '';
+			if($row->responsible == 'PPIC-Siti Sumiyati' || $row->responsible == 'PPIC-Dania Fitri') {
+				$dept_tujuan = 'TRICOT';
+			} else if ($row->responsible == 'PPIC-Desti') {
+				$dept_tujuan = 'JACQUARD';
+			}
+
         	$dataRecord[] = array('kode'           => $row->kode, 
         						  'tgl_mo' 		   => tgl_indo2(date('d-m-y',strtotime($row->tanggal))), 
         						  'mc' 			   => $row->nama_mesin,
@@ -376,7 +383,10 @@ class Produksiwarpingdasar extends MY_Controller
         						  'qty1'           => number_format($row->hph_qty1,2),
         						  'qty2'		   => $row->hph_qty2,
         						  'sisa'           => number_format($row->sisa_target,2),
-        						  'status'         => $row->status );
+        						  'status'         => $row->status,
+								  'responsible'    => $row->responsible,
+								  'dept_tujuan'	   => $dept_tujuan
+								  );
 
         	$sales_contract = '';
 	        $mo_knitting 	= '';
@@ -401,7 +411,7 @@ class Produksiwarpingdasar extends MY_Controller
     function declaration_name_field($nama_field)
     {
     	
-    	if($nama_field == 'kode' OR $nama_field ==  'nama_produk' OR $nama_field == 'reff_note' OR $nama_field == 'status' ){
+    	if($nama_field == 'kode' OR $nama_field ==  'nama_produk' OR $nama_field == 'reff_note' OR $nama_field == 'status' OR $nama_field == 'tanggal'){
     		$where = 'mp.'.$nama_field;
     	}else if($nama_field =='nama_mesin'){
     		$where = 'ms.'.$nama_field;
@@ -433,10 +443,10 @@ class Produksiwarpingdasar extends MY_Controller
 
  		$object->getActiveSheet()->SetCellValue('A1', 'Jadwal Produksi Warping Dasar');
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
-		$object->getActiveSheet()->mergeCells('A1:S1');
+		$object->getActiveSheet()->mergeCells('A1:U1');
 
 		// header table
-    	$table_head_columns  = array('No', 'MO', 'Tgl.MO', 'MC', 'Product', 'Sales Contract', 'MO Knitting', 'MC Knitting', 'Corak', 'BEAM','GB', 'Jml Beam', 'Lembar', 'Panjang Benang/Beam',  'Produksi Warping', 'Kelipatan Pembuatan Beang', 'Target', 'HPH/Qty1','HPH/Qty2', 'Sisa','Status');
+    	$table_head_columns  = array('No', 'MO', 'Tgl.MO', 'MC', 'Product', 'Sales Contract', 'MO Knitting', 'MC Knitting', 'Corak', 'BEAM','GB', 'Jml Beam', 'Lembar', 'Panjang Benang/Beam',  'Produksi Warping', 'Kelipatan Pembuatan Beang', 'Target', 'HPH/Qty1','HPH/Qty2', 'Sisa','Status', 'Responsible', 'Dept Tujuan');
 
     	$table_head_columns2 = array();
     	$column = 0;
@@ -477,7 +487,7 @@ class Produksiwarpingdasar extends MY_Controller
     			$merge = FALSE;
     		}
 
-    		if($column == 20){
+    		if($column == 20 || $column == 21 || $column == 22){
     			$object->getActiveSheet()->setCellValueByColumnAndRow($column-2, 3, $field);	
 				$object->getActiveSheet()->mergeCellsByColumnAndRow($column-2, 3, $column-2, 4);
     		}
@@ -501,9 +511,9 @@ class Produksiwarpingdasar extends MY_Controller
 		$object->getActiveSheet()->getStyle('O3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 		// set column
-		$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S');
+		$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U');
 
-		$object->getActiveSheet()->getStyle("A1:S4")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:U4")->getFont()->setBold(true);
 		$object->getSheet(0)->getColumnDimension('A')->setAutoSize(true);
 		$object->getSheet(0)->getColumnDimension('B')->setAutoSize(true);
 		$object->getSheet(0)->getColumnDimension('D')->setAutoSize(true);
@@ -524,6 +534,8 @@ class Produksiwarpingdasar extends MY_Controller
 		$object->getSheet(0)->getColumnDimension('Q')->SetWidth(15);
 		$object->getSheet(0)->getColumnDimension('R')->SetWidth(15);
 		$object->getSheet(0)->getColumnDimension('S')->setAutoSize(true);
+		$object->getSheet(0)->getColumnDimension('T')->setAutoSize(true);
+		$object->getSheet(0)->getColumnDimension('U')->setAutoSize(true);
 
 		// setWraptex n4, m4
 		$object->getActiveSheet()->getStyle('N4:N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);	
@@ -587,6 +599,12 @@ class Produksiwarpingdasar extends MY_Controller
 	        	$i++;
         	}
 
+			$dept_tujuan = '';
+			if($row->responsible == 'PPIC-Siti Sumiyati' || $row->responsible == 'PPIC-Dania Fitri') {
+				$dept_tujuan = 'TRICOT';
+			} else if ($row->responsible == 'PPIC-Desti') {
+				$dept_tujuan = 'JACQUARD';
+			}
 
 			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($no));
 			$object->getActiveSheet()->SetCellValue('B'.$rowCount, mb_strtoupper($row->kode,'UTF-8'));
@@ -607,6 +625,8 @@ class Produksiwarpingdasar extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $row->hph_qty2);
 			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $row->sisa_target);
 			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $row->status);
+			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $row->responsible);
+			$object->getActiveSheet()->SetCellValue('U'.$rowCount, $dept_tujuan);
 
 			//align center
 			$object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -625,7 +645,8 @@ class Produksiwarpingdasar extends MY_Controller
 			$object->getActiveSheet()->getStyle('M'.$rowCount.':N'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('O'.$rowCount.':P'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('Q'.$rowCount.':R'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('S'.$rowCount.':T'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray);
 
 
 			$no=$no+1;

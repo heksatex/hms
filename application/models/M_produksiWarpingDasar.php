@@ -8,7 +8,7 @@ class M_produksiWarpingDasar extends CI_Model
 
 	public function get_list_produksi_by_dept($where)
 	{
-		return $this->db->query("SELECT mp.kode, mp.tanggal, mp.nama_produk, mp.qty as qty_target, mp.reff_note, mp.status,ms.nama_mesin,
+		return $this->db->query("SELECT mp.responsible, mp.kode, mp.tanggal, mp.nama_produk, mp.qty as qty_target, mp.reff_note, mp.status,ms.nama_mesin,
 										(SELECT IFNULL(sum(mpfg.qty),0) as total_qty1
 												 FROM mrp_production_fg_hasil mpfg
 												 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = 'WRD')) as hph_qty1,

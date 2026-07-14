@@ -167,11 +167,13 @@
                               <th  class='style'>HPH/Qty2</th>
                               <th  class='style'>Sisa</th>
                               <th  class='style' >Status</th>
+                              <th  class='style'>Responsible</th>
+                              <th  class='style'>Dept Tujuan</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="19" align="center">Tidak ada Data</td>
+                              <td colspan="21" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -236,6 +238,15 @@
      $(document).ready(function(){
       $('[data-role="tags-input"]').tagsinput({ });
     });
+
+
+    $('#tags').tagsinput('add',{ id: 1, text: 'Status MO = draft OR Status MO = ready' });
+    $('[data-role="tags-input"]').tagsinput('add','Status MO = draft OR Status MO = ready');
+    
+    arr_filter.push({ caption:"Status MO = draft OR Status MO = ready", 
+                      nama_field : "status^-|=^-|draft^-|,status^-|=^-|ready", 
+                      operator:"kosong", isi:"kosong", condition:"OR", type:'table'
+                    } );
 
 
     // event jika caption ditambahkan di texbox
@@ -308,12 +319,14 @@
                       $("<td>").text(value.qty2),
                       $("<td align='right'>").text(value.sisa),
                       $("<td>").text(value.status),
+                      $("<td>").text(value.responsible),
+                      $("<td>").text(value.dept_tujuan),
               );
               tbody.append(tr);
           });
 
           if(empty == true){
-              var tr = $("<tr>").append($("<td colspan='19' align='center'>").text('Tidak ada Data'));
+              var tr = $("<tr>").append($("<td colspan='21' align='center'>").text('Tidak ada Data'));
               tbody.append(tr);
           }
           dataRecord.push(data.record);
@@ -389,12 +402,14 @@
                                   $("<td>").text(value.qty2),
                                   $("<td>").text(value.sisa),
                                   $("<td>").text(value.status), 
+                                  $("<td>").text(value.responsible),
+                                  $("<td>").text(value.dept_tujuan),
                         );
                        tbody.append(tr);
                       });
 
                     if(empty == true){
-                        var tr = $("<tr>").append($("<td colspan='19' align='center'>").text('Tidak ada Data'));
+                        var tr = $("<tr>").append($("<td colspan='21' align='center'>").text('Tidak ada Data'));
                         tbody.append(tr);
                     }
                     $("#example1").append(tbody);
