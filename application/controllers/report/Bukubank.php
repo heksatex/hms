@@ -201,7 +201,7 @@ class Bukubank extends MY_Controller {
             $sheet->setCellValue("G{$row}", 'Kredit');
             $sheet->setCellValue("H{$row}", 'Saldo');
 
-            if (count($data) > 0) {
+           
                 $data_saldo = $this->_getSaldoAwal();
                 $saldos = (in_array($curr, ["", "IDR"])) ? floatval($data_saldo->saldo_awal_final) : floatval($data_saldo->saldo_valas_final);
                 $row += 1;
@@ -209,8 +209,7 @@ class Bukubank extends MY_Controller {
                 $sheet->setCellValue("F{$row}", "");
                 $sheet->setCellValue("G{$row}", "");
                 $sheet->setCellValue("H{$row}", $saldos);
-            }
-
+          
             $kredits = 0;
             $debets = 0;
             $temp = "";
