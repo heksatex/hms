@@ -34,9 +34,9 @@ class Memorialpelpiutang {
                     ->setWheres(["date(bm.tanggal) >=" => $datas['tanggals'][0], "date(bm.tanggal) <=" => $datas['tanggals'][1], "bm.status" => "confirm"])
                     ->setWhereRaw("bmd.kode_coa in (select '1161.01' as kode_coa union all select '1161.02' as kode_coa union all select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bm.no_bm,bmd.kurs"])
                     ->setSelects(["bmd.kode_coa as kode_coa_bmd,acbmd.nama as nama_bmd,if(bmd.kurs > 1,sum(bmd.nominal),0) as valas,sum(bmd.nominal*bmd.kurs) as nominals,acbm.nama,bm.kode_coa,date(bmd.tanggal) as tanggal"])
-                    ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bm.jenis_transaksi) else bm.jenis_transaksi end as uraian'])
+                    ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bm.jenis_transaksi) else bm.jenis_transaksi end as uraian,kurs'])
                     ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
-                    if (!empty($datas["fbank"])) {
+            if (!empty($datas["fbank"])) {
                 $model->setWheres(["bm.kode_coa" => $datas["fbank"]]);
             }
             $data["bank_debit"] = $model->getData();
@@ -62,7 +62,7 @@ class Memorialpelpiutang {
                     ->setWhereRaw("gmd.kode_coa in (select '1161.01' as kode_coa union all select '1161.02' as kode_coa union all select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setGroups(["gm.kode_coa"])->setOrder(["gm.kode_coa"])
                     ->setSelects(["gmd.kode_coa as kode_coa_gmd,acgmd.nama as nama_gmd,if(gmd.kurs > 1,sum(gmd.nominal),0) as valas,sum(gmd.nominal*gmd.kurs) as nominals,acgm.nama", "gm.kode_coa"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,gm.no_gm,gmd.kurs", "date(gmd.tanggal) as tanggal", "transinfo as uraian"]);
-                    if (!empty($datas["fbank"])) {
+            if (!empty($datas["fbank"])) {
                 $model->setWheres(["gm.kode_coa" => $datas["fbank"]]);
             }
             $data["giro_debit"] = $model->getData();
@@ -106,22 +106,34 @@ class Memorialpelpiutang {
             $totalKredit = 0;
             $grandTotalDebit = 0;
             $grandTotalKredit = 0;
+
+            $totalDebitV = 0;
+            $totalKreditV = 0;
+            $grandTotalDebitV = 0;
+            $grandTotalKreditV = 0;
+
             foreach ($data["bank_debit"] as $key => $value) {
                 $totalDebit += $value->nominals;
                 $grandTotalDebit += $value->nominals;
+                $totalDebitV += $value->valas;
+                $grandTotalDebitV += $value->valas;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", ($key === 0) ? "1" : "");
                 $sheet->setCellValue("B{$row}", "{$value->nama}");
                 $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
-                $sheet->setCellValue("D{$row}", "{$value->nominals}");
+                $sheet->setCellValue("D{$row}", "{$value->valas}");
+                $sheet->setCellValue("E{$row}", "{$value->nominals}");
             }
             foreach ($data["bank_kredit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $grandTotalKredit += $value->nominals;
+                $totalKreditV += $value->valas;
+                $grandTotalKreditV += $value->valas;
                 $row += 1;
                 $sheet->setCellValue("B{$row}", "{$value->nama_bmd}");
                 $sheet->setCellValue("C{$row}", "{$value->kode_coa_bmd}");
-                $sheet->setCellValue("E{$row}", "{$value->nominals}");
+                $sheet->setCellValue("F{$row}", "{$value->valas}");
+                $sheet->setCellValue("G{$row}", "{$value->nominals}");
             }
             $row += 1;
             if (($totalDebit + $totalKredit) > 0) {
@@ -131,22 +143,31 @@ class Memorialpelpiutang {
 
             $totalDebit = 0;
             $totalKredit = 0;
+            $totalDebitV = 0;
+            $totalKreditV = 0;
+
             foreach ($data["giro_debit"] as $key => $value) {
                 $totalDebit += $value->nominals;
                 $grandTotalDebit += $value->nominals;
+                $totalDebitV += $value->valas;
+                $grandTotalDebitV += $value->valas;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", ($key === 0) ? "2" : "");
                 $sheet->setCellValue("B{$row}", "{$value->nama}");
                 $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
-                $sheet->setCellValue("D{$row}", "{$value->nominals}");
+                $sheet->setCellValue("D{$row}", "{$value->valas}");
+                $sheet->setCellValue("E{$row}", "{$value->nominals}");
             }
             foreach ($data["giro_kredit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $grandTotalKredit += $value->nominals;
+                $totalKreditV += $value->valas;
+                $grandTotalKreditV += $value->valas;
                 $row += 1;
                 $sheet->setCellValue("B{$row}", "{$value->nama_gmd}");
                 $sheet->setCellValue("C{$row}", "{$value->kode_coa_gmd}");
-                $sheet->setCellValue("E{$row}", "{$value->nominals}");
+                $sheet->setCellValue("F{$row}", "{$value->valas}");
+                $sheet->setCellValue("G{$row}", "{$value->nominals}");
             }
             $row += 1;
             if (($totalDebit + $totalKredit) > 0) {
@@ -154,11 +175,20 @@ class Memorialpelpiutang {
                 $row += 2;
             }
             if (($grandTotalKredit + $grandTotalDebit) > 0) {
-                $sheet->setCellValue("D{$row}", $grandTotalDebit);
-                $sheet->setCellValue("E{$row}", $grandTotalKredit);
+                $sheet->setCellValue("D{$row}", $grandTotalDebitV);
+                $sheet->setCellValue("E{$row}", $grandTotalDebit);
+                $sheet->setCellValue("F{$row}", $grandTotalKreditV);
+                $sheet->setCellValue("G{$row}", $grandTotalKredit);
             }
             $sheet->getStyle("D2:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+
+            if ($data["curr"] === "") {
+                $sheet->removeColumn('F');
+                $sheet->removeColumn('D');
+            }
 
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$data["filter"]}";
@@ -184,46 +214,62 @@ class Memorialpelpiutang {
             $sheet->setCellValue("B{$row}", 'No Bukti');
             $sheet->setCellValue("C{$row}", 'Uraian');
             $sheet->setCellValue("D{$row}", 'Dari');
-            $sheet->setCellValue("E{$row}", 'Nominal');
-            $sheet->setCellValue("F{$row}", 'No Perkiraan');
-            $sheet->setCellValue("G{$row}", 'Perkiraan Posisi Debet');
-            $sheet->setCellValue("H{$row}", 'Jumlah');
+            $sheet->setCellValue("E{$row}", 'Kurs');
+            $sheet->setCellValue("F{$row}", 'Nominal');
+            $sheet->setCellValue("G{$row}", 'Nominal Rp');
+            $sheet->setCellValue("H{$row}", 'No Perkiraan');
+            $sheet->setCellValue("I{$row}", 'Perkiraan Posisi Debet');
+            $sheet->setCellValue("J{$row}", 'Jumlah');
+            $sheet->setCellValue("K{$row}", 'Jumlah Rp');
 
             $grandTotal = 0;
             $total = 0;
+            $grandTotalV = 0;
+            $totalV = 0;
             $bank = $data["bank_debit"] ?? [];
             foreach ($bank as $key => $value) {
                 $grandTotal += $value->nominals;
                 $total += $value->nominals;
+                $grandTotalV += $value->valas;
+                $totalV += $value->valas;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", $value->tanggal);
                 $sheet->setCellValue("B{$row}", $value->no_bm);
                 $sheet->setCellValue("C{$row}", $value->uraian);
                 $sheet->setCellValue("D{$row}", $value->partner);
-                $sheet->setCellValue("E{$row}", $value->nominals);
-                $sheet->setCellValue("F{$row}", $value->kode_coa);
-                $sheet->setCellValue("G{$row}", $value->nama);
-                $sheet->setCellValue("H{$row}", $value->nominals);
+                $sheet->setCellValue("E{$row}", $value->kurs);
+                $sheet->setCellValue("F{$row}", $value->valas);
+                $sheet->setCellValue("G{$row}", $value->nominals);
+                $sheet->setCellValue("H{$row}", $value->kode_coa);
+                $sheet->setCellValue("I{$row}", $value->nama);
+                $sheet->setCellValue("J{$row}", $value->valas);
+                $sheet->setCellValue("K{$row}", $value->nominals);
 
                 if (isset($bank[$key + 1])) {
                     if ($value->kode_coa !== $bank[$key + 1]->kode_coa) {
                         $row += 1;
-                        $sheet->setCellValue("E{$row}", $total);
-                        $sheet->setCellValue("G{$row}", "{$value->nama} Total");
-                        $sheet->setCellValue("H{$row}", $total);
+                        $sheet->setCellValue("F{$row}", $totalV);
+                        $sheet->setCellValue("G{$row}", $total);
+                        $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                        $sheet->setCellValue("J{$row}", $totalV);
+                        $sheet->setCellValue("K{$row}", $total);
                         $total = 0;
+                        $totalV = 0;
                         $row += 1;
                     }
                 } else {
                     $row += 1;
-                    $sheet->setCellValue("E{$row}", $total);
-                    $sheet->setCellValue("G{$row}", "{$value->nama} Total");
-                    $sheet->setCellValue("H{$row}", $total);
+                    $sheet->setCellValue("F{$row}", $totalV);
+                    $sheet->setCellValue("G{$row}", $total);
+                    $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                    $sheet->setCellValue("J{$row}", $totalV);
+                    $sheet->setCellValue("K{$row}", $total);
                     $row += 1;
                 }
             }
 
             $total = 0;
+            $totalV = 0;
             $giro = $data["giro_debit"] ?? [];
             foreach ($giro as $key => $value) {
                 $grandTotal += $value->nominals;
@@ -233,37 +279,57 @@ class Memorialpelpiutang {
                 $sheet->setCellValue("B{$row}", $value->no_gm);
                 $sheet->setCellValue("C{$row}", $value->uraian);
                 $sheet->setCellValue("D{$row}", $value->partner);
-                $sheet->setCellValue("E{$row}", $value->nominals);
-                $sheet->setCellValue("F{$row}", $value->kode_coa);
-                $sheet->setCellValue("G{$row}", $value->nama);
-                $sheet->setCellValue("H{$row}", $value->nominals);
+                $sheet->setCellValue("E{$row}", $value->kurs);
+                $sheet->setCellValue("F{$row}", $value->valas);
+                $sheet->setCellValue("G{$row}", $value->nominals);
+                $sheet->setCellValue("H{$row}", $value->kode_coa);
+                $sheet->setCellValue("I{$row}", $value->nama);
+                $sheet->setCellValue("J{$row}", $value->valas);
+                $sheet->setCellValue("K{$row}", $value->nominals);
 
                 if (isset($giro[$key + 1])) {
                     if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
                         $row += 1;
-                        $sheet->setCellValue("E{$row}", $total);
-                        $sheet->setCellValue("G{$row}", "{$value->nama} Total");
-                        $sheet->setCellValue("H{$row}", $total);
+                        $sheet->setCellValue("E{$row}", $totalV);
+                        $sheet->setCellValue("G{$row}", $total);
+                        $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                        $sheet->setCellValue("J{$row}", $totalV);
+                        $sheet->setCellValue("K{$row}", $total);
                         $total = 0;
+                        $totalV = 0;
                         $row += 1;
                     }
                 } else {
                     $row += 1;
-                    $sheet->setCellValue("E{$row}", $total);
-                    $sheet->setCellValue("G{$row}", "{$value->nama} Total");
-                    $sheet->setCellValue("H{$row}", $total);
+                    $sheet->setCellValue("E{$row}", $totalV);
+                    $sheet->setCellValue("G{$row}", $total);
+                    $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                    $sheet->setCellValue("J{$row}", $totalV);
+                    $sheet->setCellValue("K{$row}", $total);
                     $row += 1;
                 }
             }
 
             if ($grandTotal > 0) {
                 $row += 2;
-                $sheet->setCellValue("E{$row}", $grandTotal);
-                $sheet->setCellValue("G{$row}", "Grand Total");
-                $sheet->setCellValue("H{$row}", $grandTotal);
+                $sheet->setCellValue("F{$row}", $grandTotalV);
+                $sheet->setCellValue("G{$row}", $grandTotal);
+                $sheet->setCellValue("I{$row}", "Grand Total");
+                $sheet->setCellValue("J{$row}", $grandTotalV);
+                $sheet->setCellValue("K{$row}", $grandTotal);
             }
+
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("K2:K{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+
+            if ($data["curr"] === "") {
+                $sheet->removeColumn('J');
+                $sheet->removeColumn('F');
+                $sheet->removeColumn('E');
+            }
 
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
@@ -289,86 +355,129 @@ class Memorialpelpiutang {
             $sheet->setCellValue("B{$row}", 'No Bukti');
             $sheet->setCellValue("C{$row}", 'Uraian');
             $sheet->setCellValue("D{$row}", 'Dari');
-            $sheet->setCellValue("E{$row}", 'Nominal');
-            $sheet->setCellValue("F{$row}", 'No Perkiraan');
-            $sheet->setCellValue("G{$row}", 'Perkiraan Posisi Kredit');
-            $sheet->setCellValue("H{$row}", 'Jumlah');
+            $sheet->setCellValue("E{$row}", 'Kurs');
+            $sheet->setCellValue("F{$row}", 'Nominal');
+            $sheet->setCellValue("G{$row}", 'Nominal Rp');
+            $sheet->setCellValue("H{$row}", 'No Perkiraan');
+            $sheet->setCellValue("I{$row}", 'Perkiraan Posisi Debet');
+            $sheet->setCellValue("J{$row}", 'Jumlah');
+            $sheet->setCellValue("K{$row}", 'Jumlah Rp');
 
             $grandTotal = 0;
             $total = 0;
+            $grandTotalV = 0;
+            $totalV = 0;
             $bank = $data["bank_kredit"] ?? [];
             foreach ($bank as $key => $value) {
                 $grandTotal += $value->nominals;
                 $total += $value->nominals;
+
+                $grandTotalV += $value->valas;
+                $totalV += $value->valas;
+
                 $row += 1;
                 $sheet->setCellValue("A{$row}", $value->tanggal);
                 $sheet->setCellValue("B{$row}", $value->no_bm);
                 $sheet->setCellValue("C{$row}", $value->uraian);
                 $sheet->setCellValue("D{$row}", $value->partner);
-                $sheet->setCellValue("E{$row}", $value->nominals);
-                $sheet->setCellValue("F{$row}", $value->kode_coa_bmd);
-                $sheet->setCellValue("G{$row}", $value->nama_bmd);
-                $sheet->setCellValue("H{$row}", $value->nominals);
+                $sheet->setCellValue("E{$row}", $value->kurs);
+                $sheet->setCellValue("F{$row}", $value->valas);
+                $sheet->setCellValue("G{$row}", $value->nominals);
+                $sheet->setCellValue("H{$row}", $value->kode_coa_bmd);
+                $sheet->setCellValue("I{$row}", $value->nama_bmd);
+                $sheet->setCellValue("J{$row}", $value->valas);
+                $sheet->setCellValue("K{$row}", $value->nominals);
 
                 if (isset($bank[$key + 1])) {
                     if ($value->kode_coa_bmd !== $bank[$key + 1]->kode_coa_bmd) {
                         $row += 1;
-                        $sheet->setCellValue("E{$row}", $total);
-                        $sheet->setCellValue("G{$row}", "{$value->nama_bmd} Total");
-                        $sheet->setCellValue("H{$row}", $total);
+                        $sheet->setCellValue("F{$row}", $totalV);
+                        $sheet->setCellValue("G{$row}", $total);
+                        $sheet->setCellValue("I{$row}", "{$value->nama_bmd} Total");
+                        $sheet->setCellValue("J{$row}", $totalV);
+                        $sheet->setCellValue("K{$row}", $total);
                         $total = 0;
+                        $totalV = 0;
                         $row += 1;
                     }
                 } else {
                     $row += 1;
-                    $sheet->setCellValue("E{$row}", $total);
-                    $sheet->setCellValue("G{$row}", "{$value->nama_bmd} Total");
-                    $sheet->setCellValue("H{$row}", $total);
+                    $sheet->setCellValue("F{$row}", $totalV);
+                    $sheet->setCellValue("G{$row}", $total);
+                    $sheet->setCellValue("I{$row}", "{$value->nama_bmd} Total");
+                    $sheet->setCellValue("J{$row}", $totalV);
+                    $sheet->setCellValue("K{$row}", $total);
                     $row += 1;
                 }
             }
 
             $total = 0;
+            $totalV = 0;
             $giro = $data["giro_kredit"] ?? [];
             foreach ($giro as $key => $value) {
                 $grandTotal += $value->nominals;
                 $total += $value->nominals;
+                
+                $grandTotalV += $value->valas;
+                $totalV += $value->valas;
+                
                 $row += 1;
                 $sheet->setCellValue("A{$row}", $value->tanggal);
                 $sheet->setCellValue("B{$row}", $value->no_gm);
                 $sheet->setCellValue("C{$row}", $value->uraian);
                 $sheet->setCellValue("D{$row}", $value->partner);
-                $sheet->setCellValue("E{$row}", $value->nominals);
-                $sheet->setCellValue("F{$row}", $value->kode_coa_gmd);
-                $sheet->setCellValue("G{$row}", $value->nama_gmd);
-                $sheet->setCellValue("H{$row}", $value->nominals);
+                $sheet->setCellValue("E{$row}", $value->kurs);
+                $sheet->setCellValue("F{$row}", $value->valas);
+                $sheet->setCellValue("G{$row}", $value->nominals);
+                $sheet->setCellValue("H{$row}", $value->kode_coa_gmd);
+                $sheet->setCellValue("I{$row}", $value->nama_gmd);
+                $sheet->setCellValue("J{$row}", $value->valas);
+                $sheet->setCellValue("K{$row}", $value->nominals);
+
 
                 if (isset($giro[$key + 1])) {
                     if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
                         $row += 1;
-                        $sheet->setCellValue("E{$row}", $total);
-                        $sheet->setCellValue("G{$row}", "{$value->nama_gmd} Total");
-                        $sheet->setCellValue("H{$row}", $total);
+                        $sheet->setCellValue("F{$row}", $totalV);
+                        $sheet->setCellValue("G{$row}", $total);
+                        $sheet->setCellValue("I{$row}", "{$value->nama_gmd} Total");
+                        $sheet->setCellValue("J{$row}", $totalV);
+                        $sheet->setCellValue("K{$row}", $total);
                         $total = 0;
+                        $totalV = 0;
                         $row += 1;
                     }
                 } else {
                     $row += 1;
-                    $sheet->setCellValue("E{$row}", $total);
-                    $sheet->setCellValue("G{$row}", "{$value->nama_gmd} Total");
-                    $sheet->setCellValue("H{$row}", $total);
+                    $sheet->setCellValue("F{$row}", $totalV);
+                        $sheet->setCellValue("G{$row}", $total);
+                        $sheet->setCellValue("I{$row}", "{$value->nama_gmd} Total");
+                        $sheet->setCellValue("J{$row}", $totalV);
+                        $sheet->setCellValue("K{$row}", $total);
                     $row += 1;
                 }
             }
 
             if ($grandTotal > 0) {
                 $row += 2;
-                $sheet->setCellValue("E{$row}", $grandTotal);
-                $sheet->setCellValue("G{$row}", "Grand Total");
-                $sheet->setCellValue("H{$row}", $grandTotal);
+                $sheet->setCellValue("F{$row}", $grandTotalV);
+                $sheet->setCellValue("G{$row}", $grandTotal);
+                $sheet->setCellValue("I{$row}", "Grand Total");
+                $sheet->setCellValue("J{$row}", $grandTotalV);
+                $sheet->setCellValue("K{$row}", $grandTotal);
             }
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("K2:K{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+
+            if ($data["curr"] === "") {
+                $sheet->removeColumn('J');
+                $sheet->removeColumn('F');
+                $sheet->removeColumn('E');
+            }
+
 
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
