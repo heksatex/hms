@@ -108,13 +108,12 @@ class Machinemonitoringv2 extends MY_Controller {
         $data["count_mesin"] = count($data["mesin"]);
         $mulai = date("Y-m-d H:i:s", strtotime("-3 day", strtotime($sampai)));
         $model->setTables("mesin mst")
-                ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
-                ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai])
+                ->setJoins("log_mesin log", "mst.devid_esp=log.devid")
+                ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai, "status_aktif" => "t", "dept_id" => $dept])
                 ->setSelects(["COUNT(log.state)*SUM(log.state<>1) as downtime"])
                 ->setSelects(["COUNT(log.state)*SUM(log.state=1) as uptime"])
                 ->setSelects(["nama_mesin,count(state) as total,state,devid,no_mesin,dept_id,mc_id,max(timelog) as last_time"])
                 ->setGroups(["devid", "state"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"]);
-        $model->setWheres(["dept_id" => $dept]);
 
         $durasis = $model->getData();
         $durasi = [];
@@ -123,13 +122,10 @@ class Machinemonitoringv2 extends MY_Controller {
             if (isset($durasi[$nm])) {
                 $durasi[$nm]->downtime += $value->downtime;
                 $durasi[$nm]->uptime += $value->uptime;
-//                $durasi[$nm]->total_up = $value->uptime / $value->total;
-//                $durasi[$nm]->total_down = $value->downtime / $value->total;
                 $datetime1 = strtotime($durasi[$nm]->last_time);
                 $datetime2 = strtotime($value->last_time);
                 $difference_in_seconds = abs($datetime2 - $datetime1);
                 $durasi[$nm]->time_running = round($difference_in_seconds / 60);
-//                $this->status[$durasi[$nm]->state]["jumlah"] += 1;
                 if ($durasi[$nm]->state == "1") {
                     $durasi[$nm]->total_up = 0;
                     $durasi[$nm]->total_down = $durasi[$nm]->time_running;
@@ -143,7 +139,7 @@ class Machinemonitoringv2 extends MY_Controller {
                 }
                 continue;
             }
-            $value->status =$this->status[$value->state]["stt"];
+            $value->status = $this->status[$value->state]["stt"];
             $value->total_up = $value->uptime / $value->total;
             $value->total_down = $value->downtime / $value->total;
             $value->total_up_text = $this->con_min_days($value->total_up);
@@ -151,6 +147,57 @@ class Machinemonitoringv2 extends MY_Controller {
             $value->time_running = $value->total_up + $value->total_down;
             $durasi[$nm] = $value;
         }
+        $mulai = date("Y-m-d", strtotime("-3 day", strtotime(date("Y-m-d")))) . " 00:00:00";
+        $selesai = date("Y-m-d") . " 23:59:59";
+        $query = "SELECT 
+    concat('d',devid) as devid,
+    -- Mengambil state paling baru
+    MAX(state_terbaru) AS state_terakhir,
+    -- Mengambil jumlah baris berturut-turut untuk state tersebut
+    MAX(running_count) AS count_state_terakhir
+FROM (
+    SELECT 
+        timelog,
+        devid,
+        state,
+        -- Jika devid berubah, catat ini sebagai state terbarunya
+        IF(@prev_devid <> devid, state, @cur_state) AS state_terbaru,
+        -- Logika hitungan mundur
+        CASE 
+            WHEN @prev_devid <> devid THEN @counter := 1
+            WHEN @prev_state <> state THEN @counter := 0 -- stop hitung jika state berubah
+            WHEN @counter = 0 THEN 0
+            ELSE @counter := @counter + 1
+        END AS running_count,
+        -- Update nilai variabel state aktif untuk baris berikutnya di devid yang sama
+        @cur_state := IF(@prev_devid <> devid, state, @cur_state),
+        -- Update nilai variabel penanda baris sebelumnya
+        @prev_devid := devid,
+        @prev_state := state
+    FROM (
+        -- Diurutkan dari yang paling baru (DESC)
+        SELECT timelog, devid, state 
+        FROM log_mesin 
+        WHERE timelog >= '{$mulai}' AND timelog <= '{$selesai}'
+        ORDER BY devid, timelog DESC
+    ) t,
+    (SELECT @prev_devid := '', @prev_state := '', @cur_state := '', @counter := 0) r
+) state_check
+-- Hanya menghitung baris rangkaian state terakhir sebelum berubah
+WHERE running_count > 0
+GROUP BY devid;
+";
+        $durasiAll = $model->excQueryWResult($query)->result();
+        $drs = [];
+        foreach ($durasiAll as $key => $value) {
+            $drs["{$value->devid}"] = (object) array(
+                "state"=>$value->state_terakhir,
+                "time"=>$value->count_state_terakhir,
+                "time_text"=>$this->con_min_days($value->count_state_terakhir)
+            );
+        }
+//        log_message("error",json_encode($drs));
+        $data["durasiAll"] = $drs;
         $data["durasi"] = $durasi;
         $data["status"] = $this->status;
         $data["warnaStatus"] = json_encode($this->warnaStatus);

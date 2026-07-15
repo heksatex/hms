@@ -366,6 +366,7 @@
                             $sumGr = 0;
                             foreach ($mesin as $key => $value) {
                                 $durasis = $durasi["d{$value->devid}"];
+                                $drs = $durasiAll["d{$value->devid}"];
                                 $logo = "mark_success";
                                 $ttlDwn = $value->downtime / $value->total;
                                 $ttlUp = $value->uptime / $value->total;
@@ -384,7 +385,7 @@
                                 }
                                 ?>
                                 <!--<div class="col-lg-2 col-md-4 col-xs-6">-->
-                                <div class="card cardstatus card-<?= "d{$value->devid}" ?>" data-durasi_up="<?= $durasis->total_up ?>" data-durasi_down="<?= $durasis->total_down ?>"
+                                <div class="card cardstatus card-<?= "d{$value->devid}" ?>" data-durasi_up="<?= $drs->state == 1 ? $drs->time : 0 ?>" data-durasi_down="<?= $drs->state != 1 ? $drs->time : 0 ?>"
                                      data-state="<?= $value->state ?>" data-totaldown = "<?= $ttlDwn ?>" data-total="<?= $value->total ?>" data-uptime="<?= $ttlUp ?>" data-downtime="<?= $ttlDwn ?>"
                                      style="border: 1px solid black;">
                                     <div class="container container-<?= "d{$value->devid}" ?>" style="height: 20%; background-color: <?= $border ?>; color:#ffffff">
@@ -394,7 +395,7 @@
                                     <!--<img class="img-<?= "d{$value->devid}" ?> center statuss" data-status="<?= $logo ?>" src="<?= base_url("dist/img/{$logo}.png") ?>" alt="Avatar">-->
                                     <div class="container" style="word-wrap: break-word;">
                                         <p title="Downtime Shift Sekarang">Downtime : <span class="down-<?= "d{$value->devid}" ?>"><?= round(($ttlDwn / $value->total) * 100) ?></span> %</p>
-                                        <span class="durasi-text durasi-<?= "d{$value->devid}" ?>"><?= ($value->state == 0) ? "Running : {$durasis->total_up_text}" : "Stop : {$durasis->total_down_text}" ?></span>
+                                        <span class="durasi-text durasi-<?= "d{$value->devid}" ?>"><?= ($value->state == 1) ? "Running : {$drs->time_text}" : "Stop : {$drs->time_text}" ?></span>
                                     </div>
                                 </div>
 
@@ -554,7 +555,7 @@
                             return params.marker + params.name;
                         }
                     },
-                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '20%', containLabel: true},
+                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '30%', containLabel: true},
                     xAxis: {
                         type: 'time',
                         position: 'top',
@@ -585,7 +586,7 @@
                                 let categoryIndex = api.value(0);
                                 let start = api.coord([api.value(1), categoryIndex]);
                                 let end = api.coord([api.value(2), categoryIndex]);
-                                let height = api.size([0, 1])[1] * 0.8; // Tinggi bar 60% dari baris
+                                let height = api.size([0, 1])[1] * 0.9; // Tinggi bar 60% dari baris
 
                                 return {
                                     type: 'rect',
@@ -793,7 +794,7 @@
                                 state: parseInt(datas.state),
                                 total: parseInt(datas.total),
                                 totaldown: parseInt(datas.downtime),
-                                durasi_down: parseInt(datas.downtime),
+                                durasi_down: parseInt(datas.durasi_down),
                                 uptime: datas.uptime,
                                 durasi_up: parseInt(datas.durasi_up)
                             };

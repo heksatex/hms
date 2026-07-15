@@ -24,6 +24,7 @@ class Service extends CI_Controller {
         $this->load->library("wa_message");
         $this->config->load('additional');
         $this->load->model("m_menu");
+        $this->load->model("m_global");
     }
 
     public function generate_gtp() {
@@ -165,5 +166,86 @@ class Service extends CI_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
+    }
+
+    public function machine_monitoring_rekap() {
+        $waktuShift[1] = ["nama" => "Shift Pagi", "time" => "07:00:00"];
+        $waktuShift[2] = ["nama" => "Shift Sore", "time" => "15:00:00"];
+        $waktuShift[3] = ["nama" => "Shift Malam", "time" => "23:00:00"];
+        try {
+            if (!isset($waktuShift[$this->input->get("shift")]))
+                throw new \Exception("Waktu Tidak ada", 500);
+            $shift = $waktuShift[$this->input->get("shift")];
+            $mulai = date("Y-m-d") . " {$shift["time"]}";
+            $selesai = date("Y-m-d H:i:s", strtotime("{$mulai} +8 hours"));
+            $model = new $this->m_global;
+            $depart = $model->setTables("mesin")->setJoins("departemen", "dept_id = kode")
+                            ->setWheres(["devid_esp" > 0])->setGroups(["dept_id"])
+                            ->setSelects(["dept_id", "nama_mesin", "count(devid_esp) as total_mesin", "departemen.nama as nama_dept"])->getData();
+
+            $model->setTables("log_mesin")->setJoins("mesin", "devid_esp  = devid");
+            foreach ($depart as $key => $val) {
+                $model->setWheres(["dept_id" => $val->dept_id, "timelog >" => $mulai, "timelog <=" => $selesai], true);
+                $countMesin = $model->setSelects(["COALESCE(count(DISTINCT devid),0) as total_mesin_aktif"], true)->setOrder(["devid"], true)->getDetail();
+//                log_message("error",json_encode($countMesin));
+                if (!$countMesin || $countMesin->total_mesin_aktif < 1)
+                    continue;
+                $wa = new $this->wa_message;
+                //persen state
+                $countState = $model->setSelects(["COUNT(state) as totals"], true)
+                        ->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running"])
+                        ->setSelects(["COUNT(IF(state = '2', 1, NULL)) as noresp"])
+                        ->setSelects(["COUNT(IF(state = '3', 1, NULL)) as benang"])
+                        ->setSelects(["COUNT(IF(state = '4', 1, NULL)) as problem"])
+                        ->setSelects(["COUNT(IF(state = '5', 1, NULL)) as noorder"])
+                        ->setSelects(["COUNT(IF(state <> '1', 1, NULL)) as downtime"])
+                        ->getDetail();
+
+                $persenRunn = $countState->running == 0 ? 0 : round(($countState->running / $countState->totals) * 100);
+                $persenNorep = $countState->noresp == 0 ? 0 : round(($countState->noresp / $countState->totals) * 100);
+                $persenBenang = $countState->benang == 0 ? 0 : round(($countState->benang / $countState->totals) * 100);
+                $persenProblem = $countState->problem == 0 ? 0 : round(($countState->problem / $countState->totals) * 100);
+                $persenNoorder = $countState->noorder == 0 ? 0 : round(($countState->noorder / $countState->totals) * 100);
+
+                $totalDowntime = $this->con_min_days($countState->downtime / $countMesin->total_mesin_aktif);
+
+//                $utilisasi = $model->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running", "nama_mesin"], true)
+//                                ->setGroups(["devid"], true)->setOrder(["running" => "desc"], true)->getData();
+//                $util = "";
+//                foreach ($utilisasi as $k => $value) {
+//                    $persen = $countState->running == 0 ? 0 : round(($value->running / $countState->running) * 100, 2);
+//                    $util .= "{$value->nama_mesin} : {$persen} %\n";
+//                }
+                $theshift = "{$shift["nama"]} (" . date("H:i", strtotime($mulai)) . " - " . date("H:i", strtotime($selesai)) . ")";
+//                $wa->sendMessageToGroup('machine_monitoring_rekap_shift', ["{department}" => $val->nama_dept, "{date}" => date("Y-m-d", strtotime($mulai)),
+//                            "{shift}" => $theshift, "{persen_ganti_benang}" => "{$persenBenang} %",
+//                            "{persen_running}" => "{$persenRunn} %", "{persen_noresp}" => "{$persenNorep} %", "{persen_problem}" => "{$persenProblem} %",
+//                            "{persen_noorder}" => "{$persenNoorder} %", "{total_jam_downtime}" => $totalDowntime]
+//                                , ["IT WDT"])
+//                        ->setMentions([])->setFooter('footer_hms')->send();
+                log_message("error", "runn {$persenRunn} noresp {$persenNorep} benang {$persenBenang} problem {$persenProblem} noorder {$persenNoorder} , downtime {$totalDowntime}");
+            }
+        } catch (\Exception $ex) {
+            log_message("error", json_encode($ex));
+        }
+    }
+
+    protected function con_min_days($mins) {
+
+        $hours = str_pad(floor($mins / 60), 2, "0", STR_PAD_LEFT);
+        $mins = str_pad($mins % 60, 2, "0", STR_PAD_LEFT);
+        $days = 0;
+        if ((int) $hours > 24) {
+            $days = str_pad(floor($hours / 24), 2, "0", STR_PAD_LEFT);
+            $hours = str_pad($hours % 24, 2, "0", STR_PAD_LEFT);
+        }
+        if ($days > 0) {
+
+            return $days . " Days Ago";
+        }
+        if ((int) $hours === 0) {
+            return "{$mins} Min";
+        }
+        return "{$hours} Hours, {$mins} Min";
     }
 }
