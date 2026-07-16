@@ -229,7 +229,10 @@ class Bukukas extends MY_Controller {
             $sheet->setCellValue("H{$row}", 'Saldo');
 
             $data_saldo = $this->_getSaldoAwal($valas);
-            $saldos = floatval($data_saldo->saldo_awal_valas_final);
+            if ($valas)
+                $saldos = floatval($data_saldo->saldo_awal_valas_final);
+            else
+                $saldos = floatval($data_saldo->saldo_awal_final);
             $row += 1;
             $sheet->setCellValue("D{$row}", "Saldo Awal");
             $sheet->setCellValue("F{$row}", "");
@@ -280,12 +283,10 @@ class Bukukas extends MY_Controller {
                 $sheet->setCellValue("F{$row}", $debets);
                 $sheet->setCellValue("G{$row}", $kredits);
                 $sheet->setCellValue("H{$row}", $saldos);
-
-                $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-                $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-                $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             }
-
+            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $filename = "Buku Kas {$tanggals}";
             $url = "dist/storages/report/acc";
