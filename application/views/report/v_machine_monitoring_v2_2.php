@@ -804,7 +804,7 @@
                         dataMesin[`${val.devid}`].total += 1;
                         dataMesin[`${val.devid}`].totaldown += 1;
                         var dtt = "";
-                        console.log(stts[val.state]);
+//                        console.log(stts[val.state]);
                         var border = stts[val.state]["warna"];
                         switch (true) {
                             case (parseInt(val.state) != 1):
