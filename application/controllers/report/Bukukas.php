@@ -229,7 +229,10 @@ class Bukukas extends MY_Controller {
             $sheet->setCellValue("H{$row}", 'Saldo');
 
             $data_saldo = $this->_getSaldoAwal($valas);
-            $saldos = floatval($data_saldo->saldo_awal_valas_final);
+            if ($valas)
+                $saldos = floatval($data_saldo->saldo_awal_valas_final);
+            else
+                $saldos = floatval($data_saldo->saldo_awal_final);
             $row += 1;
             $sheet->setCellValue("D{$row}", "Saldo Awal");
             $sheet->setCellValue("F{$row}", "");
