@@ -6,11 +6,11 @@
         <meta http-equiv="Pragma" content="no-cache">
         <meta http-equiv="Expires" content="0">
         <title>HMS - <?= $departmen->nama ?? "" ?> OEE Dashboard</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="<?= base_url('dist/css/bs5/bs5.css'); ?>" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="<?= base_url('dist/css/slider.css'); ?>" />
         <!-- Menggunakan ECharts CDN -->
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+        <script src="<?= base_url('dist/js/echarts.min.js'); ?>"></script>
         <style>
             :root {
                 --bg-light: #f4f7fa;
@@ -804,6 +804,7 @@
                         dataMesin[`${val.devid}`].total += 1;
                         dataMesin[`${val.devid}`].totaldown += 1;
                         var dtt = "";
+                        console.log(stts[val.state]);
                         var border = stts[val.state]["warna"];
                         switch (true) {
                             case (parseInt(val.state) != 1):
