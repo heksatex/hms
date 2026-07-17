@@ -2,11 +2,11 @@
 <html lang="id">
     <head>
         <title>HMS - <?= $departmen->nama ?? "" ?> OEE Dashboard Detail</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="<?= base_url('dist/css/bs5/bs5.css'); ?>" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
         <!-- Menggunakan ECharts CDN -->
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+        <script src="<?= base_url('dist/js/echarts.min.js'); ?>"></script>
         <style>
             :root {
                 --bg-light: #f4f7fa;
