@@ -172,11 +172,13 @@ class Service extends CI_Controller {
         $waktuShift[1] = ["nama" => "Shift Pagi", "time" => "07:00:00"];
         $waktuShift[2] = ["nama" => "Shift Sore", "time" => "15:00:00"];
         $waktuShift[3] = ["nama" => "Shift Malam", "time" => "23:00:00"];
+        $totalMenit = 480; //8jam
         try {
             if (!isset($waktuShift[$this->input->get("shift")]))
                 throw new \Exception("Waktu Tidak ada", 500);
             $shift = $waktuShift[$this->input->get("shift")];
-            $mulai = date("Y-m-d") . " {$shift["time"]}";
+            $dt = $this->input->get("date");
+            $mulai = "{$dt} {$shift["time"]}";
             $selesai = date("Y-m-d H:i:s", strtotime("{$mulai} +8 hours"));
             $model = new $this->m_global;
             $depart = $model->setTables("mesin")->setJoins("departemen", "dept_id = kode")
@@ -203,27 +205,27 @@ class Service extends CI_Controller {
 
                 $persenRunn = $countState->running == 0 ? 0 : round(($countState->running / $countState->totals) * 100);
                 $persenNorep = $countState->noresp == 0 ? 0 : round(($countState->noresp / $countState->totals) * 100);
-                $persenBenang = $countState->benang == 0 ? 0 : round(($countState->benang / $countState->totals) * 100);
+                $persenBenang = $countState->benang == 0 ? 0 : round(($countState->benang / $countState->totals) * 100);                
                 $persenProblem = $countState->problem == 0 ? 0 : round(($countState->problem / $countState->totals) * 100);
                 $persenNoorder = $countState->noorder == 0 ? 0 : round(($countState->noorder / $countState->totals) * 100);
 
                 $totalDowntime = $this->con_min_days($countState->downtime / $countMesin->total_mesin_aktif);
 
-//                $utilisasi = $model->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running", "nama_mesin"], true)
-//                                ->setGroups(["devid"], true)->setOrder(["running" => "desc"], true)->getData();
-//                $util = "";
-//                foreach ($utilisasi as $k => $value) {
-//                    $persen = $countState->running == 0 ? 0 : round(($value->running / $countState->running) * 100, 2);
-//                    $util .= "{$value->nama_mesin} : {$persen} %\n";
-//                }
+                $utilisasi = $model->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running", "nama_mesin"], true)
+                                ->setGroups(["devid"], true)->setOrder(["running" => "desc"], true)->getData();
+                $util = "";
+                foreach ($utilisasi as $k => $value) {
+                    $persen = $countState->running == 0 ? 0 : round(($value->running / $countState->totals) * 100, 2);
+                    $util .= "{$value->nama_mesin} : {$persen} %\n";
+                }
                 $theshift = "{$shift["nama"]} (" . date("H:i", strtotime($mulai)) . " - " . date("H:i", strtotime($selesai)) . ")";
-//                $wa->sendMessageToGroup('machine_monitoring_rekap_shift', ["{department}" => $val->nama_dept, "{date}" => date("Y-m-d", strtotime($mulai)),
-//                            "{shift}" => $theshift, "{persen_ganti_benang}" => "{$persenBenang} %",
-//                            "{persen_running}" => "{$persenRunn} %", "{persen_noresp}" => "{$persenNorep} %", "{persen_problem}" => "{$persenProblem} %",
-//                            "{persen_noorder}" => "{$persenNoorder} %", "{total_jam_downtime}" => $totalDowntime]
-//                                , ["IT WDT"])
-//                        ->setMentions([])->setFooter('footer_hms')->send();
-                log_message("error", "runn {$persenRunn} noresp {$persenNorep} benang {$persenBenang} problem {$persenProblem} noorder {$persenNoorder} , downtime {$totalDowntime}");
+                $wa->sendMessageToGroup('machine_monitoring_rekap_shift', ["{department}" => '*' . strtoupper($val->nama_dept) . '*', "{date}" => date("Y-m-d", strtotime($selesai)),
+                            "{shift}" => $theshift, "{persen_ganti_benang}" => "{$persenBenang} %",
+                            "{persen_running}" => "{$persenRunn} %", "{persen_noresp}" => "{$persenNorep} %", "{persen_problem}" => "{$persenProblem} %",
+                            "{persen_noorder}" => "{$persenNoorder} %", "{total_jam_downtime}" => $totalDowntime, "{mesin_utiliti}" => $util]
+                                , ["NON-MULTIBAR 24JAM"])
+                        ->setMentions([])->setFooter('footer_hms')->send();
+//                log_message("error", "runn {$persenRunn} noresp {$persenNorep} benang {$persenBenang} problem {$persenProblem} noorder {$persenNoorder} , downtime {$totalDowntime} , utlisasi {$util}");
             }
         } catch (\Exception $ex) {
             log_message("error", json_encode($ex));
@@ -235,14 +237,14 @@ class Service extends CI_Controller {
         $hours = str_pad(floor($mins / 60), 2, "0", STR_PAD_LEFT);
         $mins = str_pad($mins % 60, 2, "0", STR_PAD_LEFT);
         $days = 0;
-        if ((int) $hours > 24) {
-            $days = str_pad(floor($hours / 24), 2, "0", STR_PAD_LEFT);
-            $hours = str_pad($hours % 24, 2, "0", STR_PAD_LEFT);
-        }
-        if ($days > 0) {
-
-            return $days . " Days Ago";
-        }
+//        if ((int) $hours > 24) {
+//            $days = str_pad(floor($hours / 24), 2, "0", STR_PAD_LEFT);
+//            $hours = str_pad($hours % 24, 2, "0", STR_PAD_LEFT);
+//        }
+//        if ($days > 0) {
+//
+//            return $days . " Days Ago";
+//        }
         if ((int) $hours === 0) {
             return "{$mins} Min";
         }
