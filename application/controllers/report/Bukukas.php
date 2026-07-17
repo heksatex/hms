@@ -224,69 +224,151 @@ class Bukukas extends MY_Controller {
             $sheet->setCellValue("C{$row}", 'No Bukti');
             $sheet->setCellValue("D{$row}", 'Uraian');
             $sheet->setCellValue("E{$row}", 'No Acc');
-            $sheet->setCellValue("F{$row}", 'Debet');
-            $sheet->setCellValue("G{$row}", 'Kredit');
-            $sheet->setCellValue("H{$row}", 'Saldo');
+            $sheet->setCellValue("F{$row}", 'Kurs');
+            $sheet->setCellValue("G{$row}", 'Debet');
+            $sheet->setCellValue("H{$row}", 'Kredit');
+            $sheet->setCellValue("I{$row}", 'Saldo');
+            if ($valas) {
+                $sheet->setCellValue("J{$row}", 'Debet Rp');
+                $sheet->setCellValue("K{$row}", 'Kredit Rp');
+                $sheet->setCellValue("L{$row}", 'Saldo Rp');
+            }
 
-            $data_saldo = $this->_getSaldoAwal($valas);
-            if ($valas)
-                $saldos = floatval($data_saldo->saldo_awal_valas_final);
-            else
+//            if (count($data) > 0) {
+                $data_saldo = $this->_getSaldoAwal($valas);
                 $saldos = floatval($data_saldo->saldo_awal_final);
-            $row += 1;
-            $sheet->setCellValue("D{$row}", "Saldo Awal");
-            $sheet->setCellValue("F{$row}", "");
-            $sheet->setCellValue("G{$row}", "");
-            $sheet->setCellValue("H{$row}", $saldos);
-
+                $row += 1;
+                if (!$valas) {
+                    $sheet->setCellValue("E{$row}", "Saldo Awal");
+                    $sheet->setCellValue("I{$row}", $saldos);
+                } else {
+                    $saldosValas = floatval($data_saldo->saldo_awal_valas_final);
+                    $sheet->setCellValue("E{$row}", "Saldo Awal");
+                    $sheet->setCellValue("I{$row}", $saldosValas);
+                    $sheet->setCellValue("J{$row}", '');
+                    $sheet->setCellValue("K{$row}", '');
+                    $sheet->setCellValue("L{$row}", $saldos);
+                }
+//            }
             $kredits = 0;
             $debets = 0;
             $temp = "";
             $noUrut = 0;
-            foreach ($data as $key => $value) {
-                $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
-                $row += 1;
-                $showUrut = "";
-                $no_bukti = "";
-                $dt = "";
-                if ($value->no_bukti !== $temp) {
-                    $noUrut++;
-                    $showUrut = $noUrut;
-                    $no_bukti = $value->no_bukti;
-                    $dt = $value->tanggal;
-                }
-                $saldo = 0;
-                $debet = 0;
-                $kredit = 0;
-                if ($value->posisi === "D") {
-                    $debet = $value->nominal;
-                    $debets += $debet;
-                } else {
-                    $kredit = $value->nominal;
-                    $kredits += $kredit;
-                }
-                $saldos += ($debet - $kredit);
-                $sheet->setCellValue("A{$row}", $showUrut);
-                $sheet->setCellValue("B{$row}", $dt);
-                $sheet->setCellValue("C{$row}", $no_bukti);
-                $sheet->setCellValue("D{$row}", "{$partner}{$value->uraian}");
-                $sheet->setCellValue("E{$row}", $value->kode_coa);
-                $sheet->setCellValue("F{$row}", ($debet == 0) ? "" : $debet);
-                $sheet->setCellValue("G{$row}", ($kredit == 0) ? "" : $kredit);
-                $sheet->setCellValue("H{$row}", $saldos);
+            if (!$valas) {
+                foreach ($data as $key => $value) {
+                    $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
+                    $row += 1;
+                    $showUrut = "";
+                    $no_bukti = "";
+                    $dt = "";
+                    if ($value->no_bukti !== $temp) {
+                        $noUrut++;
+                        $showUrut = $noUrut;
+                        $no_bukti = $value->no_bukti;
+                        $dt = $value->tanggal;
+                    }
+                    $debet = 0;
+                    $kredit = 0;
+                    if ($value->posisi === "D") {
+                        $debet = $value->nominal;
+                        $debets += $debet;
+                    } else {
+                        $kredit = $value->nominal;
+                        $kredits += $kredit;
+                    }
+                    $saldos += ($debet - $kredit);
+                    $sheet->setCellValue("A{$row}", $showUrut);
+                    $sheet->setCellValue("B{$row}", $dt);
+                    $sheet->setCellValue("C{$row}", $no_bukti);
+                    $sheet->setCellValue("D{$row}", "{$partner}{$value->uraian}");
+                    $sheet->setCellValue("E{$row}", $value->kode_coa);
+                    $sheet->setCellValue("F{$row}", $value->kurs);
+                    $sheet->setCellValue("G{$row}", ($debet == 0) ? "" : $debet);
+                    $sheet->setCellValue("H{$row}", ($kredit == 0) ? "" : $kredit);
+                    $sheet->setCellValue("I{$row}", $saldos);
 
-                $temp = $value->no_bukti;
+                    $temp = $value->no_bukti;
+                }
+            } else {
+                $kreditsRp = 0;
+                $debetsRp = 0;
+                $saldosRp = 0;
+                foreach ($data as $key => $value) {
+                    $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
+                    $row += 1;
+                    $showUrut = "";
+                    $no_bukti = "";
+                    $dt = "";
+                    if ($value->no_bukti !== $temp) {
+                        $noUrut++;
+                        $showUrut = $noUrut;
+                        $no_bukti = $value->no_bukti;
+                        $dt = $value->tanggal;
+                    }
+                    $debet = 0;
+                    $kredit = 0;
+                    $debetRp = 0;
+                    $kreditRp = 0;
+
+                    if ($value->posisi === "D") {
+                        $debet = $value->nominal;
+                        $debets += $debet;
+
+                        $debetRp = $value->nominal * $value->kurs;
+                        $debetsRp += $debetRp;
+                    } else {
+                        $kredit = $value->nominal;
+                        $kredits += $kredit;
+
+                        $kreditRp = $value->nominal * $value->kurs;
+                        $kreditsRp += $kreditRp;
+                    }
+                    $saldosValas += ($debet - $kredit);
+                    $saldos += ($debetRp - $kreditRp);
+                    $sheet->setCellValue("A{$row}", $showUrut);
+                    $sheet->setCellValue("B{$row}", $dt);
+                    $sheet->setCellValue("C{$row}", $no_bukti);
+                    $sheet->setCellValue("D{$row}", "{$partner}{$value->uraian}");
+                    $sheet->setCellValue("E{$row}", $value->kode_coa);
+                    $sheet->setCellValue("F{$row}", $value->kurs);
+                    $sheet->setCellValue("G{$row}", ($debet == 0) ? "" : $debet);
+                    $sheet->setCellValue("H{$row}", ($kredit == 0) ? "" : $kredit);
+                    $sheet->setCellValue("I{$row}", $saldosValas);
+
+                    $sheet->setCellValue("J{$row}", ($debetRp == 0) ? "" : $debetRp);
+                    $sheet->setCellValue("K{$row}", ($kreditRp == 0) ? "" : $kreditRp);
+                    $sheet->setCellValue("L{$row}", $saldos);
+
+                    $temp = $value->no_bukti;
+                }
             }
             if (count($data) > 0) {
                 $row += 1;
-                $sheet->setCellValue("D{$row}", "Saldo Akhir");
-                $sheet->setCellValue("F{$row}", $debets);
-                $sheet->setCellValue("G{$row}", $kredits);
-                $sheet->setCellValue("H{$row}", $saldos);
+                if (!$valas) {
+                    $sheet->setCellValue("D{$row}", "Saldo Akhir");
+                    $sheet->setCellValue("G{$row}", $debets);
+                    $sheet->setCellValue("H{$row}", $kredits);
+                    $sheet->setCellValue("I{$row}", $saldos);
+                    $sheet->removeColumn('F');
+                } else {
+                    $sheet->setCellValue("D{$row}", "Saldo Akhir");
+                    $sheet->setCellValue("G{$row}", $debets);
+                    $sheet->setCellValue("H{$row}", $kredits);
+                    $sheet->setCellValue("I{$row}", $saldosValas);
+                    $sheet->setCellValue("J{$row}", $debetsRp);
+                    $sheet->setCellValue("K{$row}", $kreditsRp);
+                    $sheet->setCellValue("L{$row}", $saldos);
+                }
             }
+
+
             $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("G2:G{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("I2:I{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("J2:J{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("K2:K{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("l2:l{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $filename = "Buku Kas {$tanggals}";
             $url = "dist/storages/report/acc";
