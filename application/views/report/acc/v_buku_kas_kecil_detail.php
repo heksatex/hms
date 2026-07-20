@@ -25,7 +25,7 @@ if (count($data) > 0) {
 
 foreach ($data as $key => $value) {
     $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] ";
-    if($parner === "[]") {
+    if($partner === "[]") {
         $partner = "";
     }
     $showUrut = "";
