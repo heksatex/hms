@@ -223,7 +223,7 @@ class Service extends CI_Controller {
                             "{shift}" => $theshift, "{persen_ganti_benang}" => "{$persenBenang} %",
                             "{persen_running}" => "{$persenRunn} %", "{persen_noresp}" => "{$persenNorep} %", "{persen_problem}" => "{$persenProblem} %",
                             "{persen_noorder}" => "{$persenNoorder} %", "{total_jam_downtime}" => $totalDowntime, "{mesin_utiliti}" => $util]
-                                , ["NON-MULTIBAR 24JAM"])
+                                , ["IT WDT"])
                         ->setMentions([])->setFooter('footer_hms')->send();
 //                log_message("error", "runn {$persenRunn} noresp {$persenNorep} benang {$persenBenang} problem {$persenProblem} noorder {$persenNoorder} , downtime {$totalDowntime} , utlisasi {$util}");
             }
