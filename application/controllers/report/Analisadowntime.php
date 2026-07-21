@@ -27,9 +27,9 @@ class Analisadowntime extends MY_Controller {
         $this->load->model('_module');
     }
 
-    public function index($depth = "WRD") {
+    public function index($id_depth = "ADM", $depth = "WRD") {
         $model = new $this->m_global;
-        $data['id_dept'] = 'ADM';
+        $data['id_dept'] = $id_depth;
         $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
         $data["mesin"] = $model->getData();
         $this->load->view('report/v_analisa_downtime', $data);
