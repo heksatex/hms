@@ -12,12 +12,14 @@
                 box-shadow: 0 4px 6px rgba(0,0,0,0.03);
                 margin-bottom: 25px;
                 align-content: center;
+                margin-left: 15px;
+                margin-right: 15px;
             }
 
             #shift_comparison_chart {
                 width: 100%;
                 height: 420px;
-                min-height: 420px;
+                min-height: 300px;
                 display: block;
             }
             .mono {
@@ -57,17 +59,34 @@
                                                 <input type="text" name="tanggal" id="tanggal" value="" class="form-control" required/>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 col-xs-12">
-                                    <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-6">
-                                                <input type="hidden" name="dept" id="dept" value="wrd" class="form-control"/>
-                                                <button class="btn btn-success" type="button" id="search"><i class="fa fa-refresh"></i> Cari </button>
+                                            <div class="col-xs-4">
+                                                <label class="form-label">Mesin</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <select class="form-control select2 mesin" style="width: 100%" name="mesin">
+                                                    <option value="">ALL</option>
+                                                    <?php
+                                                    foreach ($mesin as $key => $value) {
+                                                        ?>
+                                                        <option value="<?= $value->devid_esp ?>"><?= $value->nama_mesin ?></option>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="col-md-4 col-xs-12">
+                                    <!--                                    <div class="form-group">
+                                                                            <div class="col-md-12 col-xs-12">
+                                                                                <div class="col-xs-6">
+                                                                                    <input type="hidden" name="dept" id="dept" value="wrd" class="form-control"/>
+                                                                                    <button class="btn btn-success" type="button" id="search"><i class="fa fa-refresh"></i> Cari </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>-->
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-6">
@@ -90,13 +109,14 @@
                                     <table class="table table-hover align-middle text-center" id="downtime-table">
                                         <thead>
                                             <tr>
-                                                <th class="text-start">Tanggal</th>
-                                                <th>Running (Hrs)</th>
-                                                <th>No Response (Hrs)</th>
-                                                <th>Ganti Benang (Hrs)</th>
-                                                <th>Putus/Problem (Hrs)</th>
-                                                <th>No Order (Hrs)</th>
-                                                <th>Total Capacity</th>
+                                                <th class="text-start" style="width: 100px;">Tanggal</th>
+                                                <th style="width: 120px;">Running (Hrs)</th>
+                                                <th style="width: 140px;">No Response (Hrs)</th>
+                                                <th style="width: 150px;">Ganti Benang (Hrs)</th>
+                                                <th style="width: 150px;">Putus/Problem (Hrs)</th>
+                                                <th style="width: 120px;">No Order (Hrs)</th>
+                                                <th style="width: 120px;">Total Capacity</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -111,14 +131,15 @@
         </div>
         <?php $this->load->view("admin/_partials/js.php"); ?>
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+        <script src="<?= base_url('dist/js/echarts.min.js'); ?>"></script>
         <script>
             let myChart;
             const  asDataGrafik = (() => {
                 return $.ajax({
                     type: "POST",
                     data: {
-                        tanggal: $("#tanggal").val()
+                        tanggal: $("#tanggal").val(),
+                        mesin: $(".mesin").val()
                     },
                     url: "<?php echo base_url(); ?>report/analisadowntime/get_grafiks",
                     complete: function (jqXHR, textStatus) {
@@ -206,9 +227,14 @@
                 if (activeDates.length > 60)
                     labelInterval = 5;
                 // Terapkan ke Grafik ECharts
-
-
+                
+                let mesin = $(".mesin :selected").text();
                 myChart.setOption({
+                    title: {
+                        text: (mesin === 'ALL' ? '' : ` Mesin : ${mesin}`),
+                        left: 'center',
+                        textStyle: {fontSize: 14, fontWeight: 'normal', color: '#495057'}
+                    },
                     xAxis: {data: activeDates, axisLabel: {interval: labelInterval}},
                     yAxis: {max: currentCapacity},
                     series: [
@@ -223,15 +249,25 @@
             }
 
             $(function () {
+                $(".select2").select2({
+                    allowClear: true,
+                    placeholder: "All"
+                });
                 $('#tanggal').daterangepicker({
                     endDate: moment().startOf('day'),
-                    startDate: moment().startOf('day').add(-1, 'week'),
+                    startDate: moment().startOf('month'),
                     minYear: 2026,
                     maxDate: new Date(),
                     minDate: "2026/04/01",
                     locale: {
                         format: 'YYYY-MM-DD'
                     }
+                });
+                $(".mesin").on('change', function (e) {
+                    renderChart();
+                });
+                $('#tanggal').on('apply.daterangepicker', function (ev, picker) {
+                    renderChart();
                 });
 
                 const chartDom = document.getElementById('shift_comparison_chart');
@@ -257,9 +293,9 @@
                         myChart.resize();
                 });
 
-                $("#search").on("click", function () {
-                    renderChart();
-                });
+//                $("#search").on("click", function () {
+//                    renderChart();
+//                });
 
                 $("#export").on("click", function () {
                     var imgData = myChart.getDataURL({

@@ -58,29 +58,34 @@
                                                 <input type="text" name="tanggal" id="tanggal" value="" class="form-control" required/>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 col-xs-12">
-                                    <div class="form-group">
-                                        <input type="hidden" name="dept" id="dept" value="wrd" class="form-control"/>
-                                        <!--                                    <div class="col-md-12 col-xs-12">
-                                                                                <div class="col-xs-4">
-                                                                                    <label class="form-label required">Tanggal</label>
-                                                                                </div>
-                                                                                <div class="col-xs-8 col-md-8">
-                                                                                    <input type="text" name="tanggal" id="tanggal" value="" class="form-control" required/>
-                                                                                </div>
-                                                                            </div>-->
-                                    </div>
-                                </div>
-                                <div class="col-md-4 col-xs-12">
-                                    <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-6">
-                                                <button class="btn btn-success" type="button" id="search"><i class="fa fa-refresh"></i> Cari </button>
+                                            <div class="col-xs-4">
+                                                <label class="form-label">Mesin</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <select class="form-control select2 mesin" style="width: 100%" name="mesin">
+                                                    <option value="">ALL</option>
+                                                    <?php
+                                                    foreach ($mesin as $key => $value) {
+                                                        ?>
+                                                        <option value="<?= $value->devid_esp ?>"><?= $value->nama_mesin ?></option>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="col-md-4 col-xs-12">
+                                    <!--                                    <div class="form-group">
+                                                                            <div class="col-md-12 col-xs-12">
+                                                                                <div class="col-xs-6">
+                                                                                    <button class="btn btn-success" type="button" id="search"><i class="fa fa-refresh"></i> Cari </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>-->
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-6">
@@ -123,14 +128,15 @@
         </div>
         <?php $this->load->view("admin/_partials/js.php"); ?>
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+        <script src="<?= base_url('dist/js/echarts.min.js'); ?>"></script>
         <script>
             let myChart;
             const  asDataGrafik = (() => {
                 return $.ajax({
                     type: "post",
                     data: {
-                        tanggal: $("#tanggal").val()
+                        tanggal: $("#tanggal").val(),
+                        mesin: $(".mesin").val()
                     },
                     url: "<?php echo base_url(); ?>report/kinerjamesin/get_grafiks",
                     complete: function (jqXHR, textStatus) {
@@ -182,9 +188,10 @@
                 });
 
                 renderTable();
+                let mesin = $(".mesin :selected").text();
                 const options = {
                     title: {
-                        text: 'Grafik Perbandingan Distribusi Jam Kerja Antar Shift (Kategori Terpisah)',
+                        text: 'Grafik Perbandingan Distribusi Jam Kerja Antar Shift (Kategori Terpisah)' + (mesin === 'ALL' ? '' : ` Mesin : ${mesin}`),
                         left: 'center',
                         textStyle: {fontSize: 14, fontWeight: 'normal', color: '#495057'}
                     },
@@ -291,20 +298,8 @@
             };
 
             $(function () {
-                $('#tanggal').daterangepicker({
-                    endDate: moment().startOf('day'),
-                    startDate: moment().startOf('day').add(-1, 'week'),
-                    minYear: 2026,
-                    maxDate: new Date(),
-                    minDate: "2026/04/01",
-                    locale: {
-                        format: 'YYYY-MM-DD'
-                    }
-                });
-                const chartDom = document.getElementById('shift_comparison_chart');
-                myChart = echarts.init(chartDom);
-                renderChart();
-                $("#search").on("click", function () {
+
+                const applyReport = (() => {
                     totals = {
                         "pagi": {
                             "running": 0,
@@ -333,6 +328,30 @@
                     };
                     renderChart();
                 });
+                $(".select2").select2({
+                    allowClear: true,
+                    placeholder: "All"
+                });
+                $(".mesin").on('change', function (e) {
+                    applyReport();
+                });
+                $('#tanggal').daterangepicker({
+                    endDate: moment().startOf('day'),
+                    startDate: moment().startOf('month'),
+                    minYear: 2026,
+                    maxDate: new Date(),
+                    minDate: "2026/04/01",
+                    locale: {
+                        format: 'YYYY-MM-DD'
+                    }
+                });
+                $('#tanggal').on('apply.daterangepicker', function (ev, picker) {
+                    applyReport();
+                });
+                const chartDom = document.getElementById('shift_comparison_chart');
+                myChart = echarts.init(chartDom);
+                renderChart();
+
                 $("#export").on("click", function () {
                     var imgData = myChart.getDataURL({
                         type: 'png',
@@ -344,7 +363,8 @@
                         data: {
                             img: imgData,
                             tanggal: $("#tanggal").val(),
-                            tbl: totals
+                            tbl: totals,
+                            mesin: $(".mesin").val()
                         },
                         url: "<?php echo base_url(); ?>report/kinerjamesin/export",
                         complete: function (jqXHR, textStatus) {
