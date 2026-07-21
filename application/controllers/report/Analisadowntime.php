@@ -27,8 +27,11 @@ class Analisadowntime extends MY_Controller {
         $this->load->model('_module');
     }
 
-    public function index() {
+    public function index($depth = "WRD") {
+        $model = new $this->m_global;
         $data['id_dept'] = 'ADM';
+        $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
+        $data["mesin"] = $model->getData();
         $this->load->view('report/v_analisa_downtime', $data);
     }
 
@@ -36,6 +39,7 @@ class Analisadowntime extends MY_Controller {
         try {
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
+            $mesin = $this->input->post("mesin");
 
             $model = new $this->m_global;
 
@@ -53,8 +57,10 @@ class Analisadowntime extends MY_Controller {
                         "DATE(timelog) >=" => $tanggals[0],
                         "DATE(timelog) <=" => $tanggals[1]
                     ])
-                    ->setGroups(["dt"])->setOrder(["date(timelog)"])->getData();
-
+                    ->setGroups(["dt"])->setOrder(["date(timelog)"]);
+            if (!empty($mesin)) {
+                $model->setWheres(["devid" => $mesin]);
+            }
             $date1 = date_create($tanggals[0]);
             $date2 = date_create($tanggals[1]);
             $interval = date_diff($date1, $date2);

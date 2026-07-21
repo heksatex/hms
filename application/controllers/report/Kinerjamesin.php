@@ -28,8 +28,11 @@ class Kinerjamesin extends MY_Controller {
         $this->load->model('_module');
     }
 
-    public function index() {
+    public function index($depth = "WRD") {
+        $model = new $this->m_global;
         $data['id_dept'] = 'KNM';
+        $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
+        $data["mesin"] = $model->getData();
         $this->load->view('report/v_kinerja_mesin', $data);
     }
 
@@ -63,6 +66,9 @@ class Kinerjamesin extends MY_Controller {
                         "DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) <=" => $tanggals[1]
                     ])
                     ->setGroups(["shift_range"]);
+            if (!empty($mesin)) {
+                $model->setWheres(["devid"=>$mesin]);
+            }
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $model->getData())));
@@ -78,7 +84,7 @@ class Kinerjamesin extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $imageData = $this->input->post("img");
             $tbl = $this->input->post("tbl");
-
+            
             if (preg_match('/^data:image\/(\w+);base64,/', $imageData)) {
                 $imageData = substr($imageData, strpos($imageData, ',') + 1);
             }
@@ -121,12 +127,12 @@ class Kinerjamesin extends MY_Controller {
                 $row++;
                 $sheet->setCellValue("A{$row}", $key);
                 $sheet->setCellValue("B{$row}", $this->con_min_days($value["running"]));
-                $sheet->setCellValue("C{$row}",  $this->con_min_days($value["noresp"]));
-                $sheet->setCellValue("D{$row}",  $this->con_min_days($value["benang"]));
-                $sheet->setCellValue("E{$row}",  $this->con_min_days($value["problem"]));
-                $sheet->setCellValue("F{$row}",  $this->con_min_days($value["noorder"]));
+                $sheet->setCellValue("C{$row}", $this->con_min_days($value["noresp"]));
+                $sheet->setCellValue("D{$row}", $this->con_min_days($value["benang"]));
+                $sheet->setCellValue("E{$row}", $this->con_min_days($value["problem"]));
+                $sheet->setCellValue("F{$row}", $this->con_min_days($value["noorder"]));
                 $sheet->setCellValue("G{$row}", $value["total"]);
-                $sheet->setCellValue("H{$row}", round($value["efficiency"],2)." %");
+                $sheet->setCellValue("H{$row}", round($value["efficiency"], 2) . " %");
             }
 
             $filename = "report kinerja {$tanggal}";
@@ -143,14 +149,13 @@ class Kinerjamesin extends MY_Controller {
         } catch (Exception $ex) {
             
         }
-        
     }
-    
+
     protected function con_min_days($mins) {
 
         $hours = str_pad(floor($mins / 60), 2, "0", STR_PAD_LEFT);
         $mins = str_pad($mins % 60, 2, "0", STR_PAD_LEFT);
-        
+
         if ((int) $hours === 0) {
             return "{$mins} Min";
         }
