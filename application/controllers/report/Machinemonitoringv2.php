@@ -191,9 +191,9 @@ GROUP BY devid;
         $drs = [];
         foreach ($durasiAll as $key => $value) {
             $drs["{$value->devid}"] = (object) array(
-                "state"=>$value->state_terakhir,
-                "time"=>$value->count_state_terakhir,
-                "time_text"=>$this->con_min_days($value->count_state_terakhir)
+                        "state" => $value->state_terakhir,
+                        "time" => $value->count_state_terakhir,
+                        "time_text" => $this->con_min_days($value->count_state_terakhir)
             );
         }
 //        log_message("error",json_encode($drs));
@@ -247,7 +247,8 @@ GROUP BY devid;
                             ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
                             ->setWheres(["date(timelog) >=" => $mulai, "date(timelog) <=" => $sampai, "dept_id" => $dep])
                             ->setSelects(["date(timelog) as tgl,count(state) as total"])
-                            ->setSelects(["COUNT(log.state)*SUM(log.state=1) as running"])
+                            ->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running"])
+                            ->setSelects(["COUNT(DISTINCT devid) as count_mesin"])
                             ->setGroups(["date(timelog)"])->setOrder(["date(timelog)" => "asc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

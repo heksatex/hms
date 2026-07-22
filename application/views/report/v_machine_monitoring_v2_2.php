@@ -489,12 +489,20 @@
             });
             var runToday = 0;
             var timeRunToday = 0;
+            const getMinuteDate = ((mulai, sampai) => {
+                const dateMulai = moment(mulai).startOf('day');
+                const dateSampai = moment(sampai);
+                if (dateSampai.diff(dateMulai, 'days') > 0) {
+                    return 1440;
+                }
+                return dateSampai.diff(dateMulai, 'minutes');
+            });
             async function persenToday() {
                 await asDataGrafik(0).then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
-                        runToday += (sd.running / sd.total);
-                        timeRunToday += parseInt(sd.total);
+                        runToday += parseInt(sd.running);
+                        timeRunToday += getMinuteDate(moment().toString(), moment().toString()) * sd.count_mesin;
                     });
                 });
                 updatePersenToday(1, false);
@@ -618,7 +626,7 @@
                 });
             }
 
-            // --- 4. Trend Chart (Line/Area) ---
+            // --- 4. Trend Chart (Line/Area) --
             async function drawTrendChart() {
                 const chartDom = document.getElementById('trend_chart');
                 const myChart = echarts.init(chartDom);
@@ -630,7 +638,7 @@
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
                         dates.push(moment(sd.tgl).format("DD MMM"));
-                        var pr = (sd.running / sd.total) / sd.total;
+                        var pr = (sd.running) / (getMinuteDate(sd.tgl, moment().toString()) * sd.count_mesin);
                         persens += pr;
                         values.push((pr * 100));
                     });

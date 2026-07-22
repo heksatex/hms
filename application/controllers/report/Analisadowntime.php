@@ -27,9 +27,9 @@ class Analisadowntime extends MY_Controller {
         $this->load->model('_module');
     }
 
-    public function index($depth = "WRD") {
+    public function index($id_depth = "ADM", $depth = "WRD") {
         $model = new $this->m_global;
-        $data['id_dept'] = 'ADM';
+        $data['id_dept'] = $id_depth;
         $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
         $data["mesin"] = $model->getData();
         $this->load->view('report/v_analisa_downtime', $data);
@@ -46,6 +46,7 @@ class Analisadowntime extends MY_Controller {
             $model->setTables("log_mesin")
                     ->setSelects([
                         "COUNT(DISTINCT devid) as count_mesin",
+                        "date(timelog) as tanggal",
                         "DATE_FORMAT(timelog, '%e %M') as dt",
                         "COUNT(*) AS total_log",
                         "COUNT(IF(state = '1', 1, NULL)) as running",
