@@ -116,6 +116,7 @@
                                                 <th style="width: 150px;">Putus/Problem (Hrs)</th>
                                                 <th style="width: 120px;">No Order (Hrs)</th>
                                                 <th style="width: 120px;">Total Capacity</th>
+                                                <!--<th style="width: 120px;">%</th>-->
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -150,7 +151,7 @@
             Number.prototype.themeFormat = function () {
                 return this.toFixed(1).replace(/\d(?=(\d{3})+\.)/g, '$&,');
             };
-            var filteredRun = [], filteredNoResp = [], filteredGanti = [], filteredProb = [], filterNoOrder = [], filteredOff = [], activeDates = [], cps = [];
+            var filteredRun = [], filteredNoResp = [], filteredGanti = [], filteredProb = [], filterNoOrder = [], filteredOff = [], activeDates = [], cps = [], persen = [];
             async function renderChart() {
                 // Arrays tampungan filter terpilih
                 activeDates = [];
@@ -160,50 +161,80 @@
                 filteredProb = [];
                 filterNoOrder = [];
                 filteredOff = [];
+                persen = [];
                 cps = [];
-                let tRun = 0, tNoResp = 0, tGanti = 0, tProb = 0, tNoOrd = 0, toff = 0, totals = 0;
+                let tRun = 0, tNoResp = 0, tGanti = 0, tProb = 0, tNoOrd = 0, toff = 0, totals = 0, tpersen = 0;
                 let currentCapacitys = 0, currentCapacity = 0;
                 let htmlRows = '';
+
+
+//                const startTime = moment().startOf('day');
+//                const endTime = moment();
+//                const nowHour = endTime.diff(startTime, 'minutes');
+
+                const nowHour = ((mulai, sampai) => {
+                    const dateMulai = moment(mulai).startOf('day');
+                    const dateSampai = moment(sampai);
+                    if (dateSampai.diff(dateMulai, 'days') > 0) {
+                        return 1440;
+                    }
+                    return dateSampai.diff(dateMulai, 'minutes');
+                });
+
                 await asDataGrafik().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
-                        let total = parseInt(sd.total_log) / parseInt(sd.count_mesin) / 60;
-                        let run = parseInt(sd.running) / 60;
-                        let noResp = parseInt(sd.noresp) / 60;
-                        let ganti = parseInt(sd.benang) / 60;
-                        let prob = parseInt(sd.problem) / 60;
-                        let order = parseInt(sd.noorder) / 60;
-                        currentCapacity = parseInt(sd.count_mesin) * 24;
+                        let total = parseInt(sd.total_log) / parseInt(sd.count_mesin);
+                        let run = parseInt(sd.running);
+                        let noResp = parseInt(sd.noresp);
+                        let ganti = parseInt(sd.benang);
+                        let prob = parseInt(sd.problem);
+                        let order = parseInt(sd.noorder);
+                        currentCapacity = parseInt(sd.count_mesin) * nowHour(sd.tanggal,moment().toString());
                         let off = currentCapacity - (run + noResp + ganti + prob);
                         if (off < 0)
                             off = 0;
+                        let prs = 100 / (currentCapacity / 60) * (run / 60);
+                        total = (total / 60).toFixed(2);
+                        run = (run / 60).toFixed(2);
+                        noResp = (noResp / 60).toFixed(2);
+                        ganti = (ganti / 60).toFixed(2);
+                        prob = (prob / 60).toFixed(2);
+                        order = (order / 60).toFixed(2);
+
+                        off = (off / 60).toFixed(2);
+                        currentCapacity = (currentCapacity / 60).toFixed(2);
+                        prs = (prs).toFixed(2);
 
                         activeDates.push(sd.dt);
-                        filteredRun.push(run.themeFormat());
-                        filteredNoResp.push(noResp.themeFormat());
-                        filteredGanti.push(ganti.themeFormat());
-                        filteredProb.push(prob.themeFormat());
-                        filterNoOrder.push(order.themeFormat());
-                        filteredOff.push(off.themeFormat());
+                        filteredRun.push(run);
+                        filteredNoResp.push(noResp);
+                        filteredGanti.push(ganti);
+                        filteredProb.push(prob);
+                        filterNoOrder.push(order);
+                        filteredOff.push(off);
                         cps.push(currentCapacity);
+                        persen.push(prs);
 
-                        tRun += run;
-                        tNoResp += noResp;
-                        tGanti += ganti;
-                        tProb += prob;
-                        tNoOrd += order;
-                        toff += off;
-                        totals += total;
-                        currentCapacitys += currentCapacity;
+                        tpersen += parseFloat(prs);
+                        tRun += parseFloat(run);
+                        tNoResp += parseFloat(noResp);
+                        tGanti += parseFloat(ganti);
+                        tProb += parseFloat(prob);
+                        tNoOrd += parseFloat(order);
+                        toff += parseFloat(off);
+                        totals += parseFloat(total);
+                        currentCapacitys += parseFloat(currentCapacity);
                         htmlRows += `
                     <tr>
                         <td class="fw-semibold">${sd.dt}</td>
-                        <td class="mono text-success">${run.themeFormat()}</td>
-                        <td class="mono text-danger">${noResp.themeFormat()}</td>
-                        <td class="mono text-primary">${ganti.themeFormat()}</td>
-                        <td class="mono text-warning fw-semibold">${prob.themeFormat()}</td>
-                        <td class="mono text-dark">${off.themeFormat()}</td>
-                        <td class="mono text-secondary">${currentCapacity.themeFormat()}</td>
+                        <td class="mono text-success">${run}</td>
+                        <td class="mono text-danger">${noResp}</td>
+                        <td class="mono text-primary">${ganti}</td>
+                        <td class="mono text-warning fw-semibold">${prob}</td>
+                        <td class="mono text-dark">${off}</td>
+                        <td class="mono text-secondary">${currentCapacity}</td>
+                        
                     </tr>
                 `;
                     });
@@ -227,7 +258,7 @@
                 if (activeDates.length > 60)
                     labelInterval = 5;
                 // Terapkan ke Grafik ECharts
-                
+
                 let mesin = $(".mesin :selected").text();
                 myChart.setOption({
                     title: {
