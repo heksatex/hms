@@ -267,7 +267,7 @@
                         textStyle: {fontSize: 14, fontWeight: 'normal', color: '#495057'}
                     },
                     xAxis: {data: activeDates, axisLabel: {interval: labelInterval}},
-                    yAxis: {max: currentCapacity},
+                    yAxis: {max: Math.ceil(currentCapacity)},
                     series: [
                         {data: filteredRun},
                         {data: filteredNoResp},
