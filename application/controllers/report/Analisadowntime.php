@@ -46,6 +46,7 @@ class Analisadowntime extends MY_Controller {
             $model->setTables("log_mesin")
                     ->setSelects([
                         "COUNT(DISTINCT devid) as count_mesin",
+                        "date(timelog) as tanggal",
                         "DATE_FORMAT(timelog, '%e %M') as dt",
                         "COUNT(*) AS total_log",
                         "COUNT(IF(state = '1', 1, NULL)) as running",
