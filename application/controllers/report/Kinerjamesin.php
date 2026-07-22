@@ -28,9 +28,9 @@ class Kinerjamesin extends MY_Controller {
         $this->load->model('_module');
     }
 
-    public function index($depth = "WRD") {
+    public function index($id_depth = "KNM", $depth = "WRD") {
         $model = new $this->m_global;
-        $data['id_dept'] = 'KNM';
+        $data['id_dept'] = $id_depth;
         $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
         $data["mesin"] = $model->getData();
         $this->load->view('report/v_kinerja_mesin', $data);
@@ -67,7 +67,7 @@ class Kinerjamesin extends MY_Controller {
                     ])
                     ->setGroups(["shift_range"]);
             if (!empty($mesin)) {
-                $model->setWheres(["devid"=>$mesin]);
+                $model->setWheres(["devid" => $mesin]);
             }
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -84,7 +84,7 @@ class Kinerjamesin extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $imageData = $this->input->post("img");
             $tbl = $this->input->post("tbl");
-            
+
             if (preg_match('/^data:image\/(\w+);base64,/', $imageData)) {
                 $imageData = substr($imageData, strpos($imageData, ',') + 1);
             }
