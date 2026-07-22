@@ -116,7 +116,7 @@
                                                 <th style="width: 150px;">Putus/Problem (Hrs)</th>
                                                 <th style="width: 120px;">No Order (Hrs)</th>
                                                 <th style="width: 120px;">Total Capacity</th>
-                                                <!--<th style="width: 120px;">%</th>-->
+                                                <th style="width: 120px;">% Utilization</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -149,7 +149,7 @@
                 });
             });
             Number.prototype.themeFormat = function () {
-                return this.toFixed(1).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                return this.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
             };
             var filteredRun = [], filteredNoResp = [], filteredGanti = [], filteredProb = [], filterNoOrder = [], filteredOff = [], activeDates = [], cps = [], persen = [];
             async function renderChart() {
@@ -166,7 +166,6 @@
                 let tRun = 0, tNoResp = 0, tGanti = 0, tProb = 0, tNoOrd = 0, toff = 0, totals = 0, tpersen = 0;
                 let currentCapacitys = 0, currentCapacity = 0;
                 let htmlRows = '';
-
 
 //                const startTime = moment().startOf('day');
 //                const endTime = moment();
@@ -190,7 +189,7 @@
                         let ganti = parseInt(sd.benang);
                         let prob = parseInt(sd.problem);
                         let order = parseInt(sd.noorder);
-                        currentCapacity = parseInt(sd.count_mesin) * nowHour(sd.tanggal,moment().toString());
+                        currentCapacity = parseInt(sd.count_mesin) * nowHour(sd.tanggal, moment().toString());
                         let off = currentCapacity - (run + noResp + ganti + prob);
                         if (off < 0)
                             off = 0;
@@ -234,6 +233,7 @@
                         <td class="mono text-warning fw-semibold">${prob}</td>
                         <td class="mono text-dark">${off}</td>
                         <td class="mono text-secondary">${currentCapacity}</td>
+                            <td class="mono">${prs} %</td>
                         
                     </tr>
                 `;
@@ -249,6 +249,7 @@
                         <td class="mono text-warning fw-semibold">${tProb.themeFormat()}</td>
                             <td class="mono text-dark">${toff.themeFormat()}</td>
                         <td class="mono text-secondary">${currentCapacitys.themeFormat()}</td>
+                            <td class="mono text-secondary">${tpersen.themeFormat()}</td>
                     </tr>
                 `;
                 $("#downtime-table tfoot").html(htmlRows);
@@ -267,7 +268,7 @@
                         textStyle: {fontSize: 14, fontWeight: 'normal', color: '#495057'}
                     },
                     xAxis: {data: activeDates, axisLabel: {interval: labelInterval}},
-                    yAxis: {max: Math.ceil(currentCapacity)},
+                    yAxis: {max: Math.ceil(Math.max(...cps))},
                     series: [
                         {data: filteredRun},
                         {data: filteredNoResp},
