@@ -115,7 +115,7 @@
                                                 <th>Putus/Problem (Hrs)</th>
                                                 <th>No Order (Hrs)</th>
                                                 <th>Total Capacity</th>
-                                                <th>Prod. Efficiency</th>
+                                                <th>% Utilization</th>
                                             </tr>
                                         </thead>
                                         <tbody id="table-body"></tbody>
@@ -151,7 +151,8 @@
                     "benang": 0,
                     "problem": 0,
                     "noorder": 0,
-                    "total": 0
+                    "total": 0,
+                    "efficiency": 0
                 },
                 "siang": {
                     "running": 0,
@@ -159,7 +160,8 @@
                     "benang": 0,
                     "problem": 0,
                     "noorder": 0,
-                    "total": 0
+                    "total": 0,
+                    "efficiency": 0
                 },
                 "malam": {
                     "running": 0,
@@ -167,7 +169,8 @@
                     "benang": 0,
                     "problem": 0,
                     "noorder": 0,
-                    "total": 0
+                    "total": 0,
+                    "efficiency": 0
                 }
             };
             async function renderChart() {
@@ -180,7 +183,6 @@
                         totals[sd.shift_range]["problem"] += parseInt(sd.problem);
                         totals[sd.shift_range]["noorder"] += parseInt(sd.noorder);
                         totals[sd.shift_range]["total"] += parseInt(sd.total_log);
-
                         totals[sd.shift_range]["efficiency"] = (totals[sd.shift_range]["running"] / (totals[sd.shift_range]["total"] - totals[sd.shift_range]["noorder"]) * 100);
                         if (isNaN(totals[sd.shift_range]["efficiency"]))
                             totals[sd.shift_range]["efficiency"] = 0;
@@ -276,6 +278,7 @@
                     textHours.benang = converMinute(s.benang);
                     textHours.problem = converMinute(s.problem);
                     textHours.noorder = converMinute(s.noorder);
+                    textHours.efficiency = (s.efficiency == undefined) ? 0 : s.efficiency;
                     htmlRows += `
                 <tr>
                     <td class="fw-semibold text-start text-dark" style="border-left: 4px solid var(--text-muted);">Shift ${shift}</td>
@@ -285,7 +288,7 @@
                     <td class="mono text-warning fw-semibold">${textHours.problem}</td>
                     <td class="mono text-dark">${textHours.noorder}</td>
                     <td class="mono fw-semibold text-secondary">${s.total.themeFormat()}</td>
-                    <td class="mono fw-bold text-dark">${s.efficiency.toFixed(1)}%</td>
+                    <td class="mono fw-bold text-dark">${textHours.efficiency.toFixed(2)}%</td>
                 </tr>
             `;
 
@@ -390,6 +393,9 @@
             );
 
             const converMinute = ((minute) => {
+                var hsl = minute / 60;
+
+                return hsl.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
                 var value = minute;
                 var units = {
 //                    "day": 24 * 60,
