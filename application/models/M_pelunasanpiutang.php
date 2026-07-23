@@ -1003,7 +1003,7 @@ class M_pelunasanpiutang extends CI_Model
         if(count($where) > 0){
             $this->db->where($where);
         }
-        $this->db->select('appsk.posisi, appsk.kode_coa, appsk.nama_coa, apps.koreksi, appsk.posisi, appsk.nominal, appsk.koreksi_id, appsk.head, appsk.faktur_id, appsk.alat_pelunasan, appsk.lunas, apps.mode');
+        $this->db->select('appsk.posisi, appsk.kode_coa, appsk.nama_coa, apps.koreksi, appsk.posisi, appsk.nominal, appsk.koreksi_id, appsk.head, appsk.faktur_id, appsk.alat_pelunasan, appsk.lunas, apps.mode,  apps.currency, apps.kurs');
         $this->db->order_by('appsk.id');
         $this->db->from('acc_pelunasan_piutang_summary_koreksi appsk');
         $this->db->join('acc_pelunasan_piutang_summary apps', 'apps.id = appsk.pelunasan_summary_id', 'inner');
