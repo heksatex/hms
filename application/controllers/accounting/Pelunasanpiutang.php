@@ -2960,9 +2960,9 @@ class Pelunasanpiutang extends MY_Controller
                             // if (!empty($gs->koreksi)) {
                             //     throw new \Exception('Koreksi Untuk Uang Muka tidak harus dipilih !', 422);
                             // }
-                            if ($gs->tipe_currency == 'Rp') {
-                                $create_jurnal = true;
-                            }
+                            $create_jurnal = true;
+                            // if ($gs->tipe_currency == 'Rp') {
+                            // }
                         } else { // selisih == 0 atau selisih > 0
                             throw new \Exception('Nominal Uang Muka tidak Valid !', 200);
                         }
@@ -3023,30 +3023,158 @@ class Pelunasanpiutang extends MY_Controller
 
                         // var_dump($this->coa_um);
 
-                        $data_koreksi_coa =  $this->m_pelunasanpiutang->get_coa_summary_id(['appsk.no_pelunasan' => $no_pelunasan, 'apps.tipe_currency' => 'Rp'])->result();
-                        if (empty($data_koreksi_coa)) {
-                            throw new \Exception('CoA Uang Muka Tidak di temukan !', 422);
-                        }
-                        // looping coa 
-                        foreach ($data_koreksi_coa as $cok) {
-                            if (empty($cok->kode_coa)) {
-                                throw new \Exception("CoA " . (($cok->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
+                        $get_selisih = $this->m_pelunasanpiutang->get_data_summary_by_code($no_pelunasan);
+                        foreach ($get_selisih as $gs) {
+
+                            if($gs->selisih > 0 || $gs->selisih) {
+
+                                $kode_coa_head  = "";
+                                $total_credit  = 0;
+                                $total_debit   = 0;
+
+                                if (empty($gs->mode)) {
+                                    throw new \Exception('Koreksi ' . $gs->tipe_currency . ' Masih kosong  ! ', 422);
+                                }
+
+                                if ($gs->tipe_currency !== 'Rp') {
+                                    // continue; // skip Valas
+                                    $data_koreksi_coa = [];
+                                } else {
+                                    $data_koreksi_coa =  $this->m_pelunasanpiutang->get_coa_summary_id(['appsk.no_pelunasan' => $no_pelunasan, 'apps.tipe_currency' => 'Rp'])->result();
+                                    if (empty($data_koreksi_coa)) {
+                                        throw new \Exception('CoA Uang Muka Tidak di temukan !', 422);
+                                    }
+                                }
+
+                                // looping coa 
+                                foreach ($data_koreksi_coa as $cok) {
+
+                                    if($cok->mode === 'split') {
+                                        
+                                        if($cok->head === 'true') {
+                                            $kode_coa_head  = $cok->kode_coa;
+                                            ($cok->posisi === 'D') ? $total_debit = $total_debit + abs($cok->nominal) : $total_credit = $total_credit + abs($cok->nominal);
+                                        } else {
+
+                                            $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $cok->koreksi_id]);
+                                            if (!$cek_koreksi) {
+                                                throw new \Exception('Koreksi ' . $gs->tipe_currency . ' tidak ditemukan / Kosong  ', 422);
+                                            }
+
+                                            if (isset($cek_koreksi) && $cek_koreksi->get_coa == 'true') {
+
+                                                if (!$cok->kode_coa || !$cok->nama_coa) {
+                                                    throw new \Exception("CoA " . (($cok->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
+                                                }
+
+                                                if ($gs->tipe_currency == 'Rp') {
+                                                    $items_entries[] = array(
+                                                        'kode'          => $jurnal,
+                                                        'nama'          => ($cok->koreksi_id === 'uang_muka') ? $tmp_bukti : 'Koreksi',
+                                                        'reff_note'     => ($cok->koreksi_id === 'uang_muka') ? 'Uang Muka' : 'Pelunasan Piutang',
+                                                        'partner'       => $cek->partner_id, // partner_id
+                                                        'kode_coa'      => $cok->kode_coa,
+                                                        'posisi'        => $cok->posisi,
+                                                        'nominal_curr'  => abs($cok->nominal),
+                                                        'kurs'          => $cok->kurs,
+                                                        'kode_mua'      => $cok->currency,
+                                                        'nominal'       => abs($cok->nominal * $cok->kurs),
+                                                        'row_order'     => $row_items
+                                                    );
+                                                    $row_items++;
+
+                                                    if (empty($kode_coa_head)) {
+                                                        throw new \Exception('CoA Head kosong !', 422);
+                                                    }
+
+                                                    // item lawannya dengan coa HEAD
+                                                    $items_entries[] = array(
+                                                        'kode'          => $jurnal,
+                                                        'nama'          => ($cok->koreksi_id === 'uang_muka') ? $tmp_bukti : 'Koreksi',
+                                                        'reff_note'     => ($cok->koreksi_id === 'uang_muka') ? 'Uang Muka' : 'Pelunasan Utang',
+                                                        'partner'       => $cek->partner_id, // partner_id
+                                                        'kode_coa'      => $kode_coa_head,
+                                                        'posisi'        => ($cok->posisi === 'D') ? 'C' : 'D',
+                                                        'nominal_curr'  => abs($cok->nominal),
+                                                        'kurs'          => $cok->kurs,
+                                                        'kode_mua'      => $cok->currency,
+                                                        'nominal'       => abs($cok->nominal * $cok->kurs),
+                                                        'row_order'     => $row_items
+                                                    );
+                                                    $row_items++;
+
+                                                    ($cok->posisi === 'D') ? $total_debit = $total_debit + abs($cok->nominal) : $total_credit = $total_credit + abs($cok->nominal);
+                                                }
+                                            }
+                                        }
+                                    } else if ($cok->mode === 'normal'){
+                                        if ($cok->head === 'false') {
+
+                                             $cek_koreksi = $this->m_pelunasanpiutang->get_koreksi_by_kode(['kode' => $cok->koreksi_id]);
+                                            if (!$cek_koreksi) {
+                                                throw new \Exception('Koreksi ' . $gs->tipe_currency . ' tidak ditemukan / Kosong  ', 422);
+                                            }
+
+                                            if (isset($cek_koreksi) && $cek_koreksi->get_coa == 'true') {
+
+                                                if (!$cok->kode_coa || !$cok->nama_coa) {
+                                                    throw new \Exception("CoA " . (($cok->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
+                                                }
+
+                                                if ($gs->tipe_currency == 'Rp') {
+                                                    $items_entries[] = array(
+                                                        'kode'          => $jurnal,
+                                                        'nama'          => $tmp_bukti,
+                                                        'reff_note'     => 'Uang Muka',
+                                                        'partner'       => $cek->partner_id, // partner_id
+                                                        'kode_coa'      => $cok->kode_coa,
+                                                        'posisi'        => $cok->posisi,
+                                                        'nominal_curr'  => abs($cok->nominal),
+                                                        'kurs'          => $cok->kurs,
+                                                        'kode_mua'      => $cok->currency,
+                                                        'nominal'       => abs($cok->nominal * $cok->kurs),
+                                                        'row_order'     => $row_items
+                                                    );
+                                                    $row_items++;
+                                                    ($cok->posisi === 'D') ? $total_debit = $total_debit + abs($cok->nominal) : $total_credit = $total_credit + abs($cok->nominal);
+                                                }
+
+                                            }
+
+                                        } else {
+                                            throw new \Exception('Mode Koreksi Normal Tidak Valid', 422);
+                                        }
+                                    } else {
+                                        throw new \Exception('Mode Koreksi Tidak Valid', 422);
+                                    }
+                                }
                             }
-                            $items_entries[] = array(
-                                'kode'          => $jurnal,
-                                'nama'          => $tmp_bukti,
-                                'reff_note'     => 'Uang Muka',
-                                'partner'       => $cek->partner_id, // partner_id
-                                'kode_coa'      => $cok->kode_coa,
-                                'posisi'        => $cok->posisi,
-                                'nominal_curr'  => $total_curr,
-                                'kurs'          => $kurs,
-                                'kode_mua'      => $currency,
-                                'nominal'       => $total_nominal,
-                                'row_order'     => $row_items
-                            );
-                            $row_items++;
                         }
+
+                        // $data_koreksi_coa =  $this->m_pelunasanpiutang->get_coa_summary_id(['appsk.no_pelunasan' => $no_pelunasan, 'apps.tipe_currency' => 'Rp'])->result();
+                        // if (empty($data_koreksi_coa)) {
+                        //     throw new \Exception('CoA Uang Muka Tidak di temukan !', 422);
+                        // }
+                        // // looping coa 
+                        // foreach ($data_koreksi_coa as $cok) {
+                        //     if (empty($cok->kode_coa)) {
+                        //         throw new \Exception("CoA " . (($cok->posisi == 'D') ? 'Debit' : 'Credit') . " Kosong !", 422);
+                        //     }
+                        //     $items_entries[] = array(
+                        //         'kode'          => $jurnal,
+                        //         'nama'          => $tmp_bukti,
+                        //         'reff_note'     => 'Uang Muka',
+                        //         'partner'       => $cek->partner_id, // partner_id
+                        //         'kode_coa'      => $cok->kode_coa,
+                        //         'posisi'        => $cok->posisi,
+                        //         'nominal_curr'  => $total_curr,
+                        //         'kurs'          => $kurs,
+                        //         'kode_mua'      => $currency,
+                        //         'nominal'       => $total_nominal,
+                        //         'row_order'     => $row_items
+                        //     );
+                        //     $row_items++;
+                        // }
                     } else {
                         throw new \Exception('Data Metode Pelunasan masih Kosong ', 409);
                     }
