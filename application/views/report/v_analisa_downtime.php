@@ -179,7 +179,7 @@
                     }
                     return dateSampai.diff(dateMulai, 'minutes');
                 });
-
+                let maxCap = 1440 * 10; //24 jam x 10 mesin
                 await asDataGrafik().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
@@ -190,6 +190,7 @@
                         let prob = parseInt(sd.problem);
                         let order = parseInt(sd.noorder);
                         currentCapacity = parseInt(sd.count_mesin) * nowHour(sd.tanggal, moment().toString());
+                        currentCapacity = (currentCapacity >= maxCap) ? maxCap : currentCapacity;
                         let off = currentCapacity - (run + noResp + ganti + prob);
                         if (off < 0)
                             off = 0;
