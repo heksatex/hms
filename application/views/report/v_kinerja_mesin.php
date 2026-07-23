@@ -177,12 +177,12 @@
                 await asDataGrafik().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
-                        totals[sd.shift_range]["running"] += parseInt(sd.running);
-                        totals[sd.shift_range]["noresp"] += parseInt(sd.noresp);
-                        totals[sd.shift_range]["benang"] += parseInt(sd.benang);
-                        totals[sd.shift_range]["problem"] += parseInt(sd.problem);
-                        totals[sd.shift_range]["noorder"] += parseInt(sd.noorder);
-                        totals[sd.shift_range]["total"] += parseInt(sd.total_log);
+                        totals[sd.shift_range]["running"] += parseInt(sd.running) / 60;
+                        totals[sd.shift_range]["noresp"] += parseInt(sd.noresp) / 60;
+                        totals[sd.shift_range]["benang"] += parseInt(sd.benang) / 60;
+                        totals[sd.shift_range]["problem"] += parseInt(sd.problem) / 60;
+                        totals[sd.shift_range]["noorder"] += parseInt(sd.noorder) / 60;
+                        totals[sd.shift_range]["total"] += parseInt(sd.total_log) / 60;
                         totals[sd.shift_range]["efficiency"] = (totals[sd.shift_range]["running"] / (totals[sd.shift_range]["total"] - totals[sd.shift_range]["noorder"]) * 100);
                         if (isNaN(totals[sd.shift_range]["efficiency"]))
                             totals[sd.shift_range]["efficiency"] = 0;
@@ -393,7 +393,7 @@
             );
 
             const converMinute = ((minute) => {
-                var hsl = minute / 60;
+                var hsl = minute;
 
                 return hsl.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
                 var value = minute;
