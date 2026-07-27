@@ -16,6 +16,7 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Kinerjamesin extends MY_Controller {
 
@@ -127,14 +128,22 @@ class Kinerjamesin extends MY_Controller {
             foreach ($tbl as $key => $value) {
                 $row++;
                 $sheet->setCellValue("A{$row}", $key);
-                $sheet->setCellValue("B{$row}", $this->con_min_days($value["running"]));
-                $sheet->setCellValue("C{$row}", $this->con_min_days($value["noresp"]));
-                $sheet->setCellValue("D{$row}", $this->con_min_days($value["benang"]));
-                $sheet->setCellValue("E{$row}", $this->con_min_days($value["problem"]));
-                $sheet->setCellValue("F{$row}", $this->con_min_days($value["noorder"]));
+                $sheet->setCellValue("B{$row}", $value["running"]);
+                $sheet->setCellValue("C{$row}", $value["noresp"]);
+                $sheet->setCellValue("D{$row}", $value["benang"]);
+                $sheet->setCellValue("E{$row}", $value["problem"]);
+                $sheet->setCellValue("F{$row}", $value["noorder"]);
                 $sheet->setCellValue("G{$row}", $value["total"]);
                 $sheet->setCellValue("H{$row}", round($value["efficiency"], 2) . " %");
             }
+
+            $sheet->getStyle("B14:B{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("C14:C{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("D14:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E14:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("H14:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $filename = "report kinerja {$tanggal}";
             $url = "dist/storages/report/kinerjamesin";
