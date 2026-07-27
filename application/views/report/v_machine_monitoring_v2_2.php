@@ -282,6 +282,7 @@
                 font-size: 11px;
             }
         </style>
+        <link rel="shortcut icon"  href="<?php echo base_url('dist/img/favicon_heksa.ico') ?>">
     </head>
     <body>
 

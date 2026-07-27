@@ -48,18 +48,19 @@ class Kinerjamesin extends MY_Controller {
 //                ->setSelects(["DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) AS tanggal_kerja"])
                     ->setSelects([
                         'CASE 
-        WHEN TIME(timelog) >= "07:00:00" AND TIME(timelog) < "15:00:00" THEN "pagi"
-        WHEN TIME(timelog) >= "15:00:00" AND TIME(timelog) < "23:00:00" THEN "siang"
+        WHEN TIME(timelog) > "07:00:00" AND TIME(timelog) <= "15:00:00" THEN "pagi"
+        WHEN TIME(timelog) > "15:00:00" AND TIME(timelog) <= "23:00:00" THEN "siang"
         ELSE "malam"
     END AS shift_range'
                     ])
                     ->setSelects([
-                        "COUNT(*) AS total_log",
+                        "COUNT(*) AS total_log,count(DISTINCT  devid) as total_mesin",
                         "COUNT(IF(state = '1', 1, NULL)) as running",
                         "COUNT(IF(state = '2', 1, NULL)) as noresp",
                         "COUNT(IF(state = '3', 1, NULL)) as benang",
                         "COUNT(IF(state = '4', 1, NULL)) as problem",
-                        "COUNT(IF(state = '5', 1, NULL)) as noorder"
+                        "COUNT(IF(state = '5', 1, NULL)) as noorder",
+                        "COUNT(IF(state <> '5', 1, NULL)) as downtime"
                     ])
                     ->setWheres([
                         "DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) >=" => $tanggals[0],

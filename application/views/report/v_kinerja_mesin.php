@@ -177,15 +177,23 @@
                 await asDataGrafik().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
-                        totals[sd.shift_range]["running"] += parseInt(sd.running) / 60;
-                        totals[sd.shift_range]["noresp"] += parseInt(sd.noresp) / 60;
-                        totals[sd.shift_range]["benang"] += parseInt(sd.benang) / 60;
-                        totals[sd.shift_range]["problem"] += parseInt(sd.problem) / 60;
-                        totals[sd.shift_range]["noorder"] += parseInt(sd.noorder) / 60;
-                        totals[sd.shift_range]["total"] += parseInt(sd.total_log) / 60;
-                        totals[sd.shift_range]["efficiency"] = (totals[sd.shift_range]["running"] / (totals[sd.shift_range]["total"] - totals[sd.shift_range]["noorder"]) * 100);
+                        totals[sd.shift_range]["running"] += parseInt(sd.running);
+                        totals[sd.shift_range]["noresp"] += parseInt(sd.noresp);
+                        totals[sd.shift_range]["benang"] += parseInt(sd.benang);
+                        totals[sd.shift_range]["problem"] += parseInt(sd.problem);
+                        totals[sd.shift_range]["noorder"] += parseInt(sd.noorder);
+                        totals[sd.shift_range]["total"] += sd.total_mesin * 480;
+                        totals[sd.shift_range]["efficiency"] = (totals[sd.shift_range]["running"] / (sd.total_mesin * 480) * 100);
                         if (isNaN(totals[sd.shift_range]["efficiency"]))
                             totals[sd.shift_range]["efficiency"] = 0;
+                    });
+                    ["pagi", "siang", "malam"].forEach(shift => {
+                        totals[shift]["running"] = (totals[shift]["running"] / 60).toFixed(2);
+                        totals[shift]["noresp"] = (totals[shift]["noresp"] / 60).toFixed(2);
+                        totals[shift]["benang"] = (totals[shift]["benang"] / 60).toFixed(2);
+                        totals[shift]["problem"] = (totals[shift]["problem"] / 60).toFixed(2);
+                        totals[shift]["noorder"] = (totals[shift]["noorder"] / 60).toFixed(2);
+                         totals[shift]["total"] = (totals[shift]["total"] / 60);
                     });
                 });
 
@@ -232,31 +240,31 @@
                             name: 'Running', type: 'bar',
                             // Menghapus properti 'stack' agar grafik berdiri sendiri secara berdampingan (Grouped)
                             itemStyle: {color: '#2ecc71', borderRadius: [4, 4, 0, 0]},
-                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value.toFixed(0) : '', textStyle: {fontSize: 10, color: '#64748b'}},
+                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value : '', textStyle: {fontSize: 10, color: '#64748b'}},
                             data: [totals["pagi"].running, totals["siang"].running, totals["malam"].running]
                         },
                         {
                             name: 'No Response', type: 'bar',
                             itemStyle: {color: '#e74c3c', borderRadius: [4, 4, 0, 0]},
-                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value.toFixed(0) : '', textStyle: {fontSize: 10, color: '#64748b'}},
+                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value : '', textStyle: {fontSize: 10, color: '#64748b'}},
                             data: [totals["pagi"].noresp, totals["siang"].noresp, totals["malam"].noresp]
                         },
                         {
                             name: 'Ganti Benang', type: 'bar',
                             itemStyle: {color: '#3498db', borderRadius: [4, 4, 0, 0]},
-                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value.toFixed(0) : '', textStyle: {fontSize: 10, color: '#64748b'}},
+                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value : '', textStyle: {fontSize: 10, color: '#64748b'}},
                             data: [totals["pagi"].benang, totals["siang"].benang, totals["malam"].benang]
                         },
                         {
                             name: 'Putus/Problem', type: 'bar',
                             itemStyle: {color: '#f1c40f', borderRadius: [4, 4, 0, 0]},
-                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value.toFixed(0) : '', textStyle: {fontSize: 10, color: '#64748b'}},
+                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value : '', textStyle: {fontSize: 10, color: '#64748b'}},
                             data: [totals["pagi"].problem, totals["siang"].problem, totals["malam"].problem]
                         },
                         {
                             name: 'No Order', type: 'bar',
                             itemStyle: {color: '#2c3e50', borderRadius: [4, 4, 0, 0]},
-                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value.toFixed(0) : '', textStyle: {fontSize: 10, color: '#64748b'}},
+                            label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value : '', textStyle: {fontSize: 10, color: '#64748b'}},
                             data: [totals["pagi"].noorder, totals["siang"].noorder, totals["malam"].noorder]
                         }
                     ]
@@ -395,7 +403,7 @@
             const converMinute = ((minute) => {
                 var hsl = minute;
 
-                return hsl.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                return hsl;
                 var value = minute;
                 var units = {
 //                    "day": 24 * 60,
