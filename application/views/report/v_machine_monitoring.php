@@ -62,17 +62,17 @@
                         <div class="box-header with-border">
                             <h3 class="box-title"><strong>Mesin Monitoring <?= $departmen->nama ?> (Realtime Update)</strong></h3>
                             <div class="pull-right" id="btn-header">
-<!--                                Mesin : 
-                                <select class="mesin-select2" id="mesin">
-                                    <option value=""></option>
-                                    <?php
-                                    foreach ($allMesin as $key => $value) {
-                                        ?>
-                                        <option value="<?= $value->dept_id ?>" <?= ($value->dept_id === $dept) ? "selected" : "" ?>><?= $value->nama ?></option>
-                                        <?php
-                                    }
+                                <!--                                Mesin : 
+                                                                <select class="mesin-select2" id="mesin">
+                                                                    <option value=""></option>
+                                <?php
+                                foreach ($allMesin as $key => $value) {
                                     ?>
-                                </select>-->
+                                                                            <option value="<?= $value->dept_id ?>" <?= ($value->dept_id === $dept) ? "selected" : "" ?>><?= $value->nama ?></option>
+                                    <?php
+                                }
+                                ?>
+                                                                </select>-->
                                 &nbsp;&nbsp;&nbsp;
                                 Summary : 
                                 <span class="label label-danger sum-mark_danger" style="background-color: red; color: black;" data-val="0">0</span>
@@ -274,7 +274,8 @@
             };
             socket.onmessage = function (event) {
                 var data = JSON.parse(event.data);
-                updateContent(data);
+                if (data["version"] == undefined)
+                    updateContent(data);
             };
             $(function () {
                 $(".mesin-select2").select2({
