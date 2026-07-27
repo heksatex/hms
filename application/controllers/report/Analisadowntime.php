@@ -16,6 +16,7 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class Analisadowntime extends MY_Controller {
 
@@ -154,6 +155,13 @@ class Analisadowntime extends MY_Controller {
             $sheet->setCellValue("e{$row}", $Tproblem);
             $sheet->setCellValue("f{$row}", $Toff);
             $sheet->setCellValue("g{$row}", $Tcps);
+            
+            $sheet->getStyle("B14:B{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("C14:C{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("D14:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("E14:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("F14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("G14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $filename = "report analisadowntime {$tanggal}";
             $url = "dist/storages/report/kinerjamesin";
