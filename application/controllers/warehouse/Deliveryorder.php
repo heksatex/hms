@@ -1382,7 +1382,7 @@ class Deliveryorder extends MY_Controller {
             $buff->write("\x1bF" . chr(0));
             $printer->feed();
             $buff->write("\x1bM");
-            $printer->text(str_pad("No PO", 10));
+            $printer->text(str_pad("No DO", 10));
             $printer->text(str_pad(": {$data[0]->no}", 25));
             $printer->feed();
             $printer->text(str_pad("Picklist", 10));
