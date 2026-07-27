@@ -13,6 +13,8 @@ require FCPATH . 'vendor/autoload.php';
  * @author RONI
  */
 use Mpdf\Mpdf;
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 
 class Deliveryorder extends MY_Controller {
 
@@ -32,6 +34,8 @@ class Deliveryorder extends MY_Controller {
         $this->load->library("token");
         $this->load->library("wa_message");
         $this->load->model("m_global");
+        $this->load->driver('cache', array('adapter' => 'file'));
+        $this->config->load('additional');
     }
 
     public function index() {
@@ -1331,16 +1335,183 @@ class Deliveryorder extends MY_Controller {
         }
     }
 
-    public function print_retur() {
+    protected function _printRetur() {
         try {
             $doid = $this->input->post("doid");
             $model = new $this->m_global;
-            $model->setTables("delivery_order_detail dod")->setJoins("delivery_order do", "do.id = dod.do_id")
-                    ->setJoins("picklist_detail pd", "(pd.id = dod.picklist_detail_id) and (pd.no_pl = do.no_picklist)")
-                    ->setWheres(['dod.do_id' => $doid, 'dod.status' => 'retur'])
-                    ->setSelects(["do.no_sj,do.no"])
-                    ->setSelects(["pd.kode_produk,no_pl,pd.nama_produk,pd.warna_remark,pd.corak_remark,pd.barcode_id"])
-                    ->setSelects(["pd.qty as qty_jual,pd.uom as uom_jual,pd.qty2 as qty2_jual,pd.uom2 as uom2_jual,pd.qty_hph as qty,pd.qty2_hph as qty2,pd.uom_hph as uom,pd.uom2_hph as uom2"]);
+            return $model->setTables("delivery_order_detail dod")->setJoins("delivery_order do", "do.id = dod.do_id")
+                            ->setJoins("picklist_detail pd", "(pd.id = dod.picklist_detail_id) and (pd.no_pl = do.no_picklist)")
+                            ->setWheres(['dod.do_id' => $doid, 'dod.status' => 'retur'])
+                            ->setSelects(["do.no_sj,do.no"])
+                            ->setSelects(["pd.kode_produk,no_pl,pd.nama_produk,pd.warna_remark,pd.corak_remark,pd.barcode_id"])
+                            ->setSelects(["pd.qty as qty_jual,pd.uom as uom_jual,pd.qty2 as qty2_jual,pd.uom2 as uom2_jual,pd.qty_hph as qty,pd.qty2_hph as qty2,pd.uom_hph as uom,pd.uom2_hph as uom2"]);
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function print_retur_direct() {
+        try {
+            $model = $this->_printRetur();
+            $data = $model->getData();
+
+            if (count($data) < 1) {
+                throw new \exception("Data Retur Tidak ditemukan", 500);
+            }
+            $connector = new DummyPrintConnector();
+            $printer = new Printer($connector);
+            $printers = $this->session->userdata('printer');
+            if ($printers === null) {
+                throw new \exception("Printer Direct belum ditentukan, silakan pilih pada tab atas", 500);
+            }
+            $printers = json_decode($printers);
+
+            $buff = $printer->getPrintConnector();
+            $buff->write("\x1bO");
+            $buff->write("\x1b" . chr(2));
+            $buff->write("\x1bC" . chr(33));
+            $buff->write("\x1bN" . chr(4));
+
+            $printer->text(str_pad("", 28));
+            $buff->write("\x1bE" . chr(1));
+            $printer->text(str_pad("RETUR DELIVERY ORDER", 25));
+            $buff->write("\x1bF" . chr(0));
+            $printer->feed();
+            $buff->write("\x1bE" . chr(1));
+            $printer->text(str_pad($data[0]->no_sj, 20));
+            $buff->write("\x1bF" . chr(0));
+            $printer->feed();
+            $buff->write("\x1bM");
+            $printer->text(str_pad("No PO", 10));
+            $printer->text(str_pad(": {$data[0]->no}", 25));
+            $printer->feed();
+            $printer->text(str_pad("Picklist", 10));
+            $printer->text(str_pad(": {$data[0]->no_pl}", 25));
+            $printer->feed();
+            $printer->selectPrintMode();
+            $buff->write("\x1bX" . chr(15));
+            $printer->setUnderline(Printer::UNDERLINE_SINGLE);
+            $printer->text(str_pad(" ", 137));
+            $printer->setUnderline(Printer::UNDERLINE_NONE);
+            $printer->setUnderline(Printer::UNDERLINE_SINGLE);
+            $printer->text(str_pad("No", 3));
+            $printer->text(str_pad("Barcode", 12));
+            $printer->text(str_pad("kode Produk", 12));
+            $printer->text(str_pad("Nama Produk", 44));
+            $printer->text(str_pad("Corak Remark", 20));
+            $printer->text(str_pad("Warna Remark", 20));
+            $printer->text(str_pad("QTY", 13, " ", STR_PAD_LEFT));
+            $printer->text(str_pad("QTY 2", 13, " ", STR_PAD_LEFT));
+            $printer->setUnderline(Printer::UNDERLINE_NONE);
+
+            foreach ($data as $key => $value) {
+                $no = str_split(($key + 1), 3);
+                foreach ($no as $k => $vls) {
+                    $vls = trim($vls);
+                    $no[$k] = $vls;
+                }
+                $nama = str_split($value->nama_produk, 42);
+                foreach ($nama as $k => $vls) {
+                    $vls = trim($vls);
+                    $nama[$k] = $vls;
+                }
+                $barcode = str_split($value->barcode_id, 11);
+                foreach ($barcode as $k => $vls) {
+                    $vls = trim($vls);
+                    $barcode[$k] = $vls;
+                }
+                $kode = str_split($value->kode_produk, 11);
+                foreach ($kode as $k => $vls) {
+                    $vls = trim($vls);
+                    $kode[$k] = $vls;
+                }
+                $corak_remark = str_split($value->corak_remark, 19);
+                foreach ($corak_remark as $k => $vls) {
+                    $vls = trim($vls);
+                    $corak_remark[$k] = $vls;
+                }
+                $warna_remark = str_split($value->warna_remark, 19);
+                foreach ($warna_remark as $k => $vls) {
+                    $vls = trim($vls);
+                    $warna_remark[$k] = $vls;
+                }
+                $jmlJual = str_split("{$value->qty_jual} {$value->uom_jual}", 12);
+                foreach ($jmlJual as $k => $vls) {
+                    $vls = trim($vls);
+                    $jmlJual[$k] = $vls;
+                }
+                $jmlJual2 = str_split("{$value->qty2_jual} {$value->uom2_jual}", 12);
+                foreach ($jmlJual2 as $k => $vls) {
+                    $vls = trim($vls);
+                    $jmlJual2[$k] = $vls;
+                }
+
+                $counter = 0;
+                $temp = [];
+                $temp[] = count($no);
+                $temp[] = count($kode);
+                $temp[] = count($nama);
+                $temp[] = count($barcode);
+                $temp[] = count($corak_remark);
+                $temp[] = count($warna_remark);
+                $temp[] = count($jmlJual);
+                $temp[] = count($jmlJual2);
+                $counter = max($temp);
+                for ($i = 0; $i < $counter; $i++) {
+                    if (($counter - 1) === $i)
+                        $printer->setUnderline(Printer::UNDERLINE_SINGLE);
+
+                    $line = (isset($no[$i])) ? str_pad($no[$i], 3) : str_pad("", 3);
+                    $line .= (isset($barcode[$i])) ? str_pad($barcode[$i], 12) : str_pad("", 12);
+                    $line .= (isset($kode[$i])) ? str_pad($kode[$i], 12) : str_pad("", 12);
+                    $line .= (isset($nama[$i])) ? str_pad($nama[$i], 44) : str_pad("", 44);
+                    $line .= (isset($corak_remark[$i])) ? str_pad($corak_remark[$i], 20) : str_pad("", 20);
+                    $line .= (isset($warna_remark[$i])) ? str_pad($warna_remark[$i], 20) : str_pad("", 20);
+                    $line .= (isset($jmlJual[$i])) ? str_pad($jmlJual[$i], 13, " ", STR_PAD_LEFT) : str_pad("", 13);
+                    $line .= (isset($jmlJual2[$i])) ? str_pad($jmlJual2[$i], 13, " ", STR_PAD_LEFT) : str_pad("", 13);
+                    $printer->text($line . "\n");
+                    if (($counter - 1) === $i)
+                        $printer->setUnderline(Printer::UNDERLINE_NONE);
+                }
+                $printer->setUnderline(Printer::UNDERLINE_SINGLE);
+                $printer->setUnderline(Printer::UNDERLINE_NONE);
+                $printer->feed();
+            }
+            $buff->write("\x1bg" . chr(1));
+            $printer->text(str_pad("Yang Menyetujui :", 70, " ", STR_PAD_LEFT));
+            $printer->text(str_pad("yang Membuat :", 30, " ", STR_PAD_LEFT));
+            $printer->feed();
+            $printer->feed();
+            $printer->feed();
+            $printer->text(str_pad("", 70, " ", STR_PAD_LEFT));
+            $printer->text(str_pad("", 30, " ", STR_PAD_LEFT));
+            $buff->write("\x0c");
+            $datas = $connector->getData();
+            $printer->close();
+            $client = new GuzzleHttp\Client();
+            $resp = $client->request("POST", $this->config->item('url_web_print'), [
+                "form_params" => [
+                    "data" => $datas,
+                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
+                ]
+            ]);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $printer->close();
+        }
+    }
+
+    public function print_retur() {
+        try {
+            $model = $this->_printRetur();
+
             $data["data"] = $model->getData();
             $data["user"] = $this->session->userdata('nama');
             $html = $this->load->view("print/do/retur", $data, true);
