@@ -16,7 +16,8 @@
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12">
-                        <div class="col-xs-4"><button type="button" class="btn btn-sm btn-primary btn-print-retur"><i class="fa fa-print"></i> &nbsp; Print</button></div>
+                        <div class="col-xs-4"><button type="button" class="btn btn-sm btn-primary btn-print-retur"><i class="fa fa-print"></i> &nbsp; Print PDF</button></div>
+                        <div class="col-xs-4"><button type="button" class="btn btn-sm btn-primary btn-print-retur-direct"><i class="fa fa-print"></i> &nbsp; Print</button></div>
                     </div>
                 <?php } ?>
             </form>
@@ -214,6 +215,35 @@
                 });
             }).catch(er => {
                 alert_notify("fa fa-danger", er.message, "danger", function () {});
+            });
+        });
+
+        $(".btn-print-retur-direct").on("click", function () {
+            $.ajax({
+                type: "POST",
+                url: "<?= base_url('warehouse/deliveryorder/print_retur_direct') ?>",
+                beforeSend: function (e) {
+                    please_wait(function () {});
+                },
+                data: {
+                    "do": "<?= $do ?>",
+                    "doid": "<?= $doid ?>"
+                },
+                success: function (data) {
+                    unblockUI(function () {
+                        setTimeout(function () {
+                            alert_notify(data.icon, data.message, data.type, function () {});
+                        }, 500);
+                    });
+
+                },
+                error: function (req, error) {
+                    unblockUI(function () {
+                        setTimeout(function () {
+                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                        }, 500);
+                    });
+                }
             });
         });
 

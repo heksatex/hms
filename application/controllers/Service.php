@@ -69,7 +69,7 @@ class Service extends CI_Controller {
                     ],
                     "group" => ["corak", "customer_name", "lebar_jadi"]]
             ];
-//            $now = "2025-08-04";
+//            $now = "2026-07-27";
             $now = date("Y-m-d");
             $model = new $this->m_gtp;
             $sales = $model->setSelects(["nama_sales_group,report_date"])->setOrder(["report_date" => "desc"])
@@ -117,9 +117,9 @@ class Service extends CI_Controller {
                 $wa = new $this->wa_message;
                 if (is_file(FCPATH . $pathFile)) {
                     $nm = date("Y-M-d", strtotime($values->report_date));
-//                    $wa->sendMessageToGroup('service_gtp', ["{message}" => "GOODS To PUSH *{$values->nama_sales_group}* \n {$nm}"], $groups)
-//                            ->setFile(getIpPubic("hms/" . $pathFile))
-//                            ->setMentions([])->setFooter('footer_hms')->send();
+                    $wa->sendMessageToGroup('service_gtp', ["{message}" => "GOODS To PUSH *{$values->nama_sales_group}* \n {$nm}"], $groups)
+                            ->setFile(getIpPubic("hms/" . $pathFile))
+                            ->setMentions([])->setFooter('footer_hms')->send();
                 } else {
                     $wa->sendMessageToGroup('error', ["{message}" => "File GTP sales *{$values->nama_sales_group}* Tidak terbuat."], ['IT WDT'])
                             ->setMentions([])->setFooter('footer_hms')->send();
@@ -224,7 +224,7 @@ class Service extends CI_Controller {
                             "{shift}" => $theshift, "{persen_ganti_benang}" => "{$persenBenang} %",
                             "{persen_running}" => "{$persenRunn} %", "{persen_noresp}" => "{$persenNorep} %", "{persen_problem}" => "{$persenProblem} %",
                             "{persen_noorder}" => "{$persenNoorder} %", "{total_jam_downtime}" => $totalDowntime, "{mesin_utiliti}" => $util,"{total_mesin}"=>$countMesin->total_mesin_aktif]
-                                , ["IT WDT"])
+                                , ["NON-MULTIBAR 24JAM"])
                         ->setMentions([])->setFooter('footer_hms')->send();
 //                log_message("error", "running ({$persenRunn}) noresp {$persenNorep} benang {$persenBenang} problem {$persenProblem} noorder {$persenNoorder} , downtime {$totalDowntime} , utlisasi {$util}");
             }
