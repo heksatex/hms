@@ -797,7 +797,7 @@
                 $.each(data, function (index, val) {
                     var datas = $(`.card-d${val.devid}`).data();
                     if (datas) {
-                        updatePersenToday(datas.state);
+//                        updatePersenToday(datas.state);
                         if (dataMesin[`${val.devid}`] === undefined) {
                             dataMesin[`${val.devid}`] = {
                                 state: parseInt(datas.state),
@@ -870,8 +870,10 @@
                 var data = JSON.parse(event.data);
                 if (data["version"] != undefined && data["version"] == 2) {
                     updateContents(data["data"]);
-                    if (loop > 10)
+                    if (loop > 20){
                         await drawTimeline();
+                        await persenToday();
+                    }
                 }
 
             };
