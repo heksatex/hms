@@ -36,7 +36,7 @@ class Analisadowntime extends MY_Controller {
         $this->load->view('report/v_analisa_downtime', $data);
     }
 
-    public function get_grafiks() {
+    public function get_grafiks($depth = "WRD") {
         try {
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
@@ -44,9 +44,10 @@ class Analisadowntime extends MY_Controller {
 
             $model = new $this->m_global;
 
-            $model->setTables("log_mesin")
+            $model->setTables("mesin mst")
+                            ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
                     ->setSelects([
-                        "COUNT(DISTINCT devid) as count_mesin",
+                        "COUNT(DISTINCT log.devid) as count_mesin",
                         "date(timelog) as tanggal",
                         "DATE_FORMAT(timelog, '%e %M') as dt",
                         "COUNT(*) AS total_log",
@@ -57,7 +58,8 @@ class Analisadowntime extends MY_Controller {
                         "COUNT(IF(state = '5', 1, NULL)) as noorder"
                     ])->setWheres([
                         "DATE(timelog) >=" => $tanggals[0],
-                        "DATE(timelog) <=" => $tanggals[1]
+                        "DATE(timelog) <=" => $tanggals[1],
+                        "dept_id" => $depth
                     ])
                     ->setGroups(["dt"])->setOrder(["date(timelog)"]);
             if (!empty($mesin)) {

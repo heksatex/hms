@@ -37,7 +37,7 @@ class Kinerjamesin extends MY_Controller {
         $this->load->view('report/v_kinerja_mesin', $data);
     }
 
-    public function get_grafiks() {
+    public function get_grafiks($depth = "WRD") {
         try {
 
             $mesin = $this->input->post("mesin");
@@ -45,7 +45,8 @@ class Kinerjamesin extends MY_Controller {
             $tanggals = explode(" - ", $tanggal);
 
             $model = new $this->m_global;
-            $model->setTables("log_mesin")
+            $model->setTables("mesin mst")
+                     ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
 //                ->setSelects(["DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) AS tanggal_kerja"])
                     ->setSelects([
                         'CASE 
@@ -55,7 +56,7 @@ class Kinerjamesin extends MY_Controller {
     END AS shift_range'
                     ])
                     ->setSelects([
-                        "COUNT(*) AS total_log,count(DISTINCT  devid) as total_mesin",
+                        "COUNT(*) AS total_log,count(DISTINCT  log.devid) as total_mesin",
                         "COUNT(IF(state = '1', 1, NULL)) as running",
                         "COUNT(IF(state = '2', 1, NULL)) as noresp",
                         "COUNT(IF(state = '3', 1, NULL)) as benang",
@@ -65,7 +66,8 @@ class Kinerjamesin extends MY_Controller {
                     ])
                     ->setWheres([
                         "DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) >=" => $tanggals[0],
-                        "DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) <=" => $tanggals[1]
+                        "DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) <=" => $tanggals[1],
+                        "dept_id" => $depth
                     ])
                     ->setGroups(["shift_range"]);
             if (!empty($mesin)) {
