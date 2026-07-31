@@ -499,6 +499,8 @@
                 return dateSampai.diff(dateMulai, 'minutes');
             });
             async function persenToday() {
+                runToday = 0;
+                timeRunToday = 0;
                 await asDataGrafik(0).then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
@@ -870,7 +872,7 @@
                 var data = JSON.parse(event.data);
                 if (data["version"] != undefined && data["version"] == 2) {
                     updateContents(data["data"]);
-                    if (loop > 20){
+                    if (loop > 20) {
                         await drawTimeline();
                         await persenToday();
                     }
