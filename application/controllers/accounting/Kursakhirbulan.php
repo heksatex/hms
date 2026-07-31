@@ -87,7 +87,7 @@ class Kursakhirbulan extends MY_Controller {
                     ->setWheres(['tanggal_dibuat >= ' => $tgl_dari, 'tanggal_dibuat <= ' => $tgl_sampai, 'status' => 'posted', 'posisi' => "C"]);
             $saldoKreditRp = $model->getQuery();
             $saldoKredit = $model->setWheres(["kode_mua" => $curr])->getQuery();
-            
+
             $model->setTables("acc_coa coa")
                     ->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
@@ -346,6 +346,7 @@ class Kursakhirbulan extends MY_Controller {
                     . "acc_retur_kurs_akhir_bulan WRITE,acc_pelunasan_piutang_akhir_bulan WRITE,acc_kas_bank_giro_kurs_akhir_bulan WRITE,invoice_retur WRITE";
             $this->_module->lock_tabel($lock);
             $coask = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs"])->getDetail();
+            $coaskr = $model->setTables("setting")->setWheres(["setting_name" => "selisih_kurs_rugi"])->getDetail();
 
             if (!$noJurnal = $this->token->noUrut('jurnal_selisih_kurs', date('ym', strtotime($tanggal)), true)->generate('SK', '/%03d')->prefixAdd("/" . date("y", strtotime($tanggal)) . "/" . date('m', strtotime($tanggal)))->get()) {
                 throw new \Exception("No Jurnal tidak terbuat", 500);
@@ -422,7 +423,7 @@ class Kursakhirbulan extends MY_Controller {
                     "kode" => $noJurnal,
                     "reff_note" => "",
                     "partner" => "",
-                    "kode_coa" => $coask->value,
+                    "kode_coa" => ($selisih > 0) ? $coask->value : $coaskr->value,
                     "kurs" => 1,
                     "kode_mua" => "IDR",
                     "posisi" => ($selisih < 0) ? "D" : "C",
