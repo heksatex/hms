@@ -168,7 +168,7 @@ class Service extends CI_Controller {
         }
     }
 
-    public function machine_monitoring_rekap() {
+    public function machine_monitoring_rekap($depth = "WRD") {
         $waktuShift[1] = ["nama" => "Shift Pagi", "time" => "07:00:00"];
         $waktuShift[2] = ["nama" => "Shift Sore", "time" => "15:00:00"];
         $waktuShift[3] = ["nama" => "Shift Malam", "time" => "23:00:00"];
@@ -182,12 +182,12 @@ class Service extends CI_Controller {
             $selesai = date("Y-m-d H:i:s", strtotime("{$mulai} +8 hours"));
             $model = new $this->m_global;
             $depart = $model->setTables("mesin")->setJoins("departemen", "dept_id = kode")
-                            ->setWheres(["devid_esp >" => 0])->setGroups(["dept_id"])
+                            ->setWheres(["devid_esp >" => 0, "dept_id" => $depth])->setGroups(["dept_id"])
                             ->setSelects(["dept_id", "nama_mesin", "count(devid_esp) as total_mesin", "departemen.nama as nama_dept"])->getData();
 
             $model->setTables("log_mesin")->setJoins("mesin", "devid_esp  = devid");
             foreach ($depart as $key => $val) {
-                $model->setWheres(["dept_id" => $val->dept_id, "timelog >" => $mulai, "timelog <=" => $selesai], true);
+                $model->setWheres(["dept_id" => $val->dept_id, "timelog >" => $mulai, "timelog <=" => $selesai, "dept_id" => $depth], true);
                 $countMesin = $model->setSelects(["COALESCE(count(DISTINCT devid),0) as total_mesin_aktif"], true)->setOrder(["devid"], true)->getDetail();
 //                log_message("error",json_encode($countMesin));
                 if (!$countMesin || $countMesin->total_mesin_aktif < 1)
@@ -204,15 +204,15 @@ class Service extends CI_Controller {
                         ->setSelects(["COUNT(IF(state <> '1', 1, NULL)) as downtime"])
                         ->getDetail();
 
-                $persenRunn = $countState->running == 0 ? 0 : round(($countState->running / $totalTime) * 100,2);
-                $persenNorep = $countState->noresp == 0 ? 0 : round(($countState->noresp / $totalTime) * 100,2);
-                $persenBenang = $countState->benang == 0 ? 0 : round(($countState->benang / $totalTime) * 100,2);                
-                $persenProblem = $countState->problem == 0 ? 0 : round(($countState->problem / $totalTime) * 100,2);
-                $persenNoorder = $countState->noorder == 0 ? 0 : round(($countState->noorder / $totalTime) * 100,2);
+                $persenRunn = $countState->running == 0 ? 0 : round(($countState->running / $totalTime) * 100, 2);
+                $persenNorep = $countState->noresp == 0 ? 0 : round(($countState->noresp / $totalTime) * 100, 2);
+                $persenBenang = $countState->benang == 0 ? 0 : round(($countState->benang / $totalTime) * 100, 2);
+                $persenProblem = $countState->problem == 0 ? 0 : round(($countState->problem / $totalTime) * 100, 2);
+                $persenNoorder = $countState->noorder == 0 ? 0 : round(($countState->noorder / $totalTime) * 100, 2);
 
                 $totalDowntime = $this->con_min_days($countState->downtime);
 
-                $utilisasi = $model->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running", "nama_mesin","count(DISTINCT devid) as jml_mesin"], true)
+                $utilisasi = $model->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running", "nama_mesin", "count(DISTINCT devid) as jml_mesin"], true)
                                 ->setGroups(["devid"], true)->setOrder(["running" => "desc"], true)->getData();
                 $util = "";
                 foreach ($utilisasi as $k => $value) {
@@ -223,7 +223,7 @@ class Service extends CI_Controller {
                 $wa->sendMessageToGroup('machine_monitoring_rekap_shift', ["{department}" => '*' . strtoupper($val->nama_dept) . '*', "{date}" => date("Y-m-d", strtotime($selesai)),
                             "{shift}" => $theshift, "{persen_ganti_benang}" => "{$persenBenang} %",
                             "{persen_running}" => "{$persenRunn} %", "{persen_noresp}" => "{$persenNorep} %", "{persen_problem}" => "{$persenProblem} %",
-                            "{persen_noorder}" => "{$persenNoorder} %", "{total_jam_downtime}" => $totalDowntime, "{mesin_utiliti}" => $util,"{total_mesin}"=>$countMesin->total_mesin_aktif]
+                            "{persen_noorder}" => "{$persenNoorder} %", "{total_jam_downtime}" => $totalDowntime, "{mesin_utiliti}" => $util, "{total_mesin}" => $countMesin->total_mesin_aktif]
                                 , ["NON-MULTIBAR 24JAM"])
                         ->setMentions([])->setFooter('footer_hms')->send();
 //                log_message("error", "running ({$persenRunn}) noresp {$persenNorep} benang {$persenBenang} problem {$persenProblem} noorder {$persenNoorder} , downtime {$totalDowntime} , utlisasi {$util}");
