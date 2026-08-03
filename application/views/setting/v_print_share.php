@@ -75,6 +75,9 @@
                             </div>
                             <br>
                             <br>
+
+                        </div>
+                        <div class="box-footer">
                             <div class="col-xs-12 table-responsive">
                                 <table id="printshare" class="table">
                                     <thead>
@@ -99,7 +102,7 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
-                
+
                 const form = document.forms.namedItem("input");
                 form.addEventListener(
                         "submit",
@@ -121,7 +124,7 @@
                 },
                         false
                         );
-                
+
                 const table = $('#printshare').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -161,7 +164,7 @@
                     $("#alias_printer").val("");
                     $("#input").trigger('reset');
                 });
-                
+
             });
         </script>
     </body>
