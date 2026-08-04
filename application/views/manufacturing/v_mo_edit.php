@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/mo-production-batch.css') ?>">
 
   <style>
     button[id="btn-simpan"],button[id="btn-cancel"],button[id="btn-unhold"]{/*untuk hidden button simpan/cancel di top bar MO*/
@@ -1080,6 +1081,7 @@
 
 <!-- add js -->
 <script src="<?php echo base_url('dist/js/myscript.js') ?>"></script>
+<script src="<?php echo site_url('dist/js/formatAdded.js') ?>"></script>
 
 <script type="text/javascript">
 
@@ -1220,6 +1222,7 @@
 
     $("#tambah_data .modal-dialog .modal-content .modal-body").empty();
     // $("#tambah_data .modal-dialog .modal-content .modal-footer button[id='btn-tambah']).remove();
+    $("#tambah_data").find('.modal-dialog').removeClass('pb-modal');
 
     readonly_textfield();
     refresh_mo();
@@ -1715,63 +1718,65 @@
 
   });
 
+  $('#tambah_data').on('shown.bs.modal', function () {
+      $(this).find('.modal-body').scrollTop(0);
+  });
+
   // modal produksi batch
-  $("#btn-produksi-batch").unbind( "click" );
-  $(document).on('click','#btn-produksi-batch',function(e){
-
-    var status = $('#status').val();
-    if(status == 'done'){
-      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
-    }else if(status == 'cancel'){
-      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
-    }else if(status == 'draft'){
-      alert_modal_warning('Maaf, Product belum ready !');
-    }else{
+  $("#btn-produksi-batch").unbind("click");
+  $(document).on('click', '#btn-produksi-batch', function(e) {
+      var status = $('#status').val();
+      if (status == 'done') {
+          alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+          return;
+      }
+      if (status == 'cancel') {
+          alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+          return;
+      }
+      if (status == 'draft') {
+          alert_modal_warning('Maaf, Product belum ready !');
+          return;
+      }
       e.preventDefault();
-      $('.modal-title').text('Produksi batch');
-
+      $('.modal-title').text('Produksi Batch');
       $('#btn-tambah').button('reset');
-     
-      var kode   = $("#kode").val();
-      var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
-      //var move_id = '<?php echo $move_id_rm['move_id'];?>';
+      var kode = $("#kode").val();
+      var deptid = "<?php echo $list->dept_id; ?>";
       var move_id_fg = '<?php echo $move_id_fg['move_id'];?>';
-      var qty  = '<?php echo $list->qty?>';
+      /* ===========================
+        SETUP MODAL
+      =========================== */
+      $("#tambah_data .modal-dialog").removeClass("modal-sm modal-lg").addClass("pb-modal");
       $("#tambah_data").modal({
           show: true,
-          backdrop: 'static'
+          backdrop: 'static',
+          keyboard: false
       });
-      $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('produksi_rm_batch');
-      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
-      $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
-
-      $("#btn-produksi").prop('disabled',true);
-
+      $("#tambah_data .modal-body").addClass("produksi_rm_batch");
+      $("#tambah_data .modal-footer").html('');
+      $("#tambah_data #btn-tambah").prop('disabled', true);
+      $("#btn-produksi").prop('disabled', true);
       $(".produksi_rm_batch").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $.post('<?php echo site_url()?>manufacturing/mO/produksi_rm_batch',
-        { kode        : $('#kode').val(),
-          kode_produk : $('#kode_produk').val(), 
-          nama_produk : $('#product').val(),
-          sisa_qty    : $('#total_sisa').val(), 
-          uom_qty_sisa    : $('#uom_qty_sisa').val(), 
-          deptid      : deptid, 
-          kode        : kode,
-          //move_id     : move_id, 
-          move_id_fg  : move_id_fg, 
-          qty         : $('#qty_prod').val(),  
-          origin      : $('#origin').val(),
-          qty1_std    : $('#qty1_std').val(),
-          qty2_std    : $('#qty2_std').val(),
-          lot_prefix  : $('#lot_prefix').val(),
-          lot_prefix_waste  : $('#lot_prefix_waste').val(),       
-        } 
-      ).done(function(html){
-        setTimeout(function() {
-          $(".produksi_rm_batch").html(html)  
-        },1000);
-        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+      $.post('<?php echo site_url()?>manufacturing/mO/produksi_rm_batch', {
+          kode: $('#kode').val(),
+          kode_produk: $('#kode_produk').val(),
+          nama_produk: $('#product').val(),
+          sisa_qty: $('#total_sisa').val(),
+          uom_qty_sisa: $('#uom_qty_sisa').val(),
+          deptid: deptid,
+          move_id_fg: move_id_fg,
+          qty: $('#qty_prod').val(),
+          origin: $('#origin').val(),
+          qty1_std: $('#qty1_std').val(),
+          qty2_std: $('#qty2_std').val(),
+          lot_prefix: $('#lot_prefix').val(),
+          lot_prefix_waste: $('#lot_prefix_waste').val()
+      }).done(function(html) {
+          $(".produksi_rm_batch").html(html);
+          $("#tambah_data #btn-tambah").prop('disabled', false);
+          bindFormatAngka(document.querySelector("#tambah_data"));
       });
-    }
   });
 
   // modal produksi 
