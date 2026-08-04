@@ -51,6 +51,7 @@ foreach ($list as $key => $value) {
         <td  class="text-right"><?= number_format($value->total_qty_jual, 2) . ' ' . $value->uom_jual ?></td>
         <td  class="text-right"><?= number_format($value->total_qty2_jual, 2) . ' ' . $value->uom2_jual ?></td>
         <td class="text-right"><?= $value->total_lot ?></td>
+        <td><?= ($rekap === "barcode") ? $value->bulk_no_bulk : ""?></td>
         <td><?= substr($value->note, 0, 50) ?></td>
         <td><?= $value->marketing ?></td>
         <td><?= $value->dod_status ?></td>
@@ -80,11 +81,13 @@ foreach ($list as $key => $value) {
                     <td  class="text-right"><?= number_format($sum["total_qty_jual"], 2) . ' ' . $sumUom["uom_jual"] ?></td>
                     <td  class="text-right"><?= number_format($sum["total_qty2_jual"], 2) . ' ' . $sumUom["uom2_jual"] ?></td>
                     <td class="text-right"><?= $sum["total_lot"] ?></td>
+                    <td></td>
                     <td><?= substr($value->note, 0, 50) ?></td>
                     <td><?= $value->marketing ?></td>
                     <td></td>
                 </tr>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -137,6 +140,7 @@ foreach ($list as $key => $value) {
                 <td class="text-right"><?= number_format($sum["total_qty_jual"], 2) . ' ' . $sumUom["uom_jual"] ?></td>
                 <td class="text-right"><?= number_format($sum["total_qty2_jual"], 2) . ' ' . $sumUom["uom2_jual"] ?></td>
                 <td class="text-right"><?= $sum["total_lot"] ?></td>
+                <td></td>
                 <td><?= substr($value->note, 0, 50) ?></td>
                 <td><?= $value->marketing ?></td>
                 <td></td>
