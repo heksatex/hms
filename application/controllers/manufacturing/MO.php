@@ -229,10 +229,12 @@ class MO extends MY_Controller
     {   
         $sub_menu = $this->uri->segment(2);
         $id_dept  = $this->input->post('id_dept');
+        $mc_id  = $this->input->post('mc_id');
+       
         if(isset($_POST['start']) && isset($_POST['draw'])){
 
             $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,$id_dept)->row_array();
-            $list = $this->m_mo->get_datatables($id_dept,$kode['kode']);
+            $list = $this->m_mo->get_datatables($id_dept,$kode['kode'],$mc_id);
             $data = array();
             $no = $_POST['start'];
             foreach ($list as $field) {
@@ -246,6 +248,7 @@ class MO extends MY_Controller
                 $row[] = $field->nama_produk;
                 $row[] = $field->qty;
                 $row[] = $field->uom;
+                $row[] = $field->nama_mesin;
                 $row[] = $field->reff_note;
                 $row[] = $field->responsible;
                 $row[] = $field->nama_status;
@@ -255,8 +258,8 @@ class MO extends MY_Controller
     
             $output = array(
                 "draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_mo->count_all($id_dept,$kode['kode']),
-                "recordsFiltered" => $this->m_mo->count_filtered($id_dept,$kode['kode']),
+                "recordsTotal" => $this->m_mo->count_all($id_dept,$kode['kode'],''),
+                "recordsFiltered" => $this->m_mo->count_filtered($id_dept,$kode['kode'],$mc_id),
                 "data" => $data,
             );
             //output dalam format JSON
@@ -1358,6 +1361,7 @@ class MO extends MY_Controller
         $deptid           = $this->input->post('deptid');
         $lot_prefix_waste = $this->input->post('lot_prefix_waste');
         $kode_produk      = $this->input->post('kode_produk');
+        $no_mesin         = '';
 
         if($deptid == 'TRI' OR $deptid == 'JAC'){
             //cek MC by dept_id
@@ -1380,7 +1384,11 @@ class MO extends MY_Controller
                 }
                 $lot_prefix  = $awal.'/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
             }
+            $data['mesin'] = $no_mesin;
         }else{
+            $list   = $this->m_mo->get_data_by_code($kode);
+            $nm_mesin = $this->m_mo->get_nama_mesin_by_kode($list->mc_id)->row_array();
+            $data['mesin'] = $nm_mesin['nama_mesin'];
             $lot_prefix  = $this->input->post('lot_prefix');       
         };
         
@@ -1446,8 +1454,29 @@ class MO extends MY_Controller
             $data['row_lot_waste']    = "";
         }
 
-        return $this->load->view('modal/v_mo_produksi_batch_modal',$data);
+        if($deptid == 'WRD') {
+            return $this->load->view('modal/v_mo_produksi_batch_modal_new',$data);
+        } else {
+            return $this->load->view('modal/v_mo_produksi_batch_modal',$data);
+        }
+
     }
+
+    public function getBeamSelect2()
+    {
+        $search = $this->input->get('search');
+        $list = $this->m_mo->getBeamSelect2($search);
+        $result = array();
+        foreach($list as $row){
+            $result[] = array(
+                "id"=>$row->seri_beam,
+                "text"=>$row->seri_beam,
+                "ui"=>$row->ui,
+            );
+        }
+        echo json_encode($result);
+    }
+
 
     public function consume_mo()
     {
@@ -7526,6 +7555,14 @@ class MO extends MY_Controller
 
 
         $pdf->Output();
+    }
+
+
+    public function getMachine()
+    {
+        $dept_id           = $this->input->get('id_dept');
+        $data_mc = $this->m_mo->get_list_mesin($dept_id);
+        echo json_encode($data_mc);
     }
 
 }
