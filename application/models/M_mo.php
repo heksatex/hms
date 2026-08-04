@@ -8,8 +8,8 @@ class M_mo extends CI_Model
 	
 	//var $table 		  = 'mrp_production';
 	//var $table2 	  = 'mesin';
-	var $column_order = array(null, 'kode', 'tanggal','origin', 'nama_produk', 'qty', 'uom', 'reff_note', 'responsible','nama_status');
-	var $column_search= array( 'kode', 'tanggal','origin', 'nama_produk', 'qty','uom', 'reff_note', 'responsible', 'nama_status');
+	var $column_order = array(null, 'kode', 'tanggal','origin', 'nama_produk', 'qty', 'uom', 'nama_mesin','reff_note', 'responsible','nama_status');
+	var $column_search= array( 'kode', 'tanggal','origin', 'nama_produk', 'qty','uom', 'nama_mesin','reff_note', 'responsible', 'nama_status');
 	var $order  	  = array('kode' => 'desc');
 
 	var $table2  	    = 'stock_quant';
@@ -28,9 +28,10 @@ class M_mo extends CI_Model
 		//$this->db->from('mrp_production');
 		//$this->db->JOIN('mrp_production', 'mrp_production.md_id = mesin.mc_id');
 
-		$this->db->select("mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.qty, mp.uom, mp.status, mmss.nama_status, mp.reff_note, mp.responsible");
+		$this->db->select("mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.qty, mp.uom, mp.status, mmss.nama_status, mp.reff_note, mp.responsible, m.nama_mesin");
 		$this->db->from("mrp_production mp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mp.status", "inner");
+		$this->db->join("mesin m","mp.mc_id = m.mc_id", "LEFT");
 
 		$i = 0;
 	
@@ -66,10 +67,16 @@ class M_mo extends CI_Model
 		}
 	}
 
-	function get_datatables($id_dept,$mmss)
+	function get_datatables($id_dept,$mmss,$mesin)
 	{
 		$this->_get_datatables_query();
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where('mp.dept_id',$id_dept);
+		if($mesin == 'EMPTY'){
+			$this->db->where('mp.mc_id','');
+		} else if($mesin == ''){
+		} else {
+			$this->db->where('mp.mc_id',$mesin);
+		}
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		if(isset($_POST["length"]) && $_POST["length"] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
@@ -77,22 +84,34 @@ class M_mo extends CI_Model
 		return $query->result();
 	}
 
-	function count_filtered($id_dept,$mmss)
+	function count_filtered($id_dept,$mmss,$mesin)
 	{
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where('mp.dept_id',$id_dept);
+		if($mesin == 'EMPTY'){
+			$this->db->where('mp.mc_id','');
+		} else if($mesin == ''){
+		} else {
+			$this->db->where('mp.mc_id',$mesin);
+		}
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		$this->_get_datatables_query();
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all($id_dept,$mmss)
+	public function count_all($id_dept,$mmss,$mesin)
 	{
 		//$this->db->from($this->table);
 		$this->db->select("mp.kode, mp.tanggal, mp.nama_produk, mp.qty, mp.uom, mp.status, mmss.nama_status");
 		$this->db->from("mrp_production mp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mp.status", "inner");
 		$this->db->where('dept_id',$id_dept);
+		if($mesin == 'EMPTY'){
+			$this->db->where('mp.mc_id','');
+		} else if($mesin == ''){
+		} else {
+			$this->db->where('mp.mc_id',$mesin);
+		}
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		return $this->db->count_all_results();
 	}
@@ -1322,6 +1341,19 @@ class M_mo extends CI_Model
 		$query = $this->db->get('mrp_production_fg_hasil');
 		return $query->row();
 	}
+
+	public function getBeamSelect2($search)
+	{
+		if ($search) {
+            $this->db->like('seri_beam', $search);
+        }
+		$this->db->limit(50);
+        $this->db->order_by('CAST(SUBSTRING(seri_beam, 2) AS UNSIGNED) ASC');
+        $result = $this->db->get('mst_beam_dasar');
+        return $result->result();
+	}
+
+
 
 
 }
