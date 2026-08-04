@@ -158,10 +158,11 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('U1', 'Qty 2 Jual');
             $sheet->setCellValue('V1', 'Uom 2Jual');
             $sheet->setCellValue('W1', 'Lot');
-            $sheet->setCellValue('X1', 'User');
-            $sheet->setCellValue('Y1', 'Catatan');
-            $sheet->setCellValue('Z1', 'Marketing');
-            $sheet->setCellValue('AA1', 'Status');
+            $sheet->setCellValue('X1', 'Bulk');
+            $sheet->setCellValue('Y1', 'User');
+            $sheet->setCellValue('Z1', 'Catatan');
+            $sheet->setCellValue('AA1', 'Marketing');
+            $sheet->setCellValue('AB1', 'Status');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
@@ -272,10 +273,11 @@ class Delivery extends MY_Controller {
                 $sheet->setCellValue('U' . $rowStartData, $value->total_qty2_jual);
                 $sheet->setCellValue('V' . $rowStartData, $value->uom2_jual);
                 $sheet->setCellValue('W' . $rowStartData, $value->total_lot);
-                $sheet->setCellValue('X' . $rowStartData, $value->user);
-                $sheet->setCellValue('Y' . $rowStartData, $value->note);
-                $sheet->setCellValue('Z' . $rowStartData, $value->marketing ?? "-");
-                $sheet->setCellValue('AA' . $rowStartData, $value->dod_status);
+                $sheet->setCellValue('X' . $rowStartData, ($rekap === "barcode") ? $value->bulk_no_bulk : "");
+                $sheet->setCellValue('Y' . $rowStartData, $value->user);
+                $sheet->setCellValue('Z' . $rowStartData, $value->note);
+                $sheet->setCellValue('AA' . $rowStartData, $value->marketing ?? "-");
+                $sheet->setCellValue('AB' . $rowStartData, $value->dod_status);
                 if ($summary === "1") {
                     if (isset($list[$key + 1])) {
                         if ($value->no_sj !== $list[$key + 1]->no_sj) {
@@ -303,10 +305,11 @@ class Delivery extends MY_Controller {
                             $sheet->setCellValue('U' . $rowStartData, $sum["total_qty2_jual"]);
                             $sheet->setCellValue('V' . $rowStartData, $sumUom["uom2_jual"]);
                             $sheet->setCellValue('W' . $rowStartData, $sum["total_lot"]);
-                            $sheet->setCellValue('X' . $rowStartData, $value->user);
-                            $sheet->setCellValue('Y' . $rowStartData, $value->note);
-                            $sheet->setCellValue('Z' . $rowStartData, $value->marketing ?? "-");
-                            $sheet->setCellValue('AA' . $rowStartData, "");
+                            $sheet->setCellValue('X' . $rowStartData, "");
+                            $sheet->setCellValue('Y' . $rowStartData, $value->user);
+                            $sheet->setCellValue('Z' . $rowStartData, $value->note);
+                            $sheet->setCellValue('AA' . $rowStartData, $value->marketing ?? "-");
+                            $sheet->setCellValue('AB' . $rowStartData, "");
 
                             $rowStartData++;
                             $sheet->setCellValue("A" . $rowStartData, "");
@@ -336,7 +339,7 @@ class Delivery extends MY_Controller {
                             $sheet->setCellValue('Y' . $rowStartData, "");
                             $sheet->setCellValue('Z' . $rowStartData, "");
                             $sheet->setCellValue('AA' . $rowStartData, "");
-
+                            $sheet->setCellValue('AB' . $rowStartData, "");
                             $sum = $sumDef;
                             $sumUom = $sumUomDef;
                         }
@@ -365,10 +368,11 @@ class Delivery extends MY_Controller {
                         $sheet->setCellValue('U' . $rowStartData, $sum["total_qty2_jual"]);
                         $sheet->setCellValue('V' . $rowStartData, $sumUom["uom2_jual"]);
                         $sheet->setCellValue('W' . $rowStartData, $sum["total_lot"]);
-                        $sheet->setCellValue('X' . $rowStartData, $value->user);
-                        $sheet->setCellValue('Y' . $rowStartData, $value->note);
-                        $sheet->setCellValue('Z' . $rowStartData, $value->marketing ?? "-");
-                        $sheet->setCellValue('AA' . $rowStartData, "");
+                        $sheet->setCellValue('X' . $rowStartData, "");
+                        $sheet->setCellValue('Y' . $rowStartData, $value->user);
+                        $sheet->setCellValue('Z' . $rowStartData, $value->note);
+                        $sheet->setCellValue('AA' . $rowStartData, $value->marketing ?? "-");
+                        $sheet->setCellValue('AB' . $rowStartData, "");
                     }
                 }
                 $tempid = $value->no_sj;
