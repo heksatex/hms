@@ -12,7 +12,7 @@ class M_inout extends CI_Model
 	}
 
 
-    public function get_list_penerimaan_harian_by_kode($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak)
+    public function get_list_penerimaan_harian_by_kode($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak,$reff_note1)
     {
         $reff_picking = '';
         if(!empty($dept_dari)){
@@ -21,6 +21,11 @@ class M_inout extends CI_Model
         $status     = '';
         if(!empty($status1)){
             $status     .= " AND pb.status IN (".$status1.") ";
+        }
+
+        $reff_note = '';
+        if(!empty($reff_note1)){
+            $reff_note     .= " AND sq.reff_note LIKE '%".$reff_note1."%' ";
         }
 
         $kode = '';
@@ -44,12 +49,12 @@ class M_inout extends CI_Model
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
 									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk 
+                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk  $reff_note
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
 
     }
 
-    public function get_list_penerimaan_harian_by_kode_group($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak)
+    public function get_list_penerimaan_harian_by_kode_group($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak,$reff_note1)
     {
         $reff_picking = '';
         if(!empty($dept_dari)){
@@ -60,6 +65,10 @@ class M_inout extends CI_Model
             $status     .= " AND pb.status IN (".$status1.") ";
         }
 
+        $reff_note = '';
+        if(!empty($reff_note1)){
+            $reff_note     .= " AND pb.reff_note LIKE '%".$reff_note1."%' ";
+        }
         $kode = '';
         if(!empty($kode_in)){
             $kode     .= " AND pb.kode LIKE '%".$kode_in."%' ";
@@ -77,14 +86,18 @@ class M_inout extends CI_Model
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON pb.status = ms.kode
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk 
+                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk  $reff_note
                                 GROUP BY pb.kode
                                 ORDER BY pb.tanggal_transaksi ")->result();
 
     }
 
-    public function get_list_pengiriman_harian_by_kode($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak)
+    public function get_list_pengiriman_harian_by_kode($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak,$reff_note1)
     {
+        $reff_note = '';
+        if(!empty($reff_note1)){
+            $reff_note .= " AND sq.reff_note LIKE '%$reff_note1%' ";
+        }
         $reff_picking = '';
         if(!empty($dept_tujuan)){
             $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',-1) LIKE '%$dept_tujuan%' ";
@@ -112,13 +125,18 @@ class M_inout extends CI_Model
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
 									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk
+                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk $reff_note
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
 
     }
 
-    public function get_list_pengiriman_harian_by_kode_group($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak)
+    public function get_list_pengiriman_harian_by_kode_group($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak,$reff_note1)
     {
+        $reff_note = '';
+        if(!empty($reff_note1)){
+            $reff_note     .= " AND pb.reff_note LIKE '%".$reff_note1."%' ";
+        }
+
         $reff_picking = '';
         if(!empty($dept_tujuan)){
             $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',-1) LIKE '%$dept_tujuan%' ";
@@ -143,7 +161,7 @@ class M_inout extends CI_Model
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON pb.status = ms.kode
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk
+                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk $reff_note
                                 GROUP BY pb.kode
                                 ORDER BY pb.tanggal_transaksi")->result();
 
@@ -256,7 +274,7 @@ class M_inout extends CI_Model
     }
 
 
-    public function get_list_pengiriman_harian_by_kode_get_in($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak)
+    public function get_list_pengiriman_harian_by_kode_get_in($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak,$reff_note1)
     {
         $status     = '';
         if(!empty($status1)){
@@ -265,6 +283,11 @@ class M_inout extends CI_Model
         $where_dept = '';
         if(!empty($dept_tujuan)){
             $where_dept = " AND SUBSTRING_INDEX(pb.reff_picking,'|',1) LIKE '%$dept_tujuan%' ";
+        }
+
+        $reff_note = '';
+        if(!empty($reff_note1)){
+            $reff_note     .= " AND sq.reff_note LIKE '%".$reff_note1."%' ";
         }
 
         $kode = '';
@@ -290,12 +313,12 @@ class M_inout extends CI_Model
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
 									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND SUBSTRING_INDEX(pb.reff_picking,'|',-1) = '$dept_id'  $where_dept  $status $kode $nama_produk $lokasi_pos
+                                AND SUBSTRING_INDEX(pb.reff_picking,'|',-1) = '$dept_id'  $where_dept  $status $kode $nama_produk $lokasi_pos $reff_note
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
 
     }
 
-    public function get_list_pengiriman_harian_by_kode_get_in_group($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak)
+    public function get_list_pengiriman_harian_by_kode_get_in_group($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode_out,$corak,$reff_note1)
     {
         $status     = '';
         if(!empty($status1)){
@@ -306,6 +329,11 @@ class M_inout extends CI_Model
             $where_dept = " AND SUBSTRING_INDEX(pb.reff_picking,'|',1) LIKE '%$dept_tujuan%' ";
         }
 
+        
+        $reff_note = '';
+        if(!empty($reff_note1)){
+            $reff_note    .= " AND pb.reff_note LIKE '%".$reff_note1."%' ";
+        }
         $kode = '';
         if(!empty($kode_out)){
             $kode    .= " AND pb.kode LIKE '%".$kode_out."%' ";
@@ -327,15 +355,19 @@ class M_inout extends CI_Model
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON pb.status = ms.kode
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND SUBSTRING_INDEX(pb.reff_picking,'|',-1) = '$dept_id'  $where_dept  $status  $kode $nama_produk $lokasi_pos
+                                AND SUBSTRING_INDEX(pb.reff_picking,'|',-1) = '$dept_id'  $where_dept  $status  $kode $nama_produk $lokasi_pos $reff_note
                                 GROUP BY pb.kode
                                 ORDER BY pb.tanggal_transaksi  ")->result();
 
     }
 
 
-    public function get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak)
+    public function get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak,$reff_note1)
     {
+        $reff_note     = '';
+        if(!empty($reff_note1)){
+            $reff_note     .= " AND sq.reff_note LIKE '%".$reff_note1."%' ";
+        }
         $status     = '';
         if(!empty($status1)){
             $status     .= " AND pb.status IN (".$status1.") ";
@@ -363,13 +395,18 @@ class M_inout extends CI_Model
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
 									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND SUBSTRING_INDEX(pb.reff_picking,'|',1) = '$dept_id'  $where_dept  $status $kode $nama_produk
+                                AND SUBSTRING_INDEX(pb.reff_picking,'|',1) = '$dept_id'  $where_dept  $status $kode $nama_produk $reff_note
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
 
     }
 
-    public function get_list_penerimaan_harian_by_kode_get_out_group($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak)
+    public function get_list_penerimaan_harian_by_kode_get_out_group($tgldari,$tglsampai,$dept_id,$dept_dari,$status1,$kode_in,$corak,$reff_note1)
     {
+        $reff_note = '';
+        if(!empty($reff_note1)){
+            $reff_note     .= " AND pb.reff_note LIKE '%".$reff_note1."%' ";
+        }
+
         $status     = '';
         if(!empty($status1)){
             $status     .= " AND pb.status IN (".$status1.") ";
@@ -394,7 +431,7 @@ class M_inout extends CI_Model
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON smi.status = ms.kode
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND SUBSTRING_INDEX(pb.reff_picking,'|',1) = '$dept_id'  $where_dept  $status $kode $nama_produk
+                                AND SUBSTRING_INDEX(pb.reff_picking,'|',1) = '$dept_id'  $where_dept  $status $kode $nama_produk $reff_note
                                 GROUP BY pb.kode
                                 ORDER BY pb.tanggal_transaksi")->result();
 
