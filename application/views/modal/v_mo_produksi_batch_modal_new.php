@@ -1286,7 +1286,7 @@
 		var data = getProduksiData();
 		if (!validateProduksi(data)) return;
 		appendProduksiRow(data);
-		clearProduksiForm();
+		// clearProduksiForm();
 		updateSummary();
 	}
 
@@ -1583,25 +1583,31 @@
 
 
 	var editRow = null;
-
-	$(document).on("click",".pb-edit",function(){
+	$(".pb-edit").unbind( "click" );
+	// $(".pb-edit").on("click", function(){
+	// $(document).on("click",".pb-edit",function(){
+	$(document).off("click", ".pb-edit").on("click", ".pb-edit", function(){
 		editRow = $(this).closest("tr");
+		// editRow.find("input").each(function () {
+		// 	console.log(this.name, this.value);
+		// });
 		loadEdit(editRow);
 	});
 
 	function loadEdit(row) {
 		editRow = row;
-		$("#pb_beam").val(row.find('input[name="beam[]"]').val()).trigger("change");
 		$("#pb_lot").val(row.find('input[name="txtlot[]"]').val());
 		$("#pb_grade").val(row.find('input[name="grade[]"]').val()).trigger("change");
+		$("#pb_beam").val(row.find('input[name="beam[]"]').val()).trigger("change");
 		$("#pb_qty1").val(row.find('input[name="txtqty[]"]').val());
 		$("#pb_qty2").val(row.find('input[name="txtqty2[]"]').val());
 		$("#pb_reff_note").val(row.find('input[name="reff_note[]"]').val());
 		$("#pb_ua").val(row.find('input[name="ua[]"]').val());
 		$("#pb_ui").val(row.find('input[name="ui[]"]').val());
 		$("#pb_w").val(row.find('input[name="w[]"]').val());
-		 // Kembalikan semua action terlebih dahulu
+		//  Kembalikan semua action terlebih dahulu
 		restoreAllAction();
+
 
 		// Simpan action asli
 		var actionCell = row.find("td:last");

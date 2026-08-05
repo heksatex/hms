@@ -134,7 +134,7 @@
                     <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
                       <div class="panel-body" style="padding: 5px">
                         <div class="form-group col-md-12" style="margin-bottom:0px">
-                          <div class="col-md-5" >
+                          <div class="col-md-4" >
                             <div class="form-group">
                               <div class="col-md-5">
                                 <label>Dept dari </label>
@@ -163,7 +163,7 @@
                               </div>
                             </div>
                           </div>
-                          <div class="col-md-5">
+                          <div class="col-md-4">
                             <div class="form-group">
                               <div class="col-md-5">
                                 <label>Kode </label>
@@ -178,6 +178,16 @@
                               </div>
                               <div class="col-md-7">
                                 <input type="text" class="form-control input-sm" name="corak" id="corak" placeholder="Corak / Nama Produk">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Reff Note </label>
+                              </div>
+                              <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="reff_note" id="reff_note" >
                               </div>
                             </div>
                           </div>
@@ -349,6 +359,7 @@
     dept_dari  = $('#dari').val();
     kode       = $('#kode').val();
     corak      = $('#corak').val();
+    reff_note  = $('#reff_note').val();
     tgldari_2     = $('#tgldari').data("DateTimePicker").date();
     tglsampai_2   = $('#tglsampai').data("DateTimePicker").date();
     lokasi    = $('input[name="lokasi[]"]').prop('checked');
@@ -387,14 +398,14 @@
     }else if (checkboxes_arr.length == 0) {
       alert_modal_warning('Status Harus Dipilih Salah satu !');
       // return false;
-    }else if( selisih > 30 ){
-      alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 30 hari !')
+    // }else if( selisih > 30 ){
+    //   alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 30 hari !')
       // return false;
     }else{
       $.ajax({
           "type":'POST',
           "url" : "<?php echo site_url('report/penerimaanharian/export_excel_in')?>",
-          "data": {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr, lokasi_pos:lokasi },
+          "data": {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr, lokasi_pos:lokasi, reff_note:reff_note},
           "dataType":'json',
           beforeSend: function() {
             $('#btn-excel').button('loading');
@@ -428,6 +439,7 @@
       dept_dari  = $('#dari').val();
       kode       = $('#kode').val();
       corak      = $('#corak').val();
+      reff_note  = $('#reff_note').val();
       tgldari_2     = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2   = $('#tglsampai').data("DateTimePicker").date();
       lokasi    = $('input[name="lokasi[]"]').prop('checked');
@@ -475,8 +487,8 @@
       }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
         alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
 
-      }else if(selisih > 30){
-        alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 30 hari !')
+      // }else if(selisih > 30){
+      //   alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 30 hari !')
 
       }else{  
           $("#example1_processing").css('display',''); // show loading
@@ -487,7 +499,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/penerimaanharian/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr, lokasi_pos:lokasi},
+                data: {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr, lokasi_pos:lokasi, reff_note:reff_note},
                 success: function(data){
 
                   if(data.status == 'failed'){
@@ -540,7 +552,7 @@
                         tbody.append(tr);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='11' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);
