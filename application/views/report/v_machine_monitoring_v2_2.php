@@ -581,7 +581,6 @@
             }
 
             async function drawTimeline() {
-                $("#timeline_tricot").addClass('linear-background');
                 const machines = [];
                 var namas = [];
                 var nama_mesin = "", count = 0;
@@ -713,7 +712,7 @@
                         // You clicked a specific bar, line symbol, etc.
                     }
                 });
-                $("#timeline_tricot").removeClass('linear-background');
+                
             }
 
             // --- 4. Trend Chart (Line/Area) --
@@ -981,16 +980,19 @@
 
                 $(".reset-day-timeline").on("click", async function () {
                     daysTimeline = 0;
+                    $("#timeline_tricot").addClass('linear-background');
                     await drawTimeline();
                     $(".capture_date").html("24 JAM");
-
+                    $("#timeline_tricot").removeClass('linear-background');
                 });
                 $(".minus-day-timeline").on("click", async function () {
                     daysTimeline -= 1;
+                    $("#timeline_tricot").addClass('linear-background');
                     await drawTimeline();
                     let str = moment().add(daysTimeline, "day").format("YYYY-MM-DD");
                     let fns = moment().add((daysTimeline + 1), "day").format("YYYY-MM-DD");
                     $(".capture_date").html(`${str} 07:00 - ${fns} 07:00`);
+                    $("#timeline_tricot").removeClass('linear-background');
                 });
                 $(".add-day-timeline").on("click", async function () {
                     daysTimeline += 1;
@@ -998,10 +1000,12 @@
                         $(".reset-day-timeline").trigger("click");
                         return;
                     }
+                    $("#timeline_tricot").addClass('linear-background');
                     await drawTimeline();
                     let str = moment().add(daysTimeline, "day").format("YYYY-MM-DD");
                     let fns = moment().add((daysTimeline + 1), "day").format("YYYY-MM-DD");
                     $(".capture_date").html(`${str} 07:00 - ${fns} 07:00`);
+                    $("#timeline_tricot").removeClass('linear-background');
                 });
 
                 myChart.on('dataZoom', function (event) {
