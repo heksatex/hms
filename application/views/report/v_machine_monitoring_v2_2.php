@@ -159,7 +159,7 @@
                 background: #f6f7f8;
                 background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
                 background-size: 1000px 104px;
-
+                z-index: 9999;
                 position: relative;
                 overflow: hidden;
             }
@@ -342,13 +342,32 @@
 
                         <div class="chart-card">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="text-uppercase m-0" style="font-size: 0.8rem; font-weight:800; color:var(--muted-text)">CAPTURE 24 JAM</h5>
+                                <h5 class="text-uppercase m-0" style="font-size: 0.8rem; font-weight:800; color:var(--muted-text)">CAPTURE <span class="capture_date">24 JAM</span></h5>
+
                                 <div class="d-flex">
                                     <?php foreach ($status as $key => $value) {
                                         ?>
                                         <div class="legend-pill" style="background:<?= $value['warna'] ?>; color:#ffffff"><?= $value["stt"] ?></div>
                                     <?php }
                                     ?>
+                                </div>
+                                <div class="zoom-controls ms-3 d-flex">
+                                    <div  class="legend-pill minus-day-timeline" title="Reduce Date"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"/>
+                                        </svg>
+                                    </div><div  class="legend-pill reset-day-timeline"  onclick="" title="Reset (Now)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/>
+                                        <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/>
+                                        </svg>
+                                    </div>
+                                    <div  class="legend-pill add-day-timeline"  title="Add Date">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/>
+                                        </svg>
+                                    </div>
+
                                 </div>
                             </div>
                             <div id="scroll-container">
@@ -420,11 +439,8 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script type="text/javascript" src="<?= base_url('dist/js/sliders.js') ?>"></script>
         <script type="text/javascript">
-
-
-
-
-            // --- 1. Realtime Clock ---
+            var daysTimeline = 0;
+            var zoomsTimeline = false;
             function updateClock() {
                 const now = new Date();
                 const options = {weekday: 'short', day: 'numeric', month: 'short'};
@@ -465,6 +481,7 @@
 
             // --- 3. Timeline Chart (Custom Series) ---
 
+
             const  asData = (() => {
                 return $.ajax({
                     type: "post",
@@ -478,9 +495,12 @@
                 });
             });
             loop = 0;
-            const updateData = (() => {
+            const updateData = (async() => {
                 return $.ajax({
                     type: "post",
+                    data: {
+                        day: daysTimeline
+                    },
                     url: "<?php echo base_url(); ?>report/machinemonitoringv2/ins_timeline",
 
                     complete: function (jqXHR, textStatus) {
@@ -519,16 +539,54 @@
                 var pr = (runToday / timeRunToday) * 100;
                 pr = pr.toFixed(2);
                 $(".persen-today").html(`${pr}%`);
-            })
+            });
+            const chartDom = document.getElementById('timeline_tricot');
+            const myChart = echarts.init(chartDom);
+            let currentZoomStart = 0;
+            let currentZoomEnd = 100;
+            function zoomTimeline(factor) {
+                if (!myChart)
+                    return;
+                let center = (currentZoomStart + currentZoomEnd) / 2;
+                let halfRange = (currentZoomEnd - currentZoomStart) / 2;
+                let newHalfRange = halfRange / factor;
+
+                let newStart = Math.max(0, center - newHalfRange);
+                let newEnd = Math.min(100, center + newHalfRange);
+
+                if (newEnd - newStart < 2)
+                    return;
+
+                currentZoomStart = newStart;
+                currentZoomEnd = newEnd;
+
+                myChart.dispatchAction({
+                    type: 'dataZoom',
+                    start: currentZoomStart,
+                    end: currentZoomEnd
+                });
+            }
+
+            function resetZoomTimeline() {
+                if (!myChart)
+                    return;
+                currentZoomStart = 0;
+                currentZoomEnd = 100;
+
+                myChart.dispatchAction({
+                    type: 'dataZoom',
+                    start: 0,
+                    end: 100
+                });
+            }
 
             async function drawTimeline() {
-                const chartDom = document.getElementById('timeline_tricot');
-                const myChart = echarts.init(chartDom);
+                $("#timeline_tricot").addClass('linear-background');
                 const machines = [];
                 var namas = [];
                 var nama_mesin = "", count = 0;
                 const statusColors = JSON.parse('<?= json_encode($status) ?>');
-                updateData();
+                await updateData();
                 await asData().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
@@ -590,6 +648,34 @@
                         axisLabel: {fontWeight: 'bold', color: '#333', fontSize: 15},
                         triggerEvent: true
                     },
+//                    toolbox: {
+//                        show: true,
+//                        left: 'left', // 'left', 'center', 'right', or specific pixel/percentage like '80%'
+//                        top: 'top', // 'top', 'middle', 'bottom', or pixel/percentage like '10%'
+//                        itemGap: 12, 
+//                        feature: {
+//                            dataZoom: {
+//                                yAxisIndex: 'none'
+//                            },
+//                            restore: {},
+//                            saveAsImage: {}
+//                        }
+//                    },
+                    dataZoom: [
+                        {
+                            type: 'inside', // Enables mouse wheel and touch pinch zoom
+                            xAxisIndex: 0, // Target the first X-axis
+                            start: 0, // Initial start percentage (0%)
+                            filterMode: 'weakFilter',
+                            end: 100         // Initial end percentage (100%),
+                        },
+                        {
+                            type: 'slider', // Enables a visual slider bar
+                            xAxisIndex: 0, // Target the same X-axis
+                            start: 0,
+                            end: 100
+                        }
+                    ],
                     series: [{
                             type: 'custom',
                             clickable: true,
@@ -627,6 +713,7 @@
                         // You clicked a specific bar, line symbol, etc.
                     }
                 });
+                $("#timeline_tricot").removeClass('linear-background');
             }
 
             // --- 4. Trend Chart (Line/Area) --
@@ -757,7 +844,6 @@
                 Object.keys(data).forEach(key => {
                     $(`.sum-${key}`).attr("data-val", data[key]);
                     $(`.sum-${key}`).html(data[key]);
-                    //                    console.log(key, data[key]); // Prints "name Jean-Luc Picard" then "rank Captain"
                 });
                 Object.keys(dt).forEach(key => {
                     $(`.stt-${key}`).html(dt[key]);
@@ -873,7 +959,8 @@
                 if (data["version"] != undefined && data["version"] == 2) {
                     updateContents(data["data"]);
                     if (loop > 20) {
-                        await drawTimeline();
+                        if (daysTimeline === 0 && zoomsTimeline === false)
+                            await drawTimeline();
                         await persenToday();
                     }
                 }
@@ -891,6 +978,41 @@
                 $(".sum-mark_success").html("<?= $sumGr ?>");
 
                 persenToday();
+
+                $(".reset-day-timeline").on("click", async function () {
+                    daysTimeline = 0;
+                    await drawTimeline();
+                    $(".capture_date").html("24 JAM");
+
+                });
+                $(".minus-day-timeline").on("click", async function () {
+                    daysTimeline -= 1;
+                    await drawTimeline();
+                    let str = moment().add(daysTimeline, "day").format("YYYY-MM-DD");
+                    let fns = moment().add((daysTimeline + 1), "day").format("YYYY-MM-DD");
+                    $(".capture_date").html(`${str} 07:00 - ${fns} 07:00`);
+                });
+                $(".add-day-timeline").on("click", async function () {
+                    daysTimeline += 1;
+                    if(daysTimeline > 0) {
+                        $(".reset-day-timeline").trigger("click");
+                        return;
+                    }
+                    await drawTimeline();
+                    let str = moment().add(daysTimeline, "day").format("YYYY-MM-DD");
+                    let fns = moment().add((daysTimeline + 1), "day").format("YYYY-MM-DD");
+                    $(".capture_date").html(`${str} 07:00 - ${fns} 07:00`);
+                });
+
+                myChart.on('dataZoom', function (event) {
+                    const startPercent = event.batch ? event.batch[0].start : event.start;
+                    const endPercent = event.batch ? event.batch[0].end : event.end;
+                    if ((endPercent - startPercent) < 100)
+                        zoomsTimeline = true;
+                    else
+                        zoomsTimeline = false;
+
+                });
             });
         </script>
     </body>
