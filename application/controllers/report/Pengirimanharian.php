@@ -35,6 +35,7 @@ class Pengirimanharian extends MY_Controller
 		$dept_tujuan = addslashes($this->input->post('dept_tujuan'));
 		$kode 		 = addslashes($this->input->post('kode'));
 		$corak       = addslashes($this->input->post('corak'));
+		$reff_note   = addslashes($this->input->post('reff_note'));
 		$status_arr  = $this->input->post('status_arr');
 		$view_arr  	 = $this->input->post('view_arr');
 		$dataRecord  = [];
@@ -52,7 +53,7 @@ class Pengirimanharian extends MY_Controller
 		}
 
 		if($view == "Detail"){
-			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			$total = 0;
 			foreach($list as $row){
 
@@ -76,7 +77,7 @@ class Pengirimanharian extends MY_Controller
 				$total++;
 			}
 
-			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			foreach($list as $row){
 				$kode_encrypt = encrypt_url($row->kode);
 				$dataRecord[] = array('kode' 		=> $row->kode,
@@ -99,7 +100,7 @@ class Pengirimanharian extends MY_Controller
 
 		}else{
 
-			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			$total = 0;
 			foreach($list as $row){
 
@@ -123,7 +124,7 @@ class Pengirimanharian extends MY_Controller
 				$total++;
 			}
 
-			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			foreach($list as $row){
 				$kode_encrypt = encrypt_url($row->kode);
 				$dataRecord[] = array('kode' 		=> $row->kode,
@@ -163,6 +164,7 @@ class Pengirimanharian extends MY_Controller
 		$dept_tujuan = addslashes($this->input->post('dept_tujuan'));
 		$kode 		 = addslashes($this->input->post('kode'));
 		$corak       = addslashes($this->input->post('corak'));
+		$reff_note   = addslashes($this->input->post('reff_note'));
 		$status_arr  = $this->input->post('status_arr');
 		$view_arr  	 = $this->input->post('view_arr');
 		$dataRecord  = [];
@@ -312,7 +314,7 @@ class Pengirimanharian extends MY_Controller
 		if($view == "Detail"){
 		
 			// tbody
-			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			$num   = 1;
 			$rowCount = 9;
 			foreach($list as $row){
@@ -365,7 +367,7 @@ class Pengirimanharian extends MY_Controller
 			}
 
 			// tbody
-			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			foreach($list as $row){
 					$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
 					$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
@@ -415,7 +417,7 @@ class Pengirimanharian extends MY_Controller
 			}
 		}else{
 			// tbody 1
-			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			$num   = 1;
 			$rowCount = 9;
 			foreach($list as $row){
@@ -456,7 +458,7 @@ class Pengirimanharian extends MY_Controller
 			}
 
 			// tbody 2
-			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak);
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out_group($tgldari,$tglsampai,$departemen,$dept_tujuan,$status,$kode,$corak,$reff_note);
 			foreach($list as $row){
 
 				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));

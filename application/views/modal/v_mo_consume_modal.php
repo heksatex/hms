@@ -115,8 +115,8 @@
                             <thead>
                                 <tr>
                                     <th class="style no">No.</th>
-                                    <th class="style" >Product</th>
-                                    <th class="style" style="width: 180px;">Lot</th>
+                                    <th class="style" style="min-width: 200px;">Product</th>
+                                    <th class="style" style="min-width: 180px;">Lot</th>
                                     <th class="style" style="width: 100px;">Qty</th>
                                     <th class="style" style="width: 100px;">Qty2</th>
                                     <th class="style" style="width: 65px;">Grade</th>
