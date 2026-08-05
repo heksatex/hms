@@ -139,13 +139,14 @@ class M_deliveryorder extends CI_Model {
         $this->db->join("picklist p", 'p.no = ddo.no_picklist');
         $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = p.sales_kode', 'left');
+        $this->db->join("bulk_detail bd","(pd.id = bd.picklist_detail_id and bd.barcode = pd.barcode_id)",'left');
 //        $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,alamat_kirim,"
 //                . "pd.corak_remark,pd.warna_remark,sq.uom,sq.uom2,sq.uom_jual,sq.uom2_jual,sq.lebar_jadi,sq.uom_lebar_jadi,"
 //                . "SUM(sq.qty) as total_qty,SUM(sq.qty2) as total_qty2,SUM(sq.qty_jual) as total_qty_jual,SUM(sq.qty2_jual) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note");
 
         $this->db->select("'{$ip}' as ip,ddo.`no`,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,alamat_kirim,"
                 . "pd.corak_remark,pd.warna_remark,pd.uom_hph as uom,pd.uom2_hph as uom2,pd.uom as uom_jual,pd.uom2 as uom2_jual,pd.lebar_jadi,pd.uom_lebar_jadi,pd.nama_produk,dod.status as dod_status,"
-                . "msg.nama_sales_group as marketing,ddo.user,ddo.note,,ddo.tanggal_batal,dod.tanggal_retur");
+                . "msg.nama_sales_group as marketing,ddo.user,ddo.note,,ddo.tanggal_batal,dod.tanggal_retur,bd.bulk_no_bulk");
     }
 
     public function getDataReport(array $condition, $order = "", $rekap = "global", $returbatal = "0", $raw = false) {

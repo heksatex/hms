@@ -298,6 +298,7 @@
                                                 <th class="style bb ws text-right">QTY 1 [JUAL]</th>
                                                 <th class="style bb ws text-right">QTY 2 [JUAL]</th>
                                                 <th class="style bb ws">LOT</th>
+                                                <th class="style bb ws">Bulk</th>
                                                 <th class="style bb ws">Catatan</th>
                                                 <th class="style bb ws">Marketing</th>
                                                 <th class="style bb ws">Status</th>
