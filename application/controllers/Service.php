@@ -170,7 +170,7 @@ class Service extends CI_Controller {
 
     public function machine_monitoring_rekap($depth = "WRD") {
         $waktuShift[1] = ["nama" => "Shift Pagi", "time" => "07:00:00"];
-        $waktuShift[2] = ["nama" => "Shift Sore", "time" => "15:00:00"];
+        $waktuShift[2] = ["nama" => "Shift Siang", "time" => "15:00:00"];
         $waktuShift[3] = ["nama" => "Shift Malam", "time" => "23:00:00"];
         $totalMenit = 480; //8jam
         try {
