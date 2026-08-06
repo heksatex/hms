@@ -176,14 +176,15 @@
             async function renderChart() {
                 await asDataGrafik().then((res) => {
                     var dt = res.data;
+                    var totalMesin = res.total_mesin;
                     dt.forEach((sd, idx) => {
                         totals[sd.shift_range]["running"] += parseInt(sd.running);
                         totals[sd.shift_range]["noresp"] += parseInt(sd.noresp);
                         totals[sd.shift_range]["benang"] += parseInt(sd.benang);
                         totals[sd.shift_range]["problem"] += parseInt(sd.problem);
                         totals[sd.shift_range]["noorder"] += parseInt(sd.noorder);
-                        totals[sd.shift_range]["total"] += sd.total_mesin * 480;
-                        totals[sd.shift_range]["efficiency"] = (totals[sd.shift_range]["running"] / (sd.total_mesin * 480) * 100);
+                        totals[sd.shift_range]["total"] += totalMesin * 480;
+                        totals[sd.shift_range]["efficiency"] = (totals[sd.shift_range]["running"] / (totalMesin * 480) * 100);
                         if (isNaN(totals[sd.shift_range]["efficiency"]))
                             totals[sd.shift_range]["efficiency"] = 0;
                     });
