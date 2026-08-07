@@ -45,6 +45,11 @@ class Kinerjamesin extends MY_Controller {
             $tanggals = explode(" - ", $tanggal);
 
             $model = new $this->m_global;
+            $totalMesinQuery = $model->setTables("mesin mst")
+                     ->setJoins("log_mesin log", "mst.devid_esp=log.devid")
+                    ->setWheres(["status_aktif" => "t","date(timelog) >=" =>$tanggals[0],"date(timelog) <=" =>$tanggals[1],"dept_id" => $depth])
+                    ->setSelects(['count(DISTINCT  log.devid) as total_mesin'])->setGroups(["date(timelog)"])->getQuery();
+            $totalMesin = $model->setTables("({$totalMesinQuery}) as subs")->setSelects(["SUM(total_mesin) AS totalmesin"])->getDetail();
             $model->setTables("mesin mst")
                      ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
 //                ->setSelects(["DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) AS tanggal_kerja"])
@@ -73,9 +78,10 @@ class Kinerjamesin extends MY_Controller {
             if (!empty($mesin)) {
                 $model->setWheres(["devid" => $mesin]);
             }
+            
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $model->getData())));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $model->getData(),'total_mesin'=>$totalMesin->totalmesin ?? 0)));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
