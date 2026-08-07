@@ -80,15 +80,15 @@ class Memorialpenggiro {
                 $totalDebit += $value->nominals;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", ($key === 0) ? "1" : "");
-                $sheet->setCellValue("B{$row}", "{$value->nama}");
-                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
+                $sheet->setCellValue("B{$row}", "{$value->nama_gkd}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa_gkd}");
                 $sheet->setCellValue("D{$row}", "{$value->nominals}");
             }
             foreach ($data["giro_kredit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $row += 1;
-                $sheet->setCellValue("B{$row}", "{$value->nama_gkd}");
-                $sheet->setCellValue("C{$row}", "{$value->kode_coa_gkd}");
+                $sheet->setCellValue("B{$row}", "{$value->nama}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
                 $sheet->setCellValue("E{$row}", "{$value->nominals}");
             }
             $row += 2;
