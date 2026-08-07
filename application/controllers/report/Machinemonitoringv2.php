@@ -275,9 +275,15 @@ GROUP BY devid;
                 ];
             }
 
-
-            $sampai = date("Y-m-d H:i:s");
-            $mulai = date("Y-m-d H:i:s", strtotime("-24 hours"));
+            $day = $this->input->post("day");
+            if ($day == 0) {
+                $sampai = date("Y-m-d H:i:s");
+                $mulai = date("Y-m-d H:i:s", strtotime("-24 hours"));
+            }
+            else {
+                $mulai = date("Y-m-d H:i:s", strtotime("{$day} day", strtotime(date("Y-m-d")." 07:00:00")));
+                $sampai = date("Y-m-d H:i:s",strtotime("1 day", strtotime($mulai)));
+            }
             $lists = $model->setTables("mesin mst")
                             ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
                             ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai, "state <>" => 0])
@@ -351,39 +357,6 @@ GROUP BY devid;
                                 $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
                         }
                     }
-
-//                    foreach ($items[$value["id"]] as $k => $val) {
-//                        $loop += 1;
-//                        if ($tempStt === "") {
-//                            $tempStt = $this->status[$val["state"]]["warna"];
-//                            $tempStar = $val["start"];
-//                            $tempEnd = $val["end"];
-//                            $temDept = $val["dept_id"];
-//                        } else {
-//                            if ($val["status"] === $tempStt) {
-//                                $tempEnd = $val["end"];
-//                            } else {
-//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-//                                $tempStt = $this->status[$val["state"]]["warna"];
-//                                $tempStar = $val["start"];
-//                                $tempEnd = $val["end"];
-//                                $temDept = $val["dept_id"];
-//                            }
-//                        }
-//
-//                        if ($loop === 120) {
-//                            $loop = 0;
-//                            $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-//                            $tempStt = "";
-//                            $tempStar = "";
-//                            $tempEnd = "";
-//                            $temDept = "";
-//                        }
-//                        if (!isset($items[$value["id"]][$k + 1])) {
-//                            if ($tempStt !== "")
-//                                $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $val["state"]];
-//                        }
-//                    }
                 }
             }
             if (isset($insert[0])) {
