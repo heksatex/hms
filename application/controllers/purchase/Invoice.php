@@ -290,7 +290,7 @@ class Invoice extends MY_Controller {
                 "total_rp" => round($hutangrp),
                 "hutang_valas" => $hutangvalas,
                 "hutang_rp" => round($hutangrp),
-                "total_valas" => $grandTotal,
+                "total_valas" => $totalValas,
                 "no_faktur_pajak" => $noFP,
                 "tanggal_fk" => $tanggal_fk,
                 "coa_hutang_dagang" => $coaDagang
