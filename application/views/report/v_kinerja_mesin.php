@@ -111,9 +111,9 @@
                                                 <th class="text-start">Shift Name</th>
                                                 <th>Running (Hrs)</th>
                                                 <th>No Response (Hrs)</th>
-                                                <th>Ganti Benang (Hrs)</th>
+                                                <th>Ganti Lembar (Hrs)</th>
                                                 <th>Putus/Problem (Hrs)</th>
-                                                <th>No Order (Hrs)</th>
+                                                <th>Bongkar Pasang (Hrs)</th>
                                                 <th>Total Capacity</th>
                                                 <th>% Utilization</th>
                                             </tr>
@@ -215,7 +215,7 @@
                         textStyle: {color: '#1e293b', fontSize: 12}
                     },
                     legend: {
-                        data: ['Running', 'No Response', 'Ganti Benang', 'Putus/Problem', 'No Order'],
+                        data: ['Running', 'No Response', 'Ganti Lembar', 'Putus/Problem', 'Bongkar Pasang'],
                         bottom: '0%',
                         icon: 'rect',
                         itemWidth: 12,
@@ -251,7 +251,7 @@
                             data: [totals["pagi"].noresp, totals["siang"].noresp, totals["malam"].noresp]
                         },
                         {
-                            name: 'Ganti Benang', type: 'bar',
+                            name: 'Ganti Lembar', type: 'bar',
                             itemStyle: {color: '#3498db', borderRadius: [4, 4, 0, 0]},
                             label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value : '', textStyle: {fontSize: 10, color: '#64748b'}},
                             data: [totals["pagi"].benang, totals["siang"].benang, totals["malam"].benang]
@@ -263,7 +263,7 @@
                             data: [totals["pagi"].problem, totals["siang"].problem, totals["malam"].problem]
                         },
                         {
-                            name: 'No Order', type: 'bar',
+                            name: 'Bongkar Pasang', type: 'bar',
                             itemStyle: {color: '#2c3e50', borderRadius: [4, 4, 0, 0]},
                             label: {show: true, position: 'top', formatter: p => p.value > 0 ? p.value : '', textStyle: {fontSize: 10, color: '#64748b'}},
                             data: [totals["pagi"].noorder, totals["siang"].noorder, totals["malam"].noorder]
