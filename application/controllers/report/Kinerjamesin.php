@@ -127,9 +127,9 @@ class Kinerjamesin extends MY_Controller {
             $sheet->setCellValue("A{$row}", 'Shift Name');
             $sheet->setCellValue("B{$row}", 'Running (Hrs)');
             $sheet->setCellValue("C{$row}", 'No Response (Hrs)');
-            $sheet->setCellValue("D{$row}", 'Ganti Benang (Hrs)');
+            $sheet->setCellValue("D{$row}", 'Ganti Lembar (Hrs)');
             $sheet->setCellValue("E{$row}", 'Putus/Problem (Hrs)');
-            $sheet->setCellValue("F{$row}", 'No Order (Hrs)');
+            $sheet->setCellValue("F{$row}", 'Bonkar Pasang (Hrs)');
             $sheet->setCellValue("G{$row}", 'Total Capacity');
             $sheet->setCellValue("H{$row}", 'Prod. Efficiency');
 
