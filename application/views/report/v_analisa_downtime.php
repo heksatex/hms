@@ -112,9 +112,9 @@
                                                 <th class="text-start" style="width: 100px;">Tanggal</th>
                                                 <th style="width: 120px;">Running (Hrs)</th>
                                                 <th style="width: 140px;">No Response (Hrs)</th>
-                                                <th style="width: 150px;">Ganti Benang (Hrs)</th>
+                                                <th style="width: 150px;">Ganti Lembar (Hrs)</th>
                                                 <th style="width: 150px;">Putus/Problem (Hrs)</th>
-                                                <th style="width: 120px;">No Order (Hrs)</th>
+                                                <th style="width: 120px;">Bongkar Pasang (Hrs)</th>
                                                 <th style="width: 120px;">Total Capacity</th>
                                                 <th style="width: 120px;">% Utilization</th>
                                                 <th></th>
@@ -308,16 +308,16 @@
                 renderChart();
                 const initialOption = {
                     tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'}},
-                    legend: {data: ['Running', 'No Response', 'Ganti Benang', 'Putus/Problem', 'No Order'], bottom: '0%'},
+                    legend: {data: ['Running', 'No Response', 'Ganti Lembar', 'Putus/Problem', 'Bongkar Pasang'], bottom: '0%'},
                     grid: {top: '30px', left: '1%', right: '1%', bottom: '40px', containLabel: true},
                     xAxis: {type: 'category', axisLabel: {color: '#6c757d', fontSize: 9, rotate: 45}},
                     yAxis: {type: 'value', name: 'Durasi (Jam)', splitLine: {lineStyle: {type: 'dashed', color: '#EBEBEB'}}},
                     series: [
                         {name: 'Running', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#198754'}},
                         {name: 'No Response', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#dc3545'}},
-                        {name: 'Ganti Benang', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#0d6efd'}},
+                        {name: 'Ganti Lembar', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#0d6efd'}},
                         {name: 'Putus/Problem', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#ffc107'}},
-                        {name: 'No Order', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#212529'}}
+                        {name: 'Bongkar Pasang', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#212529'}}
                     ]
                 };
                 myChart.setOption(initialOption);
