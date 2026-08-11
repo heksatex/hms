@@ -35,7 +35,7 @@ class Machinemonitoringv2 extends MY_Controller {
             'jumlah' => 0
         ],
         '3' => [
-            'stt' => 'Ganti Benang',
+            'stt' => 'Ganti Lembar',
             'warna' => '',
             'jumlah' => 0
         ],
@@ -45,7 +45,7 @@ class Machinemonitoringv2 extends MY_Controller {
             'jumlah' => 0
         ],
         '5' => [
-            'stt' => 'No Order',
+            'stt' => 'Bongkar Pasang',
             'warna' => '',
             'jumlah' => 0
         ]
