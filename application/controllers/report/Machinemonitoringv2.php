@@ -223,8 +223,19 @@ GROUP BY devid;
     public function get_items() {
         try {
             $model = new $this->m_global;
+            $custom = $this->input->post("custom");
+            $tbl = bin2hex(random_bytes(6));
+            if (!empty($custom)) {
+                $day = $this->input->post("day");
+                $table = $tbl;
+                $model->excQueryWResult("CREATE TEMPORARY TABLE {$table} LIKE log_mc_timeline;");
+                $this->_insTimeline($day, $table);
+            } else {
+                $table = "log_mc_timeline";
+            }
             $dep = $this->input->post("dept");
-            $items = $model->setTables("log_mc_timeline")->setWheres(["dept_id" => $dep])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "desc"])->getData();
+            $items = $model->setTables($table)->setWheres(["dept_id" => $dep])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "desc"])->getData();
+            $model->excQueryWResult("DROP TEMPORARY TABLE IF EXISTS {$tbl};");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $items)));
@@ -260,7 +271,7 @@ GROUP BY devid;
         }
     }
 
-    public function ins_timeline() {
+    protected function _insTimeline($day, $custom) {
         try {
             $model = new $this->m_global;
             $mesin = $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "devid_esp > " => 0])
@@ -274,15 +285,12 @@ GROUP BY devid;
                     "value" => ($key + 1)
                 ];
             }
-
-            $day = $this->input->post("day");
             if ($day == 0) {
                 $sampai = date("Y-m-d H:i:s");
                 $mulai = date("Y-m-d H:i:s", strtotime("-24 hours"));
-            }
-            else {
-                $mulai = date("Y-m-d H:i:s", strtotime("{$day} day", strtotime(date("Y-m-d")." 07:00:00")));
-                $sampai = date("Y-m-d H:i:s",strtotime("1 day", strtotime($mulai)));
+            } else {
+                $mulai = date("Y-m-d H:i:s", strtotime("{$day} day", strtotime(date("Y-m-d") . " 07:00:00")));
+                $sampai = date("Y-m-d H:i:s", strtotime("1 day", strtotime($mulai)));
             }
             $lists = $model->setTables("mesin mst")
                             ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
@@ -334,12 +342,9 @@ GROUP BY devid;
                             $temDept = $val["dept_id"];
                             $states = $val["state"];
                         } else {
-//                            if($name == "MC1"){
                             $date1 = strtotime($tempEnd);
                             $date2 = strtotime($val["start"]);
                             $interval = $date2 - $date1;
-//                            log_message("error",$tempEnd." - ".$val["start"]." = ".$interval->s);
-//                            }
                             if ($interval > 100) {
                                 $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
                                 $tempStt = $this->status[$val["state"]]["warna"];
@@ -347,7 +352,6 @@ GROUP BY devid;
                                 $tempEnd = $val["end"];
                                 $temDept = $val["dept_id"];
                                 $states = $val["state"];
-//                                continue;
                             } else {
                                 $tempEnd = $val["end"];
                             }
@@ -359,12 +363,22 @@ GROUP BY devid;
                     }
                 }
             }
+
             if (isset($insert[0])) {
-                $model->excQuery("LOCK TABLES log_mc_timeline WRITE;");
-                $model->excQuery("truncate log_mc_timeline;");
-                $model->setTables("log_mc_timeline")->saveBatch($insert);
+                $model->excQuery("LOCK TABLES {$custom} WRITE;");
+                $model->excQuery("truncate {$custom};");
+                $model->setTables($custom)->saveBatch($insert);
                 $model->excQuery("UNLOCK TABLES;");
             }
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function ins_timeline() {
+        try {
+            $day = $this->input->post("day");
+            $this->_insTimeline($day, "log_mc_timeline");
         } catch (Exception $ex) {
             log_message("error", json_encode($ex));
         }
