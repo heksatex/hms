@@ -465,7 +465,7 @@
 
             // --- 2. Initialize Charts ---
             window.onload = function () {
-                drawTimeline();
+                drawTimeline("");
                 drawTrendChart();
                 if (countMesin > 10)
                     initAutoScroll();
@@ -495,11 +495,13 @@
             // --- 3. Timeline Chart (Custom Series) ---
 
 
-            const  asData = (() => {
+            const  asData = ((custom = "") => {
                 return $.ajax({
                     type: "post",
                     data: {
-                        dept: "<?= $dept ?>"
+                        dept: "<?= $dept ?>",
+                        custom: custom,
+                        day: daysTimeline
                     },
                     url: "<?php echo base_url(); ?>report/machinemonitoringv2/get_items",
                     complete: function (jqXHR, textStatus) {
@@ -508,11 +510,12 @@
                 });
             });
             loop = 0;
-            const updateData = (async() => {
+            const updateData = (async(custom = "") => {
                 return $.ajax({
                     type: "post",
                     data: {
-                        day: daysTimeline
+                        day: daysTimeline,
+                        custom: custom
                     },
                     url: "<?php echo base_url(); ?>report/machinemonitoringv2/ins_timeline",
 
@@ -593,13 +596,15 @@
                 });
             }
 
-            async function drawTimeline() {
+            async function drawTimeline(custom = "") {
                 const machines = [];
                 var namas = [];
                 var nama_mesin = "", count = 0;
                 const statusColors = JSON.parse('<?= json_encode($status) ?>');
-                await updateData();
-                await asData().then((res) => {
+//                if (custom == "")
+                await updateData(custom);
+
+                await asData(custom).then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
                         if (nama_mesin !== sd.nama_mesin) {
@@ -994,14 +999,14 @@
                 $(".reset-day-timeline").on("click", async function () {
                     daysTimeline = 0;
                     $("#timeline_tricot").addClass('linear-background');
-                    await drawTimeline();
+                    await drawTimeline(1);
                     $(".capture_date").html("24 JAM");
                     $("#timeline_tricot").removeClass('linear-background');
                 });
                 $(".minus-day-timeline").on("click", async function () {
                     daysTimeline -= 1;
                     $("#timeline_tricot").addClass('linear-background');
-                    await drawTimeline();
+                    await drawTimeline(1);
                     let str = moment().add(daysTimeline, "day").format("YYYY-MM-DD");
                     let fns = moment().add((daysTimeline + 1), "day").format("YYYY-MM-DD");
                     $(".capture_date").html(`${str} 07:00 - ${fns} 07:00`);
@@ -1014,7 +1019,7 @@
                         return;
                     }
                     $("#timeline_tricot").addClass('linear-background');
-                    await drawTimeline();
+                    await drawTimeline(1);
                     let str = moment().add(daysTimeline, "day").format("YYYY-MM-DD");
                     let fns = moment().add((daysTimeline + 1), "day").format("YYYY-MM-DD");
                     $(".capture_date").html(`${str} 07:00 - ${fns} 07:00`);
