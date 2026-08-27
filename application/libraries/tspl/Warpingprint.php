@@ -95,11 +95,11 @@ class Warpingprint {
                         $posisiX = 600;
                         $this->textPrint .= "PRINT 1 \r\nCLS \r\n";
                     } else {
-                        $this->textPrint .= "PRINT 1";
+                        $this->textPrint .= "PRINT 1\r\n";
                     }
                 } else {
                     if (!isset($this->lots[$next])) {
-                        $this->textPrint .= "PRINT 1";
+                        $this->textPrint .= "PRINT 1\r\n";
                     }
                 }
             }
