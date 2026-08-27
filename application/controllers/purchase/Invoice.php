@@ -350,7 +350,9 @@ class Invoice extends MY_Controller {
             if ($status === 'cancel') {
                 if ($dataHead->lunas == 1)
                     throw new \Exception('Sudah dilakukan pelunasan', 500);
-
+                if ($dataHead->hutang_rp != $dataHead->total_rp)
+                    throw new \Exception('Sudah dilakukan pelunasan', 500);
+                
                 $cekJurnal = clone $head;
                 $jurnal = $cekJurnal->setTables("acc_jurnal_entries")->setWheres(["origin" => "{$dataHead->no_invoice}|{$dataHead->origin}", "status " => "posted"])->getDetail();
 
