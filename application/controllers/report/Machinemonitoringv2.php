@@ -235,7 +235,7 @@ GROUP BY devid;
             }
             $dep = $this->input->post("dept");
             $items = $model->setTables($table)->setWheres(["dept_id" => $dep])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "desc"])->getData();
-            $model->excQueryWResult("DROP TEMPORARY TABLE IF EXISTS {$tbl};");
+            $model->excQueryWResult("DROP TEMPORARY TABLE IF EXISTS `{$tbl}`;");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $items)));
