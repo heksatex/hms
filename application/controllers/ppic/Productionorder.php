@@ -10,6 +10,10 @@ class Productionorder extends MY_Controller
 		$this->is_loggedin();//cek apakah user sudah login
         $this->load->model('m_productionOrder');
 		$this->load->model('_module');
+
+        $this->load->model("m_gtp");
+        $this->load->library("wa_message");
+        $this->config->load('additional');
 		
 	}
 
@@ -518,7 +522,7 @@ class Productionorder extends MY_Controller
             }else{           
 
                 //lock table
-                $this->_module->lock_tabel('mst_produk WRITE, mst_produk mp WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE,  stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, bom WRITE, bom_items bi WRITE, bom_items  WRITE, production_order WRITE, production_order_items WRITE,  log_history WRITE,user WRITE,main_menu_sub WRITE');
+                $this->_module->lock_tabel('mst_produk WRITE, mst_produk mp WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE,  stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, bom WRITE, bom_items bi WRITE, bom_items  WRITE, production_order WRITE, production_order_items WRITE,  log_history WRITE,user WRITE,main_menu_sub WRITE, production_order_items as poi WRITE, mst_category WRITE, wa_group WRITE,wa_template WRITE,wa_send_message WRITE');
 
                 /*--Get ROUTE produk by kode_produk--*/
             	$jen_route  = $this->_module->get_jenis_route_product(addslashes($kode_produk))->row_array();
@@ -541,6 +545,7 @@ class Productionorder extends MY_Controller
                 $kg_bom_empty       = FALSE;
                 $route_empty        = TRUE;
                 $insert_log       = array();
+                $mo_production      = array();
                 $ip         = $this->input->ip_address();
 
             	if(empty($jen_route['route_produksi'])){//cek route produksi apakah ada ?
@@ -856,6 +861,11 @@ class Productionorder extends MY_Controller
     	                }elseif($method_action == 'PROD'){// generate mo/mg
     	                  $source_move = $move_id;
                           $route_empty        = FALSE;
+                          $mo_production[]    = array(
+                                                'kode'=> $kode_mo,
+                                                'id_dept'=> $method_dept,
+                                                'origin' => $origin
+                          );
 
     	                  /*----------------------------------
     	                      Generate MO / MG
@@ -923,7 +933,8 @@ class Productionorder extends MY_Controller
                           $sql_stock_move_produk_batch .= "('".$move_id_fg."','".addslashes($kode_prod_fg_target)."','".addslashes($nama_prod_fg_target)."','".$qty_fg_target."','".addslashes($uom_fg_target)."','draft','1',''), ";
     	                  
     	                 // $last_bom  = $last_bom + 1;
-    	                  $last_mo   = $last_mo + 1;    	                 
+    	                  $last_mo   = $last_mo + 1;    	           
+                                
     	                }
     	                
     	                $dgt       = substr("00000" . $last_mo,-5);            
@@ -1161,6 +1172,17 @@ class Productionorder extends MY_Controller
                             
                         $callback = array('status' => 'success','message' => 'Generate Data Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
 
+                        // $kode_mo_tmp_ex = explode(',',rtrim($kode_mo_tmp,','));
+                        $pesan   = [];
+                        foreach($mo_production as $kmo){
+                            $pesan = ["{mo}" => ($kmo['kode'] ?? ""), "{origin}" => ($kmo['origin'] ?? ""), "{dept}" => $kmo['id_dept']];
+                            $this->sendWa($kode, $row_order, $warehouse, $pesan);
+                            $pesan = [];
+                        }
+
+
+
+
                     }// end if cek produk generate
 
                     if($produk_empty == TRUE OR $bom_empty == TRUE OR $generate_produk == FALSE OR $produk_tidak_aktif == TRUE OR $produk_bom_tidak_aktif == TRUE OR $produk_bom_item_tidak_aktif == TRUE OR $route_empty == TRUE ){
@@ -1232,6 +1254,7 @@ class Productionorder extends MY_Controller
 
             $nama_produk = $get['nama_produk'];//ex.. J-5P143SR-126" (Inspecting)
             $sales_order = $get['sales_order'];
+            $warehouse   = $get['warehouse'];
             $origin      = $sales_order.'|'.$kode.'|'.$row_order;
             /*
             $prod_exp = explode('"',$nama_produk);
@@ -1252,7 +1275,7 @@ class Productionorder extends MY_Controller
                 $callback = array('status' => 'failed','message' => 'Maaf, Data yang akan Di Batalkan Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else{     
                 //lock table
-                $this->_module->lock_tabel('production_order WRITE, production_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, departemen as d WRITE');
+                $this->_module->lock_tabel('production_order WRITE, production_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, departemen as d WRITE, production_order_items as poi WRITE, mst_category WRITE, wa_group WRITE,wa_template WRITE,wa_send_message WRITE, mst_produk WRITE');
                 
                     //select stock_move by origin row order move id
                     //$mrp = true;
@@ -1279,6 +1302,8 @@ class Productionorder extends MY_Controller
                     $dokumen          = '';
                     $kode_mrp_tmp     = '';
                     $status_done_all  = true;
+                    $mo_production      = array();
+
 
                     $list_sm    = $this->_module->get_list_stock_move_by_origin($origin);
                     foreach($list_sm as $row){
@@ -1320,6 +1345,7 @@ class Productionorder extends MY_Controller
                                                 $dokumen         .= '<br>';
                                             }
                                             $kode_mrp_tmp     = $kode_mrp;
+
                                         }
                                     }else if($mrp['status'] == 'ready'){
                                         $status_in_valid = true;
@@ -1329,6 +1355,16 @@ class Productionorder extends MY_Controller
                                             $dokumen         .= '<br>';
                                         }
                                         $kode_mrp_tmp     = $kode_mrp;
+
+                                       
+                                    }
+                                    if($method_action == 'PROD') {
+
+                                        $mo_production[]    = array(
+                                            'kode'=> $kode_mrp,
+                                            'id_dept'=> $method_dept,
+                                            'origin' => $origin
+                                            );
                                     }
                                 }
                             }
@@ -1562,6 +1598,14 @@ class Productionorder extends MY_Controller
                         $callback = array('status' => 'failed', 'message' => 'Production Order Items Gagal Dibatalkan ! <br> Rantai Production Order Terdapat Status <b>Ready</b> <br>'.$dokumen , 'icon' =>'fa fa-warning', 'type' => 'danger');
                     }else{
                         $callback = array('status' => 'success', 'message' => 'Production Order Items Berhasil Dibatalkan !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+
+                            foreach($mo_production as $mop){
+
+                                $pesan = ["{mo}" => ($mop['kode'] ?? ""), "{origin}" => ($mop['origin'] ?? ""), "{dept}" => $mop['id_dept']];
+                                $this->sendWa($kode, $row_order, $warehouse, $pesan);
+                                $pesan = [];
+                            }
                     }
 
                 //unlock table
@@ -1805,6 +1849,37 @@ class Productionorder extends MY_Controller
 
         echo json_encode($callback);
 
+    }
+
+    protected function sendWa($kode, $row_order, $tujuan, $data_pesan = []) {
+        try {
+            $check = new $this->m_gtp;
+            $data = [];
+            if (in_array(strtolower($tujuan), ["grg"])) {           
+                $data = $check->setTables("production_order_items as poi")->setOrder(["poi.row_order"])
+                        ->setJoins("mst_produk", "mst_produk.kode_produk = poi.kode_produk")
+                        ->setJoins("mst_category", "(mst_category.id = mst_produk.id_category and mst_category.id in ('6','10'))")
+                        ->setWheres(["kode_prod" => $kode, 'row_order' => $row_order])
+                        ->getDetail();
+                $groups = $this->config->item('additional_wa_production_order') ?? [];
+            }
+            if ((count($data) > 0)) {
+
+                if ($data->status === "generated") {
+                    $pesan = "*{$data_pesan["{mo}"]}* BARU ({$data_pesan["{dept}"]})";
+                    $template = "prod_order_create";
+                } else if ($data->status === "cancel") {
+                    $pesan = "*{$data_pesan["{mo}"]}* BATAL ({$data_pesan["{dept}"]})";
+                    $template = "prod_order_cancel";
+                }
+                $data_pesan = array_merge($data_pesan, ["{judul}" => $pesan, "{produk}" => $data->nama_produk, "{qty}" => (number_format($data->qty, 2, ",", ".") . " " . $data->uom), "{reff_notes}" => $data->reff_notes]);
+                $wa = new $this->wa_message;
+                $wa->sendMessageToGroup($template, $data_pesan, $groups)
+                        ->setMentions([])->setFooter('footer_hms')->send();
+            }
+        } catch (Exception $ex) {
+            log_message('error', $ex->getMessage());
+        }
     }
 
 }
