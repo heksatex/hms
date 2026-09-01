@@ -413,7 +413,7 @@ class Cacat extends MY_Controller
 					$pdf->Multicell(18, 4, $loop_7-1, 1, 'C');
 
 					// Grade
-					$pdf->setXY(133, $y4_7);
+					$pdf->setXY(133, $y4_7+4);
 					$pdf->Multicell(18, 4, $items['nama_grade'], 1, 'C');
 
 				}else if($loop == 8){ // beam ke - 8
@@ -449,7 +449,7 @@ class Cacat extends MY_Controller
 					$pdf->Multicell(18, 4, $loop_9-1, 1, 'C');
 
 					// Grade
-					$pdf->setXY(169, $y4_9);
+					$pdf->setXY(169, $y4_9+4);
 					$pdf->Multicell(18, 4, $items['nama_grade'], 1, 'C');
 
 				}else if($loop == 10){ // beam ke - 10
@@ -478,6 +478,7 @@ class Cacat extends MY_Controller
 				}
 
 
+
 			}// end loop isi
 
 
@@ -499,25 +500,41 @@ class Cacat extends MY_Controller
 					$pdf->setXY($x3,$y+13);
 					$pdf->Multicell(18, 6, '', 1, 'L'); // create date
 					$x3 = $x3+18;
-
-
 				}
 
-				$y4		= $pdf->GetY()+(($loop_1-1)*4);
-				$y4_2	= $pdf->GetY()+(($loop_2-1)*4);;
-				$y4_3	= $pdf->GetY()+(($loop_3-1)*4);;
-				$y4_4	= $pdf->GetY()+(($loop_4-1)*4);;
-				$y4_5	= $pdf->GetY()+(($loop_5-1)*4);;
-				$y4_6	= $pdf->GetY()+(($loop_6-1)*4);;
-				$y4_7	= $pdf->GetY()+(($loop_7-1)*4);;
-				$y4_8	= $pdf->GetY()+(($loop_7-1)*4);;
-				$y4_9	= $pdf->GetY()+(($loop_8-1)*4);;
-				$y4_10	= $pdf->GetY()+(($loop_10-1)*4);;
+
+				// $y4		= $pdf->GetY()+(($loop_1-1)*4);;
+				// $y4_3	= $pdf->GetY()+(($loop_3-1)*4);;
+				$y4_2   = $y4_2 - ((15 - $loop_2) * 4);
+				$y4_3   = $y4_3 - ((15 - $loop_3) * 4);
+				$y4_4   = $y4_4 - ((15 - $loop_4) * 4);
+				$y4_5   = $y4_5 - ((15 - $loop_5) * 4);
+				$y4_6   = $y4_6 - ((15 - $loop_6) * 4);
+				$y4_7   = $y4_7 - ((15 - $loop_7) * 4);
+				$y4_8   = $y4_8 - ((15 - $loop_8) * 4);
+				$y4_9   = $y4_9 - ((15 - $loop_9) * 4);
+				
+				
+
+				$y4_10   = $y4_10 - ((15 - $loop_10) * 4);
+
+				// $y4_4	= $pdf->GetY()+(($loop_4-1)*4);;
+				// $y4_5	= $pdf->GetY()+(($loop_5-1)*4);;
+				// $y4_6	= $pdf->GetY()+(($loop_6-1)*4);;
+				// $y4_7	= $pdf->GetY()+(($loop_7-1)*4);;
+				// $y4_8	= $pdf->GetY()+(($loop_8-1)*4);;
+				// $y4_9	= $pdf->GetY()+(($loop_9-1)*4);;
+				// $y4_10	= $pdf->GetY()+(($loop_10-1)*4);;
 
 				if($loop_1 <= 14){ // beam ke - 1
+				
+					if($loop<2){
+						$y	= $pdf->GetY();
+						$y4 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_1; $a<=14; $a++){
 						$pdf->setXY($x4,$y4);
-						$pdf->Multicell(18, 4, '', 1, 'L');
+						$pdf->Multicell(18, 4, "", 1, 'L');
 						$y4 = $y4 + 4;
 					}
 
@@ -531,6 +548,10 @@ class Cacat extends MY_Controller
 				}
 
 				if($loop_2 <= 14){ // beam ke - 2
+					if($loop<3){
+						$y	= $pdf->GetY();
+						$y4_2 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_2; $a<=14; $a++){
 						$pdf->setXY(43,$y4_2);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -547,6 +568,10 @@ class Cacat extends MY_Controller
 				}
 			
 				if($loop_3 <= 14){ // beam ke - 3
+					if($loop<4){
+						$y	= $pdf->GetY();
+						$y4_3 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_3; $a<=14; $a++){
 						$pdf->setXY(61,$y4_3);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -563,6 +588,10 @@ class Cacat extends MY_Controller
 				}
 
 				if($loop_4 <= 14){ // beam ke - 4
+					if($loop<5){
+						$y	= $pdf->GetY();
+						$y4_4 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_4; $a<=14; $a++){
 						$pdf->setXY(79,$y4_4);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -580,6 +609,10 @@ class Cacat extends MY_Controller
 				}
 
 				if($loop_5 <= 14){ // beam ke - 5
+					if($loop<6){
+						$y	= $pdf->GetY();
+						$y4_5 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_5; $a<=14; $a++){
 						$pdf->setXY(97,$y4_5);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -596,6 +629,10 @@ class Cacat extends MY_Controller
 				}
 
 				if($loop_6 <= 14){ // beam ke - 6
+					if($loop<7){
+						$y	= $pdf->GetY();
+						$y4_6 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_6; $a<=14; $a++){
 						$pdf->setXY(115,$y4_6);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -612,6 +649,10 @@ class Cacat extends MY_Controller
 				}
 
 				if($loop_7 <= 14){ // beam ke - 7
+					if($loop<8){
+						$y	= $pdf->GetY();
+						$y4_7 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_7; $a<=14; $a++){
 						$pdf->setXY(133,$y4_7);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -629,6 +670,10 @@ class Cacat extends MY_Controller
 
 			
 				if($loop_8 <= 14){ // beam ke - 8
+					if($loop<9){
+						$y	= $pdf->GetY();
+						$y4_8 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_8; $a<=14; $a++){
 						$pdf->setXY(151,$y4_8);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -646,6 +691,10 @@ class Cacat extends MY_Controller
 
 		
 				if($loop_9 <= 14){ // beam ke - 9
+					if($loop<10){
+						$y	= $pdf->GetY();
+						$y4_9 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_9; $a<=14; $a++){
 						$pdf->setXY(169,$y4_9);
 						$pdf->Multicell(18, 4, '', 1, 'L');
@@ -663,9 +712,13 @@ class Cacat extends MY_Controller
 
 				
 				if($loop_10 <= 14){ // beam ke - 10
+					if($loop<11){
+						$y	= $pdf->GetY();
+						$y4_10 = $y - (4 * 15) - 4;
+					}
 					for($a = $loop_10; $a<=14; $a++){
 						$pdf->setXY(187,$y4_10);
-						$pdf->Multicell(18, 4, '', 1, 'L');
+						$pdf->Multicell(18, 4, "", 1, 'L');
 						$y4_10 = $y4_10 + 4;
 					}
 
