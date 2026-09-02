@@ -400,6 +400,7 @@ class Memorialpelhutang {
                         $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("J{$row}", $totalV);
                         $sheet->setCellValue("K{$row}", $total);
+                        $total = 0;
                         $totalV = 0;
                         $row += 1;
                     }
