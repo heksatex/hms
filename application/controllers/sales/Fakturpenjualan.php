@@ -2233,18 +2233,30 @@ class Fakturpenjualan extends MY_Controller {
 //            $this->hitungLinesPrint($printer, $lines, $halaman);
             $buff->write("\x0c");
             $datas = $connector->getData();
-            $dataPrint[] = (object) ["img" => "fp.prn", "data" => serialize($datas)];
+            $dataPrint[] = (object) ["img" => "fp.prn"];
             $printer->close();
             $client = new GuzzleHttp\Client();
             $resp = $client->request("POST", $this->config->item('url_web_print_w_logo_multi'), [
-                "form_params" => [
-                    "data" => json_encode($dataPrint),
-                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
+                "multipart" => [
+                    [
+                        "name" => 'data',
+                        "contents" => json_encode($dataPrint)
+                    ],
+                    [
+                        "name" => 'printer',
+                        "contents" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
+                    ],
+                    [
+                        "name" => "body",
+                        "contents" => $datas,
+                        "filename" => "dt.txt"
+                    ]
                 ]
             ]);
+            $rawBody = $resp->getBody()->getContents();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => $rawBody, 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
             $this->output->set_status_header($ex->getCode() ?? 500)
