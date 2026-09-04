@@ -916,9 +916,12 @@
                       <div class="col-md-8 table-responsive">
                         <table class="table table-condesed table-hover table-responsive rlstable" id="table_fg_hasil">
                           <label>Sudah diproduksi</label>
-                          <div class="pull-right" data-toggle="tooltip" title="Disabled tooltip">
-                            <button class="btn btn-primary btn-xs"  title="Print Barcode" id="btn-print-barcode"><i class="fa fa-print"></i> Print Barcode
+                          <div class="pull-right" data-toggle="tooltip" title="Disabled tooltip" >
+                            <button class="btn btn-primary btn-xs"  title="Print Barcode" id="btn-print-barcode"  ><i class="fa fa-print"></i> Print Barcode
+                            <?php if($list->dept_id == 'WRD'){ ?>
+                            <button class="btn btn-success btn-xs"  title="Print direct" id="btn-print-barcode-2" style=" margin-left: 5px;"><i class="fa fa-print"></i> Print Direct
                             </button>
+                            <?php } ?>
                           </div> 
 
                           <tr>
@@ -1434,11 +1437,66 @@
     if(countchek == 0){
       alert_modal_warning('Silahkan Pilih Product yang akan di Print !');
     }else{
+
       var url = '<?php echo base_url() ?>manufacturing/mO/print_barcode';
       window.open(url+'?kode='+ kode+'&&dept_id='+ dept_id+'&&checkboxBarcode='+ arrStr,'_blank');
+
     }
 
   });
+
+  $('#btn-print-barcode-2').off('click').on('click', function () {
+      var $btn = $(this);
+      var checkboxBarcode = [];
+      var dept_id = "<?php echo $list->dept_id; ?>";
+      var kode    = "<?php echo $list->kode; ?>";
+
+       var url = '<?php echo base_url() ?>manufacturing/mO/print_barcode_direct';
+
+      $(".checkPrint:checked").each(function() {
+          checkboxBarcode.push($(this).val());
+      });
+      if (checkboxBarcode.length === 0) {
+          return;
+      }
+      $.ajax({
+          type: 'POST',
+          dataType: 'json',
+          url:url,
+          data: {
+              kode: kode,
+              dept_id: dept_id,
+              lots: checkboxBarcode
+          },
+          beforeSend: function () {
+              $btn.prop('disabled', true);
+              $btn.find('i').removeClass('fa-print').addClass('fa-spinner fa-spin');
+          },
+          success: function (response) {
+              if (response && response.type == 'success') {
+                  console.log('Print berhasil:', response);
+                  alert_notify("fa fa-check", response.message, response.type, function () { })
+                  // nanti di sini kita lanjutkan proses print
+                  // atau tampilkan preview label
+              } else {
+                  console.log('Print gagal:', response);
+                  alert_notify("fa fa-check", response.message || 'Gagal memproses LOT untuk print.', response.type, function () { })
+              }
+          },
+          error: function (xhr, status, error) {
+              console.log('AJAX ERROR:', xhr.responseText);
+              // alert('Terjadi kesalahan saat mengirim data print.');
+              var response = xhr.responseJSON || {};
+              alert_notify("fa fa-warning",response.message || 'Gagal memproses LOT untuk print.', response.type, function () { })
+
+          },
+          complete: function () {
+              $btn.prop('disabled', checkboxBarcode.length === 0);
+              $btn.find('i').removeClass('fa-spinner fa-spin').addClass('fa-print');
+          }
+      });
+  });
+
 
 
   //validasi input angka
