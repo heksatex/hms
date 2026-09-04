@@ -3732,7 +3732,7 @@ class MO extends MY_Controller
                             }
                         }       
             
-                        //update status barang di rm target dan stock_move_produk
+                        //update status barang di rm target stock_move_produk
                         if(!empty($where6) AND !empty($case6)){
                             $where6 = rtrim($where6, ',');
                             $where6_move_id = rtrim($where6_move_id, ',');
@@ -7273,6 +7273,7 @@ class MO extends MY_Controller
 
 
 
+
     function barcode_wrd($kode,$data_arr,$dept_id)
     {
         
@@ -7564,5 +7565,88 @@ class MO extends MY_Controller
         $data_mc = $this->m_mo->get_list_mesin($dept_id);
         echo json_encode($data_mc);
     }
+
+
+    public function print_barcode_direct()    
+    {
+
+        try {
+            $kode    = $this->input->post('kode');
+            $id_dept = $this->input->post('dept_id');
+            $lots    = ($this->input->post('lots'));  
+
+
+            $origin_mo  = $this->m_mo->get_origin_mo_by_kode($kode);
+
+            if($id_dept == 'WRD'){
+               $resp = $this->barcode_wrd_direct($kode,$id_dept,$lots,$origin_mo);
+            } else {
+                throw new \Exception('Design Barcode Belum dibuat untuk Departemen tersebut ', 200);
+            }
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Print Berhasil', 'icon' => 'fa fa-check', 'type' => 'success',"resp"=>$resp)));
+            
+        } catch (Exception $ex) {
+            log_message('error', $ex->getMessage());
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+
+    }
+
+    
+    function barcode_wrd_direct($kode,$id_dept,$lots,$origin_mo)
+    {
+            $this->load->library('tspl/warpingprint'); 
+
+            $wprint = new $this->warpingprint;
+    
+            $data_lots = [];
+            $data_reff = [];
+            $data_produk = [];
+            $data_notes  = [];
+
+            $method     = $id_dept.'|OUT';
+
+            foreach ($lots as $item) {
+
+                // $lot      = $item['lot'];
+                // $quant_id = $item['quant_id'];
+
+                $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$item)->row_array();
+
+                if (!empty($get)) {
+                    $barcode     = $get['lot'];  
+                    $nama_produk = $get['nama_produk'];
+                    $reff_note   = $get['reff_note'];
+                }else{
+                    $barcode     = "Not Found";
+                    $nama_produk = "Not Found";
+                    $reff_note   = "Not Found";
+                }
+
+                $reff_picking  = $this->m_mo->get_reff_picking_pengiriman_by_kode($barcode, $method, $origin_mo);
+
+
+                $data_lots[] = $barcode;
+                $data_reff[] = $reff_picking ?? '-';
+                $data_produk[] = $nama_produk;
+                $data_notes[]  = $reff_note;
+
+            }
+
+            $wprint->setup(3.14, 2.36, 0.11);
+            foreach ($data_lots as $key => $value) {
+                $wprint->setLot($value)->setReffPicking($data_reff[$key])->setProduk($data_produk[$key])->setNote($data_notes[$key]);
+            }
+            
+            $resp = $wprint->print();
+            return $resp;
+        
+    }
+
 
 }
