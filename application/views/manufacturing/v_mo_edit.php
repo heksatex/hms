@@ -1445,7 +1445,7 @@
 
   });
 
-  $('#btn-print-barcode-2').off('click').on('click', function () {
+  $(document).on('click',"#btn-print-barcode-2",function(e){
       var $btn = $(this);
       var checkboxBarcode = [];
       var dept_id = "<?php echo $list->dept_id; ?>";
