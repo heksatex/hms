@@ -236,6 +236,7 @@ class Cacat extends MY_Controller
 
 			// set ukuran y winding - jenis cacat
 			$y4     = 54;
+			$y4_1   = 54;
 			$y4_2   = 54;
 			$y4_3   = 54;
 			$y4_4   = 54;
@@ -505,6 +506,7 @@ class Cacat extends MY_Controller
 
 				// $y4		= $pdf->GetY()+(($loop_1-1)*4);;
 				// $y4_3	= $pdf->GetY()+(($loop_3-1)*4);;
+				$y4_1   = $y4_1 - ((15 - $loop_1) * 4);
 				$y4_2   = $y4_2 - ((15 - $loop_2) * 4);
 				$y4_3   = $y4_3 - ((15 - $loop_3) * 4);
 				$y4_4   = $y4_4 - ((15 - $loop_4) * 4);
@@ -513,9 +515,6 @@ class Cacat extends MY_Controller
 				$y4_7   = $y4_7 - ((15 - $loop_7) * 4);
 				$y4_8   = $y4_8 - ((15 - $loop_8) * 4);
 				$y4_9   = $y4_9 - ((15 - $loop_9) * 4);
-				
-				
-
 				$y4_10   = $y4_10 - ((15 - $loop_10) * 4);
 
 				// $y4_4	= $pdf->GetY()+(($loop_4-1)*4);;
@@ -530,12 +529,12 @@ class Cacat extends MY_Controller
 				
 					if($loop<2){
 						$y	= $pdf->GetY();
-						$y4 = $y - (4 * 15) - 4;
-					}
+						$y4_1 = $y - (4 * 15) - 4;
+					} 
 					for($a = $loop_1; $a<=14; $a++){
-						$pdf->setXY($x4,$y4);
-						$pdf->Multicell(18, 4, "", 1, 'L');
-						$y4 = $y4 + 4;
+						$pdf->setXY($x4,$y4_1);
+						$pdf->Multicell(18, 4, '', 1, 'L');
+						$y4_1 = $y4_1 + 4;
 					}
 
 					// total Cacat

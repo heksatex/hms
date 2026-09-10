@@ -176,42 +176,54 @@
     })
 
     $("#mo").change(function(){
-      $("#lot").html('');
-      $("#lot").select2({
-          //closeOnSelect: false,
-          placeholder : "Select Lot",
-          allowClear: true,
-        
-          ajax:{
-                dataType : 'JSON',
-                type     : 'POST',
-                url      : '<?php echo base_url();?>report/cacat/get_lot_select2',
-                data : function(params){
-                  return{
-                    lot:params.term,
-                    mo:$("#mo").val(),
-                  };
-                }, 
-                processResults:function(data){
 
-                  var results = [];
-                  $.each(data, function(index,item){
-                      results.push({
-                        id:item.quant_id,
-                        text:item.lot
-                      });
-                  });
+      var mo = $("#mo").val();
 
-                  return {
-                    results : results
-                  }
-                },
-                error : function(xhr, ajaxOptions, thrownError){
-                 // alert(xhr.responseText);
-                }
+      // kosongkan LOT
+      $("#lot").empty();
+
+      if (!mo) {
+          return;
+      }
+
+      $.ajax({
+          dataType: 'JSON',
+          type: 'POST',
+          url: '<?php echo base_url();?>report/cacat/get_lot_select2',
+          data: {
+              lot: '',
+              mo: mo
+          },
+          success: function(data) {
+
+              var selectedLots = [];
+
+              $.each(data, function(index, item) {
+
+                  // tambahkan option LOT
+                  var option = new Option(
+                      item.lot,
+                      item.quant_id,
+                      true,   // langsung selected
+                      true    // langsung selected
+                  );
+
+                  $("#lot").append(option);
+
+                  // simpan ID LOT
+                  selectedLots.push(item.quant_id);
+              });
+
+              // set semua LOT terpilih
+              $("#lot").val(selectedLots).trigger('change');
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+              console.log(xhr.responseText);
           }
       });
-    });
+
+  });
+
 
 
   //klik button generate
