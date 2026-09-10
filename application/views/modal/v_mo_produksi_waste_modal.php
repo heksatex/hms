@@ -1182,6 +1182,7 @@
 			}
 			
 			$('.wproduk').select2({
+				dropdownParent: $('#tambah_data'),
 				allowClear: true,
 				placeholder: "",
 				ajax:{
@@ -1287,7 +1288,7 @@
 					// untuk select lot bahan baku
 					$('#tbl_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3) .wtxtlot').select2({
 
-						//dropdownParent: $("#tambah_data"),
+						dropdownParent: $("#tambah_data"),
 						allowClear: true,
 						placeholder: "",
 						//tags: true,
