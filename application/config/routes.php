@@ -98,7 +98,7 @@ $route['setting/wa_schedule/delete']['POST'] = 'setting/WaScheduleMessage/delete
 $route['setting/wa_schedule/status']['POST'] = 'setting/WaScheduleMessage/disablePesan';
 $route['setting/wa_schedule/get_users']['GET'] = 'setting/WaScheduleMessage/getUsers';
 
-$route['print/check'] = 'prints/print/check';
+//$route['print/check'] = 'prints/print/check';
 $route['setting/wa_template/test']['GET'] = 'warehouse/picklistvalidasi/test';
 
 //$route["accounting/bankmasuk/list_data"] = "accounting/bankmasuk/list_data";
@@ -155,3 +155,7 @@ $route["accounting/jurnalentries/data"] = 'purchase/jurnalentries/data';
 $route["accounting/jurnalentries/edit/(:any)"] = 'purchase/jurnalentries/edit/$1/ACCJNE';
 $route["accounting/jurnalentries/add"] = 'purchase/jurnalentries/add/ACCJNE';
 $route["accounting/jurnalentries/simpan"] = 'purchase/jurnalentries/simpan';
+
+//monitoring
+$route["report/machinemonitoringv2/tri"] = 'report/machinemonitoringv2/index/TRI';
+$route["report/machinemonitoringv2/detail/(:any)"] = 'report/machinemonitoringv2/detail/$1/TRI';
