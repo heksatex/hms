@@ -14,14 +14,16 @@ class Machinemonitoringv2 extends MY_Controller {
         '#dc3545',
         '#1B13F5',
         '#B29E1E',
-        '#484858'
+        '#484858',
+        '#B27272'
     ];
     protected $state = [
         '1' => 0,
         '2' => 0,
         '3' => 0,
         '4' => 0,
-        '5' => 0
+        '5' => 0,
+        '6' => 0
     ];
     protected $status = [
         '1' => [
@@ -48,6 +50,11 @@ class Machinemonitoringv2 extends MY_Controller {
             'stt' => 'Bongkar Pasang',
             'warna' => '',
             'jumlah' => 0
+        ],
+        '6' => [
+            'stt' => 'Nyucuk',
+            'warna' => '',
+            'jumlah' => 0
         ]
     ];
 
@@ -63,6 +70,7 @@ class Machinemonitoringv2 extends MY_Controller {
         $this->status["3"]["warna"] = $this->warnaStatus[2];
         $this->status["4"]["warna"] = $this->warnaStatus[3];
         $this->status["5"]["warna"] = $this->warnaStatus[4];
+        $this->status["6"]["warna"] = $this->warnaStatus[5];
     }
 
     public function index($dept = "WRD") {
@@ -82,7 +90,7 @@ class Machinemonitoringv2 extends MY_Controller {
 
         $model = new $this->m_global;
         $data["allMesin"] = $model->setTables("mesin")
-                        ->setJoins("departemen", "departemen.kode = dept_id", "left")->setWheres(["mesin.status_aktif" => "t", "devid_esp > " => 0])
+                        ->setJoins("departemen", "departemen.kode = dept_id", "left")->setWheres(["mesin.status_aktif" => "t", "devid_esp > " => 0,"dept_id"=>$dept])
                         ->setSelects(["dept_id", "departemen.nama"])->setGroups(["dept_id"])->getData();
 
         if (date("H:i:s") >= $this->waktuShip1 && date("H:i:s") < $this->waktuShip2) {
@@ -114,7 +122,7 @@ class Machinemonitoringv2 extends MY_Controller {
                 ->setSelects(["COUNT(log.state)*SUM(log.state=1) as uptime"])
                 ->setSelects(["nama_mesin,count(state) as total,state,devid,no_mesin,dept_id,mc_id,max(timelog) as last_time"])
                 ->setGroups(["devid", "state"])->setOrder(["nama_mesin" => "asc", "MAX(timelog)" => "desc"]);
-
+        
         $durasis = $model->getData();
         $durasi = [];
         foreach ($durasis as $key => $value) {
@@ -215,6 +223,7 @@ GROUP BY devid;
         $data["warnaStatus"] = json_encode($this->warnaStatus);
         $dateObj = DateTime::createFromFormat("d M Y", "{$dt} " . date("Y"));
         $data["date"] = $dateObj->format("Y-m-d");
+        $data["dept"] = $dept;
         $data["mesin"] = $model->setTables("mesin mst")->setWheres(["devid_esp >" => 0, "dept_id" => $dept])->getData();
         $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
         $this->load->view('report/v_machine_monitoring_v2_2_detail', $data);
@@ -225,15 +234,15 @@ GROUP BY devid;
             $model = new $this->m_global;
             $custom = $this->input->post("custom");
             $tbl = bin2hex(random_bytes(6));
+            $dep = $this->input->post("dept");
             if (!empty($custom)) {
                 $day = $this->input->post("day");
                 $table = $tbl;
                 $model->excQueryWResult("CREATE TEMPORARY TABLE {$table} LIKE log_mc_timeline;");
-                $this->_insTimeline($day, $table);
+                $this->_insTimeline($day, $table, $dep);
             } else {
                 $table = "log_mc_timeline";
             }
-            $dep = $this->input->post("dept");
             $items = $model->setTables($table)->setWheres(["dept_id" => $dep])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "desc"])->getData();
             $model->excQueryWResult("DROP TEMPORARY TABLE IF EXISTS `{$tbl}`;");
             $this->output->set_status_header(200)
@@ -271,10 +280,10 @@ GROUP BY devid;
         }
     }
 
-    protected function _insTimeline($day, $custom) {
+    protected function _insTimeline($day, $custom, $dept) {
         try {
             $model = new $this->m_global;
-            $mesin = $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "devid_esp > " => 0])
+            $mesin = $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "devid_esp > " => 0, "dept_id" => $dept])
                             ->setOrder(["nama_mesin" => "asc"])->getData();
             $mesins = [];
             foreach ($mesin as $key => $value) {
@@ -293,7 +302,7 @@ GROUP BY devid;
                 $sampai = date("Y-m-d H:i:s", strtotime("1 day", strtotime($mulai)));
             }
             $lists = $model->setTables("mesin mst")
-                            ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
+                            ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t", "mst.dept_id" => $dept])
                             ->setWheres(["timelog >=" => $mulai, "timelog <=" => $sampai, "state <>" => 0])
                             ->setOrder(["timelog" => "asc"])
                             ->setSelects(["state,devid,no_mesin,dept_id,mc_id,timelog"])->getData();
@@ -366,7 +375,10 @@ GROUP BY devid;
 
             if (isset($insert[0])) {
                 $model->excQuery("LOCK TABLES {$custom} WRITE;");
-                $model->excQuery("truncate {$custom};");
+                if ($custom !== 'log_mc_timeline')
+                    $model->excQuery("truncate {$custom};");
+                else
+                    $model->setTables($custom)->setWheres(["dept_id" => $dept])->delete();
                 $model->setTables($custom)->saveBatch($insert);
                 $model->excQuery("UNLOCK TABLES;");
             }
@@ -378,7 +390,8 @@ GROUP BY devid;
     public function ins_timeline() {
         try {
             $day = $this->input->post("day");
-            $this->_insTimeline($day, "log_mc_timeline");
+            $dept = $this->input->post("dept");
+            $this->_insTimeline($day, "log_mc_timeline", $dept);
         } catch (Exception $ex) {
             log_message("error", json_encode($ex));
         }
@@ -389,11 +402,11 @@ GROUP BY devid;
             $mesin = $this->input->post("mesin");
             $tanggal = $this->input->post("date");
             $tanggals = explode(" - ", $tanggal);
-
+            $dept = $this->input->post("dept");
             $model = new $this->m_global;
 
             $model->setTables("log_mesin")
-                    ->setJoins("mesin", "(mesin.devid_esp = log_mesin.devid and mesin.devid_esp > 0)")
+                    ->setJoins("mesin", "(mesin.devid_esp = log_mesin.devid and mesin.devid_esp > 0 and mesin.dept_id = '{$dept}')")
                     ->setSelects(["COUNT(IF(state = '1', 1, NULL)) as running"])
                     ->setSelects(["COUNT(IF(state = '2', 1, NULL)) as noresp"])
                     ->setSelects(["COUNT(IF(state = '3', 1, NULL)) as benang"])
@@ -402,7 +415,7 @@ GROUP BY devid;
                     ->setSelects(["mesin.nama_mesin as mesin,state,date(timelog) as tgl"])
                     ->setSearch(["nama_mesin"])
                     ->setGroups(["devid"])
-                    ->setWheres(["date(timelog) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(timelog) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+                    ->setWheres(["date(timelog) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(timelog) <=" => date("Y-m-d", strtotime($tanggals[1])),""]);
             if (!empty($mesin))
                 $model->setWheres(["devid" => $mesin]);
 
