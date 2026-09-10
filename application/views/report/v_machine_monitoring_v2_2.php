@@ -515,7 +515,8 @@
                     type: "post",
                     data: {
                         day: daysTimeline,
-                        custom: custom
+                        custom: custom,
+                        dept: "<?= $dept ?>"
                     },
                     url: "<?php echo base_url(); ?>report/machinemonitoringv2/ins_timeline",
 
@@ -608,8 +609,10 @@
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
                         if (nama_mesin !== sd.nama_mesin) {
-                            count += 1;
-                            namas.push(sd.nama_mesin);
+                            if (!namas.includes(sd.nama_mesin)) {
+                                count += 1;
+                                namas.push(sd.nama_mesin);
+                            }
                         }
                         machines.push({nama: sd.nama_mesin, status: sd.status, warna: sd.warna_status, start: moment(sd.start).toDate(), end: moment(sd.end).toDate()});
                         nama_mesin = sd.nama_mesin;
@@ -726,7 +729,7 @@
                 myChart.on('click', function (params) {
                     // Check if a data graphical element was clicked
                     if (typeof params.value === "string") {
-                        window.open("<?= base_url('report/machinemonitoringv2/detail?mesin=') ?>" + params.value, "_blank");
+                        window.open("<?= base_url("report/machinemonitoringv2/detail/{$dept}?mesin=") ?>" + params.value, "_blank");
                         // You clicked a specific bar, line symbol, etc.
                     }
                 });
