@@ -161,7 +161,8 @@
                     type: "post",
                     data: {
                         date: $("#date").val(),
-                        mesin: $("#mesin").val()
+                        mesin: $("#mesin").val(),
+                        dept: "<?= $dept ?>"
                     },
                     url: "<?php echo base_url(); ?>report/machinemonitoringv2/get_graph",
                     complete: function (jqXHR, textStatus) {
@@ -246,6 +247,7 @@
                         "data": function (d) {
                             d.date = $("#date").val();
                             d.mesin = $("#mesin").val();
+                            d.dept = "<?= $dept ?>";
                         }
                     },
                     columnDefs: [
