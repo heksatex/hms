@@ -354,7 +354,9 @@
 
                         <div class="chart-card">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="text-uppercase m-0" style="font-size: 0.8rem; font-weight:800; color:var(--muted-text)">CAPTURE <span class="capture_date">24 JAM</span></h5>
+                                <h5 class="text-uppercase m-0" style="font-size: 0.8rem; font-weight:800; color:var(--muted-text)">CAPTURE <span class="capture_date">24 JAM</span>
+                                    <span id="jumlahMesin">&nbsp; (0 Mesin)</span>
+                                </h5>
 
                                 <div class="d-flex">
                                     <?php foreach ($status as $key => $value) {
@@ -733,7 +735,7 @@
                         // You clicked a specific bar, line symbol, etc.
                     }
                 });
-
+                $("#jumlahMesin").html(`&nbsp; (${namas.length} Mesin)`);
             }
 
             // --- 4. Trend Chart (Line/Area) --
