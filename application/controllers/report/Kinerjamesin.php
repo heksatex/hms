@@ -32,9 +32,10 @@ class Kinerjamesin extends MY_Controller {
     public function index($id_depth = "KNM", $depth = "WRD") {
         $model = new $this->m_global;
         $data['id_dept'] = $id_depth;
+        $data['dept'] = $depth;
         $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
         $data["mesin"] = $model->getData();
-        $this->load->view('report/v_kinerja_mesin', $data);
+        $this->load->view('report/v_kinerja_mesin_' . strtolower($depth), $data);
     }
 
     public function get_grafiks($depth = "WRD") {
@@ -43,15 +44,23 @@ class Kinerjamesin extends MY_Controller {
             $mesin = $this->input->post("mesin");
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
-
+            $select = ["COUNT(IF(state = '1', 1, NULL)) as running",
+                "COUNT(IF(state = '2', 1, NULL)) as noresp",
+                "COUNT(IF(state = '3', 1, NULL)) as benang",
+                "COUNT(IF(state = '4', 1, NULL)) as problem",
+                "COUNT(IF(state = '5', 1, NULL)) as noorder",
+                "COUNT(IF(state <> '5', 1, NULL)) as downtime"];
+            if (strtolower($depth) === 'tri') {
+                $select[] = "COUNT(IF(state <> '6', 1, NULL)) as nyucuk";
+            }
             $model = new $this->m_global;
             $totalMesinQuery = $model->setTables("mesin mst")
-                     ->setJoins("log_mesin log", "mst.devid_esp=log.devid")
-                    ->setWheres(["status_aktif" => "t","date(timelog) >=" =>$tanggals[0],"date(timelog) <=" =>$tanggals[1],"dept_id" => $depth])
-                    ->setSelects(['count(DISTINCT  log.devid) as total_mesin'])->setGroups(["date(timelog)"])->getQuery();
+                            ->setJoins("log_mesin log", "mst.devid_esp=log.devid")
+                            ->setWheres(["status_aktif" => "t", "date(timelog) >=" => $tanggals[0], "date(timelog) <=" => $tanggals[1], "dept_id" => $depth])
+                            ->setSelects(['count(DISTINCT  log.devid) as total_mesin'])->setGroups(["date(timelog)"])->getQuery();
             $totalMesin = $model->setTables("({$totalMesinQuery}) as subs")->setSelects(["SUM(total_mesin) AS totalmesin"])->getDetail();
             $model->setTables("mesin mst")
-                     ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
+                    ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
 //                ->setSelects(["DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) AS tanggal_kerja"])
                     ->setSelects([
                         'CASE 
@@ -62,13 +71,7 @@ class Kinerjamesin extends MY_Controller {
                     ])
                     ->setSelects([
                         "COUNT(*) AS total_log,count(DISTINCT  log.devid) as total_mesin",
-                        "COUNT(IF(state = '1', 1, NULL)) as running",
-                        "COUNT(IF(state = '2', 1, NULL)) as noresp",
-                        "COUNT(IF(state = '3', 1, NULL)) as benang",
-                        "COUNT(IF(state = '4', 1, NULL)) as problem",
-                        "COUNT(IF(state = '5', 1, NULL)) as noorder",
-                        "COUNT(IF(state <> '5', 1, NULL)) as downtime"
-                    ])
+                    ])->setSelects($select)
                     ->setWheres([
                         "DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) >=" => $tanggals[0],
                         "DATE(DATE_SUB(timelog, INTERVAL 7 HOUR)) <=" => $tanggals[1],
@@ -78,10 +81,10 @@ class Kinerjamesin extends MY_Controller {
             if (!empty($mesin)) {
                 $model->setWheres(["devid" => $mesin]);
             }
-            
+
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $model->getData(),'total_mesin'=>$totalMesin->totalmesin ?? 0)));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $model->getData(), 'total_mesin' => $totalMesin->totalmesin ?? 0)));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
@@ -94,6 +97,7 @@ class Kinerjamesin extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $imageData = $this->input->post("img");
             $tbl = $this->input->post("tbl");
+            $dept = $this->input->post("dept");
 
             if (preg_match('/^data:image\/(\w+);base64,/', $imageData)) {
                 $imageData = substr($imageData, strpos($imageData, ',') + 1);
@@ -132,9 +136,32 @@ class Kinerjamesin extends MY_Controller {
             $sheet->setCellValue("F{$row}", 'Bonkar Pasang (Hrs)');
             $sheet->setCellValue("G{$row}", 'Total Capacity');
             $sheet->setCellValue("H{$row}", 'Prod. Efficiency');
+            if (strtolower($dept) === 'tri') {
+                $sheet->setCellValue("A{$row}", 'Shift Name');
+            $sheet->setCellValue("B{$row}", 'Running (Hrs)');
+            $sheet->setCellValue("C{$row}", 'No Response (Hrs)');
+            $sheet->setCellValue("D{$row}", 'Ganti Benang (Hrs)');
+            $sheet->setCellValue("E{$row}", 'Putus/Problem (Hrs)');
+            $sheet->setCellValue("F{$row}", 'Nyucuk (Hrs)');
+            $sheet->setCellValue("G{$row}", 'No Order (Hrs)');
+            $sheet->setCellValue("H{$row}", 'Total Capacity');
+            $sheet->setCellValue("I{$row}", 'Prod. Efficiency');
+            }
 
             foreach ($tbl as $key => $value) {
                 $row++;
+                if (strtolower($dept) === 'tri') {
+                 $sheet->setCellValue("A{$row}", $key);
+                $sheet->setCellValue("B{$row}", $value["running"]);
+                $sheet->setCellValue("C{$row}", $value["noresp"]);
+                $sheet->setCellValue("D{$row}", $value["benang"]);
+                $sheet->setCellValue("E{$row}", $value["problem"]);
+                $sheet->setCellValue("F{$row}", $value["nyucuk"]);
+                $sheet->setCellValue("G{$row}", $value["noorder"]);
+                $sheet->setCellValue("H{$row}", $value["total"]);
+                $sheet->setCellValue("I{$row}", round($value["efficiency"], 2) . " %");
+                }
+                else {
                 $sheet->setCellValue("A{$row}", $key);
                 $sheet->setCellValue("B{$row}", $value["running"]);
                 $sheet->setCellValue("C{$row}", $value["noresp"]);
@@ -142,7 +169,9 @@ class Kinerjamesin extends MY_Controller {
                 $sheet->setCellValue("E{$row}", $value["problem"]);
                 $sheet->setCellValue("F{$row}", $value["noorder"]);
                 $sheet->setCellValue("G{$row}", $value["total"]);
-                $sheet->setCellValue("H{$row}", round($value["efficiency"], 2) . " %");
+                $sheet->setCellValue("H{$row}", round($value["efficiency"], 2) . " %"); 
+                }
+                
             }
 
             $sheet->getStyle("B14:B{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
@@ -152,6 +181,7 @@ class Kinerjamesin extends MY_Controller {
             $sheet->getStyle("F14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("G14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("H14:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("I14:I{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $filename = "report kinerja {$tanggal}";
             $url = "dist/storages/report/kinerjamesin";
