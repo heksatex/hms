@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <?php $this->load->view("admin/_partials/head.php") ?>
+        <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
+        <style>
+            /* Premium Card Design */
+            .chart-card {
+                border-radius: 12px;
+                padding: 25px;
+                border: 1px solid #dee2e6;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+                margin-bottom: 25px;
+                align-content: center;
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+
+            #shift_comparison_chart {
+                width: 100%;
+                height: 420px;
+                min-height: 300px;
+                display: block;
+            }
+            .mono {
+                font-family: 'JetBrains Mono', monospace;
+                font-weight: 600;
+            }
+        </style>
+    <body class="hold-transition skin-black fixed sidebar-mini">
+        <div class="wrapper">
+            <header class="main-header">
+                <?php $this->load->view("admin/_partials/main-menu.php") ?>
+                <?php
+                $data['deptid'] = $id_dept;
+                $this->load->view("admin/_partials/topbar.php", $data)
+                ?>
+            </header>
+            <aside class="main-sidebar">
+                <?php $this->load->view("admin/_partials/sidebar.php") ?>
+            </aside>
+            <div class="content-wrapper">
+                <section class="content-header">
+                </section>
+                <section class="content">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Analisa Downtime</h3>
+                        </div>
+                        <div class="box-body">
+                            <form class="form-horizontal" method="POST" name="form-rd" id="form-rd" action="<?= base_url('report/analisadowntime/search') ?>">
+                                <div class="col-md-8 col-xs-12">
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label required">Tanggal</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <input type="text" name="tanggal" id="tanggal" value="" class="form-control" required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label">Mesin</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <select class="form-control select2 mesin" style="width: 100%" name="mesin">
+                                                    <option value="">ALL</option>
+                                                    <?php
+                                                    foreach ($mesin as $key => $value) {
+                                                        ?>
+                                                        <option value="<?= $value->devid_esp ?>"><?= $value->nama_mesin ?></option>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-xs-12">
+                                    <!--                                    <div class="form-group">
+                                                                            <div class="col-md-12 col-xs-12">
+                                                                                <div class="col-xs-6">
+                                                                                    <input type="hidden" name="dept" id="dept" value="wrd" class="form-control"/>
+                                                                                    <button class="btn btn-success" type="button" id="search"><i class="fa fa-refresh"></i> Cari </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>-->
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-6">
+                                                <button class="btn btn-success" type="button"  id="export"><i class="fa fa-file"></i> Excel </button>
+                                                <button class="hide" type="submit" id="submit"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="box-footer">
+                            <div class="row">
+                                <div class="chart-card">
+                                    <div id="shift_comparison_chart"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 table-responsive">
+                                    <table class="table table-hover align-middle text-center" id="downtime-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-start" style="width: 100px;">Tanggal</th>
+                                                <th style="width: 120px;">Running (Hrs)</th>
+                                                <th style="width: 140px;">No Response (Hrs)</th>
+                                                <th style="width: 150px;">Ganti Benang (Hrs)</th>
+                                                <th style="width: 150px;">Putus/Problem (Hrs)</th>
+                                                <th style="width: 120px;">Nyucuk (Hrs)</th>
+                                                <th style="width: 120px;">No Order (Hrs)</th>
+                                                <th style="width: 120px;">Total Capacity</th>
+                                                <th style="width: 120px;">% Utilization</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot></tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <?php $this->load->view("admin/_partials/js.php"); ?>
+        <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
+        <script src="<?= base_url('dist/js/echarts.min.js'); ?>"></script>
+        <script>
+            let myChart;
+            const  asDataGrafik = (() => {
+                return $.ajax({
+                    type: "POST",
+                    data: {
+                        tanggal: $("#tanggal").val(),
+                        mesin: $(".mesin").val()
+                    },
+                    url: '<?= base_url("report/analisadowntime/get_grafiks/{$dept}"); ?>',
+                    complete: function (jqXHR, textStatus) {
+                        unblockUI(function () {}, 200);
+                    }
+                });
+            });
+            Number.prototype.themeFormat = function () {
+                return this.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            };
+            var filteredRun = [], filteredNoResp = [], filteredGanti = [], filteredProb = [], filterNoOrder = [], filteredOff = [], filteredNyucuk = [], activeDates = [], cps = [], persen = [];
+            async function renderChart() {
+                // Arrays tampungan filter terpilih
+                activeDates = [];
+                filteredRun = [];
+                filteredNoResp = [];
+                filteredGanti = [];
+                filteredProb = [];
+                filterNoOrder = [];
+                filteredOff = [];
+                filteredNyucuk = [];
+                persen = [];
+                cps = [];
+                let tRun = 0, tNoResp = 0, tGanti = 0, tProb = 0, tNoOrd = 0, toff = 0 , tnyucuk = 0, totals = 0, tpersen = 0;
+                let currentCapacitys = 0, currentCapacity = 0;
+                let htmlRows = '';
+
+//                const startTime = moment().startOf('day');
+//                const endTime = moment();
+//                const nowHour = endTime.diff(startTime, 'minutes');
+
+                const nowHour = ((mulai, sampai) => {
+                    const dateMulai = moment(mulai).startOf('day');
+                    const dateSampai = moment(sampai);
+                    if (dateSampai.diff(dateMulai, 'days') > 0) {
+                        return 1440;
+                    }
+                    return dateSampai.diff(dateMulai, 'minutes');
+                });
+                let maxCap = 1440 * 10; //24 jam x 10 mesin
+                await asDataGrafik().then((res) => {
+                    var dt = res.data;
+                    dt.forEach((sd, idx) => {
+                        let total = parseInt(sd.total_log) / parseInt(sd.count_mesin);
+                        let run = parseInt(sd.running);
+                        let noResp = parseInt(sd.noresp);
+                        let ganti = parseInt(sd.benang);
+                        let prob = parseInt(sd.problem);
+                        let order = parseInt(sd.noorder);
+                        let nyucuk = parseInt(sd.nyucuk);
+                        currentCapacity = parseInt(sd.count_mesin) * nowHour(sd.tanggal, moment().toString());
+                        currentCapacity = (currentCapacity >= maxCap) ? maxCap : currentCapacity;
+                        let off = currentCapacity - (run + noResp + ganti + prob+ nyucuk);
+                        if (off < 0)
+                            off = 0;
+                        let prs = 100 / (currentCapacity / 60) * (run / 60);
+                        total = (total / 60).toFixed(2);
+                        run = (run / 60).toFixed(2);
+                        noResp = (noResp / 60).toFixed(2);
+                        ganti = (ganti / 60).toFixed(2);
+                        prob = (prob / 60).toFixed(2);
+                        order = (order / 60).toFixed(2);
+                        nyucuk = (nyucuk / 60).toFixed(2);
+                        
+                        off = (off / 60).toFixed(2);
+                        currentCapacity = (currentCapacity / 60).toFixed(2);
+                        prs = (prs).toFixed(2);
+
+                        activeDates.push(sd.dt);
+                        filteredRun.push(run);
+                        filteredNoResp.push(noResp);
+                        filteredGanti.push(ganti);
+                        filteredProb.push(prob);
+                        filterNoOrder.push(order);
+                        filteredOff.push(off);
+                        filteredNyucuk.push(nyucuk);
+                        cps.push(currentCapacity);
+                        persen.push(prs);
+
+                        tpersen += parseFloat(prs);
+                        tRun += parseFloat(run);
+                        tNoResp += parseFloat(noResp);
+                        tGanti += parseFloat(ganti);
+                        tProb += parseFloat(prob);
+                        tNoOrd += parseFloat(order);
+                        toff += parseFloat(off);
+                        tnyucuk += parseFloat(nyucuk);
+                        totals += parseFloat(total);
+                        currentCapacitys += parseFloat(currentCapacity);
+                        htmlRows += `
+                    <tr>
+                        <td class="fw-semibold">${sd.dt}</td>
+                        <td class="mono text-success">${run}</td>
+                        <td class="mono text-danger">${noResp}</td>
+                        <td class="mono text-primary">${ganti}</td>
+                        <td class="mono text-warning fw-semibold">${prob}</td>
+                        <td class="mono" style="color:#B27272">${nyucuk}</td>
+                        <td class="mono text-dark">${off}</td>
+                        <td class="mono text-secondary">${currentCapacity}</td>
+                            <td class="mono">${prs} %</td>
+                        
+                    </tr>
+                `;
+                    });
+                });
+                $("#downtime-table tbody").html(htmlRows);
+                htmlRows = `
+                    <tr>
+                        <td>TOTAL MTD</td>
+                        <td class="mono text-success">${tRun.themeFormat()}</td>
+                        <td class="mono text-danger">${tNoResp.themeFormat()}</td>
+                        <td class="mono text-primary">${tGanti.themeFormat()}</td>
+                        <td class="mono text-warning fw-semibold">${tProb.themeFormat()}</td>
+                                <td class="mono" style="color:#B27272">${tnyucuk.themeFormat()}</td>
+                            <td class="mono text-dark">${toff.themeFormat()}</td>
+                        <td class="mono text-secondary">${currentCapacitys.themeFormat()}</td>
+                            <td class="mono text-secondary">${tpersen.themeFormat()}</td>
+                    </tr>
+                `;
+                $("#downtime-table tfoot").html(htmlRows);
+                let labelInterval = 0;
+                if (activeDates.length > 31)
+                    labelInterval = 2;
+                if (activeDates.length > 60)
+                    labelInterval = 5;
+                // Terapkan ke Grafik ECharts
+
+                let mesin = $(".mesin :selected").text();
+                myChart.setOption({
+                    title: {
+                        text: (mesin === 'ALL' ? '' : ` Mesin : ${mesin}`),
+                        left: 'center',
+                        textStyle: {fontSize: 14, fontWeight: 'normal', color: '#495057'}
+                    },
+                    xAxis: {data: activeDates, axisLabel: {interval: labelInterval}},
+                    yAxis: {max: Math.ceil(Math.max(...cps))},
+                    series: [
+                        {data: filteredRun},
+                        {data: filteredNoResp},
+                        {data: filteredGanti},
+                        {data: filteredProb},
+                        {data: filteredNyucuk},
+                        {data: filteredOff}
+                    ]
+                });
+
+            }
+
+            $(function () {
+                $(".select2").select2({
+                    allowClear: true,
+                    placeholder: "All"
+                });
+                $('#tanggal').daterangepicker({
+                    endDate: moment().startOf('day'),
+                    startDate: moment().startOf('month'),
+                    minYear: 2026,
+                    maxDate: new Date(),
+                    minDate: "2026/04/01",
+                    locale: {
+                        format: 'YYYY-MM-DD'
+                    }
+                });
+                $(".mesin").on('change', function (e) {
+                    renderChart();
+                });
+                $('#tanggal').on('apply.daterangepicker', function (ev, picker) {
+                    renderChart();
+                });
+
+                const chartDom = document.getElementById('shift_comparison_chart');
+                myChart = echarts.init(chartDom);
+                renderChart();
+                const initialOption = {
+                    tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'}},
+                    legend: {data: ['Running', 'No Response', 'Ganti Lembar', 'Putus/Problem', 'Bongkar Pasang', 'Nyucuk'], bottom: '0%'},
+                    grid: {top: '30px', left: '1%', right: '1%', bottom: '40px', containLabel: true},
+                    xAxis: {type: 'category', axisLabel: {color: '#6c757d', fontSize: 9, rotate: 45}},
+                    yAxis: {type: 'value', name: 'Durasi (Jam)', splitLine: {lineStyle: {type: 'dashed', color: '#EBEBEB'}}},
+                    series: [
+                        {name: 'Running', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#198754'}},
+                        {name: 'No Response', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#dc3545'}},
+                        {name: 'Ganti Lembar', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#0d6efd'}},
+                        {name: 'Putus/Problem', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#ffc107'}},
+                        {name: 'Bongkar Pasang', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#212529'}},
+                        {name: 'Nyucuk', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#B27272'}}
+                    ]
+                };
+                myChart.setOption(initialOption);
+                window.addEventListener('resize', () => {
+                    if (myChart)
+                        myChart.resize();
+                });
+
+//                $("#search").on("click", function () {
+//                    renderChart();
+//                });
+
+                $("#export").on("click", function () {
+                    var imgData = myChart.getDataURL({
+                        type: 'png',
+                        pixelRatio: 2, // Higher quality
+                        backgroundColor: '#fff'
+                    });
+                    $.ajax({
+                        type: "post",
+                        data: {
+                            img: imgData,
+                            tanggal: $("#tanggal").val(),
+                            dept:"<?= $dept?>",
+                            tbl: {
+                                tgl: activeDates,
+                                run: filteredRun,
+                                noResp: filteredNoResp,
+                                benang: filteredGanti,
+                                problem: filteredProb,
+                                off: filteredOff,
+                                nyucuk: filteredNyucuk,
+                                cps: cps
+                            }
+                        },
+                        url: "<?php echo base_url(); ?>report/analisadowntime/export",
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 200);
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait((() => {
+
+                            }));
+                        },
+                        success: ((data) => {
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        })
+
+                    });
+
+                });
+            })
+
+        </script>
+    </body>
+</head>
