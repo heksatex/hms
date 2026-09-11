@@ -50,6 +50,34 @@ class Machinemonitoringv2 extends MY_Controller {
             'stt' => 'Bongkar Pasang',
             'warna' => '',
             'jumlah' => 0
+        ]
+    ];
+    
+    protected $status_tri = [
+        '1' => [
+            'stt' => 'Running',
+            'warna' => '',
+            'jumlah' => 0
+        ],
+        '2' => [
+            'stt' => 'No Response',
+            'warna' => '',
+            'jumlah' => 0
+        ],
+        '3' => [
+            'stt' => 'Ganti Benang',
+            'warna' => '',
+            'jumlah' => 0
+        ],
+        '4' => [
+            'stt' => 'Putus / Problem',
+            'warna' => '',
+            'jumlah' => 0
+        ],
+        '5' => [
+            'stt' => 'No Order',
+            'warna' => '',
+            'jumlah' => 0
         ],
         '6' => [
             'stt' => 'Nyucuk',
@@ -70,7 +98,13 @@ class Machinemonitoringv2 extends MY_Controller {
         $this->status["3"]["warna"] = $this->warnaStatus[2];
         $this->status["4"]["warna"] = $this->warnaStatus[3];
         $this->status["5"]["warna"] = $this->warnaStatus[4];
-        $this->status["6"]["warna"] = $this->warnaStatus[5];
+        
+        $this->status_tri["1"]["warna"] = $this->warnaStatus[0];
+        $this->status_tri["2"]["warna"] = $this->warnaStatus[1];
+        $this->status_tri["3"]["warna"] = $this->warnaStatus[2];
+        $this->status_tri["4"]["warna"] = $this->warnaStatus[3];
+        $this->status_tri["5"]["warna"] = $this->warnaStatus[4];
+        $this->status_tri["6"]["warna"] = $this->warnaStatus[5];
     }
 
     public function index($dept = "WRD") {
@@ -91,7 +125,7 @@ class Machinemonitoringv2 extends MY_Controller {
         $model = new $this->m_global;
         $data["allMesin"] = $model->setTables("mesin")
                         ->setJoins("departemen", "departemen.kode = dept_id", "left")->setWheres(["mesin.status_aktif" => "t", "devid_esp > " => 0,"dept_id"=>$dept])
-                        ->setSelects(["dept_id", "departemen.nama"])->setGroups(["dept_id"])->getData();
+                        ->setSelects(["dept_id", "departemen.nama"])->getData();
 
         if (date("H:i:s") >= $this->waktuShip1 && date("H:i:s") < $this->waktuShip2) {
             $mulai = date("Y-m-d {$this->waktuShip1}");
@@ -125,6 +159,11 @@ class Machinemonitoringv2 extends MY_Controller {
         
         $durasis = $model->getData();
         $durasi = [];
+        $tempStt = $this->status;
+        if (strtolower($dept) === "tri"){
+        $tempStt = $this->status_tri;
+        }
+        
         foreach ($durasis as $key => $value) {
             $nm = "d{$value->devid}";
             if (isset($durasi[$nm])) {
@@ -138,16 +177,16 @@ class Machinemonitoringv2 extends MY_Controller {
                     $durasi[$nm]->total_up = 0;
                     $durasi[$nm]->total_down = $durasi[$nm]->time_running;
                     $durasi[$nm]->total_down_text = $this->con_min_days($durasi[$nm]->time_running);
-                    $this->status[$durasi[$nm]->state]["jumlah"] += 1;
+                    $tempStt[$durasi[$nm]->state]["jumlah"] += 1;
                 } else {
                     $durasi[$nm]->total_down = 0;
                     $durasi[$nm]->total_up = $durasi[$nm]->time_running;
                     $durasi[$nm]->total_up_text = $this->con_min_days($durasi[$nm]->time_running);
-                    $this->status["2"]["jumlah"] += 1;
+                    $tempStt["2"]["jumlah"] += 1;
                 }
                 continue;
             }
-            $value->status = $this->status[$value->state]["stt"];
+            $value->status = $tempStt[$value->state]["stt"];
             $value->total_up = $value->uptime / $value->total;
             $value->total_down = $value->downtime / $value->total;
             $value->total_up_text = $this->con_min_days($value->total_up);
@@ -207,7 +246,7 @@ GROUP BY devid;
 //        log_message("error",json_encode($drs));
         $data["durasiAll"] = $drs;
         $data["durasi"] = $durasi;
-        $data["status"] = $this->status;
+        $data["status"] = $tempStt;
         $data["warnaStatus"] = json_encode($this->warnaStatus);
         $data["state"] = json_encode($this->state);
         $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
@@ -308,13 +347,16 @@ GROUP BY devid;
                             ->setSelects(["state,devid,no_mesin,dept_id,mc_id,timelog"])->getData();
 
             $items = [];
+            $tempStts = $this->status;
+            if(strtolower($dept) === "tri")
+                $tempStts = $this->status_tri;
             foreach ($lists as $key => $value) {
                 $nm = "d{$value->devid}";
                 if (isset($items[$nm])) {
                     $items[$nm][] = [
                         "start" => $value->timelog,
                         "end" => $value->timelog,
-                        "status" => $this->status[$value->state]["warna"],
+                        "status" => $tempStts[$value->state]["warna"],
                         "dept_id" => $value->dept_id,
                         "state" => $value->state
                     ];
@@ -323,7 +365,7 @@ GROUP BY devid;
                     $items[$nm][] = [
                         "start" => $value->timelog,
                         "end" => $value->timelog,
-                        "status" => $this->status[$value->state]["warna"],
+                        "status" => $tempStts[$value->state]["warna"],
                         "dept_id" => $value->dept_id,
                         "state" => $value->state
                     ];
@@ -341,11 +383,11 @@ GROUP BY devid;
                     $states = "";
 
                     foreach ($items[$value["id"]] as $k => $val) {
-                        if ($tempStt !== $this->status[$val["state"]]["warna"]) {
+                        if ($tempStt !== $tempStts[$val["state"]]["warna"]) {
                             if ($tempStt !== "") {
                                 $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
                             }
-                            $tempStt = $this->status[$val["state"]]["warna"];
+                            $tempStt = $tempStts[$val["state"]]["warna"];
                             $tempStar = $val["start"];
                             $tempEnd = $val["end"];
                             $temDept = $val["dept_id"];
@@ -356,7 +398,7 @@ GROUP BY devid;
                             $interval = $date2 - $date1;
                             if ($interval > 100) {
                                 $insert [] = ["nama_mesin" => $name, "warna_status" => $tempStt, "start" => $tempStar, "end" => $tempEnd, "dept_id" => $temDept, "status" => $states];
-                                $tempStt = $this->status[$val["state"]]["warna"];
+                                $tempStt = $tempStts[$val["state"]]["warna"];
                                 $tempStar = $val["start"];
                                 $tempEnd = $val["end"];
                                 $temDept = $val["dept_id"];
