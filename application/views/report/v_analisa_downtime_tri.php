@@ -324,9 +324,9 @@
                     series: [
                         {name: 'Running', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#198754'}},
                         {name: 'No Response', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#dc3545'}},
-                        {name: 'Ganti Lembar', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#0d6efd'}},
+                        {name: 'Ganti Benang', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#0d6efd'}},
                         {name: 'Putus/Problem', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#ffc107'}},
-                        {name: 'Bongkar Pasang', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#212529'}},
+                        {name: 'No Order', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#212529'}},
                         {name: 'Nyucuk', type: 'bar', stack: 'wd_date_stack', itemStyle: {color: '#B27272'}}
                     ]
                 };
