@@ -52,14 +52,7 @@ class Analisadowntime extends MY_Controller {
                 "COUNT(IF(state = '5', 1, NULL)) as noorder"
             ];
             if (strtolower($depth) === 'tri') {
-                $select = [
-                    "COUNT(IF(state = '1', 1, NULL)) as running",
-                    "COUNT(IF(state = '2', 1, NULL)) as noresp",
-                    "COUNT(IF(state = '3', 1, NULL)) as benang",
-                    "COUNT(IF(state = '4', 1, NULL)) as problem",
-                    "COUNT(IF(state = '5', 1, NULL)) as noorder",
-                    "COUNT(IF(state = '6', 1, NULL)) as nyucuk"
-                ];
+                $select[] = "COUNT(IF(state = '6', 1, NULL)) as nyucuk";
             }
             $model->setTables("mesin mst")
                     ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
