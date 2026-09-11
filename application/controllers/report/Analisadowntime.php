@@ -31,9 +31,10 @@ class Analisadowntime extends MY_Controller {
     public function index($id_depth = "ADM", $depth = "WRD") {
         $model = new $this->m_global;
         $data['id_dept'] = $id_depth;
+        $data['dept'] = $depth;
         $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
         $data["mesin"] = $model->getData();
-        $this->load->view('report/v_analisa_downtime', $data);
+        $this->load->view('report/v_analisa_downtime_' . strtolower($depth), $data);
     }
 
     public function get_grafiks($depth = "WRD") {
@@ -43,20 +44,32 @@ class Analisadowntime extends MY_Controller {
             $mesin = $this->input->post("mesin");
 
             $model = new $this->m_global;
-
+            $select = [
+                "COUNT(IF(state = '1', 1, NULL)) as running",
+                "COUNT(IF(state = '2', 1, NULL)) as noresp",
+                "COUNT(IF(state = '3', 1, NULL)) as benang",
+                "COUNT(IF(state = '4', 1, NULL)) as problem",
+                "COUNT(IF(state = '5', 1, NULL)) as noorder"
+            ];
+            if (strtolower($depth) === 'tri') {
+                $select = [
+                    "COUNT(IF(state = '1', 1, NULL)) as running",
+                    "COUNT(IF(state = '2', 1, NULL)) as noresp",
+                    "COUNT(IF(state = '3', 1, NULL)) as benang",
+                    "COUNT(IF(state = '4', 1, NULL)) as problem",
+                    "COUNT(IF(state = '5', 1, NULL)) as noorder",
+                    "COUNT(IF(state = '6', 1, NULL)) as nyucuk"
+                ];
+            }
             $model->setTables("mesin mst")
-                            ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
+                    ->setJoins("log_mesin log", "mst.devid_esp=log.devid")->setWheres(["status_aktif" => "t"])
                     ->setSelects([
                         "COUNT(DISTINCT log.devid) as count_mesin",
                         "date(timelog) as tanggal",
                         "DATE_FORMAT(timelog, '%e %M') as dt",
                         "COUNT(*) AS total_log",
-                        "COUNT(IF(state = '1', 1, NULL)) as running",
-                        "COUNT(IF(state = '2', 1, NULL)) as noresp",
-                        "COUNT(IF(state = '3', 1, NULL)) as benang",
-                        "COUNT(IF(state = '4', 1, NULL)) as problem",
-                        "COUNT(IF(state = '5', 1, NULL)) as noorder"
-                    ])->setWheres([
+                    ])
+                    ->setSelects($select)->setWheres([
                         "DATE(timelog) >=" => $tanggals[0],
                         "DATE(timelog) <=" => $tanggals[1],
                         "dept_id" => $depth
@@ -84,6 +97,7 @@ class Analisadowntime extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $imageData = $this->input->post("img");
             $tbl = $this->input->post("tbl");
+            $dept = $this->input->post("dept");
 
             if (preg_match('/^data:image\/(\w+);base64,/', $imageData)) {
                 $imageData = substr($imageData, strpos($imageData, ',') + 1);
@@ -121,11 +135,16 @@ class Analisadowntime extends MY_Controller {
             $sheet->setCellValue("E{$row}", 'Putus/Problem (Hrs)');
             $sheet->setCellValue("F{$row}", 'Bongkar Pasang (Hrs)');
             $sheet->setCellValue("G{$row}", 'Total Capacity');
+            if (strtolower($dept) === 'tri') {
+                $sheet->setCellValue("G{$row}", 'Nyucuk (Hrs)');
+                $sheet->setCellValue("H{$row}", 'Total Capacity');
+            }
             $trun = 0;
             $noTresp = 0;
             $Tbenang = 0;
             $Tproblem = 0;
             $Toff = 0;
+            $Tnyucuk = 0;
             $Tcps = 0;
             foreach ($tbl["tgl"] as $key => $value) {
                 $row++;
@@ -134,12 +153,14 @@ class Analisadowntime extends MY_Controller {
                 $benang = $tbl["benang"][$key];
                 $problem = $tbl["problem"][$key];
                 $off = $tbl["off"][$key];
+                $nyucuk = $tbl["nyucuk"][$key] ?? 0;
                 $cps = $tbl["cps"][$key];
                 $trun += $run;
                 $noTresp += $noresp;
                 $Tbenang += $benang;
                 $Tproblem += $problem;
                 $Toff += $off;
+                $Tnyucuk += $nyucuk;
                 $Tcps += $cps;
                 $sheet->setCellValue("A{$row}", $value);
                 $sheet->setCellValue("B{$row}", $run);
@@ -148,6 +169,10 @@ class Analisadowntime extends MY_Controller {
                 $sheet->setCellValue("e{$row}", $problem);
                 $sheet->setCellValue("f{$row}", $off);
                 $sheet->setCellValue("g{$row}", $cps);
+                if (strtolower($dept) === 'tri') {
+                    $sheet->setCellValue("g{$row}", $nyucuk);
+                    $sheet->setCellValue("h{$row}", $cps);
+                }
             }
             $row++;
             $sheet->setCellValue("A{$row}", "TOTAL MTD");
@@ -157,13 +182,18 @@ class Analisadowntime extends MY_Controller {
             $sheet->setCellValue("e{$row}", $Tproblem);
             $sheet->setCellValue("f{$row}", $Toff);
             $sheet->setCellValue("g{$row}", $Tcps);
-            
+            if (strtolower($dept) === 'tri') {
+                $sheet->setCellValue("g{$row}", $Tnyucuk);
+                $sheet->setCellValue("h{$row}", $Tcps);
+            }
+
             $sheet->getStyle("B14:B{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("C14:C{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("D14:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E14:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("F14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("G14:G{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("H14:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
             $filename = "report analisadowntime {$tanggal}";
             $url = "dist/storages/report/kinerjamesin";
