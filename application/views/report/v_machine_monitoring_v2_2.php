@@ -646,7 +646,7 @@
                             return params.marker + params.name;
                         }
                     },
-                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '30%', containLabel: true},
+                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '40%', containLabel: true},
                     xAxis: {
                         type: 'time',
                         position: 'top',
@@ -805,13 +805,14 @@
             }
 
             // --- 5. Auto Scroll Logic ---
-            function initAutoScroll() {
+            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            async function initAutoScroll() {
                 const scrollContainer = document.getElementById('scroll-container');
                 let isPaused = false;
-
                 scrollContainer.addEventListener('mouseenter', () => isPaused = true);
                 scrollContainer.addEventListener('mouseleave', () => isPaused = false);
-
+                await delay(5000);
                 setInterval(() => {
                     if (!isPaused) {
                         scrollContainer.scrollTop += 1;
