@@ -1,0 +1,112 @@
+.dept-card {
+    background: #FFF;
+    border-radius: 16px;
+    text-align: center;
+    padding: 35px 15px;
+    margin-bottom: 25px;
+    cursor: pointer;
+    transition: .25s;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+    text-decoration: none;
+}
+
+/* .dept-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .15);
+    text-decoration: none;
+} */
+
+.dept-card:hover{
+    transform:translateY(-3px);
+    border-color:#14d5c6;
+    background:#005B60;;
+    /* box-shadow: 0 12px 30px rgba(0, 0, 0, .15); */
+    box-shadow:0 0 18px rgba(0, 0, 0, .15);
+    text-decoration:none;
+    color:#FFF;
+}
+
+
+.dept-card:focus,
+.dept-card:active,
+.dept-card:visited {
+    text-decoration: none;
+    color: #FFF;
+}
+
+.dept-icon {
+    width: 90px;
+    height: 90px;
+    margin: auto;
+    border-radius: 50%;
+    background: #0f7c73;
+    color: #FFF;
+    font-size: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dept-name {
+    margin-top: 22px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--km-topbar-bg);
+    line-height: 1.2;
+    min-height: 54px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2; 
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.dept-card:hover .dept-name{
+    color:#FFF;;
+}
+
+
+.dept-card.disabled {
+    opacity: .35;
+    filter: grayscale(100%);
+    cursor: not-allowed;
+    position: relative;
+}
+
+.dept-card.disabled::after {
+    /* content:"COMING SOON"; */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #d9534f;
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+
+/* Link pembungkus */
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited {
+    text-decoration: none;
+}
+
+.dept-link.disabled {
+    cursor: not-allowed;
+}
+
+.dept-link.disabled .dept-card {
+    opacity: .35;
+    filter: grayscale(100%);
+    cursor: not-allowed;
+}
+
+.dept-link.disabled:hover {
+    text-decoration: none;
+}

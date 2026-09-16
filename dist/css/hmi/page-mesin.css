@@ -1,0 +1,259 @@
+.machine-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:18px;
+    padding:0 20px;
+}
+
+.machine-card{
+    position: relative; /* penting untuk badge */
+
+    background:#FFF;
+    /* border:2px solid #2f3e55; */
+    border-radius:14px;
+    height:135px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    transition:.2s;
+    color:#212529;
+    text-decoration:none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+    overflow:hidden;
+}
+
+.machine-card:hover{
+    transform:translateY(-3px);
+    /* border-color:#14d5c6; */
+    background:#005B60;;
+    box-shadow:0 0 18px rgba(20,213,198,.35);
+    text-decoration:none;
+    color:#FFF;
+}
+
+.machine-card:focus,
+.machine-card:active,
+.machine-card:visited{
+    text-decoration:none;
+    color:#FFF;
+}
+
+.machine-card i{
+    font-size:44px;
+    color:#14d5c6;
+    margin-bottom:16px;
+}
+
+.machine-card:hover i{
+    color:#14d5c6;
+}
+
+.machine-name{
+    width:90%;
+    text-align:center;
+    font-size:18px;
+    font-weight:700;
+    line-height:1.25;
+    word-break:break-word;
+    color: var(--km-topbar-bg);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2; 
+    overflow: hidden;
+}
+
+.machine-card:hover .machine-name{
+    color:#FFF;;
+}
+
+
+.machine-mo-badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+
+    min-width:34px;
+    height:24px;
+    padding:0 8px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#E8F1F5;
+    color:#005B60;
+
+    border:1px solid #C7DDE0;
+    border-radius:12px;
+
+    font-size:11px;
+    font-weight:700;
+    line-height:1;
+
+    z-index:2;
+}
+    
+.machine-card:hover .machine-mo-badge{
+    background:#FFFFFF;
+    color:#005B60;
+    border-color:#FFFFFF;
+}
+
+
+
+/* =========================
+   PAGE HEADER ACTION
+========================= */
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.page-total {
+    white-space: nowrap;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.mc-search {
+    position: relative;
+    width: 250px;
+    height: 20px;
+}
+
+.mc-search > i {
+    position: absolute;
+    left: 12px;
+    top: 70%;
+    transform: translateY(-50%);
+
+    color: #6C757D;
+    font-size: 15px;
+
+    z-index: 2;
+    pointer-events: none;
+    cursor: default;
+}
+
+.mc-search input {
+    width: 100%;
+    height: 30px;
+    box-sizing: border-box;
+
+    padding: 0 38px 0 36px;
+
+    border: 1px solid #D0D7DE;
+    border-radius: 7px;
+
+    background: #FFFFFF;
+    color: #212529;
+    font-size: 14px;
+    outline: none;
+}
+
+.mc-search input::placeholder {
+    color: #9AA4AE;
+}
+
+.mc-search input:focus {
+    border-color: #00828A;
+    box-shadow: 0 0 0 2px rgba(0, 130, 138, .12);
+}
+
+
+/* Clear */
+.mc-search button {
+    display: none;
+
+    position: absolute;
+    right: 8px;
+    top: 70%;
+    transform: translateY(-50%);
+
+    border: 0;
+    background: transparent;
+
+    color: #6C757D;
+    cursor: pointer;
+
+    padding: 5px;
+}
+
+.mc-search button:hover {
+    color: #212529;
+}
+
+.mc-search.active button {
+    display: block;
+}
+
+
+/* =========================================
+   <= 991px
+   DEFAULT : ICON SAJA
+========================================= */
+
+@media (max-width: 991px) {
+
+    .mc-search {
+        width: 38px;
+        height: 25px;
+        transition: width .25s ease;
+    }
+
+    .mc-search > i {
+        pointer-events: auto;
+        cursor: pointer;
+        /* top :50%; */
+    }
+
+    .mc-search input {
+        width: 38px;
+        height: 30px;
+
+        padding: 0;
+
+        border-color: transparent;
+        background: transparent;
+
+        opacity: 0;
+        pointer-events: none;
+
+        transition:
+        width .25s ease,
+        opacity .2s ease;
+    }
+
+    .mc-search.active {
+        width: 240px;
+    }
+
+    .mc-search.active input {
+        width: 100%;
+
+        padding: 0 38px 0 36px;
+
+        background: #FFFFFF;
+        border-color: #D0D7DE;
+
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .mc-search.active > i {
+        color: #00828A;
+    }
+
+    .mc-search button {
+        top: 50%;
+    }
+}

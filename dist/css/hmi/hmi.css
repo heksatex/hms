@@ -1,0 +1,734 @@
+  :root {
+    /* Karl Mayer Color Palette */
+    --km-topbar-bg: #005B60;
+    --km-topbar-dark: #004246;
+    --km-teal: #00828A;
+    --km-bg: #F0F4F7;
+    --km-panel-bg: #FFFFFF;
+    --km-text: #212529;
+    --km-text-muted: #6C757D;
+    --km-border: #D0D7DE;
+    --km-btn-bg: #E4E9ED;
+    --km-active-blue: #1C355E;
+    --km-num-green: #007A5A;
+    --km-value-blue: #0072CE;
+  }
+
+  html,
+  body {
+    background-color: var(--km-bg);
+    font-family: "Segoe UI";
+    height: 100vh;
+  }
+
+  /* .hmi-header {
+    background-color: var(--km-topbar-bg);
+    color: #FFFFFF;
+    padding: 12px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .15);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  } */
+
+  .hmi-header {
+    background-color: var(--km-topbar-bg);
+    color: #FFFFFF;
+    padding: 10px 16px;
+    /* box-shadow: 0 2px 10px rgba(0, 0, 0, .15); */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 62px;
+  }
+
+  .hmi-body {
+    position: fixed;
+    top: 60px;
+    /* sesuaikan tinggi header */
+    left: 0;
+    right: 0;
+    bottom: 68px;
+    /* tinggi footer */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 20px 20px 20px;
+  }
+
+  .hmi-body::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .hmi-body::-webkit-scrollbar-thumb {
+    background: #14d5c6;
+    border-radius: 20px;
+  }
+
+  .hmi-body::-webkit-scrollbar-track {
+    background: #dfe7ec;
+  }
+
+  .btn-hmi-refresh {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, .15);
+    background: #17324c;
+    color: #FFF;
+    text-decoration: none;
+    transition: .25s;
+  }
+
+  .btn-hmi-refresh:hover {
+    background: #14d5c6;
+    color: #16202d;
+    text-decoration: none;
+  }
+
+  .btn-hmi-refresh i {
+    font-size: 18px;
+  }
+
+
+  @media(max-width:768px) {
+
+    .btn-hmi-refresh,
+    .btn-hmi-logout {
+      width: 46px;
+      height: 46px;
+      padding: 0;
+    }
+
+    .btn-hmi-refresh span,
+    .btn-hmi-logout span {
+      display: none;
+    }
+
+    .operator-icon {
+      display: none !important;
+    }
+
+  }
+
+
+  .logo .title {
+    font-size: 30px;
+    color: #FFFFFF;
+    font-weight: 700;
+  }
+
+  .logo .sub {
+    font-size: 20px;
+    letter-spacing: 2px;
+  }
+
+  .logo .sub {
+    display: none;
+  }
+
+  .page-header {
+    margin: 0px 0px 10px;
+  }
+
+  .page-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .page-title {
+    flex: 1;
+  }
+
+  .page-title h2 {
+    margin: 0;
+    color: var(--km-topbar-bg);
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .page-title h2 i {
+    margin-right: 12px;
+  }
+
+  .page-title p {
+    margin-top: 10px;
+    color: #666;
+    font-size: 18px;
+  }
+
+  .page-total {
+    margin-top: 12px;
+    padding: 5px 10px;
+
+    background: var(--km-topbar-dark);
+    color: #ffffff;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-weight: 1000;
+
+    box-shadow: 0 3px 10px rgba(20, 213, 198, .25);
+  }
+
+
+  .page-title h2 small {
+    margin-left: 12px;
+    padding: 5px 10px;
+
+    background: var(--km-topbar-dark);
+    ;
+    color: #ffffff;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-weight: 1000;
+    letter-spacing: 0;
+  }
+
+
+  /* Tombol Back */
+  .btn-back {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    border: 2px solid var(--km-topbar-bg);
+    ;
+
+    color: var(--km-topbar-bg);
+    ;
+    background: #fff;
+
+    text-decoration: none;
+
+    transition: .2s;
+  }
+
+  .btn-back i {
+    font-size: 22px;
+    margin: 0;
+  }
+
+  .btn-back:hover {
+    color: #FFFFFF;
+    background: var(--km-topbar-bg);
+    ;
+    text-decoration: none;
+  }
+
+  .page-title {
+    flex: 1;
+  }
+
+
+  .header-machine-clock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    height: 100%;
+  }
+
+
+  /* =========================== 
+      Header nama Mesin 
+=========================== */
+
+
+
+
+  /* .header-machine-name {
+      position: absolute;
+      right: calc(50% + 65px);
+      left: calc(0%);
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      background: var(--km-topbar-dark);
+        padding: 8px 24px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 24px;
+        font-weight: bold;
+        color: #80CBC4;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  } */
+
+  .machine-header-left {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .machine-tag {
+    background: var(--km-topbar-dark);
+    padding: 5px 24px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 24px;
+    font-weight: bold;
+    color: #f7f7f7;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  .top-btn-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    fill: #FFFFFF;
+  }
+
+  .top-btn-icon svg {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    flex-shrink: 0;
+    fill: #FFFFFF;
+  }
+
+  .top-btn-icon:hover {
+    background: rgba(255, 255, 255, .12);
+  }
+
+  .top-btn-icon:active {
+    transform: scale(.92);
+  }
+
+  /* =========================== 
+      CLOCK 
+=========================== */
+
+
+  .clock-wrapper {
+    height: 46px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-left: 0;
+  }
+
+  #clock {
+    font-size: 24px;
+    /* font-weight: 700; */
+    font-weight: bold;
+    /* line-height: 28px; */
+    line-height: 1.2;
+    color: #fff;
+    font-family: 'Consolas', monospace;
+  }
+
+  #tanggal {
+    font-size: 14px;
+    line-height: 18px;
+    color: rgba(255, 255, 255, .85);
+    font-family: 'Consolas', monospace;
+  }
+
+
+  /* ===========================
+   OPERATOR
+=========================== */
+
+  .operator {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+  }
+
+  /* Bagian atas (Icon + Nama) */
+  .operator-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  /* Tombol bawah */
+  .operator-action {
+    height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Info Operator */
+  .operator-info {
+    text-align: left;
+  }
+
+  .operator-info small {
+    display: block;
+    color: #E0F2F1;
+    font-size: 13px;
+    letter-spacing: 1px;
+    font-weight: bold;
+  }
+
+  .operator-info strong {
+    display: block;
+    font-size: 22px;
+    color: #FFF;
+    font-weight: 600;
+  }
+
+  .operator-action .top-btn-icon,
+  .operator-action .btn-hmi-logout {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+
+  /* ===========================
+   ICON USER
+=========================== */
+
+  .operator-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #FFF;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 28px;
+    color: var(--km-topbar-bg);
+
+    flex-shrink: 0;
+  }
+
+
+  .btn-hmi-refresh,
+  .btn-hmi-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    /* border: 1px solid rgba(255, 255, 255, .15); */
+    background: rgba(255, 255, 255, .08);
+    color: #FFF;
+    text-decoration: none;
+    transition: .25s;
+  }
+
+  .btn-hmi-refresh {
+    background-color: var(--km-topbar-bg);
+  }
+
+  .btn-hmi-logout:hover {
+    background: #e53935;
+    /* border-color: #e53935; */
+    color: #FFF;
+    text-decoration: none;
+  }
+
+  /* .btn-hmi-refresh:hover {
+    background: #14d5c6;
+    color: #16202d;
+    text-decoration: none;
+  }
+
+  */
+  .btn-hmi-refresh i,
+  .btn-hmi-logout i {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-hmi-refresh:hover {
+    background: rgba(255, 255, 255, .18);
+    color: #FFF;
+  }
+
+  .btn-hmi-refresh i,
+  .btn-hmi-logout i {
+    font-size: 22px;
+  }
+
+  .hmi-footer {
+    z-index: 1000;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 68px;
+    background: #16202d;
+    display: flex;
+  }
+
+  .footer-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    color: #FFF !important;
+    cursor: pointer;
+
+    text-decoration: none;
+    transition: all .25s ease;
+  }
+
+  .footer-menu i {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+
+  /* Hover */
+  .footer-menu:hover {
+    text-decoration: none;
+    color: #FFF;
+    background: #1b3546;
+    /* warna hover */
+  }
+
+  /* Link states */
+  .footer-menu:focus,
+  .footer-menu:active,
+  .footer-menu:visited {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Active */
+  .footer-menu.active {
+    color: #14d5c6;
+    background: #0f2d3b;
+  }
+
+
+  /* ===========================================
+   RESPONSIVE HEADER  TABLET
+=========================================== */
+  @media (max-width: 991px) {
+
+    .hmi-body {
+      padding-top: 15px;
+      top: 60px;
+    }
+
+    /* .hmi-header {
+      padding: 12px 15px;
+    } */
+
+    .hmi-header .row {
+      display: flex;
+      align-items: center;
+    }
+
+    .hmi-header .col-sm-4 {
+      width: 33.333333%;
+      float: none;
+    }
+
+
+    /* =========================
+       LOGO
+    ========================= */
+
+    .logo .sub {
+      display: none;
+    }
+
+    .logo .title {
+      font-size: 30px;
+    }
+
+    /* =========================
+       CLOCK
+    ========================= */
+
+    #clock {
+      font-size: 24px;
+      /* margin-top: 5px; */
+      line-height: 1;
+    }
+
+    #tanggal {
+      font-size: 14px;
+      margin-top: 3px;
+      line-height: 1.2;
+    }
+
+    /* =========================
+       OPERATOR
+    ========================= */
+
+    .hmi-header .col-sm-4:last-child {
+      display: flex;
+      justify-content: flex-end;
+      padding-right: 10;
+    }
+
+    .operator {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+
+    .operator-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+
+    .operator-info {
+      text-align: left;
+      min-width: 0;
+    }
+
+    .operator-info strong {
+      display: none;
+    }
+
+    .operator-info small {
+      display: block;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100px;
+    }
+
+    .operator-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* =========================
+       BUTTON
+    ========================= */
+
+    .operator-action {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 0;
+      flex-shrink: 0;
+    }
+
+    .btn-hmi-refresh,
+    .btn-hmi-logout {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-hmi-refresh span,
+    .btn-hmi-logout span {
+      display: none;
+    }
+
+    /* =========================
+       PAGE
+    ========================= */
+
+    .page-title h2 small {
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .page-total {
+      margin-left: auto;
+    }
+  }
+
+  .empty-data {
+    padding: 0px 20px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1d2738;
+  }
+
+  .text-danger {
+    color: #dc3545 !important;
+  }
+
+  @media (max-width: 1520px) {
+    .machine-tag {
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 1020px) {
+    .machine-tag {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .machine-tag {
+      max-width: 130px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .machine-tag {
+      max-width: 100px;
+    }
+  }

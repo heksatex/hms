@@ -1,0 +1,652 @@
+/* ==========================
+   KANBAN HEADER
+========================== */
+
+.kanban-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.kanban-title {
+    margin: 0;
+    color: #14d5c6;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.kanban-total {
+    background: #14d5c6;
+    color: #FFF;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* ==========================
+   GRID
+========================== */
+
+.kanban-grid-layout {
+    display: grid;
+    /* grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); */
+    grid-template-columns:1fr;
+    gap: 20px;
+    padding: 0px 20px;
+}
+
+/* ==========================
+   CARD
+========================== */
+
+.kanban-card-item {
+
+    background: #FFF;
+    border: 2px solid #dbe3ea;
+    border-radius: 14px;
+    padding: 20px;
+    transition: .25s;
+    cursor: pointer;
+
+}
+
+.kanban-card-item:hover {
+    border-color: var(--km-teal);
+    box-shadow: 0 8px 20px rgba(20, 213, 198, .18);
+    transform: translateY(-2px);
+
+}
+
+.kanban-card-item.active {
+    border-color: var(--km-teal);
+    box-shadow: 0 0 0 3px rgba(20, 213, 198, .18);
+}
+
+/* ==========================
+   TITLE
+========================== */
+
+.kanban-card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.mo-number {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1d2738;
+}
+
+.mo-item-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: #4d5968;
+    margin-bottom: 18px;
+    min-height: 48px;
+}
+
+/* ==========================
+   INFO
+========================== */
+
+.mo-item-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+
+    border-top: 1px solid #edf2f5;
+    padding-top: 15px;
+}
+
+.mo-item-info div {
+    text-align: center;
+    min-width: 0;
+}
+
+.mo-item-info label {
+    display: block;
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.mo-item-info strong {
+    display: block;
+    color: #16202d;
+    font-size: 15px;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+/* ==========================
+   STATUS
+========================== */
+
+.kanban-status-tag {
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.status-active {
+    background: var(--km-topbar-bg);
+    color: #FFF;
+}
+
+.status-pending {
+    background: #eceff1;
+    color: #666;
+}
+
+.number-mo {
+    background: var(--km-topbar-bg);
+    color: #FFF;
+}
+
+/* ==========================
+   PROGRESS
+========================== */
+
+.mo-progress {
+    margin-top: -5px;
+    margin-bottom: 5px;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #8a949f;
+}
+
+.progress-header strong {
+    color: var(--km-topbar-bg);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: #edf2f5;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--km-topbar-bg);
+    border-radius: 10px;
+    transition: width .4s ease;
+}
+
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited {
+    text-decoration: none;
+}
+
+/* =========================
+   PAGE HEADER ACTION
+========================= */
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.page-total {
+    white-space: nowrap;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.mo-search {
+    position: relative;
+    width: 250px;
+    height: 20px;
+}
+
+.mo-search>i {
+    position: absolute;
+    left: 12px;
+    top: 70%;
+    transform: translateY(-50%);
+
+    color: #6C757D;
+    font-size: 15px;
+
+    z-index: 2;
+    pointer-events: none;
+    cursor: default;
+}
+
+.mo-search input {
+    width: 100%;
+    height: 30px;
+    box-sizing: border-box;
+
+    padding: 0 38px 0 36px;
+
+    border: 1px solid #D0D7DE;
+    border-radius: 7px;
+
+    background: #FFFFFF;
+    color: #212529;
+    font-size: 14px;
+    outline: none;
+}
+
+.mo-search input::placeholder {
+    color: #9AA4AE;
+}
+
+.mo-search input:focus {
+    border-color: #00828A;
+    box-shadow: 0 0 0 2px rgba(0, 130, 138, .12);
+}
+
+
+/* Clear */
+.mo-search button {
+    display: none;
+
+    position: absolute;
+    right: 8px;
+    top: 70%;
+    transform: translateY(-50%);
+
+    border: 0;
+    background: transparent;
+
+    color: #6C757D;
+    cursor: pointer;
+
+    padding: 5px;
+}
+
+.mo-search button:hover {
+    color: #212529;
+}
+
+.mo-search.active button {
+    display: block;
+}
+
+
+/* =========================================
+   <= 991px
+   DEFAULT : ICON SAJA
+========================================= */
+
+@media (max-width: 991px) {
+
+    .mo-search {
+        position: relative;
+
+        width: 30px;
+        height: 30px;
+
+        padding: 0;
+
+        border: 1px solid #D0D7DE;
+        border-radius: 7px;
+
+        background: #FFFFFF;
+
+        box-sizing: border-box;
+
+        transition: width .25s ease,
+                    border-color .2s ease,
+                    box-shadow .2s ease;
+        margin-top:10px;
+    }
+
+    .mo-search > i {
+        position: absolute;
+
+        left: 50%;
+        top: 50%;
+
+        transform: translate(-50%, -50%);
+
+        color: #6C757D;
+        font-size: 14px;
+
+        z-index: 3;
+
+        pointer-events: auto;
+        cursor: pointer;
+    }
+
+
+    /* INPUT SAAT TERTUTUP */
+
+    .mo-search input {
+        width: 30px;
+        height: 28px;
+
+        padding: 0;
+
+        border: 0;
+        outline: none;
+
+        background: transparent;
+
+        opacity: 0;
+        pointer-events: none;
+
+        box-sizing: border-box;
+    }
+
+
+    /* =========================
+       ACTIVE
+    ========================= */
+
+    .mo-search.active {
+        width: 240px;
+        height: 30px;
+
+        border: 1px solid #00828A;
+
+        box-shadow: 0 0 0 2px rgba(0, 130, 138, .12);
+
+        background: #FFFFFF;
+    }
+
+    .mo-search.active > i {
+        left: 13px;
+        top: 50%;
+
+        transform: translateY(-50%);
+
+        color: #00828A;
+
+        pointer-events: none;
+    }
+
+    .mo-search.active input {
+        width: 100%;
+        height: 28px;
+
+        padding: 0 38px 0 34px;
+
+        border: 0;
+        outline: none;
+
+        background: transparent;
+
+        opacity: 1;
+        pointer-events: auto;
+
+        line-height: 28px;
+
+        box-sizing: border-box;
+    }
+
+    .mo-search.active input::placeholder {
+        color: #9AA4AE;
+    }
+
+
+    /* CLEAR */
+
+    .mo-search button {
+        position: absolute;
+
+        right: 6px;
+        top: 50%;
+
+        transform: translateY(-50%);
+
+        padding: 4px;
+
+        border: 0;
+        background: transparent;
+
+        color: #6C757D;
+
+        z-index: 4;
+    }
+
+    .mo-search button:hover {
+        color: #212529;
+    }
+    /* =========================
+       DEFAULT MACHINE
+    ========================= */
+    
+    .btn-unset-default.is-visible {
+        width: 30px;
+        height: 30px;
+    
+        padding: 0;
+    
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    
+        gap: 0;
+    
+        font-size: 0;
+    }
+    
+    .btn-unset-default.is-visible i {
+        font-size: 13px;
+    }
+}
+
+
+
+/* =========================================
+   UNSET DEFAULT
+========================================= */
+
+.btn-unset-default {
+    display: none;
+    height: 30px;
+    padding: 0 11px;
+
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    border: 1px solid #D0D7DE;
+    border-radius: 7px;
+
+    background: #FFFFFF;
+    color: #6C757D;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+    white-space: nowrap;
+
+    transition: all .2s ease;
+    margin-top:10px;
+}
+
+.btn-unset-default.is-visible {
+    display: inline-flex;
+}
+
+.btn-unset-default i {
+    font-size: 12px;
+}
+
+.btn-unset-default:hover {
+    color: #dc3545;
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.btn-unset-default:active {
+    transform: scale(.97);
+}
+
+.btn-unset-default:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, .12);
+}
+
+
+/*
+.mo-show-all {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    height: 38px;
+    margin-left: 10px;
+}
+
+.mo-show-all label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 7px 12px;
+    background: #fff;
+    border: 1px solid #D0D7DE;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.mo-show-all input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+ */
+@media (max-width: 990px) {
+
+    .mo-show-all {
+        margin-left: 6px;
+    }
+
+    .mo-show-all label {
+        padding: 4px 4px;
+        font-size: 12px;
+    }
+
+
+    .mo-show-all span {
+        display: none;
+    }
+
+}
+
+
+
+
+.mo-show-all {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--km-border);
+    border-radius: 6px;
+    color: var(--km-text);
+    font-size: 12px;
+    font-weight: 1000;
+    cursor: pointer;
+    user-select: none;
+    transition: all .15s ease;
+}
+
+.mo-show-all:hover {
+    background: #f5f8fa;
+    border-color: var(--km-teal);
+}
+
+.mo-show-all:checked {
+    border-color: var(--km-teal);
+}
+
+.mo-show-all label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+
+/* Checkbox */
+.mo-show-all input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 17px;
+    height: 17px;
+    margin: 0;
+
+    border: 2px solid #aeb8c2;
+    border-radius: 4px;
+    background: #fff;
+
+    cursor: pointer;
+    position: relative;
+    transition: all .15s ease;
+}
+
+.mo-show-all:has(input[type="checkbox"]:checked) {
+    border-color: var(--km-teal);
+}
+
+/* Checked */
+.mo-show-all input[type="checkbox"]:checked {
+    background: var(--km-teal);
+    border-color: var(--km-teal);
+}
+
+/* Check icon */
+.mo-show-all input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+
+    left: 4px;
+    top: 1px;
+
+    width: 5px;
+    height: 9px;
+
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+
+    transform: rotate(45deg);
+}
+
+/* Focus */
+.mo-show-all input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 130, 138, .15);
+}
+
+
+
