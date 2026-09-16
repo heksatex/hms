@@ -1,0 +1,280 @@
+  /* 1. TOP HEADER BAR */
+  .top-bar {
+      background-color: var(--km-topbar-bg);
+      color: #FFFFFF;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 15px;
+      font-weight: 600;
+      position: relative;
+  }
+
+  .top-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 1;
+  }
+
+  .top-btn-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+  }
+
+  .top-btn-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #FFFFFF;
+  }
+
+  .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 25px;
+      font-weight: bold;
+  }
+
+  .status-badge span {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+  }
+
+  .status-circle {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #FFFFFF;
+      border-radius: 50%;
+      display: inline-block;
+      background-color: #22c55e;
+      animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+
+      0%,
+      100% {
+          opacity: 1;
+      }
+
+      50% {
+          opacity: 0.3;
+      }
+  }
+
+  /* Machine Tag di Posisi Tengah */
+  .top-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+
+  .machine-tag1 {
+      background: var(--km-topbar-dark);
+      padding: 5px 24px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: bold;
+      color: #FFFFFF;
+      letter-spacing: 1px;
+      white-space: nowrap;
+  }
+
+  /* Top Right: Tanggal & Jam */
+  .top-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 15px;
+      color: #E0F2F1;
+      z-index: 1;
+  }
+
+  .datetime-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-family: 'Consolas', monospace;
+      line-height: 1.2;
+  }
+
+  .datetime-date {
+      font-size: 14px;
+      color: #B2DFDB;
+      font-weight: 500;
+  }
+
+  .datetime-time {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFFFFF;
+  }
+
+  .top-right-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 15px;
+  }
+
+  .item-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #FFF;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 28px;
+      color: var(--km-topbar-bg);
+      ;
+
+      flex-shrink: 0;
+  }
+
+  .item-info small {
+      display: block;
+      color: #E0F2F1;
+      font-size: 13px;
+      letter-spacing: 1px;
+      font-weight: bold;
+  }
+
+
+  @media (max-width: 991px) {
+
+      .status-badge {
+          max-width: 300px;
+          padding: 4px 8px;
+          font-size: 14px;
+          line-height: 11px;
+          white-space: normal;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          border-radius: 12px;
+      }
+
+      .status-badge span:first-child {
+          max-width: 200px;
+          white-space: normal;
+          line-height: 21px;
+      }
+
+      .status-circle {
+          flex-shrink: 0;
+      }
+
+      .item-info small {
+          display: block;
+          font-size: 12px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 100px;
+      }
+
+      .item-icon {
+          width: 40px;
+          height: 40px;
+          font-size: 18px;
+          flex-shrink: 0;
+      }
+  }
+
+  @media (max-width: 768px) {
+
+      .status-badge span:first-child {
+          display: none;
+      }
+
+      .status-badge:before {
+          content: "Produksi"
+      }
+
+      .item-icon {
+          display: none;
+      }
+  }
+
+
+  
+  @media (max-width: 1150px) {
+
+    .status-badge span:first-child {
+        display: none;
+    }
+
+    .status-badge:before {
+          content: "Produksi berlangsung"
+      }
+
+      .item-icon {
+          display: none;
+      }
+
+    .status-badge span:first-child {
+      max-width: 270px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .status-badge span:first-child {
+      max-width: 220px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .status-badge span:first-child {
+      max-width: 100px;
+    }
+  }
+
+
+  .logout-btn {
+     color: #FFF;
+      font-size: 22px;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+
+
+  .logout-btn:hover {
+      background: #e53935;
+      /* border-color: #e53935; */
+      color: #FFF;
+      text-decoration: none;
+  }
+
+  a,
+  a:hover,
+  a:focus,
+  a:active,
+  a:visited {
+      text-decoration: none;
+  }
