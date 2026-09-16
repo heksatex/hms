@@ -369,8 +369,8 @@
             .main-content {
                 margin-left: var(--sidebar-width);
                 background-color: #f8f9fa;
-/*                min-height: 100vh;
-                padding: 20px;*/
+                /*                min-height: 100vh;
+                                padding: 20px;*/
                 width: 100%;
                 transition: all 0.3s ease;
             }
@@ -403,7 +403,7 @@
                 opacity: 0;
                 visibility: hidden;
             }
-            
+
             .dddr {
                 z-index: -1 !important;
             }
@@ -422,9 +422,9 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div>
                     <div class="fw-bold fs-6 text-dark"><i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - WARPING DASAR</div>
-                    
+
                 </div>
-                
+
             </div>
             <!-- METRICS STRIP -->
             <div class="row g-2">
@@ -449,13 +449,13 @@
                 </div>
                 <div class="col-md-3">
                     <div class="d-flex justify-content-end align-items-center gap-2">
-                    <button class="btn btn-sm btn-outline-warning text-dark border-warning fw-semibold btn-update-benang" type="button">
-                        <i class="fa-solid fa-wand-magic-sparkles text-warning me-1"></i> Update Benang
-                    </button>
-                    <button class="btn btn-sm btn-outline-success fw-semibold" onclick="exportToExcel()">
-                        <i class="fa-solid fa-file-excel me-1"></i> Export Excel
-                    </button>
-                </div>
+                        <button class="btn btn-sm btn-outline-warning text-dark border-warning fw-semibold btn-update-benang" type="button">
+                            <i class="fa-solid fa-wand-magic-sparkles text-warning me-1"></i> Update Benang
+                        </button>
+                        <button class="btn btn-sm btn-outline-success fw-semibold" onclick="exportToExcel()">
+                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -635,110 +635,110 @@
     <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
     <script type="text/javascript" src="<?= base_url('dist/js/html2canvas.js') ?>"></script>
     <script type="text/javascript">
-                                    function toggleSidebar() {
-                                        const sidebar = document.querySelector('.sidebar');
-                                        sidebar.classList.toggle('collapsed');
-                                    }
+                                function toggleSidebar() {
+                                    const sidebar = document.querySelector('.sidebar');
+                                    sidebar.classList.toggle('collapsed');
+                                }
 
-                                    //            const LOCAL_STORAGE_KEY = "hms_productionplan_schedule_data";
-                                    var startDate = moment().subtract(1, "day").startOf('day').utcOffset('+07:00');
-                                    var endDate = moment().add(3, "day").endOf('day').utcOffset('+07:00');
-                                    let moData = [], mesinData = [], mesinDataVis = [], breaksDef, breaks = [], breaksStatus = {}, moDataCount = 0;
-                                    var timeline;
-                                    var items = new vis.DataSet();
-                                    var containerVis = document.getElementById('visualization');
-                                    // TIMELINE CONFIG: 5 HARI TOTAL (120 JAM)
-                                    const TOTAL_DAYS = 5;
-                                    const TOTAL_HOURS = TOTAL_DAYS * 24; // 120 Jam
-                                    const START_OFFSET_DAYS = -1; // Kemarin (-1 Hari)
+                                //            const LOCAL_STORAGE_KEY = "hms_productionplan_schedule_data";
+                                var startDate = moment().subtract(1, "day").startOf('day').utcOffset('+07:00');
+                                var endDate = moment().add(3, "day").endOf('day').utcOffset('+07:00');
+                                let moData = [], mesinData = [], mesinDataVis = [], breaksDef, breaks = [], breaksStatus = {}, moDataCount = 0;
+                                var timeline;
+                                var items = new vis.DataSet();
+                                var containerVis = document.getElementById('visualization');
+                                // TIMELINE CONFIG: 5 HARI TOTAL (120 JAM)
+                                const TOTAL_DAYS = 5;
+                                const TOTAL_HOURS = TOTAL_DAYS * 24; // 120 Jam
+                                const START_OFFSET_DAYS = -1; // Kemarin (-1 Hari)
 
-                                    // UKURAN BASE & STATE ZOOM (%)
-                                    const converMinute = ((minute) => {
-                                        var value = minute;
-                                        var units = {
-                                            "day": 24 * 60,
-                                            "hour": 60,
-                                            "min": 1
-                                        };
-                                        var result = [];
-                                        if (minute >= 1440) {
-                                            const rtf = new Intl.RelativeTimeFormat("en", {numeric: "auto"});
-                                            result.push(rtf.format(0 - Math.floor(minute / 1440), "day"));
-                                        } else {
-                                            for (var name in units) {
-                                                var p = Math.floor(value / units[name]);
-                                                if (p == 1)
-                                                    result.push(" " + p + " " + name);
-                                                if (p >= 2)
-                                                    result.push(" " + p + " " + name + "s");
-                                                value %= units[name];
-                                            }
+                                // UKURAN BASE & STATE ZOOM (%)
+                                const converMinute = ((minute) => {
+                                    var value = minute;
+                                    var units = {
+                                        "day": 24 * 60,
+                                        "hour": 60,
+                                        "min": 1
+                                    };
+                                    var result = [];
+                                    if (minute >= 1440) {
+                                        const rtf = new Intl.RelativeTimeFormat("en", {numeric: "auto"});
+                                        result.push(rtf.format(0 - Math.floor(minute / 1440), "day"));
+                                    } else {
+                                        for (var name in units) {
+                                            var p = Math.floor(value / units[name]);
+                                            if (p == 1)
+                                                result.push(" " + p + " " + name);
+                                            if (p >= 2)
+                                                result.push(" " + p + " " + name + "s");
+                                            value %= units[name];
                                         }
-                                        return result;
-                                    });
-                                    // CALCULATE DURATION WITH DYNAMIC SETUP TIME
-                                    function calculateDurationMinutes(qty, isSameProductAsPrevious = false) {
-                                        const speedMetersPerMin = 700;
-                                        const setupTimeMinutes = isSameProductAsPrevious ? 15 : 45; // Setup lebih cepat jika produk sama
-                                        return Math.round((Number(qty) / speedMetersPerMin) + setupTimeMinutes);
                                     }
+                                    return result;
+                                });
+                                // CALCULATE DURATION WITH DYNAMIC SETUP TIME
+                                function calculateDurationMinutes(qty, isSameProductAsPrevious = false) {
+                                    const speedMetersPerMin = 700;
+                                    const setupTimeMinutes = isSameProductAsPrevious ? 15 : 45; // Setup lebih cepat jika produk sama
+                                    return Math.round((Number(qty) / speedMetersPerMin) + setupTimeMinutes);
+                                }
 
-                                    const getMo = ((event) => {
-                                        return  $.ajax({
-                                            url: "<?php echo base_url(); ?>ppic/productionplanning/get_mo",
-                                            type: "GET",
-                                            data: {
-                                                dept: "<?= $dep ?>",
-                                                value: $("#searchInputMO").val(),
-                                                status: $("#filterStatus").val(),
-                                                mesin: $("#filterMachine").val()
-                                            }
+                                const getMo = ((event) => {
+                                    return  $.ajax({
+                                        url: "<?php echo base_url(); ?>ppic/productionplanning/get_mo",
+                                        type: "GET",
+                                        data: {
+                                            dept: "<?= $dep ?>",
+                                            value: $("#searchInputMO").val(),
+                                            status: $("#filterStatus").val(),
+                                            mesin: $("#filterMachine").val()
+                                        }
 
-                                        });
                                     });
-                                    const getItems = (() => {
-                                        return  $.ajax({
-                                            url: "<?php echo base_url(); ?>ppic/productionplanning/get_items",
-                                            type: "POST",
-                                            data: {
-                                                dept: "<?= $dep ?>",
-                                                start: startDate.format("YYYY-MM-DD").toString(),
-                                                end: endDate.format("YYYY-MM-DD").toString()
-                                            }
+                                });
+                                const getItems = (() => {
+                                    return  $.ajax({
+                                        url: "<?php echo base_url(); ?>ppic/productionplanning/get_items",
+                                        type: "POST",
+                                        data: {
+                                            dept: "<?= $dep ?>",
+                                            start: startDate.format("YYYY-MM-DD").toString(),
+                                            end: endDate.format("YYYY-MM-DD").toString()
+                                        }
 
-                                        });
                                     });
-                                    const MIN_ZOOM_MS = 1000 * 60 * 60; // 1 Hour (100% Zoom / closest look)
-                                    const MAX_ZOOM_MS = 1000 * 60 * 60 * 48; // 1 Year (0% Zoom / widest look)
-                                    const setTimeline = (() => {
-                                        //moment.tz("America/New_York"); 
-                                        var options = {
-                                            format: {
-                                                majorLabels: function (date, scale, step) {
-                                                    return moment(date).locale("id").format('dddd, DD MMMM YYYY');
-                                                }
-                                            },
-                                            maxHeight: '100VH',
-                                            verticalScroll: true,
-                                            zoomKey: 'ctrlKey',
-                                            stack: false,
-                                            editable: true,
-                                            start: startDate.toDate(),
-                                            end: endDate.toDate(),
-                                            min: startDate.toDate(), // Cannot scroll before today
-                                            max: endDate.toDate(),
-                                            zoomMin: MIN_ZOOM_MS, // Min zoom: 1 hour
-                                            zoomMax: MAX_ZOOM_MS, // Max zoom: 24 hours
-                                            stackSubgroups: false,
-                                            orientation: "top",
-                                            template: function (it, element, data) {
-                                                let ctn = "";
-                                                switch (it.tipe) {
-                                                    case "box" :
-                                                        let style = "";
-                                                        if (it.status == 'draft')
-                                                            style = " background : #B29E1E;";
-                                                        ctn = `<div class="gantt-bar" style='${style}'>
+                                });
+                                const MIN_ZOOM_MS = 1000 * 60 * 60; // 1 Hour (100% Zoom / closest look)
+                                const MAX_ZOOM_MS = 1000 * 60 * 60 * 48; // 1 Year (0% Zoom / widest look)
+                                const setTimeline = (() => {
+                                    //moment.tz("America/New_York"); 
+                                    var options = {
+                                        format: {
+                                            majorLabels: function (date, scale, step) {
+                                                return moment(date).locale("id").format('dddd, DD MMMM YYYY');
+                                            }
+                                        },
+                                        maxHeight: '100VH',
+                                        verticalScroll: true,
+                                        zoomKey: 'ctrlKey',
+                                        stack: false,
+                                        editable: true,
+                                        start: startDate.toDate(),
+                                        end: endDate.toDate(),
+                                        min: startDate.toDate(), // Cannot scroll before today
+                                        max: endDate.toDate(),
+                                        zoomMin: MIN_ZOOM_MS, // Min zoom: 1 hour
+                                        zoomMax: MAX_ZOOM_MS, // Max zoom: 24 hours
+                                        stackSubgroups: false,
+                                        orientation: "top",
+                                        template: function (it, element, data) {
+                                            let ctn = "";
+                                            switch (it.tipe) {
+                                                case "box" :
+                                                    let style = "";
+                                                    if (it.status == 'draft')
+                                                        style = " background : #B29E1E;";
+                                                    ctn = `<div class="gantt-bar" style='${style}'>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                        <a href="<?= base_url('manufacturing/mO/edit') ?>/${it.enc_kode}" target="_blank">
                                                             <span style="color:#ffffff; text-decoration:underline; text-decoration-color: #000000;">${it.kode}</span>
@@ -759,28 +759,28 @@
                                                                                 <div class="progress-text">${it.progress}%</div>
                                                                             </div>
                                                                                 `;
-                                                        break;
-                                                    case "break-bng":
-                                                        ctn = `<div class="yarn-depleted-marker">
+                                                    break;
+                                                case "break-bng":
+                                                    ctn = `<div class="yarn-depleted-marker">
     
                                                             </div>
                                                             <div class="yarn-depleted-badge">
                                                             <i class="fa-solid fa-triangle-exclamation me-1"></i>YARN DEPLETED
                                                             </div>`;
-                                                        break;
-                                                    default :
-                                                        let nm = it.nama_produk.toLowerCase();
-                                                        nm = nm.replaceAll(" ", "-");
-                                                        ctn = `<div class="gantt-bar ${nm}" title="${it.nama_produk}">
+                                                    break;
+                                                default :
+                                                    let nm = it.nama_produk.toLowerCase();
+                                                    nm = nm.replaceAll(" ", "-");
+                                                    ctn = `<div class="gantt-bar ${nm}" title="${it.nama_produk}">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                             <span class="fw-bold">${it.nama_produk}</span>
                                                                 </div>
                                                  `;
-                                                }
-                                                return ctn;
-                                            },
-                                            groupTemplate: function (gr) {
-                                                return `<div class="mesin-bar" >
+                                            }
+                                            return ctn;
+                                        },
+                                        groupTemplate: function (gr) {
+                                            return `<div class="mesin-bar" >
                                                           <div class="d-flex justify-content-between align-items-center">
                                                           <span class="fw-bold">${gr.content}</span>
                                                                 <button class="btn btn-xs text-teal-400 p-0 ms-1" onclick="showEditMesin(event)" title="Edit Master Benang"
@@ -791,7 +791,7 @@
                                                                   
                                                                 <div class="text-truncate fw-semibold" style="font-size:0.65rem;" title="${gr.benang}">${gr.benang}</div>
                                                                   <div>
-                                                                    <i class="fa-solid fa-clock me-1"></i><span class="fw-bold">${(gr.benang !== '') ? gr.time:''}</span>
+                                                                    <i class="fa-solid fa-clock me-1"></i><span class="fw-bold">${(gr.benang !== '') ? gr.time : ''}</span>
                                                                     </div>
                                                                 <div class="d-flex justify-content-between align-items-center" style="font-size:0.6rem;">
                                                                 <span><i class="fa-solid fa-cube me-1"></i>${gr.qty} KG &nbsp;</span>
@@ -801,422 +801,423 @@
                                                     </div>
                                                             </div>
                                                                     `;
-                                            },
-                                            onAdd: async function (item, callback) {
-                                                item.end = moment(item.start).add(item.total_minute, "minutes");
-                                                item.start = moment(item.start);
-                                                var overlaps = await overlapCheck(item);
-                                                if (overlaps.length > 0) {
-                                                    alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
-                                                    callback(null); // Cancel the drag/move action
-                                                } else {
-                                                    switch (item.tipe) {
-                                                        case "box":
-                                                            const resp = await save({
-                                                                mcid: [item.group],
-                                                                kode: [item.kode],
-                                                                start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                                finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                                start_old: [item.start_time],
-                                                                finish_old: [item.finish_time],
-                                                                mcid_old: [item.mc_id],
-                                                                total_minute: [item.total_minute],
-                                                                tipe: item.tipe,
-                                                                nama: [item.nama_produk]
-                                                            });
-                                                            items.remove(item.kode);
-                                                            items.add({
-                                                                id: item.kode,
-                                                                enc_kode: resp.enc,
-                                                                progress: 0,
-                                                                group: item.group,
-                                                                start: item.start.toDate(),
-                                                                end: item.end.toDate(),
-                                                                nama_produk: item.nama_produk,
-                                                                uom: item.uom,
-                                                                qty: item.qty,
-                                                                duration: item.total_minute,
-                                                                kode: item.kode,
-                                                                start_time: item.start.toString(),
-                                                                finish_time: item.end.toString(),
-                                                                tipe: item.tipe,
-                                                                qty_target: item.qty_target,
-                                                                status : item.status
+                                        },
+                                        onAdd: async function (item, callback) {
+                                            item.end = moment(item.start).add(item.total_minute, "minutes");
+                                            item.start = moment(item.start);
+                                            var overlaps = await overlapCheck(item);
+                                            if (overlaps.length > 0) {
+                                                alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
+                                                callback(null); // Cancel the drag/move action
+                                            } else {
+                                                switch (item.tipe) {
+                                                    case "box":
+                                                        const resp = await save({
+                                                            mcid: [item.group],
+                                                            kode: [item.kode],
+                                                            start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                            finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                            start_old: [item.start_time],
+                                                            finish_old: [item.finish_time],
+                                                            mcid_old: [item.mc_id],
+                                                            total_minute: [item.total_minute],
+                                                            tipe: item.tipe,
+                                                            nama: [item.nama_produk]
+                                                        });
+                                                        items.remove(item.kode);
+                                                        items.add({
+                                                            id: item.kode,
+                                                            enc_kode: resp.enc,
+                                                            progress: 0,
+                                                            group: item.group,
+                                                            start: item.start.toDate(),
+                                                            end: item.end.toDate(),
+                                                            nama_produk: item.nama_produk,
+                                                            uom: item.uom,
+                                                            qty: item.qty,
+                                                            duration: item.total_minute,
+                                                            kode: item.kode,
+                                                            start_time: item.start.toString(),
+                                                            finish_time: item.end.toString(),
+                                                            tipe: item.tipe,
+                                                            qty_target: item.qty_target,
+                                                            status: item.status
 
-                                                            });
-                                                            await moList();
-                                                            break;
-                                                        default:
-                                                            await save({
-                                                                mcid: [item.group],
-                                                                kode: [item.id],
-                                                                start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                                finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                                total_minute: [item.total_minute],
-                                                                tipe: item.tipe,
-                                                                nama: [item.nama_produk]
-                                                            });
-                                                            items.add({
-                                                                group: item.group,
-                                                                start: item.start.toDate(),
-                                                                end: item.end.toDate(),
-                                                                nama_produk: item.nama_produk,
-                                                                duration: item.total_minute,
-                                                                tipe: item.tipe,
-                                                                id: item.id,
-
-                                                            });
-                                                    }
-//                                                        callback(item);
-                                                    timeline.redraw();
-                                                    $(`#card-${item.kode}`).removeClass('dragging');
-                                                    loadBebanMesin();
-                                                }
-
-                                            },
-                                            onRemove: async function (item, callback) {
-                                                item.kode = item.id;
-                                                if (item.tipe === 'break-bng')
-                                                    return false;
-                                                remove({kode: [item.kode]}).then(async rst => {
-                                                    //                                                    await moList();
-                                                    callback(item);
-//                                                        refreshVis();
-                                                    loadBebanMesin();
-                                                }).catch((e) => {
-                                                    callback(null);
-                                                });
-                                            },
-                                            onMove: async function (item, callback) {
-                                                if (item.tipe === 'break-bng') {
-                                                    callback(null);
-                                                    return false;
-                                                }
-                                                var start = moment(item.start);
-                                                var end = moment(item.end);
-                                                let diffMinute = end.diff(start, "minutes");
-                                                item.start_time = moment(item.start).format("YYYY-MM-DD HH:mm:ss").toString();
-                                                item.finish_time = moment(item.end).format("YYYY-MM-DD HH:mm:ss").toString();
-                                                item.total_minute = diffMinute;
-                                                var overlaps = await overlapCheck(item);
-                                                if (overlaps.length > 0) {
-                                                    alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
-                                                    callback(null); // Cancel the drag/move action
-                                                } else {
-                                                    item.kode = item.id;
-                                                    await update(item).then(async rst => {
-                                                        callback(item);
+                                                        });
                                                         await moList();
-                                                        //                                                                items.update(item);
-//                                                            refreshVis();
-//                                                            updateKPIs();
-                                                    }).catch(e => {
-                                                        callback(null);
-                                                    });
+                                                        break;
+                                                    case undefined:
+                                                        break;
+                                                    default:
+                                                        await save({
+                                                            mcid: [item.group],
+                                                            kode: [item.id],
+                                                            start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                            finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                            total_minute: [item.total_minute],
+                                                            tipe: item.tipe,
+                                                            nama: [item.nama_produk]
+                                                        });
+                                                        items.add({
+                                                            group: item.group,
+                                                            start: item.start.toDate(),
+                                                            end: item.end.toDate(),
+                                                            nama_produk: item.nama_produk,
+                                                            duration: item.total_minute,
+                                                            tipe: item.tipe,
+                                                            id: item.id,
+
+                                                        });
                                                 }
+//                                                        callback(item);
+                                                timeline.redraw();
+                                                $(`#card-${item.kode}`).removeClass('dragging');
+                                                loadBebanMesin();
                                             }
 
-                                        };
-                                        // Create a Timeline
-                                        timeline = new vis.Timeline(containerVis, items, options);
-                                        timeline.setGroups(mesinDataVis);
-                                        timeline.moveTo(new Date(), {animation: false});
-                                        setTimelineItems();
-                                        timeline.redraw();
-                                        timeline.on('rangechanged', () => {
-                                            const currentWindow = timeline.getWindow();
-                                            const currentDuration = currentWindow.end.valueOf() - currentWindow.start.valueOf();
-                                            let calculatedFactor = (MAX_ZOOM_MS - currentDuration) / (MAX_ZOOM_MS - MIN_ZOOM_MS);
-
-                                            // Constrain boundaries between 0 and 100
-                                            let percentage = Math.max(0, Math.min(100, calculatedFactor * 100));
-                                            percentage = percentage.toFixed(),
-                                                    document.getElementById('zoom-level-text').value = `${percentage}`;
-                                        });
-
-                                    });
-                                    const getBreaks = ((it) => {
-                                        const gets = breaks.filter((brk, idx) => {
-                                            if (brk.group !== it.mc_id) {
+                                        },
+                                        onRemove: async function (item, callback) {
+                                            item.kode = item.id;
+                                            if (item.tipe === 'break-bng')
+                                                return false;
+                                            remove({kode: [item.kode]}).then(async rst => {
+                                                //                                                    await moList();
+                                                callback(item);
+//                                                        refreshVis();
+                                                loadBebanMesin();
+                                            }).catch((e) => {
+                                                callback(null);
+                                            });
+                                        },
+                                        onMove: async function (item, callback) {
+                                            if (item.tipe === 'break-bng') {
+                                                callback(null);
                                                 return false;
                                             }
-
-                                            var str = moment(it.start_time);
-                                            var end = moment(it.finish_time);
-                                            var p = JSON.parse(breaksDef);
-                                            if (moment(p[idx].start) < end) {
-                                                var mntEnd = hitungHabisBng(str, end, it.qty_target, brk.qty_max);
-                                                if (brk.qty_max > 0) {
-                                                    brk.qty_max -= it.qty_target;
-                                                    if (brk.qty_max < 0) {
-                                                        brk.start = str.add(mntEnd, "minute");
-                                                        return true;
-                                                    }
-                                                }
-                                            }
-                                            return false;
-                                        });
-                                        return gets;
-                                    });
-                                    const overlapCheck = ((item) => {
-                                        if (item.tipe === 'break-bng')
-                                            return false;
-                                        var overlaps = items.get({
-                                            filter: function (exs) {
-                                                if (exs.tipe === 'break-bng')
-                                                    return false;
-                                                if (exs.id === item.id)
-                                                    return false;
-                                                if (exs.group !== item.group)
-                                                    return false;
-                                                exs.end = moment(exs.end);
-                                                exs.start = moment(exs.start);
-                                                if (item.end > exs.start && item.end < exs.end) {
-                                                    return true;
-                                                }
-                                                if (item.start > exs.start && item.start < exs.end) {
-                                                    return true;
-                                                }
-                                                if (exs.start > item.start && exs.start < item.start) {
-                                                    return true;
-                                                }
-                                                if (exs.end > item.start && exs.end < item.end) {
-                                                    return true;
-                                                }
-
-                                                //                                                                exs.start < item.end &&
-                                                //                                                                exs.end > item.start
-
-                                            }
-                                        });
-                                        return overlaps;
-                                    });
-                                    const setTimelineItems = (async () => {
-                                        items.clear();
-                                        await getItems().then(resp => {
-                                            resp.data.forEach(it => {
-                                                var persenProgress = 0;
-                                                if (it.tipe === 'box') {
-                                                    let hsl = (it.qty_hasil / it.qty) * 100;
-                                                    persenProgress = hsl.toFixed();
-                                                }
-                                                let drt = converMinute(it.total_minute);
-                                                items.add({
-                                                    id: it.kode,
-                                                    enc_kode: it.enc_kode,
-                                                    progress: persenProgress,
-                                                    group: it.mc_id,
-                                                    start: it.start_time,
-                                                    end: it.finish_time,
-                                                    nama_produk: it.nama_produk,
-                                                    uom: it.uom,
-                                                    qty: it.qty,
-                                                    duration: drt,
-                                                    kode: it.kode,
-                                                    start_time: it.start_time,
-                                                    finish_time: it.finish_time,
-                                                    total_minute: it.total_minute,
-                                                    tipe: it.tipe,
-                                                    qty_target: it.qty_target,
-                                                    status: it.status
+                                            var start = moment(item.start);
+                                            var end = moment(item.end);
+                                            let diffMinute = end.diff(start, "minutes");
+                                            item.start_time = moment(item.start).format("YYYY-MM-DD HH:mm:ss").toString();
+                                            item.finish_time = moment(item.end).format("YYYY-MM-DD HH:mm:ss").toString();
+                                            item.total_minute = diffMinute;
+                                            var overlaps = await overlapCheck(item);
+                                            if (overlaps.length > 0) {
+                                                alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
+                                                callback(null); // Cancel the drag/move action
+                                            } else {
+                                                item.kode = item.id;
+                                                await update(item).then(async rst => {
+                                                    callback(item);
+                                                    await moList();
+                                                    //                                                                items.update(item);
+//                                                            refreshVis();
+//                                                            updateKPIs();
+                                                }).catch(e => {
+                                                    callback(null);
                                                 });
+                                            }
+                                        }
 
-                                                if (it.tipe === 'box') {
-                                                    getBreaks(it).forEach(brk => {
-                                                        items.add({
-                                                            id: brk.id,
-                                                            group: brk.group,
-                                                            start: brk.start,
-                                                            tipe: brk.tipe
-                                                        });
-                                                        breaksStatus[brk.group] = brk.start.format("YYYY-MM-DD HH:mm").toString();
-                                                    });
+                                    };
+                                    // Create a Timeline
+                                    timeline = new vis.Timeline(containerVis, items, options);
+                                    timeline.setGroups(mesinDataVis);
+                                    timeline.moveTo(new Date(), {animation: false});
+                                    setTimelineItems();
+                                    timeline.redraw();
+                                    timeline.on('rangechanged', () => {
+                                        const currentWindow = timeline.getWindow();
+                                        const currentDuration = currentWindow.end.valueOf() - currentWindow.start.valueOf();
+                                        let calculatedFactor = (MAX_ZOOM_MS - currentDuration) / (MAX_ZOOM_MS - MIN_ZOOM_MS);
+
+                                        // Constrain boundaries between 0 and 100
+                                        let percentage = Math.max(0, Math.min(100, calculatedFactor * 100));
+                                        percentage = percentage.toFixed(),
+                                                document.getElementById('zoom-level-text').value = `${percentage}`;
+                                    });
+                                });
+                                const getBreaks = ((it) => {
+                                    const gets = breaks.filter((brk, idx) => {
+                                        if (brk.group !== it.mc_id) {
+                                            return false;
+                                        }
+
+                                        var str = moment(it.start_time);
+                                        var end = moment(it.finish_time);
+                                        var p = JSON.parse(breaksDef);
+                                        if (moment(p[idx].start) < end) {
+                                            var mntEnd = hitungHabisBng(str, end, it.qty_target, brk.qty_max);
+                                            if (brk.qty_max > 0) {
+                                                brk.qty_max -= it.qty_target;
+                                                if (brk.qty_max < 0) {
+                                                    brk.start = str.add(mntEnd, "minute");
+                                                    return true;
                                                 }
+                                            }
+                                        }
+                                        return false;
+                                    });
+                                    return gets;
+                                });
+                                const overlapCheck = ((item) => {
+                                    if (item.tipe === 'break-bng')
+                                        return false;
+                                    var overlaps = items.get({
+                                        filter: function (exs) {
+                                            if (exs.tipe === 'break-bng')
+                                                return false;
+                                            if (exs.id === item.id)
+                                                return false;
+                                            if (exs.group !== item.group)
+                                                return false;
+                                            exs.end = moment(exs.end);
+                                            exs.start = moment(exs.start);
+                                            if (item.end > exs.start && item.end < exs.end) {
+                                                return true;
+                                            }
+                                            if (item.start > exs.start && item.start < exs.end) {
+                                                return true;
+                                            }
+                                            if (exs.start > item.start && exs.start < item.start) {
+                                                return true;
+                                            }
+                                            if (exs.end > item.start && exs.end < item.end) {
+                                                return true;
+                                            }
+
+                                            //                                                                exs.start < item.end &&
+                                            //                                                                exs.end > item.start
+
+                                        }
+                                    });
+                                    return overlaps;
+                                });
+                                const setTimelineItems = (async () => {
+                                    items.clear();
+                                    await getItems().then(resp => {
+                                        resp.data.forEach(it => {
+                                            var persenProgress = 0;
+                                            if (it.tipe === 'box') {
+                                                let hsl = (it.qty_hasil / it.qty) * 100;
+                                                persenProgress = hsl.toFixed();
+                                            }
+                                            let drt = converMinute(it.total_minute);
+                                            items.add({
+                                                id: it.kode,
+                                                enc_kode: it.enc_kode,
+                                                progress: persenProgress,
+                                                group: it.mc_id,
+                                                start: it.start_time,
+                                                end: it.finish_time,
+                                                nama_produk: it.nama_produk,
+                                                uom: it.uom,
+                                                qty: it.qty,
+                                                duration: drt,
+                                                kode: it.kode,
+                                                start_time: it.start_time,
+                                                finish_time: it.finish_time,
+                                                total_minute: it.total_minute,
+                                                tipe: it.tipe,
+                                                qty_target: it.qty_target,
+                                                status: it.status
                                             });
+
+                                            if (it.tipe === 'box') {
+                                                getBreaks(it).forEach(brk => {
+                                                    items.add({
+                                                        id: brk.id,
+                                                        group: brk.group,
+                                                        start: brk.start,
+                                                        tipe: brk.tipe
+                                                    });
+                                                    breaksStatus[brk.group] = brk.start.format("YYYY-MM-DD HH:mm").toString();
+                                                });
+                                            }
                                         });
-                                        //                                                breaks.forEach(brk => {
-                                        //
-                                        //                                                });
-                                        loadBebanMesin();
                                     });
-                                    const hitungHabisBng = ((start, end, kg_target, qty_max) => {
-                                        var minutesPassed = end.diff(start, 'minutes');
-                                        var kgPerMenit = kg_target / minutesPassed;
-                                        kgPerMenit = kgPerMenit.toFixed(2);
-                                        var mnt = qty_max / kgPerMenit;
-                                        //                                        console.log(`minute : ${minutesPassed} , kg/menit : ${kgPerMenit}, hasil : ${mnt}`);
-                                        return Math.round(mnt);
-                                    });
+                                    //                                                breaks.forEach(brk => {
+                                    //
+                                    //                                                });
+                                    loadBebanMesin();
+                                });
+                                const hitungHabisBng = ((start, end, kg_target, qty_max) => {
+                                    var minutesPassed = end.diff(start, 'minutes');
+                                    var kgPerMenit = kg_target / minutesPassed;
+                                    kgPerMenit = kgPerMenit.toFixed(2);
+                                    var mnt = qty_max / kgPerMenit;
+                                    //                                        console.log(`minute : ${minutesPassed} , kg/menit : ${kgPerMenit}, hasil : ${mnt}`);
+                                    return Math.round(mnt);
+                                });
 
 //                                        const setMes
-                                    function populateMachineFilter() {
-                                        const filterEl = document.getElementById('filterMachine');
-                                        if (!filterEl)
-                                            return;
-                                        filterEl.innerHTML = '<option value="">Semua MC Target</option>';
-                                        mesinDataVis.forEach(mc => {
-                                            filterEl.innerHTML += `<option value="${mc.id}">${mc.content}</option>`;
-                                        });
-                                        filterEl.innerHTML += `<option value="UNASSIGNED">UNASSIGNED</option>`;
-                                    }
+                                function populateMachineFilter() {
+                                    const filterEl = document.getElementById('filterMachine');
+                                    if (!filterEl)
+                                        return;
+                                    filterEl.innerHTML = '<option value="">Semua MC Target</option>';
+                                    mesinDataVis.forEach(mc => {
+                                        filterEl.innerHTML += `<option value="${mc.id}">${mc.content}</option>`;
+                                    });
+                                    filterEl.innerHTML += `<option value="UNASSIGNED">UNASSIGNED</option>`;
+                                }
 
-                                    const getMesin = (() => {
-                                        $.ajax({
-                                            url: "<?php echo base_url(); ?>ppic/productionplanning/get_mesin",
-                                            type: "GET",
-                                            data: {
-                                                dept: "<?= $dep ?>",
-                                            },
-                                            success: function (data) {
-                                                mesinData = JSON.parse(JSON.stringify(data.data));
-                                                mesinDataVis = [];
-                                                breaks = [];
-                                                mesinData.forEach(mc => {
-                                                    mesinDataVis.push({
-                                                        id: mc.mc_id,
-                                                        content: mc.nama_mesin,
-                                                        time: mc.time,
-                                                        benang: mc.benang,
-                                                        est: mc.estimasi,
-                                                        qty: mc.qty
-                                                    });
-                                                    if (mc.benang != "") {
-                                                        breaks.push({
-                                                            group: mc.mc_id,
-                                                            start: moment(mc.time),
-                                                            tipe: "break-bng",
-                                                            content: "YARN DEPLETED",
-                                                            nm: "YARN DEPLETED",
-                                                            id: mc.ids,
-                                                            qty_max: parseFloat(mc.qty)
-                                                        });
-                                                    }
+                                const getMesin = (() => {
+                                    $.ajax({
+                                        url: "<?php echo base_url(); ?>ppic/productionplanning/get_mesin",
+                                        type: "GET",
+                                        data: {
+                                            dept: "<?= $dep ?>",
+                                        },
+                                        success: function (data) {
+                                            mesinData = JSON.parse(JSON.stringify(data.data));
+                                            mesinDataVis = [];
+                                            breaks = [];
+                                            mesinData.forEach(mc => {
+                                                mesinDataVis.push({
+                                                    id: mc.mc_id,
+                                                    content: mc.nama_mesin,
+                                                    time: mc.time,
+                                                    benang: mc.benang,
+                                                    est: mc.estimasi,
+                                                    qty: mc.qty
                                                 });
-                                                breaksDef = JSON.stringify([...breaks]);
-                                                refreshVis();
-                                                populateMachineFilter();
-                                                //                        renderGanttLanes();
-                                            }
-
-                                        });
-                                    });
-                                    const save = ((data) => {
-                                        return new Promise((resolve, reject) => {
-                                            $.ajax({
-                                                url: "<?php echo base_url(); ?>ppic/productionplanning/save_plan",
-                                                type: "post",
-                                                data: data,
-                                                success: (response) => resolve(response),
-                                                error: (error) => reject(0)
-
+                                                if (mc.benang != "") {
+                                                    breaks.push({
+                                                        group: mc.mc_id,
+                                                        start: moment(mc.time),
+                                                        tipe: "break-bng",
+                                                        content: "YARN DEPLETED",
+                                                        nm: "YARN DEPLETED",
+                                                        id: mc.ids,
+                                                        qty_max: parseFloat(mc.qty)
+                                                    });
+                                                }
                                             });
+                                            breaksDef = JSON.stringify([...breaks]);
+                                            refreshVis();
+                                            populateMachineFilter();
+                                            //                        renderGanttLanes();
+                                        }
+
+                                    });
+                                });
+                                const save = ((data) => {
+                                    return new Promise((resolve, reject) => {
+                                        $.ajax({
+                                            url: "<?php echo base_url(); ?>ppic/productionplanning/save_plan",
+                                            type: "post",
+                                            data: data,
+                                            success: (response) => resolve(response),
+                                            error: (error) => reject(0)
+
                                         });
                                     });
-                                    const update = ((data) => {
-                                        return new Promise((resolve, reject) => {
-                                            $.ajax({
-                                                url: "<?php echo base_url(); ?>ppic/productionplanning/update_plan",
-                                                type: "post",
-                                                data: data,
-                                                success: (response) => resolve(1),
-                                                error: (error) => reject(0)
+                                });
+                                const update = ((data) => {
+                                    return new Promise((resolve, reject) => {
+                                        $.ajax({
+                                            url: "<?php echo base_url(); ?>ppic/productionplanning/update_plan",
+                                            type: "post",
+                                            data: data,
+                                            success: (response) => resolve(1),
+                                            error: (error) => reject(0)
 
-                                            });
                                         });
                                     });
-                                    const remove = ((data) => {
-                                        return new Promise((resolve, reject) => {
-                                            $.ajax({
-                                                url: "<?php echo base_url(); ?>ppic/productionplanning/rmv_plan",
-                                                type: "post",
-                                                data: data,
-                                                success: (response) => resolve(1),
-                                                error: (error) => reject(0)
+                                });
+                                const remove = ((data) => {
+                                    return new Promise((resolve, reject) => {
+                                        $.ajax({
+                                            url: "<?php echo base_url(); ?>ppic/productionplanning/rmv_plan",
+                                            type: "post",
+                                            data: data,
+                                            success: (response) => resolve(1),
+                                            error: (error) => reject(0)
 
-                                            });
                                         });
                                     });
-                                    const dbounce = ((func, delay) => {
-                                        let timeout;
-                                        return function (...args) {
-                                            clearTimeout(timeout);
-                                            timeout = setTimeout(() => {
-                                                func.apply(this, args);
-                                            }, delay);
-                                        };
-                                    });
-                                    function dragEnd(e) {
-                                        e.target.classList.remove('dragging');
-                                    }
+                                });
+                                const dbounce = ((func, delay) => {
+                                    let timeout;
+                                    return function (...args) {
+                                        clearTimeout(timeout);
+                                        timeout = setTimeout(() => {
+                                            func.apply(this, args);
+                                        }, delay);
+                                    };
+                                });
+                                function dragEnd(e) {
+                                    e.target.classList.remove('dragging');
+                                }
 
-                                    function zoomTimeline(deltaPercent) {
-                                        var crt = $("#zoom-level-text").val();
-                                        crt = parseInt(crt);
-                                        currentZoomLevel = Math.max(0, Math.min(100, crt + deltaPercent));
+                                function zoomTimeline(deltaPercent) {
+                                    var crt = $("#zoom-level-text").val();
+                                    crt = parseInt(crt);
+                                    currentZoomLevel = Math.max(0, Math.min(100, crt + deltaPercent));
 //                                            document.getElementById('zoom-level-text').innerText = `${currentZoomLevel}%`;
-                                        zoomTimelineToPercentage(currentZoomLevel);
-                                    }
+                                    zoomTimelineToPercentage(currentZoomLevel);
+                                }
 
-                                    function resetZoom() {
-                                        //                                        timeline.fit({animation: true});
-                                        timeline.moveTo(new Date(), {
-                                            scale: 0.5,
-                                            animation: {
-                                                duration: 1000, // 1 second animation
-                                                easingFunction: 'easeInOutQuad'
-                                            }
-                                        });
-                                        document.getElementById('zoom-level-text').innerText = '100%';
-                                        //                                        renderGanttHeader();
-                                        //                renderGanttLanes();
-                                    }
-                                    function dragStartTimeBreak(e) {
-                                        var data = e.target.dataset;
-                                        data.content = "New Task";
-                                        e.dataTransfer.setData('text', JSON.stringify(data));
-                                        e.target.classList.add('dragging');
-                                    }
+                                function resetZoom() {
+                                    //                                        timeline.fit({animation: true});
+                                    timeline.moveTo(new Date(), {
+                                        scale: 0.5,
+                                        animation: {
+                                            duration: 1000, // 1 second animation
+                                            easingFunction: 'easeInOutQuad'
+                                        }
+                                    });
+                                    document.getElementById('zoom-level-text').innerText = '100%';
+                                    //                                        renderGanttHeader();
+                                    //                renderGanttLanes();
+                                }
+                                function dragStartTimeBreak(e) {
+                                    var data = e.target.dataset;
+                                    data.content = "New Task";
+                                    e.dataTransfer.setData('text', JSON.stringify(data));
+                                    e.target.classList.add('dragging');
+                                }
 
-                                    function dragStart(e, moId) {
-                                        const mo = moData.find(m => m.kode === moId);
-                                        var data = e.target.dataset;
-                                        data.content = "New Task";
-                                        data.kode = moId;
-                                        e.dataTransfer.setData('text', JSON.stringify(data));
-                                        e.target.classList.add('dragging');
-                                    }
+                                function dragStart(e, moId) {
+                                    const mo = moData.find(m => m.kode === moId);
+                                    var data = e.target.dataset;
+                                    data.content = "New Task";
+                                    data.kode = moId;
+                                    e.dataTransfer.setData('text', JSON.stringify(data));
+                                    e.target.classList.add('dragging');
+                                }
 
-                                    const moList = (async (event) => {
-                                        const moListEl = document.getElementById('mo-list');
-                                        moListEl.innerHTML = '';
-                                        const dt = await getMo(event);
-                                        moData = dt.data;
-                                        moDataCount = dt.count;
-                                        moData.forEach(mo => {
-                                            var nm = mo.reff_note;
-                                            var hslnm = nm.split(" | ");
-                                            const card = document.createElement('div');
-                                            card.className = 'mo-card';
-                                            card.draggable = true;
-                                            card.id = `card-${mo.kode}`;
-                                            card.ondragstart = (e) => dragStart(e, mo.kode);
-                                            card.ondragend = dragEnd;
-                                            if (mo.mc) {
-                                                card.style.borderLeftColor = '#059669'; // Emerald if scheduled
-                                            }
-                                            const diffInMinutes = moment(mo.finish_time).diff(moment(mo.start_time), 'minutes');
-                                            const durHoursFormatted = (diffInMinutes / 60).toFixed(1);
-                                            card.dataset.nama_produk = mo.nama_produk;
-                                            card.dataset.start_time = mo.start_time;
-                                            card.dataset.finish_time = mo.finish_time;
-                                            card.dataset.total_minute = diffInMinutes;
-                                            card.dataset.qty = mo.qty;
-                                            card.dataset.uom = mo.uom;
-                                            card.dataset.status = mo.status;
-                                            card.dataset.mc_id = mo.mc_id;
-                                            card.dataset.qty_target = mo.qty_target;
-                                            card.dataset.tipe = "box";
-                                            card.innerHTML = `
+                                const moList = (async (event) => {
+                                    const moListEl = document.getElementById('mo-list');
+                                    moListEl.innerHTML = '';
+                                    const dt = await getMo(event);
+                                    moData = dt.data;
+                                    moDataCount = dt.count;
+                                    moData.forEach(mo => {
+                                        var nm = mo.reff_note;
+                                        var hslnm = nm.split(" | ");
+                                        const card = document.createElement('div');
+                                        card.className = 'mo-card';
+                                        card.draggable = true;
+                                        card.id = `card-${mo.kode}`;
+                                        card.ondragstart = (e) => dragStart(e, mo.kode);
+                                        card.ondragend = dragEnd;
+                                        if (mo.mc) {
+                                            card.style.borderLeftColor = '#059669'; // Emerald if scheduled
+                                        }
+                                        const diffInMinutes = moment(mo.finish_time).diff(moment(mo.start_time), 'minutes');
+                                        const durHoursFormatted = (diffInMinutes / 60).toFixed(1);
+                                        card.dataset.nama_produk = mo.nama_produk;
+                                        card.dataset.start_time = mo.start_time;
+                                        card.dataset.finish_time = mo.finish_time;
+                                        card.dataset.total_minute = diffInMinutes;
+                                        card.dataset.qty = mo.qty;
+                                        card.dataset.uom = mo.uom;
+                                        card.dataset.status = mo.status;
+                                        card.dataset.mc_id = mo.mc_id;
+                                        card.dataset.qty_target = mo.qty_target;
+                                        card.dataset.tipe = "box";
+                                        card.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-1">
             <div>
             <span class="mo-code">${mo.kode} </span><span class="badge ${(mo.status === 'draft') ? 'bg-warning text-dark' : 'bg-success'} text-capitalize" style="font-size:0.6rem;">${mo.status}</span>
@@ -1246,36 +1247,36 @@
                 <span><i class="fa-solid fa-layer-group me-1 text-success"></i><b>${hslnm[4] ?? 'GB'}</b></span>
             </div>
         `;
-                                            moListEl.appendChild(card);
-                                        });
-                                        updateKPIs();
-                                        return new Promise((resolve, ) => {
-                                            resolve(1);
-                                        });
+                                        moListEl.appendChild(card);
                                     });
-                                    const searchMo = dbounce(moList, 700);
-                                    async function resetAllData() {
-                                        const dts = timeline.itemsData.get();
-                                        const mo = dts.map(dt => dt.kode);
-                                        if (mo.length > 0) {
-                                            if (confirm('Apakah Anda yakin ingin mengosongkan semua jadwal dan mengembalikan ke data awal?')) {
-                                                let rmv = await remove({kode: mo});
-                                                if (rmv == 1) {
-                                                    await moList();
-                                                    items.clear();
-                                                    timeline.redraw();
-                                                }
-
-                                                //                                                renderGanttBars();
+                                    updateKPIs();
+                                    return new Promise((resolve, ) => {
+                                        resolve(1);
+                                    });
+                                });
+                                const searchMo = dbounce(moList, 700);
+                                async function resetAllData() {
+                                    const dts = timeline.itemsData.get();
+                                    const mo = dts.map(dt => dt.kode);
+                                    if (mo.length > 0) {
+                                        if (confirm('Apakah Anda yakin ingin mengosongkan semua jadwal dan mengembalikan ke data awal?')) {
+                                            let rmv = await remove({kode: mo});
+                                            if (rmv == 1) {
+                                                await moList();
+                                                items.clear();
+                                                timeline.redraw();
                                             }
 
+                                            //                                                renderGanttBars();
                                         }
 
                                     }
 
-                                    function updateKPIs() {
-                                        const unassignedCount = moDataCount;
-                                        document.getElementById('mo-count').innerText = `${unassignedCount} MO`;
+                                }
+
+                                function updateKPIs() {
+                                    const unassignedCount = moDataCount;
+                                    document.getElementById('mo-count').innerText = `${unassignedCount} MO`;
 //                                        document.getElementById('kpi-backlog').innerText = `${unassignedCount} MO`;
 //                                        let totalScheduledMinutes = 0;
 //                                        let totalOutputMtr = 0;
@@ -1286,222 +1287,222 @@
 //                                        const avgUtilization = Math.round((totalScheduledMinutes / (TOTAL_HOURS * 60 * mesinData.length)) * 100);
 //                                        document.getElementById('kpi-utilization').innerText = `${avgUtilization}%`;
 //                                        document.getElementById('kpi-output').innerText = `${totalOutputMtr.toLocaleString()} Mtr`;
-                                    }
+                                }
 
-                                    const loadBebanMesin = (() => {
-                                        var startDate = $('#tanggal').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm');
-                                        var endDate = $('#tanggal').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm');
-                                        var pjg = moment(endDate).diff(moment(startDate), "minute");
-                                        var totalMesin = mesinDataVis.length;
-                                        var ratamesin = 0;
-                                        mesinData.forEach(mc => {
-                                            var itm = items.get({
-                                                filter: function (item) {
-                                                    return item.group === mc.mc_id && item.tipe === 'box';
-                                                }
-                                            });
-                                            var totalMinute = 0;
-                                            itm.forEach(it => {
-                                                var mnt = moment(it.end).diff(moment(it.start), "minute");
-                                                totalMinute += mnt;
-                                            });
-                                            var hsl = (totalMinute / pjg) * 100;
-                                            ratamesin += hsl;
-                                            $(`#load-${mc.mc_id}`).html(hsl.toFixed(2) + "%");
-                                        });
-                                        var totalMeter = 0;
-                                        var totalMo = items.get({
+                                const loadBebanMesin = (() => {
+                                    var startDate = $('#tanggal').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm');
+                                    var endDate = $('#tanggal').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm');
+                                    var pjg = moment(endDate).diff(moment(startDate), "minute");
+                                    var totalMesin = mesinDataVis.length;
+                                    var ratamesin = 0;
+                                    mesinData.forEach(mc => {
+                                        var itm = items.get({
                                             filter: function (item) {
-                                                if (item.tipe === 'box') {
-                                                    totalMeter += parseInt(item.qty);
-                                                    return true;
-                                                }
+                                                return item.group === mc.mc_id && item.tipe === 'box';
                                             }
                                         });
-                                        document.getElementById('kpi-backlog').innerText = `${totalMo.length} MO`;
-                                        var rata2mesin = ratamesin / totalMesin;
-                                        document.getElementById('kpi-utilization').innerText = `${rata2mesin.toFixed(2)}%`;
-                                        document.getElementById('kpi-output').innerText = `${totalMeter.toLocaleString()} Mtr`;
-                                    });
-                                    const exportToExcel = (() => {
-                                        $.ajax({
-                                            url: "<?php echo base_url(); ?>ppic/productionplanning/export_excel",
-                                            type: "post",
-                                            data: {
-                                                dept: "<?= $dep ?>",
-                                                start: startDate.format("YYYY-MM-DD").toString(),
-                                                end: endDate.format("YYYY-MM-DD").toString()
-                                            },
-                                            success: function (resp) {
-                                                const link = document.createElement('a');
-                                                link.download = resp?.text_name;
-                                                link.href = resp?.data;
-                                                link.click();
-                                            }
-
+                                        var totalMinute = 0;
+                                        itm.forEach(it => {
+                                            var mnt = moment(it.end).diff(moment(it.start), "minute");
+                                            totalMinute += mnt;
                                         });
+                                        var hsl = (totalMinute / pjg) * 100;
+                                        ratamesin += hsl;
+                                        $(`#load-${mc.mc_id}`).html(hsl.toFixed(2) + "%");
                                     });
-                                    const exportPdf = (() => {
-                                        $.ajax({
-                                            url: "<?= base_url('ppic/productionplanning/export_pdf') ?>",
-                                            type: "POST",
-                                            beforeSend: function (xhr) {
-                                                please_wait(function () {});
-                                            },
-                                            data: {
-                                                dept: "<?= $dep ?>",
-                                                start: startDate.format("YYYY-MM-DD").toString(),
-                                                end: endDate.format("YYYY-MM-DD").toString()
-                                            },
-                                            success: function (data) {
-                                                unblockUI(function () {});
-                                                window.open(data.url, "_blank").focus();
-                                            },
-                                            error: function (req, error) {
-                                                unblockUI(function () {
-                                                    setTimeout(function () {
-                                                        alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                                                    }, 500);
-                                                });
+                                    var totalMeter = 0;
+                                    var totalMo = items.get({
+                                        filter: function (item) {
+                                            if (item.tipe === 'box') {
+                                                totalMeter += parseInt(item.qty);
+                                                return true;
                                             }
-                                        });
-                                    });
-                                    const showEditMesin = ((event) => {
-                                        const modal = new bootstrap.Modal(document.getElementById('yarnMasterModal'));
-                                        const button = event.currentTarget; // Selalu mendapatkan tag <button>
-                                        const dataMc = button.getAttribute('data-mc');
-                                        const dataBng = button.getAttribute('data-benang');
-                                        const dataTime = button.getAttribute('data-time');
-                                        const dataQty = button.getAttribute('data-qty');
-                                        const dataEst = button.getAttribute('data-est');
-                                        $("#frm-mc").val(dataMc);
-                                        $("#frm-bng").val(dataBng);
-                                        $("#frm-qty").val(dataQty);
-                                        $("#frm-estimasi").val(dataEst);
-                                        $("#frm-time").val(dataTime);
-                                        if (dataQty !== "") {
-                                            $(".info-est").html(statusBenang(dataMc));
                                         }
-                                        modal.show();
                                     });
-                                    const statusBenang = ((dataMc) => {
-                                        if (breaksStatus[dataMc] == undefined)
-                                            return '<span class="badge bg-success">Stok Mencukupi</span>';
-                                        else
-                                            return '<span class="badge bg-danger">Stok Tidak Mencukupi</span>';
+                                    document.getElementById('kpi-backlog').innerText = `${totalMo.length} MO`;
+                                    var rata2mesin = ratamesin / totalMesin;
+                                    document.getElementById('kpi-utilization').innerText = `${rata2mesin.toFixed(2)}%`;
+                                    document.getElementById('kpi-output').innerText = `${totalMeter.toLocaleString()} Mtr`;
+                                });
+                                const exportToExcel = (() => {
+                                    $.ajax({
+                                        url: "<?php echo base_url(); ?>ppic/productionplanning/export_excel",
+                                        type: "post",
+                                        data: {
+                                            dept: "<?= $dep ?>",
+                                            start: startDate.format("YYYY-MM-DD").toString(),
+                                            end: endDate.format("YYYY-MM-DD").toString()
+                                        },
+                                        success: function (resp) {
+                                            const link = document.createElement('a');
+                                            link.download = resp?.text_name;
+                                            link.href = resp?.data;
+                                            link.click();
+                                        }
+
                                     });
-                                    const formUpdateBenang = ((name, idModal) => {
-                                        const formdo = document.forms.namedItem(name);
-                                        formdo.addEventListener(
-                                                "submit",
-                                                (event) => {
+                                });
+                                const exportPdf = (() => {
+                                    $.ajax({
+                                        url: "<?= base_url('ppic/productionplanning/export_pdf') ?>",
+                                        type: "POST",
+                                        beforeSend: function (xhr) {
                                             please_wait(function () {});
-                                            request(name).then(
-                                                    response => {
-                                                        unblockUI(function () {
-                                                            alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                                        }, 100);
-                                                        if (response.status === 200) {
-                                                            getMesin();
-                                                            refreshVis();
-                                                        }
-                                                    }
-
-                                            ).finally(() => {
-                                                $(`${idModal} [data-bs-dismiss="modal"]`).click();
-                                                unblockUI(function () {});
+                                        },
+                                        data: {
+                                            dept: "<?= $dep ?>",
+                                            start: startDate.format("YYYY-MM-DD").toString(),
+                                            end: endDate.format("YYYY-MM-DD").toString()
+                                        },
+                                        success: function (data) {
+                                            unblockUI(function () {});
+                                            window.open(data.url, "_blank").focus();
+                                        },
+                                        error: function (req, error) {
+                                            unblockUI(function () {
+                                                setTimeout(function () {
+                                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                                }, 500);
                                             });
-                                            event.preventDefault();
-                                        }, false
-                                                );
+                                        }
                                     });
-                                    const refreshVis = (() => {
-                                        $("#visualization").html("");
-                                        breaks = JSON.parse(breaksDef);
-                                        setTimeline();
-                                        moList()
-                                        //                                        timeline.redraw();
-                                    });
-                                    const setDateForm = ((cls) => {
-                                        $(cls).daterangepicker({
-                                            singleDatePicker: true,
-                                            showDropdowns: true,
-                                            minYear: 1901,
-                                            maxYear: parseInt(moment().format('YYYY'), 10),
-                                            locale: {
-                                                format: 'YYYY-MM-DD HH:mm'
-                                            },
-                                            timePicker: true,
-                                            timePicker24Hour: true
-                                        });
-                                    });
-
-                                    const zoomTimelineToPercentage = ((percentage) => {
-// Normalize percentage to a 0-1 scale
-                                        const factor = percentage / 100;
-
-                                        // Calculate the target window duration (Interval decreases as percentage increases)
-                                        const targetDuration = MAX_ZOOM_MS - (factor * (MAX_ZOOM_MS - MIN_ZOOM_MS));
-
-                                        // Get current window states to maintain focus center
-                                        const currentWindow = timeline.getWindow();
-                                        const centerTime = (currentWindow.start.valueOf() + currentWindow.end.valueOf()) / 2;
-
-                                        // Compute the new start and end timestamps centered on the current view
-                                        const newStart = centerTime - (targetDuration / 2);
-                                        const newEnd = centerTime + (targetDuration / 2);
-
-                                        // Apply the calculated window programmatically
-                                        timeline.setWindow(newStart, newEnd, {animation: false});
-                                    });
-
-
-                                    $(function () {
-                                        setDateForm(".tanggal-bng");
-                                        formUpdateBenang("form-edit-mesin", "#yarnMasterModal");
-                                        $('#tanggal').daterangepicker({
-                                            //                    autoUpdateInput: false,
-                                            startDate: startDate,
-                                            endDate: endDate,
-                                            locale: {
-                                                format: 'YYYY-MM-DD'
-                                            }
-                                        });
-                                        $('#tanggal').on('apply.daterangepicker', function (ev, picker) {
-                                            startDate = picker.startDate;
-                                            //                                            startDate = moment()picker.startDate;
-                                            endDate = picker.endDate;
-                                            refreshVis();
-                                            loadBebanMesin();
-                                            //                                            console.log(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-                                        });
-                                        getMesin();
-//                                            moList();
-                                        const srcMO = document.getElementById("searchInputMO");
-                                        srcMO.addEventListener("input", searchMo);
-                                        $(".zoomin").on("click", function () {
-//                                                timeline.zoomIn(0.5);
-                                            zoomTimeline(10);
-                                        });
-                                        $(".zoomout").on("click", function () {
-//                                                timeline.zoomOut(0.5);
-                                            zoomTimeline(-10);
-                                        });
-                                        formUpdateBenang("form-edit-mesin-all", "#yarnMasterModalAll");
-                                        $(".btn-update-benang").unbind("click").off("click").on("click", function (e) {
-                                            e.preventDefault();
-                                            const tbody = document.getElementById('yarn-master-tbody');
-                                            if (!tbody)
-                                                return;
-                                            tbody.innerHTML = '';
-                                            const modal = new bootstrap.Modal(document.getElementById('yarnMasterModalAll'));
-                                            mesinDataVis.forEach(mc => {
-                                                const tr = document.createElement('tr');
-                                                var stt = "";
-                                                if (mc.qty !== "") {
-                                                    stt = statusBenang(mc.id);
+                                });
+                                const showEditMesin = ((event) => {
+                                    const modal = new bootstrap.Modal(document.getElementById('yarnMasterModal'));
+                                    const button = event.currentTarget; // Selalu mendapatkan tag <button>
+                                    const dataMc = button.getAttribute('data-mc');
+                                    const dataBng = button.getAttribute('data-benang');
+                                    const dataTime = button.getAttribute('data-time');
+                                    const dataQty = button.getAttribute('data-qty');
+                                    const dataEst = button.getAttribute('data-est');
+                                    $("#frm-mc").val(dataMc);
+                                    $("#frm-bng").val(dataBng);
+                                    $("#frm-qty").val(dataQty);
+                                    $("#frm-estimasi").val(dataEst);
+                                    $("#frm-time").val(dataTime);
+                                    if (dataQty !== "") {
+                                        $(".info-est").html(statusBenang(dataMc));
+                                    }
+                                    modal.show();
+                                });
+                                const statusBenang = ((dataMc) => {
+                                    if (breaksStatus[dataMc] == undefined)
+                                        return '<span class="badge bg-success">Stok Mencukupi</span>';
+                                    else
+                                        return '<span class="badge bg-danger">Stok Tidak Mencukupi</span>';
+                                });
+                                const formUpdateBenang = ((name, idModal) => {
+                                    const formdo = document.forms.namedItem(name);
+                                    formdo.addEventListener(
+                                            "submit",
+                                            (event) => {
+                                        please_wait(function () {});
+                                        request(name).then(
+                                                response => {
+                                                    unblockUI(function () {
+                                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+                                                    }, 100);
+                                                    if (response.status === 200) {
+                                                        getMesin();
+                                                        refreshVis();
+                                                    }
                                                 }
-                                                tr.innerHTML = `
+
+                                        ).finally(() => {
+                                            $(`${idModal} [data-bs-dismiss="modal"]`).click();
+                                            unblockUI(function () {});
+                                        });
+                                        event.preventDefault();
+                                    }, false
+                                            );
+                                });
+                                const refreshVis = (() => {
+                                    $("#visualization").html("");
+                                    breaks = JSON.parse(breaksDef);
+                                    setTimeline();
+                                    moList()
+                                    //                                        timeline.redraw();
+                                });
+                                const setDateForm = ((cls) => {
+                                    $(cls).daterangepicker({
+                                        singleDatePicker: true,
+                                        showDropdowns: true,
+                                        minYear: 1901,
+                                        maxYear: parseInt(moment().format('YYYY'), 10),
+                                        locale: {
+                                            format: 'YYYY-MM-DD HH:mm'
+                                        },
+                                        timePicker: true,
+                                        timePicker24Hour: true
+                                    });
+                                });
+
+                                const zoomTimelineToPercentage = ((percentage) => {
+// Normalize percentage to a 0-1 scale
+                                    const factor = percentage / 100;
+
+                                    // Calculate the target window duration (Interval decreases as percentage increases)
+                                    const targetDuration = MAX_ZOOM_MS - (factor * (MAX_ZOOM_MS - MIN_ZOOM_MS));
+
+                                    // Get current window states to maintain focus center
+                                    const currentWindow = timeline.getWindow();
+                                    const centerTime = (currentWindow.start.valueOf() + currentWindow.end.valueOf()) / 2;
+
+                                    // Compute the new start and end timestamps centered on the current view
+                                    const newStart = centerTime - (targetDuration / 2);
+                                    const newEnd = centerTime + (targetDuration / 2);
+
+                                    // Apply the calculated window programmatically
+                                    timeline.setWindow(newStart, newEnd, {animation: false});
+                                });
+
+
+                                $(function () {
+                                    setDateForm(".tanggal-bng");
+                                    formUpdateBenang("form-edit-mesin", "#yarnMasterModal");
+                                    $('#tanggal').daterangepicker({
+                                        //                    autoUpdateInput: false,
+                                        startDate: startDate,
+                                        endDate: endDate,
+                                        locale: {
+                                            format: 'YYYY-MM-DD'
+                                        }
+                                    });
+                                    $('#tanggal').on('apply.daterangepicker', function (ev, picker) {
+                                        startDate = picker.startDate;
+                                        //                                            startDate = moment()picker.startDate;
+                                        endDate = picker.endDate;
+                                        refreshVis();
+                                        loadBebanMesin();
+                                        //                                            console.log(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                                    });
+                                    getMesin();
+//                                            moList();
+                                    const srcMO = document.getElementById("searchInputMO");
+                                    srcMO.addEventListener("input", searchMo);
+                                    $(".zoomin").on("click", function () {
+//                                                timeline.zoomIn(0.5);
+                                        zoomTimeline(10);
+                                    });
+                                    $(".zoomout").on("click", function () {
+//                                                timeline.zoomOut(0.5);
+                                        zoomTimeline(-10);
+                                    });
+                                    formUpdateBenang("form-edit-mesin-all", "#yarnMasterModalAll");
+                                    $(".btn-update-benang").unbind("click").off("click").on("click", function (e) {
+                                        e.preventDefault();
+                                        const tbody = document.getElementById('yarn-master-tbody');
+                                        if (!tbody)
+                                            return;
+                                        tbody.innerHTML = '';
+                                        const modal = new bootstrap.Modal(document.getElementById('yarnMasterModalAll'));
+                                        mesinDataVis.forEach(mc => {
+                                            const tr = document.createElement('tr');
+                                            var stt = "";
+                                            if (mc.qty !== "") {
+                                                stt = statusBenang(mc.id);
+                                            }
+                                            tr.innerHTML = `
                                                        <td class="fw-bold text-center">${mc.id}
                                                                         <input type="hidden" name="mc[]" value="${mc.id}">
                                     </td>
@@ -1518,13 +1519,13 @@
                                 ${stt}
                     </td>
                                                       `;
-                                                tbody.appendChild(tr);
-                                            });
-                                            setDateForm(".tanggal-bng");
-
-                                            modal.show();
+                                            tbody.appendChild(tr);
                                         });
+                                        setDateForm(".tanggal-bng");
+
+                                        modal.show();
                                     });
+                                });
     </script>
 </body>
 </html>
