@@ -161,7 +161,7 @@ class Productionplanning extends MY_Controller {
                 if ($checkStt) {
                     throw new \Exception("MO dalam status 'Done'", 500);
                 }
-                $model->update([
+                $model->setWheres(["kode" => $kode],true)->update([
                     "start_time" => $start,
                     "finish_time" => $finish,
                     "mc_id" => $mc
@@ -177,10 +177,12 @@ class Productionplanning extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
+            
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('pesan' => "Berhasil")));
         } catch (Exception $ex) {
+            log_message("error",json_encode($ex));
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
