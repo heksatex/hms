@@ -2758,6 +2758,7 @@ class Pengirimanbarang extends MY_Controller
                 $printer->text(str_pad("", 61));
             }
             $printer->selectPrintMode();
+            $buff->write("\x1bU".chr(1)); 
             $buff->write("\x1bX" . chr(15));
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("No", 3));
@@ -2800,12 +2801,14 @@ class Pengirimanbarang extends MY_Controller
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("", 3) . str_pad("", 35) . str_pad("", 13) . str_pad("", 13) . str_pad("{$gulung} Gulung", 25, " ", STR_PAD_BOTH)
                 . str_pad(number_format($tot_qty1, 2) . " Mtr", 20, " ", STR_PAD_LEFT) . str_pad(number_format($tot_qty2, 2) . " Kg", 15, " ", STR_PAD_LEFT) . str_pad("", 10));
+            $buff->write("\x1bU".chr(0)); 
             $printer->selectPrintMode();
             $printer->feed();
 
             $printer->text("ROUTE COLOR ORDER : ");
             $printer->feed();
             $printer->feed();
+            $buff->write("\x1bU".chr(1)); 
             $buff->write("\x1bX" . chr(15));
 
             $route = $this->m_pengirimanBarang->get_route_by_origin($origin);
