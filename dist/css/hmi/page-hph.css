@@ -1,0 +1,1679 @@
+:root {
+    --hph-header-height: 82px;
+    --hmi-footer-height: 78px;
+    --hph-top-height: 52px;
+}
+
+/* ========================================================= 
+    HPH PRODUCTION - BASE
+ ========================================================= */
+.hph-production {
+    width: 100%;
+    height: calc(100dvh - var(--hph-top-height) - var(--hmi-footer-height));
+    background: #f4f7f9;
+    overflow: hidden;
+}
+
+/* ========================================================= 
+    HEADER MO 
+========================================================= */
+.hph-header {
+    background: #FFFFFF;
+    border-bottom: 2px solid var(--km-border);
+    padding: 8px 18px;
+    display: grid;
+    grid-template-columns: 2fr repeat(6, minmax(130px, 1fr));
+    gap: 12px;
+    align-items: center;
+    overflow-x: auto;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+/* ========================================================= 
+    MO INFORMATION
+ ========================================================= */
+.hph-mo-info {
+    font-size: 20px;
+    color: var(--km-topbar-bg);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.hph-mo-number {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--km-topbar-bg);
+    /* line-height: 1.2; */
+    white-space: nowrap;
+}
+
+.hph-product-name {
+    font-size: 18px;
+    color: #334155;
+    font-weight: 700;
+    margin-top: 4px;
+    white-space: normal;
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+}
+
+
+/* ========================================================= SUMMARY ========================================================= */
+/* .hph-summary {
+     flex: 1;
+     display: grid;
+     grid-template-columns: repeat(6, minmax(120px, 1fr));
+     gap: 8px;
+     min-width: 0;
+} */
+.summary-box {
+    background: #F8FAFC;
+    border: 1.5px solid var(--km-border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 68px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.info-summary-label {
+    font-size: 12px;
+    color: var(--km-text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.info-summary-val {
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Consolas', monospace;
+    color: var(--km-text);
+    max-width: 100%;
+    /* maksimal 2 baris */
+    line-height: 20px;
+    height: 40px;
+    /* isi bisa di-scroll */
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    white-space: normal;
+    word-break: break-word;
+}
+
+.summary-box strong small {
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 3px;
+}
+
+/* ========================================================= 
+    BODY 
+========================================================= */
+
+.hph-body {
+    height: calc(100% - var(--hph-header-height));
+    display: grid;
+    /* Kiri : 25% Tengah : 45% Kanan : 30% */
+    grid-template-columns: 25% minmax(0, 1fr) 30%;
+    overflow: hidden;
+}
+
+/* ========================================================= 
+    LEFT - LOT PANEL 
+========================================================= */
+.hph-lot-panel {
+    background: #f5f8fa;
+    border-right: 1px solid #ccd6de;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+/* ========================================================= 
+    PANEL TITLE 
+========================================================= */
+.panel-title {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    background: #eef3f6;
+    border-bottom: 1px solid #ccd6de;
+    color: #34414c;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.panel-title i {
+    margin-right: 6px;
+    color: #007d86;
+}
+
+.lot-count {
+    background: #008b8f;
+    color: #ffffff;
+    padding: 4px 9px;
+    border-radius: 12px;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+/* ========================================================= 
+    HPH LOT PANEL 
+========================================================= */
+.hph-lot-panel {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+    border: 1px solid #d5dde3;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.lot-item {
+    position: relative;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.lot-selected-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--km-teal);
+    color: #fff;
+    font-size: 13px;
+    opacity: 0;
+    transform: scale(.7);
+    transition: .2s ease;
+}
+
+.lot-item.selected {
+    border: 2px solid var(--km-teal);
+    background: #eefafa;
+}
+
+.lot-item.selected .lot-selected-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+
+/* ========================================================= PANEL TITLE ========================================================= */
+ .panel-title {
+    height: 38px;
+    min-height: 38px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #eef3f6;
+    border-bottom: 1px solid #cfd8de;
+    color: #005b60;
+    font-size: 12px;
+    font-weight: 800;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.panel-title > * {
+    flex-shrink: 0;
+}
+/*
+.panel-title i {
+    margin-right: 5px;
+    font-size: 12px;
+} */
+
+
+/* ========================================================= LOT COUNT ========================================================= */
+/* .lot-count {
+    padding: 3px 9px;
+    background: #008b8f;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+} */
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.panel-title-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lot-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-print-lot, .btn-setting-printer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    height: 28px;
+    padding: 0 2px;
+
+    border: 1px solid var(--km-border);
+    border-radius: 6px;
+    background: var(--km-btn-bg);
+    color: var(--km-text);
+
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.btn-print-lot i {
+    color: inherit;
+}
+
+.btn-print-lot:hover:not(:disabled) {
+    background: var(--km-teal);
+    color: #fff;
+    border-color: var(--km-teal);
+}
+
+.btn-print-lot:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+
+ .btn-setting-printer {
+    gap: 0px;
+    padding: 5px;
+
+ }
+
+ .btn-setting-printer i {
+    margin:0px;
+     color: inherit;
+}
+
+.btn-setting-printer:hover {
+    background: var(--km-teal);
+    color: #fff;
+    border-color: var(--km-teal);
+}
+
+
+
+/* ========================================================= LOT LIST ========================================================= */
+.lot-list {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    padding: 8px 5px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f5f8fa;
+}
+
+/* scrollbar */
+.lot-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lot-list::-webkit-scrollbar-track {
+    background: #edf2f5;
+}
+
+.lot-list::-webkit-scrollbar-thumb {
+    background: #aab8c0;
+    border-radius: 10px;
+}
+
+/* ========================================================= LOT ITEM ========================================================= */
+.lot-item {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    padding: 11px 14px 10px 17px;
+    background: #FFFFFF;
+    border: 1px solid #d3dce2;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: .2s;
+    overflow: hidden;
+}
+
+/* LEFT ACTIVE BAR */
+.lot-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+}
+
+/* hover */
+.lot-item:hover {
+    background: #f5fbfb;
+    border-color: #8cc9c8;
+}
+
+.lot-item.lot_adj:hover {
+    background: #fff6f6;
+    border-color: #c98f8c;
+}
+
+/* active */
+.lot-item.active {
+    border-color: #cbd8de;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+}
+
+.lot-item.active::before {
+    background: #008b70;
+}
+
+.lot-item.lot_adj {
+    background: #fff6f6;
+}
+
+.lot-item.lot_adj.active::before {
+    background: #8b0000;
+}
+
+
+
+/* ========================================================= LOT HEADER ========================================================= */
+.lot-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.lot-item-header small {
+    padding: 2px 5px;
+    background: #fff6f6;
+    border: 1px solid #bd7878;
+    border-radius: 3px;
+    color: #DC2626 !important;
+    font-family: "Segoe UI", sans-serif !important;
+    font-size: 11px !important;
+    font-weight: bold;
+}
+
+/* LOT NUMBER / NAME */
+.lot-number {
+    color: #008b8f;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* TIME */
+.lot-time {
+    /* color: #7c8790; */
+    color: #17212b;
+    font-weight: 700;
+    font-size: 11px;
+    font-family: Consolas, monospace;
+    white-space: nowrap;
+}
+
+/* ========================================================= LOT CODE ========================================================= */
+.lot-code {
+    margin-top: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px dotted #cfd8dc;
+    /* color: #71808a; */
+    color: #17212b;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: Consolas, monospace;
+    white-space: normal;
+    /* overflow: hidden;
+    text-overflow: ellipsis; */
+}
+
+/* ========================================================= LOT INFO GRID ========================================================= */
+.lot-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 5px;
+    margin-top: 8px;
+}
+
+/* ========================================================= INFO ROW ========================================================= */
+.lot-info-row {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    font-family: Consolas, monospace;
+}
+
+/* LABEL */
+.lot-label {
+    color: #65737c;
+    font-size: 11px;
+    font-family: "Segoe UI", sans-serif;
+    white-space: nowrap;
+}
+
+/* VALUE */
+.lot-info-row strong {
+    min-width: 0;
+    color: #17212b;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+}
+
+/* UNIT */
+.lot-info-row small {
+    color: #65737c;
+    font-size: 9px;
+    font-family: "Segoe UI", sans-serif;
+    font-weight: 600;
+}
+
+/* ========================================================= GRADE ========================================================= */
+.lot-grade {
+    padding: 2px 5px;
+    background: #e3f3f1;
+    border: 1px solid #78bdb7;
+    border-radius: 3px;
+    color: #008b8f !important;
+    font-family: "Segoe UI", sans-serif !important;
+    font-size: 11px !important;
+}
+
+/* ========================================================= EMPTY ========================================================= */
+.lot-empty {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #9aa7ae;
+    font-size: 12px;
+    text-align: center;
+}
+
+.lot-empty i {
+    font-size: 28px;
+    color: #bdc7cc;
+}
+
+
+/* ========================================================= CENTER - INPUT PRODUCTION ========================================================= */
+.hph-input-panel {
+    min-width: 0;
+    overflow-y: auto;
+    padding: 0 16px;
+    background: #ffffff;
+}
+
+/* ========================================================= INPUT ROW ========================================================= */
+.input-row {
+    min-height: 66px;
+    display: grid;
+    /* grid-template-columns: 20px 130px minmax(0, 1fr);
+     */
+    grid-template-columns: 35px clamp(110px, 30%, 150px) minmax(0, 1fr);
+    align-items: center;
+    border-bottom: 1px solid #dce4e9;
+}
+
+.row-number {
+    color: #64727d;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.input-label {
+    color: #29323a;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.input-content {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* ========================================================= GENERAL INPUT ========================================================= */
+.hph-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 10px;
+    background: #ffffff;
+    border: 1px solid #c9d5df;
+    border-radius: 5px;
+    outline: none;
+    color: #008268;
+    font-size: 17px;
+    font-weight: 700;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.hph-input:focus {
+    border-color: #008b8f;
+    box-shadow: 0 0 0 2px rgba(0, 139, 143, .12);
+}
+
+/* ========================================================= BEAM - LOT ========================================================= */
+.beam-content {
+    display: grid;
+
+    /* BEAM diperkecil, LOT mendapat ruang lebih besar */
+    grid-template-columns: 110px minmax(0, 1fr);
+
+    gap: 6px;
+
+    min-width: 0;
+    width: 100%;
+}
+
+
+.input-group-small .hph-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-group-small,
+.input-group-lot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.input-group-small label,
+.input-group-lot label {
+    color: #68757e;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.beam-input {
+    width: 70px;
+}
+
+.lot-input {
+    width: 100%;
+    font-size: 13px;
+}
+
+.input-group-small {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.input-group-small label {
+    flex-shrink: 0;
+    font-size: 10px;
+    color: #68757e;
+}
+
+
+#beam+.select2-container {
+    height: 44px !important;
+}
+
+#beam+.select2-container .select2-selection--single {
+    height: 44px !important;
+    min-height: 44px !important;
+}
+
+#beam+.select2-container .select2-selection__rendered {
+    line-height: 42px !important;
+}
+
+#beam+.select2-container .select2-selection__arrow {
+    height: 42px !important;
+}
+
+#beam+.select2-container .select2-selection--single:focus,
+#beam+.select2-container.select2-container--open .select2-selection--single {
+    border-color: #008b8f !important;
+    box-shadow: 0 0 0 2px rgba(0, 139, 143, .12) !important;
+    outline: none !important;
+}
+
+#grade+.select2-container {
+    height: 44px !important;
+}
+
+#grade+.select2-container .select2-selection--single {
+    height: 44px !important;
+    min-height: 44px !important;
+}
+
+#grade+.select2-container .select2-selection__rendered {
+    line-height: 42px !important;
+}
+
+#grade+.select2-container .select2-selection__arrow {
+    height: 42px !important;
+}
+
+#grade+.select2-container .select2-selection--single:focus,
+#grade+.select2-container.select2-container--open .select2-selection--single {
+    border-color: #008b8f !important;
+    box-shadow: 0 0 0 2px rgba(0, 139, 143, .12) !important;
+    outline: none !important;
+}
+
+#grade+.select2-container--default .select2-selection--single {
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px;
+}
+
+#grade+.select2-container--default .select2-selection--single:focus {
+    border-color: #008b8f !important;
+    box-shadow: 0 0 0 2px rgba(0, 139, 143, .12) !important;
+}
+
+.input-group-small .select2-container {
+    width: 100% !important;
+    min-width: 0;
+}
+
+.input-group-small .select2-selection--single {
+    height: 34px !important;
+
+    border: 1px solid #cbd5dc !important;
+    border-radius: 5px !important;
+
+    display: flex !important;
+    align-items: center !important;
+}
+
+.input-group-small .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+
+    padding-left: 8px !important;
+
+    color: #008b75 !important;
+
+    font-size: 14px;
+
+    font-weight: 700;
+    right: 20px;
+}
+
+.input-group-small .select2-selection--single .select2-selection__arrow {
+    height: 32px !important;
+}
+
+
+.input-group-small .select2-container--default .select2-selection--single .select2-selection__clear {
+    position: absolute;
+    right: 20px;
+    /* sebelum arrow */
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    z-index: 2;
+    font-size: 18px;
+    color: #008b75 !important;
+    cursor: pointer;
+}
+
+/* Teks yang tampil di Select2 */
+.select2-container .select2-selection__rendered {
+    color: #008b75 !important;
+    font-weight: 700 !important;
+}
+
+/* Semua option */
+.select2-container .select2-results__option {
+    color: #008b75 !important;
+    font-weight: 700 !important;
+}
+
+/* Option saat hover */
+.select2-container .select2-results__option--highlighted {
+    color: #008b75 !important;
+    font-weight: 700 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #008b75 !important;
+}
+
+.select2-container--default .select2-results__option--selected {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #e5e7eb !important;
+    color: #333 !important;
+}
+
+
+/* ========================================================= SELECT ========================================================= */
+.select-input {
+    width: 125px;
+    cursor: pointer;
+}
+
+/* ========================================================= NUMBER INPUT ========================================================= */
+.number-content {
+    gap: 10px;
+}
+
+.unit {
+    color: #66747e;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.display-value {
+    min-width: 90px;
+    color: #27313a;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.number-input {
+    width: 125px;
+    text-align: right;
+}
+
+/* ========================================================= SAVE BUTTON ========================================================= */
+.save-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 0;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-hph-save {
+    min-width: 110px;
+    height: 46px;
+    border: none;
+    border-radius: 5px;
+    background: #008b8f;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+}
+
+.btn-hph-save:hover {
+    background: #006f73;
+}
+
+.btn-hph-save:active {
+    transform: scale(.98);
+}
+
+.btn-hph-save i {
+    margin-right: 6px;
+}
+
+.btn-hph-checklist {
+    height: 46px;
+    min-width: 120px;
+    padding: 0 16px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    border: 1px solid var(--km-border);
+    border-radius: 6px;
+
+    background: #fff;
+    color: var(--km-text-muted);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+.btn-hph-checklist:hover {
+    border-color: var(--km-teal);
+    color: var(--km-teal);
+}
+
+/* CHECKLIST AKTIF */
+.btn-hph-checklist.active {
+    /* background: var(--km-teal); */
+    border-color: var(--km-teal);
+    color:var(--km-teal);
+}
+
+.btn-hph-checklist.active:hover {
+    /* background: var(--km-topbar-dark);
+    border-color: var(--km-topbar-dark);
+    color:#FFFFFF; */
+    background: rgba(106, 106, 106, 0.12);
+}
+
+.btn-hph-checklist i {
+    font-size: 15px;
+}
+/* ========================================================= RIGHT - DEFECT PANEL ========================================================= */
+.hph-defect-panel {
+    min-width: 0;
+    background: #ffffff;
+    border-left: 1px solid #ccd6de;
+    overflow-y: auto;
+}
+
+/* ========================================================= DEFECT HEADER ========================================================= */
+.defect-title {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    background: #fff6f6;
+    border-bottom: 1px solid #f0b8b8;
+    color: #c62828;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.defect-count {
+    background: #e52227;
+    color: #ffffff;
+    padding: 4px 9px;
+    border-radius: 12px;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+/* ========================================================= DEFECT FORM ========================================================= */
+.defect-form {
+    padding: 12px;
+}
+
+.defect-field {
+    min-height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid #e0e6ea;
+}
+
+.defect-field label {
+    color: #263238;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.defect-input {
+    width: 145px;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid #cbd6df;
+    border-radius: 5px;
+    outline: none;
+    background: #ffffff;
+    color: #e53935;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: right;
+}
+
+.defect-input:focus {
+    border-color: #e53935;
+    box-shadow: 0 0 0 2px rgba(229, 57, 53, .10);
+}
+
+#kodeCacat+.select2-container {
+    height: 44px !important;
+}
+
+#kodeCacat+.select2-container .select2-selection--single {
+    height: 44px !important;
+    min-height: 44px !important;
+}
+
+#kodeCacat+.select2-container .select2-selection__rendered {
+    line-height: 42px !important;
+}
+
+#kodeCacat+.select2-container .select2-selection__arrow {
+    height: 42px !important;
+}
+
+#kodeCacat+.select2-container .select2-selection--single:focus,
+#kodeCacat+.select2-container.select2-container--open .select2-selection--single {
+    border-color: #e53935 !important;
+    box-shadow: 0 0 0 2px rgba(0, 139, 143, .12) !important;
+    outline: none !important;
+}
+
+#kodeCacat+.select2-container .select2-selection--single {
+    height: 44px !important;
+    min-height: 44px !important;
+}
+
+#kodeCacat+.select2-container .select2-selection__rendered {
+    line-height: 42px !important;
+}
+
+#kodeCacat+.select2-container .select2-selection__arrow {
+    height: 42px !important;
+}
+
+#kodeCacat+.select2-container .select2-selection__rendered {
+    color: #e53935 !important;
+    font-weight: 700 !important;
+}
+
+/* Semua option */
+.defect-field .select2-results__option {
+    color: #e53935 !important;
+    font-weight: 700 !important;
+}
+
+/* Option saat hover */
+.defect-field .select2-results__option--highlighted {
+    color: #e53935 !important;
+    font-weight: 700 !important;
+}
+
+#kodeCacat+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #e53935 !important;
+}
+
+/* ========================================================= ADD DEFECT BUTTON ========================================================= */
+.btn-add-defect {
+    width: 100%;
+    height: 40px;
+    margin-top: 14px;
+    border: none;
+    border-radius: 4px;
+    background: #e52327;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+.btn-add-defect:hover {
+    background: #c9191d;
+}
+
+.btn-add-defect i {
+    margin-right: 5px;
+}
+
+/* ========================================================= DEFECT TABLE ========================================================= */
+.defect-table-wrapper {
+    padding: 8px 12px;
+}
+
+.defect-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.defect-table thead {
+    background: #eef3f7;
+}
+
+.defect-table th {
+    padding: 8px;
+    border-bottom: 1px solid #d3dde4;
+    color: #50606d;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.defect-table td {
+    padding: 8px;
+    border-bottom: 1px solid #e5eaee;
+    color: #37474f;
+}
+
+/* ========================================================= DELETE DEFECT BUTTON ========================================================= */
+/* .btn-remove-defect {
+    padding: 3px 6px;
+    border: none;
+    background: transparent;
+    color: #e53935;
+    font-size: 14px;
+    cursor: pointer;
+} */
+
+.btn-remove-defect {
+    padding: 2px 5px;
+    background: #f3e3e3;
+    border: none;
+    border-radius: 3px;
+    color: #e53935 !important;
+    font-family: "Segoe UI", sans-serif !important;
+    font-size: 11px !important;
+    cursor: pointer;
+}
+
+.btn-remove-defect:hover {
+    color: #b71c1c;
+}
+
+/* ========================================================= SCROLLBAR ========================================================= */
+.hph-input-panel::-webkit-scrollbar,
+.hph-lot-panel::-webkit-scrollbar,
+.hph-defect-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.hph-input-panel::-webkit-scrollbar-thumb,
+.hph-lot-panel::-webkit-scrollbar-thumb,
+.hph-defect-panel::-webkit-scrollbar-thumb {
+    background: #b7c4cc;
+    border-radius: 10px;
+}
+
+.hph-input-panel::-webkit-scrollbar-track,
+.hph-lot-panel::-webkit-scrollbar-track,
+.hph-defect-panel::-webkit-scrollbar-track {
+    background: #eef2f4;
+}
+
+/* ========================================================= DESKTOP > 1200px ========================================================= */
+@media (min-width: 1201px) {
+    .hph-header {
+        height: 82px;
+    }
+
+    .hph-body {
+        height: calc(100% - 82px);
+    }
+}
+
+/* ========================================================= LAPTOP / SMALL DESKTOP <= 1200px ========================================================= */
+@media (max-width: 1200px) {
+    .hph-header {
+        /* height: 125px;
+        align-items: stretch; */
+        grid-template-columns: 2fr repeat(6, minmax(120px, 1fr));
+    }
+
+    .hph-mo-info {
+        width: 250px;
+        min-width: 250px;
+    }
+
+    /* .hph-summary {
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+    } */
+
+    /* .hph-body {
+        height: calc(100% - 125px);
+    } */
+
+    /* .hph-body {
+        height: calc(100vh - 82px - 68px);
+        grid-template-columns: 28% minmax(0, 1fr) 32%;
+    } */
+
+    .input-content.beam-content {
+        margin-top: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .input-group-small,
+    .input-group-lot {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .input-group-lot {
+        margin-bottom: 5px;
+    }
+
+    .input-group-small label,
+    .input-group-lot label {
+        width: 35px;
+        flex-shrink: 0;
+    }
+
+    .input-group-small .hph-input,
+    .input-group-lot .hph-input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .panel-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 0 8px;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+        
+    }
+
+    /* TEXT "LIST LOT HPH TERSIMPAN" */
+    .panel-title>span:first-child {
+        flex: 1;
+        min-width: 0;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .panel-title>span:first-child i {
+        margin-right: 6px;
+    }
+
+    /* COUNTER TETAP UTUH */
+    .lot-count {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 3px 8px;
+        background: #008b8f;
+        color: #fff;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    /* LIST LOT TETAP SCROLL */
+    .lot-list {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .info-summary-label {
+        font-size: 10px;
+    }
+
+    .info-summary-val {
+        font-size: 13px;
+    }
+
+     .btn-print-lot span {
+        display: none;
+    }
+
+    .lot-check-all span {
+        display: none;
+    }
+
+
+}
+
+/* ========================================================= TABLET <= 991px ========================================================= */
+@media (max-width: 991px) {
+    .hph-header {
+        height: auto;
+        /* min-height: 145px; */
+        flex-direction: column;
+        /* align-items: stretch; */
+        gap: 10px;
+        padding: 10px;
+        /* grid-template-columns: 2fr repeat(6, minmax(100px, 1fr)); */
+        grid-template-columns: 2fr repeat(6, minmax(130px, 1fr));
+    }
+
+    .hph-mo-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        flex: 0 0 220px;
+        min-width: 220px;
+        max-width: 220px;
+
+        overflow: hidden;
+    }
+
+    .hph-mo-number {
+        font-size: 24px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .hph-product-name {
+        font-size: 16px;
+        /* white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; */
+    }
+
+
+    /* .hph-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+    } */
+
+    /*   
+  .summary-box {
+        height: 58px;
+    }
+
+    .summary-box strong {
+        font-size: 17px;
+    } 
+        */
+    /* 
+    .hph-body {
+        height: calc(100% - 145px);
+        grid-template-columns: 25% minmax(0, 1fr) 30%;
+    } */
+
+    .info-summary-label {
+        font-size: 10px;
+    }
+
+    .info-summary-val {
+        font-size: 13px;
+    }
+
+    .input-row {
+        grid-template-columns: 28px 140px minmax(0, 1fr);
+    }
+
+    .input-label {
+        font-size: 13px;
+    }
+
+    .hph-input {
+        height: 42px;
+        font-size: 16px;
+    }
+
+    .lot-input {
+        width: 190px;
+    }
+
+    .beam-input {
+        width: 80px;
+    }
+
+    .select-input {
+        width: 145px;
+    }
+
+    .number-input {
+        width: 110px;
+    }
+
+    .display-value {
+        font-size: 18px;
+    }
+
+   
+}
+
+/* ========================================================= SMALL TABLET <= 768px ========================================================= */
+@media (max-width: 768px) {
+    .hph-production {
+        height: auto;
+        overflow: visible;
+    }
+
+    .hph-header {
+        position: relative;
+        height: auto;
+    }
+
+    .hph-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hph-body {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .input-content.beam-content {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .input-group-small,
+    .input-group-lot {
+        width: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .input-group-small {
+        flex: 0 0 auto;
+    }
+
+    .input-group-lot {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .input-group-small label,
+    .input-group-lot label {
+        width: auto;
+        flex-shrink: 0;
+        color: #68757e;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .input-group-small .hph-input {
+        width: 70px;
+        flex: 0 0 70px;
+    }
+
+    .input-group-lot .hph-input {
+        width: 100%;
+        flex: 1;
+        min-width: 0;
+    }
+
+
+    /* LOT */
+    .hph-lot-panel {
+        width: 100%;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #ccd6de;
+    }
+
+    /* INPUT */
+    .hph-input-panel {
+        width: 100%;
+        max-height: none;
+        padding: 0 10px;
+    }
+
+    .input-row {
+        min-height: 64px;
+        grid-template-columns: 25px 115px minmax(0, 1fr);
+    }
+
+    .input-label {
+        font-size: 13px;
+    }
+
+    .beam-content {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .lot-input {
+        width: 160px;
+    }
+
+    .display-value {
+        display: none;
+    }
+
+    .number-input {
+        width: 120px;
+    }
+
+    /* DEFECT */
+    .hph-defect-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid #ccd6de;
+    }
+
+    .defect-input {
+        width: 160px;
+    }
+
+    .btn-print-lot span {
+        display: inline;
+    }
+
+    .lot-check-all span {
+        display: inline;
+    }
+}
+
+/* ========================================================= VERY SMALL MOBILE <= 480px ========================================================= */
+@media (max-width: 480px) {
+    .hph-header {
+        padding: 8px;
+    }
+
+    .hph-mo-number {
+        font-size: 18px;
+    }
+
+    .hph-product-name {
+        font-size: 13px;
+    }
+
+    .summary-box {
+        height: 55px;
+        padding: 6px 8px;
+    }
+
+    .summary-box label {
+        font-size: 10px;
+    }
+
+    .summary-box strong {
+        font-size: 15px;
+    }
+
+    .input-row {
+        grid-template-columns: 22px 100px minmax(0, 1fr);
+    }
+
+    .input-label {
+        font-size: 12px;
+    }
+
+    .hph-input {
+        height: 40px;
+        font-size: 15px;
+    }
+
+    .number-input {
+        width: 105px;
+    }
+
+    .lot-input {
+        width: 140px;
+    }
+
+    .beam-input {
+        width: 70px;
+    }
+
+    .select-input {
+        width: 130px;
+    }
+
+    .defect-input {
+        width: 140px;
+    }
+}
+
+.lot-item.lot-new {
+    background: #e8f5e9;
+    border: 2px solid #43a047;
+    position: relative;
+    transition: all .5s ease;
+}
+
+.lot-item.lot-new::after {
+    content: "BARU";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: #43a047;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 10px;
+
+    transition: opacity .5s ease;
+}
+
+.lot-check-all {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--km-border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--km-text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: all .15s ease;
+}
+
+.lot-check-all:hover {
+    background: #f5f8fa;
+    border-color: var(--km-teal);
+}
+
+.lot-check-all label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Checkbox */
+.lot-check-all input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 17px;
+    height: 17px;
+    margin: 0;
+
+    border: 2px solid #aeb8c2;
+    border-radius: 4px;
+    background: #fff;
+
+    cursor: pointer;
+    position: relative;
+    transition: all .15s ease;
+}
+
+/* Checked */
+.lot-check-all input[type="checkbox"]:checked {
+    background: var(--km-teal);
+    border-color: var(--km-teal);
+}
+
+/* Check icon */
+.lot-check-all input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+
+    left: 4px;
+    top: 1px;
+
+    width: 5px;
+    height: 9px;
+
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+
+    transform: rotate(45deg);
+}
+
+/* Focus */
+.lot-check-all input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 130, 138, .15);
+}
+
+/* Text */
+.lot-check-all span {
+    line-height: 1;
+}
+
+
