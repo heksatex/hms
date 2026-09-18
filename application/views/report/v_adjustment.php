@@ -665,7 +665,7 @@
                           row += "<td>"+value.kode_adjustment+"</td>";
                           row += "<td>"+value.type_adjustment+"</td>";
                           row += "<td>"+value.tanggal+"</td>";
-                          row += "<td></td>";
+                          row += "<td>"+value.nama_produk+"</td>";
                           row += "<td>"+value.lot+"</td>";
                           row += "<td align='right' >"+value.qty_stock+"</td>";
                           row += "<td align='right' >"+value.qty+"</td>";

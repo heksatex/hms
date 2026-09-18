@@ -305,10 +305,13 @@ class Adjustment extends MY_Controller
 				$items = $this->m_reportAdjustment->get_list_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_produk,$where_adj,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)->result();
 
 				foreach ($items as $val) {
+					$nama_produk1 = '['.$val->kode_produk.'] '.$val->nama_produk;
+
 					# code...
 					$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->kode_adjustment);
 					$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->name_type);
 					$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->create_date);
+					$object->getActiveSheet()->SetCellValue('E'.$rowCount, $nama_produk1);
 					$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lot);
 					$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_data);
 					$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->qty_adjustment);
