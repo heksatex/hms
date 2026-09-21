@@ -65,7 +65,8 @@ class Productionplanning extends MY_Controller {
         }
         $data["dep"] = $dep;
         $data["state"] = $this->state;
-//        $model = new $this->m_global;
+        $model = new $this->m_global;
+        $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dep])->getDetail();
         $this->load->view("ppic/v_production_plan{$view}", $data);
     }
 

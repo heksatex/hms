@@ -419,10 +419,14 @@
         </div>
         <!-- HEADER & KPI STRIP -->
         <header class="hms-header  no-print">
-            <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex justify-content align-items-center mb-2">
+                <a href="#"onclick="history.back(); return false;">
+                    <div class="fw-bold fs-6 text-white "style="background-color: black;border-radius: 50%; "><i class="fa-solid fa-arrow-left me-2"></i> </div>
+
+                </a>
                 <div>
-                    <div class="fw-bold fs-6 text-dark"><i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - WARPING DASAR</div>
-                    
+                    <div class="fw-bold fs-6 text-dark text-uppercase">&nbsp;<i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - <?= $departmen->nama ?? ''  ?></div>
+
                 </div>
                 
             </div>
