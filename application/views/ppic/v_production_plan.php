@@ -157,7 +157,7 @@
                 width: 160px;
                 height: 90px;
                 /*background: linear-gradient(to right, rgba(128,128,128,1), rgba(128,128,128,0));*/
-                border: 1px solid #1d4ed8;
+                border: 2px solid #A9A9A9;
                 color: #0D0C0C;
                 padding: 3px;
                 font-size: 0.68rem;
@@ -419,9 +419,13 @@
         </div>
         <!-- HEADER & KPI STRIP -->
         <header class="hms-header  no-print">
-            <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex justify-content align-items-center mb-2">
+                <a href="#"onclick="history.back(); return false;">
+                    <div class="fw-bold fs-6 text-white "style="background-color: black;border-radius: 50%; "><i class="fa-solid fa-arrow-left me-2"></i> </div>
+
+                </a>
                 <div>
-                    <div class="fw-bold fs-6 text-dark"><i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - WARPING DASAR</div>
+                    <div class="fw-bold fs-6 text-dark">&nbsp;<i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - WARPING DASAR</div>
 
                 </div>
 
@@ -780,7 +784,7 @@
                                             return ctn;
                                         },
                                         groupTemplate: function (gr) {
-                                            return `<div class="mesin-bar" >
+                                            return `<div class="mesin-bar mesin-bar-${gr.devid_esp}" >
                                                           <div class="d-flex justify-content-between align-items-center">
                                                           <span class="fw-bold">${gr.content}</span>
                                                                 <button class="btn btn-xs text-teal-400 p-0 ms-1" onclick="showEditMesin(event)" title="Edit Master Benang"
@@ -897,21 +901,60 @@
                                             var start = moment(item.start);
                                             var end = moment(item.end);
                                             let diffMinute = end.diff(start, "minutes");
-                                            item.start_time = moment(item.start).format("YYYY-MM-DD HH:mm:ss").toString();
-                                            item.finish_time = moment(item.end).format("YYYY-MM-DD HH:mm:ss").toString();
+                                            var startTime = moment(item.start).format("YYYY-MM-DD HH:mm:ss").toString();
+                                            var finishTime = moment(item.end).format("YYYY-MM-DD HH:mm:ss").toString();
+                                            if ((item.finish_time !== finishTime) && (item.start_time === startTime)) {
+//                                                console.log(item);
+                                                var itemsInView = items.get({
+                                                    filter: function (it) {
+                                                        return it.group === item.group;
+                                                    }
+                                                });
+
+                                            }
+                                            var tempStartTime = item.start_time;
+                                            item.start_time = startTime;
+                                            item.finish_time = finishTime;
                                             item.total_minute = diffMinute;
                                             var overlaps = await overlapCheck(item);
                                             if (overlaps.length > 0) {
-                                                alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
-                                                callback(null); // Cancel the drag/move action
+                                                var dffm = moment(item.end).diff(overlaps[0].start, "minutes");
+                                                if (dffm > 0) {
+                                                    if (moment(item.start) < moment(tempStartTime)) {
+                                                        alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
+                                                        callback(null); // Cancel the drag/move action
+                                                    } else {
+                                                        var itemSelected = items.get({
+                                                            filter: function (it) {
+                                                                return moment(it.start) > moment(item.start);
+                                                            }
+                                                        });
+                                                        itemSelected.forEach((itt, idx) => {
+                                                            var str = moment(itt.start).add(dffm, "minutes");
+                                                            var en = moment(itt.end).add(dffm, "minutes");
+                                                            itt.start = str.toDate();
+                                                            itt.end = en.toDate();
+//                                                        itt.total_minute = parseInt(itt.total_minute) + dffm;
+                                                            itt.start_time = str.format("YYYY-MM-DD HH:mm").toString();
+                                                            itt.finish_time = en.format("YYYY-MM-DD HH:mm").toString();
+                                                            itemSelected[idx] = itt;
+                                                        });
+                                                    itemSelected.push(item);
+                                                        await update(itemSelected).then(async rst => {
+                                                            callback(item);
+                                                            items.update(itemSelected);
+                                                            timeline.redraw();
+                                                            await moList();
+                                                        }).catch(e => {
+                                                            callback(null);
+                                                        });
+                                                    }
+                                                }
                                             } else {
                                                 item.kode = item.id;
-                                                await update(item).then(async rst => {
+                                                await update([item]).then(async rst => {
                                                     callback(item);
                                                     await moList();
-                                                    //                                                                items.update(item);
-//                                                            refreshVis();
-//                                                            updateKPIs();
                                                 }).catch(e => {
                                                     callback(null);
                                                 });
@@ -972,7 +1015,7 @@
                                                 return false;
                                             exs.end = moment(exs.end);
                                             exs.start = moment(exs.start);
-                                            if (item.end > exs.start && item.end < exs.end) {
+                                            if (item.end > exs.start && item.end <= exs.end) {
                                                 return true;
                                             }
                                             if (item.start > exs.start && item.start < exs.end) {
@@ -984,9 +1027,6 @@
                                             if (exs.end > item.start && exs.end < item.end) {
                                                 return true;
                                             }
-
-                                            //                                                                exs.start < item.end &&
-                                            //                                                                exs.end > item.start
 
                                         }
                                     });
@@ -1079,7 +1119,8 @@
                                                     time: mc.time,
                                                     benang: mc.benang,
                                                     est: mc.estimasi,
-                                                    qty: mc.qty
+                                                    qty: mc.qty,
+                                                    devid_esp: mc.devid_esp
                                                 });
                                                 if (mc.benang != "") {
                                                     breaks.push({
@@ -1118,7 +1159,9 @@
                                         $.ajax({
                                             url: "<?php echo base_url(); ?>ppic/productionplanning/update_plan",
                                             type: "post",
-                                            data: data,
+                                            data: {
+                                                dt: data
+                                            },
                                             success: (response) => resolve(1),
                                             error: (error) => reject(0)
 
@@ -1455,6 +1498,24 @@
                                     // Apply the calculated window programmatically
                                     timeline.setWindow(newStart, newEnd, {animation: false});
                                 });
+
+
+                                var ipSocket = "<?= $ip_socket ?>";
+                                const socket = new WebSocket(`${ipSocket}`);
+                                socket.onopen = function () {
+                                    console.log("Connected to server");
+                                };
+                                var stateMesin = JSON.parse('<?= json_encode($state) ?>');
+                                socket.onmessage = async function (event) {
+                                    var data = JSON.parse(event.data);
+                                    if (data["version"] != undefined && data["version"] == 2) {
+                                        data["data"].forEach(dtt => {
+//                                            console.log(dtt);
+                                            $(`.mesin-bar-${dtt.devid}`).css("border-color", stateMesin[dtt.state]["warna"]);
+//                                            console.log(stateMesin[dtt.state]);
+                                        })
+                                    }
+                                };
 
 
                                 $(function () {
