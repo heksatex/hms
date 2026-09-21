@@ -425,7 +425,7 @@
 
                 </a>
                 <div>
-                    <div class="fw-bold fs-6 text-dark">&nbsp;<i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - WARPING DASAR</div>
+                    <div class="fw-bold fs-6 text-dark text-uppercase">&nbsp;<i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - <?= $departmen->nama ?? ''  ?></div>
 
                 </div>
 
