@@ -21,6 +21,33 @@ use Mpdf\Mpdf;
 class Productionplanning extends MY_Controller {
 
     //put your code here
+    protected $state = [
+        '1' => [
+            "status" => "Running",
+            "warna" => "#198754"
+        ],
+        '2' => [
+            "status" => "No Response",
+            "warna" => "#dc3545"
+        ],
+        '3' => [
+            "status" => "Ganti Lembar",
+            "warna" => "#1B13F5"
+        ],
+        '4' => [
+            "status" => "Putus / Problem",
+            "warna" => "#B29E1E"
+        ],
+        '5' => [
+            "status" => "Bongkar Pasang",
+            "warna" => "#484858"
+        ],
+        '6' => [
+            "status" => "Nyucuk",
+            "warna" => "#B27272"
+        ]
+    ];
+
     public function __construct() {
         parent::__construct();
         $this->is_loggedin();
@@ -30,7 +57,14 @@ class Productionplanning extends MY_Controller {
     }
 
     public function index($view = "", $dep = "WRD") {
+        $ip = $_SERVER['REMOTE_ADDR']; // Mengambil IP pengunjung
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            $data["ip_socket"] = "http://157.20.244.218:8889";
+        } else {
+            $data["ip_socket"] = "ws://10.10.0.17:8889";
+        }
         $data["dep"] = $dep;
+        $data["state"] = $this->state;
 //        $model = new $this->m_global;
         $this->load->view("ppic/v_production_plan{$view}", $data);
     }
@@ -143,46 +177,49 @@ class Productionplanning extends MY_Controller {
 
     public function update_plan() {
         try {
-            $kode = $this->input->post("kode");
-            $mc = $this->input->post("group");
-            $start = $this->input->post("start_time");
-            $finish = $this->input->post("finish_time");
-            $minute = $this->input->post("total_minute");
-            $tipe = $this->input->post("tipe");
             $model = new $this->m_global;
-            $check = $model->setTables("product_planning")->setWheres(["kode" => $kode])->getDetail();
-            if (!$check) {
-                throw new \Exception('Data Tidak Ditemukan', 500);
-            }
             $this->_module->startTransaction();
-            if ($tipe === "box") {
-                $model->update(["total_minute" => $minute]);
-                $checkStt = $model->setTables("mrp_production")->setWheres(["kode" => $kode, "status" => "done"])->getDetail();
-                if ($checkStt) {
-                    throw new \Exception("MO dalam status 'Done'", 500);
+            $dt = $this->input->post("dt");
+            foreach ($dt as $key => $value) {
+                $value = (object)$value;
+                $kode = $value->kode;
+                $mc = $value->group;
+                $start = $value->start_time;
+                $finish = $value->finish_time;
+                $minute = $value->total_minute;
+                $tipe = $value->tipe;
+                $check = $model->setTables("product_planning")->setWheres(["kode" => $kode],true)->getDetail();
+                if (!$check) {
+                    throw new \Exception('Data Tidak Ditemukan', 500);
+                }if ($tipe === "box") {
+                    $model->update(["total_minute" => $minute]);
+                    $checkStt = $model->setTables("mrp_production")->setWheres(["kode" => $kode, "status" => "done"],true)->getDetail();
+                    if ($checkStt) {
+                        throw new \Exception("MO dalam status 'Done'", 500);
+                    }
+                    $model->setWheres(["kode" => $kode], true)->update([
+                        "start_time" => $start,
+                        "finish_time" => $finish,
+                        "mc_id" => $mc
+                    ]);
+                } else {
+                    $model->update([
+                        "total_minute" => $minute,
+                        "tanggal_start" => $start,
+                        "tanggal_finish" => $finish,
+                        "mc" => $mc
+                    ]);
                 }
-                $model->setWheres(["kode" => $kode],true)->update([
-                    "start_time" => $start,
-                    "finish_time" => $finish,
-                    "mc_id" => $mc
-                ]);
-            } else {
-                $model->update([
-                    "total_minute" => $minute,
-                    "tanggal_start" => $start,
-                    "tanggal_finish" => $finish,
-                    "mc" => $mc
-                ]);
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-            
+
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('pesan' => "Berhasil")));
         } catch (Exception $ex) {
-            log_message("error",json_encode($ex));
+            log_message("error", json_encode($ex));
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
