@@ -157,7 +157,7 @@
                 width: 160px;
                 height: 90px;
                 /*background: linear-gradient(to right, rgba(128,128,128,1), rgba(128,128,128,0));*/
-                border: 1px solid #1d4ed8;
+                border: 2px solid #A9A9A9;
                 color: #0D0C0C;
                 padding: 3px;
                 font-size: 0.68rem;
@@ -622,7 +622,7 @@
                                                 return ctn;
                                             },
                                             groupTemplate: function (gr) {
-                                                return `<div class="mesin-bar" >
+                                                return `<div class="mesin-bar mesin-bar-${gr.devid_esp}" >
                                                           <div class="d-flex justify-content-between align-items-center">
                                                           <span class="text-truncate fw-bold">${gr.content}</span>
                                                                
@@ -915,7 +915,8 @@
                                                         time: mc.time,
                                                         benang: mc.benang,
                                                         est: mc.estimasi,
-                                                        qty: mc.qty
+                                                        qty: mc.qty,
+                                                        devid_esp: mc.devid_esp
                                                     });
                                                     if (mc.benang != "") {
                                                         breaks.push({
@@ -1178,6 +1179,23 @@
                                         // Apply the calculated window programmatically
                                         timeline.setWindow(newStart, newEnd, {animation: false});
                                     });
+                                    
+                                    var ipSocket = "<?= $ip_socket ?>";
+                                const socket = new WebSocket(`${ipSocket}`);
+                                socket.onopen = function () {
+                                    console.log("Connected to server");
+                                };
+                                var stateMesin = JSON.parse('<?= json_encode($state) ?>');
+                                socket.onmessage = async function (event) {
+                                    var data = JSON.parse(event.data);
+                                    if (data["version"] != undefined && data["version"] == 2) {
+                                        data["data"].forEach(dtt => {
+//                                            console.log(dtt);
+                                            $(`.mesin-bar-${dtt.devid}`).css("border-color", stateMesin[dtt.state]["warna"]);
+//                                            console.log(stateMesin[dtt.state]);
+                                        });
+                                    }
+                                };
 
 
                                     $(function () {
