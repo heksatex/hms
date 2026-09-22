@@ -317,7 +317,7 @@
                 renderChart();
                 const initialOption = {
                     tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'}},
-                    legend: {data: ['Running', 'No Response', 'Ganti Lembar', 'Putus/Problem', 'Bongkar Pasang', 'Nyucuk'], bottom: '0%'},
+                    legend: {data: ['Running', 'No Response', 'Ganti Benang', 'Putus/Problem', 'No Order', 'Nyucuk'], bottom: '0%'},
                     grid: {top: '30px', left: '1%', right: '1%', bottom: '40px', containLabel: true},
                     xAxis: {type: 'category', axisLabel: {color: '#6c757d', fontSize: 9, rotate: 45}},
                     yAxis: {type: 'value', name: 'Durasi (Jam)', splitLine: {lineStyle: {type: 'dashed', color: '#EBEBEB'}}},
