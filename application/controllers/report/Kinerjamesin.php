@@ -51,7 +51,7 @@ class Kinerjamesin extends MY_Controller {
                 "COUNT(IF(state = '5', 1, NULL)) as noorder",
                 "COUNT(IF(state <> '5', 1, NULL)) as downtime"];
             if (strtolower($depth) === 'tri') {
-                $select[] = "COUNT(IF(state <> '6', 1, NULL)) as nyucuk";
+                $select[] = "COUNT(IF(state = '6', 1, NULL)) as nyucuk";
             }
             $model = new $this->m_global;
             $totalMesinQuery = $model->setTables("mesin mst")
