@@ -1224,6 +1224,7 @@
     $("#lot_prefix_waste").attr("readonly", true);
     $("#estimasi_habis_jam").attr("readonly", true);
     $("#estimasi_habis_menit").attr("readonly", true);
+    $("#speed").attr("readonly", true);
     var status = $('#status').val();
    
     if(status != "hold" ){
@@ -1401,6 +1402,7 @@
     $("#alasan").attr("readonly", false);
     $("#estimasi_habis_jam").attr("readonly", false);
     $("#estimasi_habis_menit").attr("readonly", false);
+    $("#speed").attr("readonly", false);
     // $("#lot_prefix_waste").attr("readonly", false);
 
     $('#type_production').attr('disabled', false).attr('id','type_production');
