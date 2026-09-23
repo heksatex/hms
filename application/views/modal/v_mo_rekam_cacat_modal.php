@@ -104,7 +104,7 @@
     <tfoot>
       <tr>
         <td colspan="4">
-          <?php if($status_mo == 'ready' || $status_mo == 'draft'){
+          <?php if($status_mo == 'ready' || $status_mo == 'draft' ||  ($status_mo === "done"  && $deptid ===  "GJD")){
             ?>
             <a href="javascript:void(0)" onclick="tambah_cacat()"><i class="fa fa-plus"></i> Tambah Data</a>
           <?php

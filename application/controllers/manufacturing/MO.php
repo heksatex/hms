@@ -281,6 +281,10 @@ class MO extends MY_Controller
             
             $username          = addslashes($this->session->userdata('username')); 
             $data["list"]      = $list;
+            $jam               = floor($list->estimasi_menit_habis / 60);
+            $menit             = $list->estimasi_menit_habis % 60;             
+            $data['estimasi_habis_jam']   = $jam;
+            $data['estimasi_habis_menit'] = $menit;
             $lw                = $this->m_mo->get_location_waste_by_deptid($list->dept_id)->row_array();
             $data["rm"]        = $this->m_mo->get_list_bahan_baku($kode_decrypt);
             $data["hasil_rm"]  = $this->m_mo->get_list_bahan_baku_hasil_group($kode_decrypt,'f');
@@ -4617,12 +4621,14 @@ class MO extends MY_Controller
              //lock table
             $this->_module->lock_tabel('mrp_production_cacat WRITE, mrp_production WRITE');
 
+             //if(!empty($cek1['status']) AND $deptid != 'GJD'){
+
             //cek status mrp_production = done
             $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
             //cek status mrp_production = cancel
             $cek2  = $this->m_mo->cek_status_mrp_production($kode,'cancel')->row_array();
 
-            if(!empty($cek1['status'])){
+            if(!empty($cek1['status']) AND $deptid != 'GJD'){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if(!empty($cek2['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
@@ -5072,6 +5078,9 @@ class MO extends MY_Controller
             $origin_mo          = addslashes($this->input->post('origin'));
             $alasan             = addslashes($this->input->post('alasan'));
             $show_lebar = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
+            $estimasi_jam       = (int) $this->input->post('estimasi_jam');
+            $estimasi_menit     = (int) $this->input->post('estimasi_menit');
+            $speed              = (int) $this->input->post('speed');
 
             //cek status mrp_production = done
             $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
@@ -5140,7 +5149,18 @@ class MO extends MY_Controller
                         $lot_prefix_waste = '';
                     }
 
-                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alasan);
+                    if($estimasi_jam < 0 ) {
+                        $estimasi_jam = 0;
+                    }
+
+                    if ($estimasi_menit < 0 || $estimasi_menit > 59) {
+                        $estimasi_menit = 0;
+                    }
+
+                    // Konversi ke total menit
+                    $estimasi_habis_menit = ($estimasi_jam * 60) + $estimasi_menit;
+
+                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alasan, $estimasi_habis_menit, $speed);
                     
                     if($show_lebar['show_lebar'] == 'true'){
                         $lebar = $lebar_greige."  ".$uom_lebar_greige." | ".$lebar_jadi."  ".$uom_lebar_jadi." | ";
@@ -5158,9 +5178,9 @@ class MO extends MY_Controller
                     
                     $jenis_log   = "edit";
                     if($type_mo == 'colouring'){                    
-                        $note_log    = "-> ".$lebar." | ".$berat." | ".$air." | ".$handling." | ".$gramasi." | ".$program." | ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ; 
+                        $note_log    = "-> ".$lebar." | ".$berat." | ".$air." | ".$handling." | ".$gramasi." | ".$program." | ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed" ; 
                     }else{
-                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ; 
+                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed" ; 
                     }
 
 
