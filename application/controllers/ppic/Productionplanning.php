@@ -74,7 +74,7 @@ class Productionplanning extends MY_Controller {
         try {
             $dep = $this->input->get("dept");
             $model = new $this->m_global;
-            $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "dept_id" => $dep])
+            $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "dept_id" => $dep,"devid_esp >" => 0])
                     ->setJoins("product_planning_mesin ppm", "ppm.mc_id = mst.mc_id", "left")
                     ->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "asc"])
                     ->setSelects(["mst.*", "coalesce(benang,'') as benang", "coalesce(time,now()) as time", "coalesce(qty,0) as qty", "coalesce(estimasi,now()) as est"])
