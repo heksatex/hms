@@ -397,6 +397,47 @@
                 </div>                                    
               </div>
 
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Speed</label></div>
+                <div class="col-xs-8">
+                  <input type='text' class="form-control input-sm" name="speed" id="speed"  readonly="readonly"   value="<?php echo $list->speed;?>" />
+                </div>                                    
+              </div>
+
+              <div class="col-md-12 col-xs-12">
+                        <div class="col-xs-4">
+                            <label>Estimasi Sisa Waktu Bahan Baku</label>
+                        </div>
+                        <div class="col-xs-4">
+                            <div class="input-group">
+                                <input type="number"
+                                      class="form-control input-sm"
+                                      name="estimasi_habis_jam"
+                                      id="estimasi_habis_jam"
+                                      placeholder="0"
+                                      min="0"
+                                      readonly="readonly" 
+                                      value="<?php echo $estimasi_habis_jam;?>">
+                                <span class="input-group-addon">Jam</span>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-4">
+                            <div class="input-group">
+                                <input type="number"
+                                      class="form-control input-sm"
+                                      name="estimasi_habis_menit"
+                                      id="estimasi_habis_menit"
+                                      placeholder="0"
+                                      min="0"
+                                      max="59"
+                                      readonly="readonly" 
+                                      value="<?php echo $estimasi_habis_menit;?>">
+                                <span class="input-group-addon">Menit</span>
+                            </div>
+                        </div>
+              </div>
+
             </div>
             </div>
           </form>
@@ -1123,6 +1164,14 @@
         });
   });
   
+  $(document).on('click','#datetimepicker5',function (e) {
+      $('#datetimepicker5').datetimepicker({
+          format : 'HH:mm:ss',
+          ignoreReadonly: true
+      }); 
+  });
+
+  
   $('#start').inputmask("datetime",{
     mask: "y-2-1 h:s:s", 
     //placeholder: "yyyy-mm-dd hh:mm:ss", 
@@ -1173,6 +1222,8 @@
     $("#type_production").attr("disabled", true);
     $("#lot_prefix").attr("readonly", true);
     $("#lot_prefix_waste").attr("readonly", true);
+    $("#estimasi_habis_jam").attr("readonly", true);
+    $("#estimasi_habis_menit").attr("readonly", true);
     var status = $('#status').val();
    
     if(status != "hold" ){
@@ -1348,6 +1399,8 @@
     $("#qty1_std").attr("readonly", false);
     $("#qty2_std").attr("readonly", false);
     $("#alasan").attr("readonly", false);
+    $("#estimasi_habis_jam").attr("readonly", false);
+    $("#estimasi_habis_menit").attr("readonly", false);
     // $("#lot_prefix_waste").attr("readonly", false);
 
     $('#type_production').attr('disabled', false).attr('id','type_production');
@@ -2195,6 +2248,9 @@
                 program     : $('#program').val(),
                 origin      : $('#origin').val(),
                 alasan      : $('#alasan').val(),
+                estimasi_jam : $('#estimasi_habis_jam').val(),
+                estimasi_menit : $('#estimasi_habis_menit').val(),
+                speed      : $('#speed').val(),
 
           },success: function(data){
             if(data.sesi == "habis"){
