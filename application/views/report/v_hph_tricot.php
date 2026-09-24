@@ -463,7 +463,7 @@
 
                     $.each(data.record, function(key, value){
 
-                        if(value.lot_adj != ''){
+                        if (value.lot_adj != null && value.lot_adj != '') {
                           color = "style='color:red';";
                         }else{
                           color = "";
