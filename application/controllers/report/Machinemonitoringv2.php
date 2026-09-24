@@ -144,7 +144,7 @@ class Machinemonitoringv2 extends MY_Controller {
                 ->setSelects(["nama_mesin,count(state) as total,state,devid,no_mesin,dept_id,mc_id"])
                 ->setSelects(["COUNT(log.state)*SUM(log.state<>1) as downtime"])
                 ->setSelects(["COUNT(log.state)*SUM(log.state=1) as uptime"])
-                ->setGroups(["devid"])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "asc", "MAX(timelog)" => "desc"]);
+                ->setGroups(["devid"])->setOrder(["mst.row_order" => "asc", "MAX(timelog)" => "desc"]);
         $model->setWheres(["dept_id" => $dept]);
         $data["mesin"] = $model->getData();
         $data["count_mesin"] = count($data["mesin"]);
@@ -282,7 +282,7 @@ GROUP BY devid;
             } else {
                 $table = "log_mc_timeline";
             }
-            $items = $model->setTables($table)->setWheres(["dept_id" => $dep])->setOrder(["CAST(SUBSTR(nama_mesin FROM 3) AS UNSIGNED)" => "desc"])->getData();
+            $items = $model->setTables($table)->setWheres(["dept_id" => $dep])->getData();
             $model->excQueryWResult("DROP TEMPORARY TABLE IF EXISTS `{$tbl}`;");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -323,7 +323,7 @@ GROUP BY devid;
         try {
             $model = new $this->m_global;
             $mesin = $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "devid_esp > " => 0, "dept_id" => $dept])
-                            ->setOrder(["nama_mesin" => "asc"])->getData();
+                            ->setOrder(["mst.row_order" => "desc"])->getData();
             $mesins = [];
             foreach ($mesin as $key => $value) {
                 $nm = "d{$value->devid_esp}";

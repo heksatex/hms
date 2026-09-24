@@ -181,7 +181,8 @@
                     }
                     return dateSampai.diff(dateMulai, 'minutes');
                 });
-                let maxCap = 1440 * 10; //24 jam x 10 mesin
+                let totalMesin = "<?= $count_mesin ?>";
+                let maxCap = 1440 * parseInt(totalMesin); //24 jam x 10 mesin
                 await asDataGrafik().then((res) => {
                     var dt = res.data;
                     dt.forEach((sd, idx) => {
