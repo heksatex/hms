@@ -34,6 +34,7 @@ class Analisadowntime extends MY_Controller {
         $data['dept'] = $depth;
         $model->setTables("mesin")->setWheres(["dept_id" => $depth, 'devid_esp > ' => 0])->setSelects(["nama_mesin", "devid_esp"]);
         $data["mesin"] = $model->getData();
+        $data["count_mesin"] = $model->getDataCountFiltered();
         $this->load->view('report/v_analisa_downtime_' . strtolower($depth), $data);
     }
 
