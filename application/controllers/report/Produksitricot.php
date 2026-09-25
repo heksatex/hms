@@ -370,6 +370,7 @@ class Produksitricot extends MY_Controller
             $mkt         = $row->nama_sales_group;
             $pd          = $row->kode_prod;
             $sales_contract = $row->sales_order;
+            $tgl_sc      = $row->create_date;
             $status_sc   = $row->status_sc;
 
         	// explode origin
@@ -531,6 +532,7 @@ class Produksitricot extends MY_Controller
 					$sisa_target = '';
 		      		$status      = '';
 		      		$sales_contract = '';
+		      		$tgl_sc         = '';
 			        $pd         	= '';
 			        $mkt            = '';
 			        $gl             = '';
@@ -579,6 +581,7 @@ class Produksitricot extends MY_Controller
                 // buat array dataRecord
                 $dataRecord[] = array('kode'           => $mo, 
                                       'tgl_mo' 		   => $tgl_mo, 
+                                      'tgl_sc'         => $tgl_sc,
                                       'mc' 			   => $nama_mesin,
                                       'sc'             => $sales_contract,
                                       'status_sc'      => $status_sc,
@@ -615,6 +618,7 @@ class Produksitricot extends MY_Controller
                 // buat array dataRecord
                 $dataRecord[] = array('kode'         => $mo, 
                                     'tgl_mo' 		 => $tgl_mo, 
+                                    'tgl_sc'         => $tgl_sc,
                                     'mc' 			 => $nama_mesin,
                                     'sc'             => $sales_contract,
                                     'status_sc'      => $status_sc,
@@ -649,6 +653,7 @@ class Produksitricot extends MY_Controller
             }
 
 
+        	$sales_contract = '';
         	$sales_contract = '';
         	$status_sc      = '';
 	        $pd 		 	= '';
@@ -731,55 +736,67 @@ class Produksitricot extends MY_Controller
         $object->getActiveSheet()->mergeCells('A1:S1');
 
         // table header
-        $table_head_columns  = array('No', 'MO', 'Tgl.MO', 'MC', 'SC','Status SC', 'PD', 'Marketing','Corak', 'Lebar', 'Greige','Jadi', 'Start Produksi', 'Finish Produksi', 'Total Order',  'Meter', 'Gulung', 'Mtr/Gl', 'Pcs', 'Gauge','Stitch/Cm' , 'Courses', 'RPM', 'GB', 'BD', 'Target Qty', 'RUN IN','Hasil Produksi', 'Qty1','Qty2', 'Gulung','Sisa Qty1','Keterangan','TC','Status MO');
+        $table_head_columns  = array('No', 'MO', 'Tgl.MO', 'MC', 'SC','Tgl SC','Status SC', 'PD', 'Marketing','Corak', 'Lebar', 'Greige','Jadi', 'Start Produksi', 'Finish Produksi', 'Total Order',  'Meter', 'Gulung', 'Mtr/Gl', 'Pcs', 'Gauge','Stitch/Cm' , 'Courses', 'RPM', 'GB', 'BD', 'Target Qty', 'RUN IN','Hasil Produksi', 'Qty1','Qty2', 'Gulung','Sisa Qty1','Keterangan','TC','Status MO');
 
         $column = 0;
         $merge  = TRUE;
-        $columns= '';
-        $count_merge = 0; // untuk jml yg di merge
+        $columns = '';
+        $count_merge = 0;
+
         foreach ($table_head_columns as $field) {
 
             // merge cell baris ke 3-4
-            if($column < 9 OR ($column >= 12 AND $column <= 13) OR ($column >=18 AND $column <=26 ) OR $column >= 31){
+            if ($column < 10 OR ($column >= 13 AND $column <= 14) OR ($column >= 19 AND $column <= 27) OR $column >= 32) {
 
-                if($column < 9 ){
+                if ($column < 10) {
                     $columns = $column;
-                }else if(($column >= 12 AND $column <= 13) OR ($column >=18 AND $column <=26) OR $column >=31) {
-                    $columns = $column-$count_merge;
+                } else if ( ($column >= 13 AND $column <= 14) OR ($column >= 19 AND $column <= 27) OR $column >= 32) {
+                    $columns = $column - $count_merge;
                 }
 
-                $object->getActiveSheet()->setCellValueByColumnAndRow($columns, 3, $field);  
-                $object->getActiveSheet()->mergeCellsByColumnAndRow($columns, 3, $columns, 4);
+                $object->getActiveSheet()->setCellValueByColumnAndRow($columns,3,$field);
+                $object->getActiveSheet()->mergeCellsByColumnAndRow($columns,3,$columns,4);
             }
 
 
-            // merge cell lebar greige, lebar jadi
-            if(($column >= 9 AND $column <=11) OR ( $column >= 14 AND $column <=17) OR ($column >= 27 AND $column <=31)){
-                if($column == 14 OR $column == 27){$merge = TRUE;}
+            // merge cell Corak, Lebar, Greige / Total Order / Hasil Produksi
+            if ( ($column >= 10 AND $column <= 12) OR ($column >= 15 AND $column <= 18) OR ($column >= 28 AND $column <= 32) ) {
 
-                if($merge == TRUE){
-                    $columns = $column-$count_merge;
-                    $object->getActiveSheet()->setCellValueByColumnAndRow($columns, 3, $field);  
-                    if($column == 9){
-                        $object->getActiveSheet()->mergeCells('J3:K3');// merge cell lebar
-                    }elseif($column == 14){
-                        $object->getActiveSheet()->mergeCells('N3:P3');// megre cell total order
-                    }elseif($column == 27){
-                        $object->getActiveSheet()->mergeCells('Z3:AB3');// megre cell hasil produksi
+                if ($column == 15 OR $column == 28) {
+                    $merge = TRUE;
+                }
+
+                if ($merge == TRUE) {
+
+                    $columns = $column - $count_merge;
+                    $object->getActiveSheet()->setCellValueByColumnAndRow( $columns,3,$field);
+
+                    if ($column == 10) {
+                        // sebelumnya J3:K3
+                        $object->getActiveSheet()->mergeCells('K3:L3');
+
+                    } elseif ($column == 15) {
+                        // sebelumnya N3:P3
+                        $object->getActiveSheet()->mergeCells('O3:Q3');
+
+                    } elseif ($column == 28) {
+                        // sebelumnya Z3:AB3
+                        $object->getActiveSheet()->mergeCells('AA3:AC3');
                     }
+
                     $count_merge++;
 
-                }else if($merge == false){
-                    $columns = $column-$count_merge;
-                    $object->getActiveSheet()->setCellValueByColumnAndRow($columns, 4, $field);    
+                } else if ($merge == FALSE) {
+                    $columns = $column - $count_merge;
+                    $object->getActiveSheet()->setCellValueByColumnAndRow($columns,4,$field);
                 }
 
                 $merge = FALSE;
-            }  
+            }
 
             $column++;
+        }
 
-        } // end foreach
 
 
         // setting align header
@@ -789,7 +806,7 @@ class Produksitricot extends MY_Controller
         $object->getActiveSheet()->getStyle('U3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
         // setting huruf tebal
-        $object->getActiveSheet()->getStyle("A1:AF4")->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle("A1:AG4")->getFont()->setBold(true);
 
 
         //Border 
@@ -834,7 +851,7 @@ class Produksitricot extends MY_Controller
         );  
     
         // set column heeader
-        $index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF');
+        $index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG');
         $loop = 1;
         // set border, align center, set size width
         foreach ($index_header as $val) {
@@ -845,19 +862,19 @@ class Produksitricot extends MY_Controller
             //$object->getActiveSheet()->getStyle($val.'4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $object->getActiveSheet()->getStyle($val.'3:'.$val.'4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER_CONTINUOUS);
 
-            if($loop <= 3 OR ($loop >= 5 AND $loop <= 7) OR $loop == 22){ // index A, B, C, E, F, X
+            if($loop <= 3 OR ($loop >= 5 AND $loop <= 8) OR $loop == 23){ // index A, B, C, E, F,,H X
                 $object->getSheet(0)->getColumnDimension($val)->setAutoSize(true);
             }else if($loop == 4){ // index D
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(19);
-            }else if($loop == 8){ // index G
-                $object->getSheet(0)->getColumnDimension($val)->setWidth(27);
-            }else if($loop == 9){// index H
+            }else if($loop == 9){ // index G
+                $object->getSheet(0)->getColumnDimension($val)->setWidth(15);
+            }else if($loop == 10){// index H
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(17);
-            }else if($loop== 10 OR $loop == 11 OR ($loop >= 12 AND $loop <=21) OR ($loop >=24 AND $loop <=  32) ){// index I, J,M,N,O, P, Q, R, S, T, W, X, Y, Z, AA, AB, AC, AD, AE
+            }else if($loop== 11 OR $loop == 12 OR ($loop >= 13 AND $loop <=22) OR ($loop >=25 AND $loop <=  33) ){// index I, J,M,N,O, P, Q, R, S, T, W, X, Y, Z, AA, AB, AC, AD, AE
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(9);
-            }else if($loop == 12 OR $loop == 13){// index K, L
+            }else if($loop == 13 OR $loop == 14){// index K, L
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(10);
-            }else if($loop == 23){// index V
+            }else if($loop == 24){// index V
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(22);
             }
 
@@ -871,8 +888,8 @@ class Produksitricot extends MY_Controller
         }
 
         // set wrap text
-        $object->getActiveSheet()->getStyle('L3:L'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);  
         $object->getActiveSheet()->getStyle('L3:M'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+        $object->getActiveSheet()->getStyle('L3:N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);  
 
         // diatas column A5 tidak bergerak
         //$object->getActiveSheet()->freezePane('A5'); 
@@ -883,6 +900,7 @@ class Produksitricot extends MY_Controller
         $no    = 1;
         $rowCount = 5;
         $sales_contract = '';
+        $tgl_sc         = '';
         $status_sc      = '';
         $pd             = '';
         $mkt            = '';
@@ -932,6 +950,7 @@ class Produksitricot extends MY_Controller
             $mkt         = $row->nama_sales_group;
             $pd          = $row->kode_prod;
             $sales_contract = $row->sales_order;
+            $tgl_sc         = $row->create_date;
 
             // explode reff_note
             $ex2 = explode('|', $row->reff_note);
@@ -1075,6 +1094,7 @@ class Produksitricot extends MY_Controller
                     $sisa_target = '';
                     $status      = '';
                     $status_sc    = '';
+                    $tgl_sc       = '';
                     $sales_contract = '';
                     $pd             = '';
                     $mkt            = '';
@@ -1112,40 +1132,41 @@ class Produksitricot extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('C'.$rowCount, $tgl_mo);
                 $object->getActiveSheet()->SetCellValue('D'.$rowCount, $nama_mesin);
                 $object->getActiveSheet()->SetCellValue('E'.$rowCount, $sales_contract);
-                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $status_sc);
-                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $pd);
-                $object->getActiveSheet()->SetCellValue('H'.$rowCount, $mkt);
-                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $nama_produk);
-                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $lbr_greige);
-                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_jadi);
-                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $start_time);
-                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $finish_time);
-                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_pd);
-                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $gl);
-                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $mtr_gl);
-                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $pcs);
-                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $gauge);
-                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $stitch);
-                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $courses);
-                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $rpm);
-                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $gb);
-                $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->nama_produk);
-                $object->getActiveSheet()->SetCellValue('X'.$rowCount, $val->target_qty);
-                $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $run_in);
-                $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $hph_qty1);
-                $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $hph_qty2);
-                $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $gulung);
-                $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $sisa_target);
-                $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $ket);
-                $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $tc);
-                $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $status);
+                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $tgl_sc);
+                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $status_sc);
+                $object->getActiveSheet()->SetCellValue('H'.$rowCount, $pd);
+                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $mkt);
+                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $nama_produk);
+                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_greige);
+                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $lbr_jadi);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $start_time);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $finish_time);
+                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $target_pd);
+                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $gl);
+                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $mtr_gl);
+                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $pcs);
+                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $gauge);
+                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $stitch);
+                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $courses);
+                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $rpm);
+                $object->getActiveSheet()->SetCellValue('W'.$rowCount, $gb);
+                $object->getActiveSheet()->SetCellValue('X'.$rowCount, $val->nama_produk);
+                $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $val->target_qty);
+                $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $run_in);
+                $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $hph_qty1);
+                $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $hph_qty2);
+                $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $gulung);
+                $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $sisa_target);
+                $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $ket);
+                $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $tc);
+                $object->getActiveSheet()->SetCellValue('AG'.$rowCount, $status);
 
                 // set align 
                 $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('C'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-                $object->getActiveSheet()->getStyle('F'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('G'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('H'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('M'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('N'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('V'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -1194,6 +1215,7 @@ class Produksitricot extends MY_Controller
                 $object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray_left);
                 $object->getActiveSheet()->getStyle('AF'.$rowCount)->applyFromArray($styleArray_left);
                 $object->getActiveSheet()->getStyle('AG'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AH'.$rowCount)->applyFromArray($styleArray_left);
              
 
                 $boM++;
@@ -1207,40 +1229,41 @@ class Produksitricot extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('C'.$rowCount, $tgl_mo);
                 $object->getActiveSheet()->SetCellValue('D'.$rowCount, $nama_mesin);
                 $object->getActiveSheet()->SetCellValue('E'.$rowCount, $sales_contract);
-                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $status_sc);
-                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $pd);
-                $object->getActiveSheet()->SetCellValue('H'.$rowCount, $mkt);
-                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $nama_produk);
-                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $lbr_greige);
-                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_jadi);
-                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $start_time);
-                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $finish_time);
-                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_pd);
-                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $gl);
-                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $mtr_gl);
-                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $pcs);
-                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $gauge);
-                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $stitch);
-                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $courses);
-                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $rpm);
-                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $gb);
-                $object->getActiveSheet()->SetCellValue('W'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $tgl_sc);
+                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $status_sc);
+                $object->getActiveSheet()->SetCellValue('H'.$rowCount, $pd);
+                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $mkt);
+                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $nama_produk);
+                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_greige);
+                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $lbr_jadi);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $start_time);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $finish_time);
+                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $target_pd);
+                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $gl);
+                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $mtr_gl);
+                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $pcs);
+                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $gauge);
+                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $stitch);
+                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $courses);
+                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $rpm);
+                $object->getActiveSheet()->SetCellValue('W'.$rowCount, $gb);
                 $object->getActiveSheet()->SetCellValue('X'.$rowCount, "");
                 $object->getActiveSheet()->SetCellValue('Y'.$rowCount, "");
                 $object->getActiveSheet()->SetCellValue('Z'.$rowCount, "");
                 $object->getActiveSheet()->SetCellValue('AA'.$rowCount, "");
                 $object->getActiveSheet()->SetCellValue('AB'.$rowCount, "");
                 $object->getActiveSheet()->SetCellValue('AC'.$rowCount, "");
-                $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $ket);
-                $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $tc);
-                $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $status);
+                $object->getActiveSheet()->SetCellValue('AD'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $ket);
+                $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $tc);
+                $object->getActiveSheet()->SetCellValue('AG'.$rowCount, $status);
 
                 // set align 
                 $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('C'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-                $object->getActiveSheet()->getStyle('F'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('G'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('H'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('M'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('N'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('V'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -1289,6 +1312,7 @@ class Produksitricot extends MY_Controller
                 $object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray_left);
                 $object->getActiveSheet()->getStyle('AF'.$rowCount)->applyFromArray($styleArray_left);
                 $object->getActiveSheet()->getStyle('AG'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AH'.$rowCount)->applyFromArray($styleArray_left);
 
                 $rowCount++;
             }
@@ -1324,11 +1348,13 @@ class Produksitricot extends MY_Controller
                 $object->getActiveSheet()->getStyle('AC'.$rowCount)->applyFromArray($styleArray_top);
                 $object->getActiveSheet()->getStyle('AD'.$rowCount)->applyFromArray($styleArray_top);
                 $object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray_top);
-                $object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray_top);
+                $object->getActiveSheet()->getStyle('AF'.$rowCount)->applyFromArray($styleArray_top);
+                $object->getActiveSheet()->getStyle('AG'.$rowCount)->applyFromArray($styleArray_top);
 
 
             $no++;
 
+            $tgl_sc         = '';
             $sales_contract = '';
             $status_sc      = '';
             $pd             = '';

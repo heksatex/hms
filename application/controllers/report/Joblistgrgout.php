@@ -53,6 +53,7 @@ class Joblistgrgout extends MY_Controller
                 $row[] = $field->tanggal;
                 $row[] = $field->origin;
                 $row[] = $field->reff_picking;
+                $row[] = $field->delivery_date;
                 $row[] = $field->nama_produk;
                 $row[] = $field->nama_warna;
                 $row[] = $field->target_mtr;

@@ -149,6 +149,7 @@
                       <th>Tgl.dibuat</th>
                       <th>Origin</th>
                       <th>Reff Picking</th>
+                      <th>Delivery Date</th>
                       <th>Product</th>
                       <th>Warna</th>
                       <th>Target Mtr</th>
@@ -202,7 +203,7 @@
             "processing": true, 
             "serverSide": true, 
             "order": [2, "asc"], 
-
+            
             "paging": true,
             "lengthChange": true,
             "searching": true,
@@ -217,7 +218,6 @@
                     data.id_dept  = "<?php echo $id_dept_asli;?>"
                     data.kode     = $('#kode').val();
                     data.origin   = $('#origin').val();
-                    data.produk   = $('#produk').val();
                     data.status   = $('#status').val();
                     data.reff_picking = $('#reff_picking').val();
                 }
@@ -226,7 +226,7 @@
  
             "columnDefs": [
               { 
-                "targets": [ 0 ], 
+                "targets": [ 0, 5 ], 
                 "orderable": false, 
               },
               {
@@ -236,7 +236,7 @@
                 }
               },
               {
-                "targets" : 5,
+                "targets" : 6,
                  render: function (data, type, full, meta) {
                         return "<div class='text-wrap width-150'>" + data + "</div>";
                 }
