@@ -209,6 +209,7 @@
                               <th  class='style bb ws' rowspan="2"style="min-width: 80px">Tgl.MO</th>
                               <th  class='style bb ws' rowspan="2"style="min-width: 130px">MC</th>
                               <th  class='style bb ws' rowspan="2">SC</th>
+                              <th  class='style bb ws' rowspan="2">Tgl SC</th>
                               <th  class='style bb ws' rowspan="2">Status SC</th>
                               <th  class='style bb ws' rowspan="2">PD</th>
                               <th  class='style bb ws' rowspan="2">Marketing</th>
@@ -372,6 +373,7 @@
                       $("<td>").text(value.tgl_mo),
                       $("<td>").text(value.mc),
                       $("<td>").text(value.sc),
+                      $("<td>").text(value.tgl_sc),
                       $("<td>").text(value.status_sc),
                       $("<td>").text(value.pd),
                       $("<td>").text(value.marketing),
@@ -406,7 +408,7 @@
           });
 
           if(empty == true){
-              var tr = $("<tr>").append($("<td colspan='30' align='center'>").text('Tidak ada Data'));
+              var tr = $("<tr>").append($("<td colspan='31' align='center'>").text('Tidak ada Data'));
               tbody.append(tr);
           }
           dataRecord.push(data.record);
@@ -475,6 +477,7 @@
                                   $("<td>").text(value.tgl_mo),
                                   $("<td>").text(value.mc),
                                   $("<td>").text(value.sc),
+                                  $("<td>").text(value.tgl_sc),
                                   $("<td>").text(value.status_sc),
                                   $("<td>").text(value.pd),
                                   $("<td>").text(value.marketing),
@@ -508,7 +511,7 @@
                       });
 
                     if(empty == true){
-                        var tr = $("<tr>").append($("<td colspan='19' align='center'>").text('Tidak ada Data'));
+                        var tr = $("<tr>").append($("<td colspan='20' align='center'>").text('Tidak ada Data'));
                         tbody.append(tr);
                     }
                     $("#example1").append(tbody);
