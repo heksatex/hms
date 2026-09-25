@@ -209,6 +209,7 @@
                               <th  class='style bb ws' rowspan="2" style="min-width: 80px">Tgl.MO</th>
                               <th  class='style bb ws' rowspan="2"style="min-width: 130px">MC</th>
                               <th  class='style bb ws' rowspan="2">SC</th>
+                              <th  class='style bb ws' rowspan="2">Tgl SC</th>
                               <th  class='style bb ws' rowspan="2">Status SC</th>
                               <th  class='style bb ws' rowspan="2">PD</th>
                               <th  class='style bb ws' rowspan="2">Buyer Code</th>
@@ -245,7 +246,7 @@
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="19" align="center">Tidak ada Data</td>
+                              <td colspan="20" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -379,6 +380,7 @@
                       $("<td>").text(value.tgl_mo),
                       $("<td>").text(value.mc),
                       $("<td>").text(value.sc),
+                      $("<td>").text(value.tgl_sc),
                       $("<td>").text(value.status_sc),
                       $("<td>").text(value.pd),
                       $("<td>").text(value.buyer_code),
@@ -484,6 +486,7 @@
                                   $("<td>").text(value.tgl_mo),
                                   $("<td>").text(value.mc),
                                   $("<td>").text(value.sc),
+                                  $("<td>").text(value.tgl_sc),
                                   $("<td>").text(value.status_sc),
                                   $("<td>").text(value.pd),
                                   $("<td>").text(value.buyer_code),
