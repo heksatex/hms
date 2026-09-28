@@ -194,7 +194,7 @@ class M_mo extends CI_Model
 
 	public function get_data_by_code($kode)
 	{
-		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, mrp.alasan, hd.nama_handling, w.nama_warna, w.kode_warna, wv.notes_varian as notes_varian, mrp.program, mrp.gramasi, wv.id as id_warna_varian, wv.nama_varian, mrp.speed, mrp.estimasi_menit_habis
+		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, mrp.alasan, hd.nama_handling, w.nama_warna, w.kode_warna, wv.notes_varian as notes_varian, mrp.program, mrp.gramasi, wv.id as id_warna_varian, wv.nama_varian, mrp.speed, mrp.estimasi_menit_habis, mrp.speed_unit
 								  FROM mrp_production mrp 
 								  LEFT join  mst_handling hd ON mrp.id_handling = hd.id 
 								  LEFT JOIN warna w ON mrp.id_warna = w.id
@@ -474,7 +474,7 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT * FROM mesin where mc_id = '$mc_id' ");
 	}
 
-	public function update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alsan, $estimasi_menit, $speed)
+	public function update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alsan, $estimasi_menit, $speed, $speed_unit)
 	{
 		return $this->db->query("UPDATE mrp_production set berat = '$berat', air = '$air', start_time = '$start', 
 														   finish_time = '$finish',reff_note = '$reff_note', 
@@ -492,7 +492,8 @@ class M_mo extends CI_Model
 														   program  = '$program',
 														   alasan = '$alsan',
 														   estimasi_menit_habis = '$estimasi_menit',
-														   speed = '$speed'
+														   speed = '$speed',
+														   speed_unit = '$speed_unit'
 														WHERE kode = '$kode' ");
 	}
 
@@ -1352,6 +1353,15 @@ class M_mo extends CI_Model
 		$this->db->limit(50);
         $this->db->order_by('CAST(SUBSTRING(seri_beam, 2) AS UNSIGNED) ASC');
         $result = $this->db->get('mst_beam_dasar');
+        return $result->result();
+	}
+
+	
+	public function get_list_speed_unit()
+	{
+		
+        $this->db->order_by('speed_unit');
+        $result = $this->db->get('mst_speed_unit');
         return $result->result();
 	}
 
