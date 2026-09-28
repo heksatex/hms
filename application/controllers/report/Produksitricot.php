@@ -699,7 +699,7 @@ class Produksitricot extends MY_Controller
     	
     	if($nama_field == 'kode' OR $nama_field == 'tanggal' OR $nama_field == 'status' ){
     		$where = 'mrp.'.$nama_field;
-    	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order' OR $nama_field == 'status_sc'){
+    	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order' OR $nama_field == 'status_sc' OR $nama_field == 'create_date'){
             if($nama_field == 'status_sc'){
                 $where = 'sc.nama_status';
             }else{
