@@ -350,13 +350,13 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Qty 1 Standar </label></div>
                 <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm" name="qty1_std" id="qty1_std"  readonly="readonly"   value="<?php echo $list->qty1_std;?>" onkeyup="validAngka(this)"/>
+                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  name="qty1_std" id="qty1_std"  readonly="readonly"   value="<?php echo $list->qty1_std;?>" onkeyup="validAngka(this)"/>
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Qty 2 Standar </label></div>
                 <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm" name="qty2_std" id="qty2_std"  readonly="readonly"   value="<?php echo $list->qty2_std;?>" onkeyup="validAngka(this)"/>
+                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  name="qty2_std" id="qty2_std"  readonly="readonly"   value="<?php echo $list->qty2_std;?>" onkeyup="validAngka(this)"/>
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
@@ -397,12 +397,33 @@
                 </div>                                    
               </div>
 
-              <div class="col-md-12 col-xs-12">
-                <div class="col-xs-4"><label>Speed</label></div>
-                <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm" name="speed" id="speed"  readonly="readonly"   value="<?php echo $list->speed;?>" />
-                </div>                                    
+            <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4">
+                      <label>Speed</label>
+                  </div>
+
+                  <div class="col-xs-8">
+                      <div class="row">
+                          <div class="col-xs-8">
+                              <input type="text"  class="form-control input-sm text-right" name="speed" id="speed" readonly="readonly" value="<?php echo $list->speed; ?>" />
+                          </div>
+
+                          <div class="col-xs-4">
+                              <select class="form-control input-sm" name="speed_unit" id="speed_unit" disabled> 
+                                <?php 
+                                  $selected = "";
+                                  echo "<option>Pilih</option>";
+                                  foreach($speed_unit as $sp) {
+                                    $selected = ($sp->speed_unit === $list->speed_unit)? 'selected' : '';
+                                    echo "<option value='".$sp->speed_unit."' ".$selected."> ".$sp->speed_unit."</option>";
+                                  }
+                                ?>
+                              </select>
+                          </div>
+                      </div>
+                  </div>
               </div>
+
 
               <div class="col-md-12 col-xs-12">
                         <div class="col-xs-4">
@@ -410,13 +431,15 @@
                         </div>
                         <div class="col-xs-4">
                             <div class="input-group">
-                                <input type="number"
-                                      class="form-control input-sm"
+                                <input type="text"
+                                      class="form-control input-sm  formatAngka text-right" 
+                                      data-decimal="0" 
                                       name="estimasi_habis_jam"
                                       id="estimasi_habis_jam"
                                       placeholder="0"
                                       min="0"
                                       readonly="readonly" 
+                                      
                                       value="<?php echo $estimasi_habis_jam;?>">
                                 <span class="input-group-addon">Jam</span>
                             </div>
@@ -424,8 +447,9 @@
 
                         <div class="col-xs-4">
                             <div class="input-group">
-                                <input type="number"
-                                      class="form-control input-sm"
+                                <input type="text"
+                                      class="form-control input-sm  formatAngka text-right" 
+                                      data-decimal="0" 
                                       name="estimasi_habis_menit"
                                       id="estimasi_habis_menit"
                                       placeholder="0"
@@ -1225,6 +1249,7 @@
     $("#estimasi_habis_jam").attr("readonly", true);
     $("#estimasi_habis_menit").attr("readonly", true);
     $("#speed").attr("readonly", true);
+    $("#speed_unit").attr("disabled", true);
     var status = $('#status').val();
    
     if(status != "hold" ){
@@ -1403,6 +1428,7 @@
     $("#estimasi_habis_jam").attr("readonly", false);
     $("#estimasi_habis_menit").attr("readonly", false);
     $("#speed").attr("readonly", false);
+    $("#speed_unit").attr("disabled", false).attr('id', 'speed_unit');
     // $("#lot_prefix_waste").attr("readonly", false);
 
     $('#type_production').attr('disabled', false).attr('id','type_production');
@@ -2234,8 +2260,8 @@
                 mesin       : $('#mc').val(),
                 kode        : $('#kode').val(),
                 target_efisiensi : $('#target_efisiensi').val(),
-                qty1_std    : $('#qty1_std').val(),
-                qty2_std    : $('#qty2_std').val(),
+                qty1_std    : unformatNumber($('#qty1_std').val()),
+                qty2_std    : unformatNumber($('#qty2_std').val()),
                 type_production  : $('#type_production').val(),
                 lot_prefix  : $('#lot_prefix').val(),
                 lot_prefix_waste  : $('#lot_prefix_waste').val(),
@@ -2250,9 +2276,10 @@
                 program     : $('#program').val(),
                 origin      : $('#origin').val(),
                 alasan      : $('#alasan').val(),
-                estimasi_jam : $('#estimasi_habis_jam').val(),
-                estimasi_menit : $('#estimasi_habis_menit').val(),
+                estimasi_jam : unformatNumber($('#estimasi_habis_jam').val()),
+                estimasi_menit : unformatNumber($('#estimasi_habis_menit').val()),
                 speed      : $('#speed').val(),
+                speed_unit      : $('#speed_unit').val(),
 
           },success: function(data){
             if(data.sesi == "habis"){

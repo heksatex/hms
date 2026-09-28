@@ -298,6 +298,7 @@ class MO extends MY_Controller
             $orgn              = $list->origin."|".$kode_decrypt;
             $cek_request       = $this->m_mo->cek_origin_di_stock_move($orgn)->row_array();//cek udh request color ?
             $data['handling']  = $this->_module->get_list_handling();
+            $data['speed_unit']= $this->m_mo->get_list_speed_unit();
             // akses menu 
             $mms = $this->_module->get_kode_sub_menu_deptid_user('mO',$list->dept_id,$username)->row_array();
             if(!empty($mms['kode'])){
@@ -5080,7 +5081,8 @@ class MO extends MY_Controller
             $show_lebar = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
             $estimasi_jam       = (int) $this->input->post('estimasi_jam');
             $estimasi_menit     = (int) $this->input->post('estimasi_menit');
-            $speed              = (int) $this->input->post('speed');
+            $speed              = $this->input->post('speed');
+            $speed_unit         = $this->input->post('speed_unit');
 
             //cek status mrp_production = done
             $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
@@ -5160,7 +5162,7 @@ class MO extends MY_Controller
                     // Konversi ke total menit
                     $estimasi_habis_menit = ($estimasi_jam * 60) + $estimasi_menit;
 
-                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alasan, $estimasi_habis_menit, $speed);
+                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alasan, $estimasi_habis_menit, $speed, $speed_unit);
                     
                     if($show_lebar['show_lebar'] == 'true'){
                         $lebar = $lebar_greige."  ".$uom_lebar_greige." | ".$lebar_jadi."  ".$uom_lebar_jadi." | ";
@@ -5180,7 +5182,7 @@ class MO extends MY_Controller
                     if($type_mo == 'colouring'){                    
                         $note_log    = "-> ".$lebar." | ".$berat." | ".$air." | ".$handling." | ".$gramasi." | ".$program." | ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed" ; 
                     }else{
-                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed" ; 
+                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed " .$speed_unit; 
                     }
 
 
