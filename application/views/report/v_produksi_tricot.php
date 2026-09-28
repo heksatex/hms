@@ -68,6 +68,26 @@
       }
     }
 
+     /*over show tampilan dekstop*/
+    @media screen and (min-width: 768px) {
+      .over {
+        overflow-x: visible !important;
+      }
+
+      div.divListview {
+         width: 100%;
+      }
+
+      .listView {
+         /*display: table;*/
+         table-layout: fixed;
+         width: 100%;
+      }
+
+    }
+
+    
+
 
   </style>
 </head>

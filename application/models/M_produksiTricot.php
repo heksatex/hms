@@ -81,7 +81,7 @@ class M_produksiTricot extends CI_Model
 		$query  = $this->db->query("SELECT count(sc.sales_order) as allcount
 																					
 																					FROM (
-										SELECT sc.sales_order, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group, ms.nama_status
+										SELECT sc.sales_order, sc.create_date, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group, ms.nama_status
 										FROM sales_contract sc 
 										INNER JOIN sales_contract_items sci ON sc.sales_order = sci.sales_order
 										LEFT JOIN mst_status ms ON sc.status = ms.kode
