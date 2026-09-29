@@ -356,7 +356,7 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Qty 2 Standar </label></div>
                 <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  />
+                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  name="qty2_std" id="qty2_std"  readonly="readonly"   value="<?php echo $list->qty2_std;?>" >
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
