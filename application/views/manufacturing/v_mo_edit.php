@@ -350,13 +350,13 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Qty 1 Standar </label></div>
                 <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  name="qty1_std" id="qty1_std"  readonly="readonly"   value="<?php echo $list->qty1_std;?>" onkeyup="validAngka(this)"/>
+                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  name="qty1_std" id="qty1_std"  readonly="readonly"   value="<?php echo $list->qty1_std;?>" />
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Qty 2 Standar </label></div>
                 <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  name="qty2_std" id="qty2_std"  readonly="readonly"   value="<?php echo $list->qty2_std;?>" onkeyup="validAngka(this)"/>
+                  <input type='text' class="form-control input-sm formatAngka "   data-decimal="2"  />
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
