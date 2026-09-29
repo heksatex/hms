@@ -425,7 +425,7 @@
 
                 </a>
                 <div>
-                    <div class="fw-bold fs-6 text-dark text-uppercase">&nbsp;<i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - <?= $departmen->nama ?? ''  ?></div>
+                    <div class="fw-bold fs-6 text-dark text-uppercase">&nbsp;<i class="fa-solid fa-timeline text-teal me-2"></i>PRODUCTION PLANNING - <?= $departmen->nama ?? '' ?></div>
 
                 </div>
 
@@ -939,7 +939,7 @@
                                                             itt.finish_time = en.format("YYYY-MM-DD HH:mm").toString();
                                                             itemSelected[idx] = itt;
                                                         });
-                                                    itemSelected.push(item);
+                                                        itemSelected.push(item);
                                                         await update(itemSelected).then(async rst => {
                                                             callback(item);
                                                             items.update(itemSelected);
@@ -1248,18 +1248,30 @@
                                         if (mo.mc) {
                                             card.style.borderLeftColor = '#059669'; // Emerald if scheduled
                                         }
-                                        const diffInMinutes = moment(mo.finish_time).diff(moment(mo.start_time), 'minutes');
-                                        const durHoursFormatted = (diffInMinutes / 60).toFixed(1);
                                         card.dataset.nama_produk = mo.nama_produk;
                                         card.dataset.start_time = mo.start_time;
-                                        card.dataset.finish_time = mo.finish_time;
-                                        card.dataset.total_minute = diffInMinutes;
                                         card.dataset.qty = mo.qty;
                                         card.dataset.uom = mo.uom;
                                         card.dataset.status = mo.status;
                                         card.dataset.mc_id = mo.mc_id;
                                         card.dataset.qty_target = mo.qty_target;
                                         card.dataset.tipe = "box";
+                                        if (mo.speed_unit !== "") {
+                                            if (mo.speed_unit === "m/menit") {
+                                                var hslMnt = parseFloat(mo.qty) / parseFloat(mo.speed);
+                                            } else {
+                                                var hsl = parseFloat(mo.qty) / parseFloat(mo.speed);
+                                                var hslMnt = hsl * 60;
+                                            }
+                                            hslMnt = hslMnt.toFixed();
+//                                            console.log(`${mo.start_time} - ${mo.finish_time}`);
+                                            mo.finish_time = moment(mo.start_time).add(hslMnt,"minutes");
+                                            
+                                        }
+                                        const diffInMinutes = moment(mo.finish_time).diff(moment(mo.start_time), 'minutes');
+                                        const durHoursFormatted = (diffInMinutes / 60).toFixed(1);
+                                        card.dataset.finish_time = mo.finish_time;
+                                        card.dataset.total_minute = diffInMinutes;
                                         card.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-1">
             <div>

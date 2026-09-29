@@ -122,7 +122,7 @@ class Productionplanning extends MY_Controller {
 
             $model->setSelects(["mp.kode", "mp.nama_produk", "COALESCE(start_time,'') as start_time", "COALESCE(finish_time,'') as finish_time", "mp.status"]);
             $model->setSelects(["COALESCE(total_minute,0) as total_minute", "COALESCE(mc_id,'') as mc_id", "COALESCE(pp.mc,'') as mc", "mp.qty", "mp.uom", "mp.reff_note"])
-                    ->setSelects(["sum(mpt.qty) as qty_target"]);
+                    ->setSelects(["sum(mpt.qty) as qty_target","speed","speed_unit"]);
             $count = $model->getDataCountFiltered();
             $_POST['length'] = 20;
             $_POST['start'] = 0;
