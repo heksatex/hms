@@ -138,6 +138,7 @@ class Productionplanning extends MY_Controller {
 
     public function rmv_plan() {
         try {
+            $username = $this->session->userdata('username');
             $kode = $this->input->post("kode");
             $model = new $this->m_global;
             $this->_module->startTransaction();
@@ -160,8 +161,9 @@ class Productionplanning extends MY_Controller {
             if (count($checkMrp) > 0) {
                 throw new \Exception("MO dalam status 'Done'", 500);
             }
+            $checkMrp = $model->setTables("mrp_production")->setWhereIn("kode", $kode)->getDetail();
             $model->updateBatch($update, "kode");
-
+            $this->_module->gen_history_deptid('manufacturing', $kode[0], "edit", logArrayToString("; ", array_merge(["remove"=>"product planning"],$update[0])), $username,$checkMrp->dept_id);  
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
@@ -178,6 +180,7 @@ class Productionplanning extends MY_Controller {
 
     public function update_plan() {
         try {
+             $username = $this->session->userdata('username');
             $model = new $this->m_global;
             $this->_module->startTransaction();
             $dt = $this->input->post("dt");
@@ -194,15 +197,18 @@ class Productionplanning extends MY_Controller {
                     throw new \Exception('Data Tidak Ditemukan', 500);
                 }if ($tipe === "box") {
                     $model->update(["total_minute" => $minute]);
-                    $checkStt = $model->setTables("mrp_production")->setWheres(["kode" => $kode, "status" => "done"],true)->getDetail();
-                    if ($checkStt) {
+                    $checkStt = $model->setTables("mrp_production")->setWheres(["kode" => $kode],true)->getDetail();
+                    if ($checkStt && $checkStt->status == "done") {
                         throw new \Exception("MO dalam status 'Done'", 500);
                     }
-                    $model->setWheres(["kode" => $kode], true)->update([
+                    $upp = [
                         "start_time" => $start,
                         "finish_time" => $finish,
                         "mc_id" => $mc
-                    ]);
+                    ];
+                    $model->setWheres(["kode" => $kode], true)->update($upp);
+                    
+                    $this->_module->gen_history_deptid('manufacturing', $kode, "edit", logArrayToString("; ", array_merge(["update"=>"product planning"],$upp)), $username,$checkStt->dept_id);
                 } else {
                     $model->update([
                         "total_minute" => $minute,
@@ -211,7 +217,9 @@ class Productionplanning extends MY_Controller {
                         "mc" => $mc
                     ]);
                 }
+                
             }
+             
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
@@ -230,6 +238,7 @@ class Productionplanning extends MY_Controller {
 
     public function save_plan() {
         try {
+             $username = $this->session->userdata('username');
             $kode = $this->input->post("kode");
             $mc = $this->input->post("mcid");
             $start = $this->input->post("start");
@@ -278,6 +287,8 @@ class Productionplanning extends MY_Controller {
                 }
                 $model->saveBatch($insert);
                 $model->setTables("mrp_production")->updateBatch($update, "kode");
+                $checkMrp = $model->setWheres(["kode"=>$kode[0]])->getDetail();
+                $this->_module->gen_history_deptid('manufacturing', $kode[0], "edit", logArrayToString("; ", array_merge(["add"=>"product planning"],$update[0])), $username,$checkMrp->dept_id);
             } else {
                 $model->setTables("product_planning")->save([
                     "kode" => $kode[0],
