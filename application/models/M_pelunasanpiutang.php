@@ -967,8 +967,15 @@ class M_pelunasanpiutang extends CI_Model
         if($tipe_currency == 'Valas') { // Rp, VALAS
             $this->db->WHERE('show_valas', 'true'); // I
         }
-        if($tipe){
-            $this->db->WHERE('tipe', $tipe); // um / koreksi
+        if($tipe == 'um'){
+            // Menghasilkan query: AND (tipe = 'um' OR nama_koreksi = 'deposit')
+            $this->db->group_start();
+                $this->db->where('tipe', 'um');
+                $this->db->or_where('nama_koreksi', 'deposit'); // atau ->or_like('nama_koreksi', 'deposit') jika pencarian parsial
+            $this->db->group_end();
+        } else if($tipe){
+            // Jika $tipe diisi nilai lain selain 'um', jalankan where seperti biasa
+            $this->db->where('tipe', $tipe); 
         }
         $query = $this->db->get('acc_pelunasan_koreksi_piutang');
         return $query->result();
