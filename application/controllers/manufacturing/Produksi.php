@@ -136,10 +136,12 @@ class Produksi extends MY_Controller
         $mc_knitting = trim($ex[2] ?? '');
         $gb          = trim($ex[4] ?? '');
         $jml_beam     = trim($ex[5] ?? '');
+        $note_add   = trim($ex[9] ?? '');
 
         $data['mo_knitting']    = $mo_knitting;
         $data['mc_knitting']    = $mc_knitting;
         $data['jml_beam']       = $jml_beam .' - '.$gb;
+        $data['note_add']       = $note_add;
         $data['total_target']   = $list_mo['qty'];
         $data['sudah_dibuat']   = $list_mo['qty_produced'];
         $data['sisa_target']    = $list_mo['qty'] - $list_mo['qty_produced'];
@@ -238,7 +240,7 @@ class Produksi extends MY_Controller
             ['nama' => 'Twisting',        'icon' => 'fa-cog',       'disabled' => true],
             ['nama' => 'Warping Dasar',   'icon' => 'fa-cog',       'disabled' => false,      'url' => site_url('manufacturing/produksi/produksiMesin/WRD')],
             ['nama' => 'Warping Panjang', 'icon' => 'fa-cog',       'disabled' => true],
-            ['nama' => 'Tricot',          'icon' => 'fa-cog',       'disabled' => false,      'url' => site_url('manufacturing/produksi/produksiMesin/TRI')],
+            ['nama' => 'Tricot',          'icon' => 'fa-cog',       'disabled' => true,      'url' => site_url('manufacturing/produksi/produksiMesin/TRI')],
             ['nama' => 'Jacquard',        'icon' => 'fa-cog',       'disabled' => true],
             ['nama' => 'Inspecting',      'icon' => 'fa-search',    'disabled' => true],
             ['nama' => 'Cutting',         'icon' => 'fa-scissors',  'disabled' => true],
