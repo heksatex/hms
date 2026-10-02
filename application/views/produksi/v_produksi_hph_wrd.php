@@ -2,7 +2,8 @@
 <html>
   <head>
         <?php $this->load->view("produksi/hmi/head") ?>
-        <link rel="stylesheet" href="<?=base_url()?>dist/css/hmi/page-hph.css">
+        <!-- <link rel="stylesheet" href="<?=base_url()?>dist/css/hmi/page-hph.css"> -->
+        <link rel="stylesheet" href="<?= base_url() ?>dist/css/hmi/page-hph.css?v=<?= filemtime(FCPATH . 'dist/css/hmi/page-hph.css') ?>">
         <link rel="stylesheet" href="<?=base_url()?>dist/css/hmi/header2.css">
         <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/select2/css/select2.min.css') ?>">
   </head>
@@ -38,6 +39,7 @@
                     <label class="info-summary-label">Jml Beam</label>
                     <div class="info-summary-val"> <?= isset($jml_beam) ? $jml_beam : '-'; ?> </div>
                 </div>
+              
                 <div class="summary-box">
                     <label class="info-summary-label">Total Target</label>
                     <div class="info-summary-val"> <?= isset($total_target) ? number_format($total_target,2) : '0'; ?> <small>Mtr</small>
@@ -59,6 +61,7 @@
                 </div>
             </div>
 
+          
             <!-- =====================================================
                     BODY
             ====================================================== -->
@@ -109,6 +112,21 @@
                         CENTER : INPUT PRODUKSI
                 ================================================== -->
                 <main class="hph-input-panel">
+                   
+                    <?php if (!empty(trim($note_add ?? ''))): ?>
+                        <div class="hph-result-note">
+                            <div class="hph-result-icon blink">
+                                <i class="fa fa-exclamation"></i>
+                            </div>
+
+                            <div class="hph-result-content">
+                                <span class="hph-result-label">Reff Note</span>
+                                <strong class="hph-result-value">
+                                    <?= htmlspecialchars(trim($note_add)); ?>
+                                </strong>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <div class="input-row">
                         <div class="row-number">1</div>
                         <div class="input-label"> BEAM - LOT </div>
