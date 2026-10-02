@@ -407,7 +407,9 @@
             .dddr {
                 z-index: -1 !important;
             }
-
+            .vis-item.vis-background.negative {
+                background-color: rgba(255, 0, 0, 0.2);
+            }
         </style>
     </head>
 
@@ -633,116 +635,253 @@
 
         </div>
     </div>
+
+    <div class="modal fade" id="groupConesModal" tabindex="-1" aria-labelledby="groupConesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white py-2">
+                    <h6 class="modal-title fw-bold" id="groupConesModalLabel">
+                        <i class="fa-solid fa-layer-group text-warning me-2"></i>Group Cones Depletion Tracker - <span id="modal-target-machine" class="text-warning text-uppercase">MC4</span>
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="row g-3">
+                        <div class="col-lg-5">
+                            <div class="card border mb-2">
+                                <div class="card-header bg-light fw-bold xsmall py-2 text-dark">
+                                    <i class="fa-solid fa-boxes-stacked text-warning me-2"></i>1. Setup Creel Mesin
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label xsmall fw-bold mb-1">Total Cones Naik</label>
+                                            <input type="number" id="setup-total-cones" class="form-control form-control-sm mono fw-bold text-primary" value="0" readonly>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label xsmall fw-bold mb-1">Berat Awal/Cone (Kg)</label>
+                                            <input type="number" id="setup-weight-per-cone" class="form-control form-control-sm mono fw-bold text-secondary" value="0" readonly>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="p-2 bg-light rounded border d-flex justify-content-between align-items-center">
+                                                <label for="setup-total-stock-input" class="xsmall fw-bold text-muted mb-0 me-2">
+                                                    <i class="fa-solid fa-pen-to-square text-success me-1"></i>Total Berat Stock Awal (Kg):
+                                                </label>
+                                                <input type="number" id="setup-total-stock-input" class="form-control form-control-sm mono fw-bold text-success text-end" style="width: 140px;" value="4228" step="0.01" min="0" oninput="calculateGroupDepletion()">
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border">
+                                <div class="card-header bg-light fw-bold xsmall py-2 text-dark d-flex justify-content-between align-items-center">
+                                    <span><i class="fa-solid fa-list-check text-primary me-2"></i>2. Urutan MO Timeline</span>
+                                    <button class="btn btn-xs btn-outline-primary" onclick="loadMoFromScheduleToTracker()"><i class="fa-solid fa-rotate me-1"></i>Refresh Timeline MO</button>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered align-middle table-xs mb-2">
+                                            <thead class="table-light text-center">
+                                                <tr>
+                                                    <th>MO</th>
+                                                    <th>Jumlah Lembar</th>
+                                                    <th>Target Consume (Kg)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="mo-input-tbody">
+                                                <!-- POPULATED VIA JS AUTOMATICALLY FROM TIMELINE -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="p-2 bg-light rounded border d-flex justify-content-between align-items-center">
+                                        <span class="xsmall fw-bold text-muted">Total Konsumsi Plan:</span>
+                                        <span class="fw-bold text-danger mono" id="label-total-target">0,00 Kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="card border mb-2">
+                                <div class="card-header bg-light fw-bold xsmall py-2 text-dark">
+                                    <i class="fa-solid fa-chart-line text-info me-2"></i>3. Detail Sisa per Cones Aktif Setiap MO
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered table-striped align-middle table-xs mb-0">
+                                            <thead class="table-light text-center">
+                                                <tr>
+                                                    <th>MO</th>
+                                                    <th>Lembar</th>
+                                                    <th>Total Consume (Kg)</th>
+                                                    <th>Consume / Cones (Kg)</th>
+                                                    <th>Sisa / Cones (Kg)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="mo-summary-tbody">
+                                                <!-- POPULATED VIA JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border">
+                                <div class="card-header bg-light fw-bold xsmall py-2 text-dark">
+                                    <i class="fa-solid fa-layer-group text-success me-2"></i>4. Ringkasan Stok Akhir per Group Cones
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="table-responsive mb-2">
+                                        <table class="table table-sm table-bordered align-middle table-xs mb-0">
+                                            <thead class="table-dark text-center">
+                                                <tr>
+                                                    <th>Group Cones</th>
+                                                    <th>Posisi Creel</th>
+                                                    <th>Jml Cones</th>
+                                                    <th>Sisa / Cones (Kg)</th>
+                                                    <th>Total Sisa Group (Kg)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="group-summary-tbody">
+                                                <!-- POPULATED VIA JS -->
+                                            </tbody>
+                                            <tfoot class="table-light fw-bold text-end">
+                                                <tr>
+                                                    <td colspan="2" class="text-start">TOTAL STOK AKHIR CREEL</td>
+                                                    <td class="text-center mono" id="label-total-final-cones">0</td>
+                                                    <td>-</td>
+                                                    <td class="text-end text-success fs-6 mono" id="label-total-final-weight">0,00 Kg</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <div class="alert alert-success p-2 mb-0 xsmall d-flex justify-content-between align-items-center">
+                                        <span><i class="fa-solid fa-circle-check me-1"></i><strong>Verifikasi Balance:</strong> Stok Awal (<span id="verif-initial">0,00</span> Kg) - Total Konsumsi (<span id="verif-target">0,00</span> Kg)</span>
+                                        <span class="fw-bold mono fs-6" id="label-balance-check">0,00 Kg</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-1">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php $this->load->view("admin/_partials/js.php") ?>
     <script src="<?= base_url('dist/js/bs5/bs5.bundle.min.js') ?>"></script>
     <script type="text/javascript" src="<?= base_url('dist/js/vis-timeline-graph2d.min.js') ?>"></script>
     <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
     <script type="text/javascript" src="<?= base_url('dist/js/html2canvas.js') ?>"></script>
     <script type="text/javascript">
-                                function toggleSidebar() {
-                                    const sidebar = document.querySelector('.sidebar');
-                                    sidebar.classList.toggle('collapsed');
-                                }
-
-                                //            const LOCAL_STORAGE_KEY = "hms_productionplan_schedule_data";
-                                var startDate = moment().subtract(1, "day").startOf('day').utcOffset('+07:00');
-                                var endDate = moment().add(3, "day").endOf('day').utcOffset('+07:00');
-                                let moData = [], mesinData = [], mesinDataVis = [], breaksDef, breaks = [], breaksStatus = {}, moDataCount = 0;
-                                var timeline;
-                                var items = new vis.DataSet();
-                                var containerVis = document.getElementById('visualization');
-                                // TIMELINE CONFIG: 5 HARI TOTAL (120 JAM)
-                                const TOTAL_DAYS = 5;
-                                const TOTAL_HOURS = TOTAL_DAYS * 24; // 120 Jam
-                                const START_OFFSET_DAYS = -1; // Kemarin (-1 Hari)
-
-                                // UKURAN BASE & STATE ZOOM (%)
-                                const converMinute = ((minute) => {
-                                    var value = minute;
-                                    var units = {
-                                        "day": 24 * 60,
-                                        "hour": 60,
-                                        "min": 1
-                                    };
-                                    var result = [];
-                                    if (minute >= 1440) {
-                                        const rtf = new Intl.RelativeTimeFormat("en", {numeric: "auto"});
-                                        result.push(rtf.format(0 - Math.floor(minute / 1440), "day"));
-                                    } else {
-                                        for (var name in units) {
-                                            var p = Math.floor(value / units[name]);
-                                            if (p == 1)
-                                                result.push(" " + p + " " + name);
-                                            if (p >= 2)
-                                                result.push(" " + p + " " + name + "s");
-                                            value %= units[name];
-                                        }
-                                    }
-                                    return result;
-                                });
-                                // CALCULATE DURATION WITH DYNAMIC SETUP TIME
-                                function calculateDurationMinutes(qty, isSameProductAsPrevious = false) {
-                                    const speedMetersPerMin = 700;
-                                    const setupTimeMinutes = isSameProductAsPrevious ? 15 : 45; // Setup lebih cepat jika produk sama
-                                    return Math.round((Number(qty) / speedMetersPerMin) + setupTimeMinutes);
-                                }
-
-                                const getMo = ((event) => {
-                                    return  $.ajax({
-                                        url: "<?php echo base_url(); ?>ppic/productionplanning/get_mo",
-                                        type: "GET",
-                                        data: {
-                                            dept: "<?= $dep ?>",
-                                            value: $("#searchInputMO").val(),
-                                            status: $("#filterStatus").val(),
-                                            mesin: $("#filterMachine").val()
+                                        function toggleSidebar() {
+                                            const sidebar = document.querySelector('.sidebar');
+                                            sidebar.classList.toggle('collapsed');
                                         }
 
-                                    });
-                                });
-                                const getItems = (() => {
-                                    return  $.ajax({
-                                        url: "<?php echo base_url(); ?>ppic/productionplanning/get_items",
-                                        type: "POST",
-                                        data: {
-                                            dept: "<?= $dep ?>",
-                                            start: startDate.format("YYYY-MM-DD").toString(),
-                                            end: endDate.format("YYYY-MM-DD").toString()
-                                        }
-
-                                    });
-                                });
-                                const MIN_ZOOM_MS = 1000 * 60 * 60; // 1 Hour (100% Zoom / closest look)
-                                const MAX_ZOOM_MS = 1000 * 60 * 60 * 48; // 1 Year (0% Zoom / widest look)
-                                const setTimeline = (() => {
-                                    //moment.tz("America/New_York"); 
-                                    var options = {
-                                        format: {
-                                            majorLabels: function (date, scale, step) {
-                                                return moment(date).locale("id").format('dddd, DD MMMM YYYY');
+                                        //            const LOCAL_STORAGE_KEY = "hms_productionplan_schedule_data";
+                                        var startDate = moment().subtract(1, "day").startOf('day').utcOffset('+07:00');
+                                        var endDate = moment().add(3, "day").endOf('day').utcOffset('+07:00');
+                                        let moData = [], mesinData = [], mesinDataVis = [], breaksDef, breaks = [], breaksStatus = {}, moDataCount = 0;
+                                        var timeline;
+                                        var items = new vis.DataSet();
+                                        var containerVis = document.getElementById('visualization');
+                                        // TIMELINE CONFIG: 5 HARI TOTAL (120 JAM)
+                                        const TOTAL_DAYS = 5;
+                                        const TOTAL_HOURS = TOTAL_DAYS * 24; // 120 Jam
+                                        const START_OFFSET_DAYS = -1; // Kemarin (-1 Hari) 
+                                        const YARN_KG_PER_METER = 0.005;
+                                        let yarnMaster = {};
+                                        // UKURAN BASE & STATE ZOOM (%)
+                                        const converMinute = ((minute) => {
+                                            var value = minute;
+                                            var units = {
+                                                "day": 24 * 60,
+                                                "hour": 60,
+                                                "min": 1
+                                            };
+                                            var result = [];
+                                            if (minute >= 1440) {
+                                                const rtf = new Intl.RelativeTimeFormat("en", {numeric: "auto"});
+                                                result.push(rtf.format(0 - Math.floor(minute / 1440), "day"));
+                                            } else {
+                                                for (var name in units) {
+                                                    var p = Math.floor(value / units[name]);
+                                                    if (p == 1)
+                                                        result.push(" " + p + " " + name);
+                                                    if (p >= 2)
+                                                        result.push(" " + p + " " + name + "s");
+                                                    value %= units[name];
+                                                }
                                             }
-                                        },
-                                        maxHeight: '100VH',
-                                        verticalScroll: true,
-                                        zoomKey: 'ctrlKey',
-                                        stack: false,
-                                        editable: true,
-                                        start: startDate.toDate(),
-                                        end: endDate.toDate(),
-                                        min: startDate.toDate(), // Cannot scroll before today
-                                        max: endDate.toDate(),
-                                        zoomMin: MIN_ZOOM_MS, // Min zoom: 1 hour
-                                        zoomMax: MAX_ZOOM_MS, // Max zoom: 24 hours
-                                        stackSubgroups: false,
-                                        orientation: "top",
-                                        template: function (it, element, data) {
-                                            let ctn = "";
-                                            switch (it.tipe) {
-                                                case "box" :
-                                                    let style = "";
-                                                    if (it.status == 'draft')
-                                                        style = " background : #B29E1E;";
-                                                    ctn = `<div class="gantt-bar" style='${style}'>
+                                            return result;
+                                        });
+                                        // CALCULATE DURATION WITH DYNAMIC SETUP TIME
+                                        function calculateDurationMinutes(qty, isSameProductAsPrevious = false) {
+                                            const speedMetersPerMin = 700;
+                                            const setupTimeMinutes = isSameProductAsPrevious ? 15 : 45; // Setup lebih cepat jika produk sama
+                                            return Math.round((Number(qty) / speedMetersPerMin) + setupTimeMinutes);
+                                        }
+
+                                        const getMo = ((event) => {
+                                            return  $.ajax({
+                                                url: "<?php echo base_url(); ?>ppic/productionplanning/get_mo",
+                                                type: "GET",
+                                                data: {
+                                                    dept: "<?= $dep ?>",
+                                                    value: $("#searchInputMO").val(),
+                                                    status: $("#filterStatus").val(),
+                                                    mesin: $("#filterMachine").val()
+                                                }
+
+                                            });
+                                        });
+                                        const getItems = (() => {
+                                            return  $.ajax({
+                                                url: "<?php echo base_url(); ?>ppic/productionplanning/get_items",
+                                                type: "POST",
+                                                data: {
+                                                    dept: "<?= $dep ?>",
+                                                    start: startDate.format("YYYY-MM-DD").toString(),
+                                                    end: endDate.format("YYYY-MM-DD").toString()
+                                                }
+
+                                            });
+                                        });
+                                        const MIN_ZOOM_MS = 1000 * 60 * 60; // 1 Hour (100% Zoom / closest look)
+                                        const MAX_ZOOM_MS = 1000 * 60 * 60 * 48; // 1 Year (0% Zoom / widest look)
+                                        const setTimeline = (() => {
+                                            //moment.tz("America/New_York"); 
+                                            var options = {
+                                                format: {
+                                                    majorLabels: function (date, scale, step) {
+                                                        return moment(date).locale("id").format('dddd, DD MMMM YYYY');
+                                                    }
+                                                },
+                                                maxHeight: '100VH',
+                                                verticalScroll: true,
+                                                zoomKey: 'ctrlKey',
+                                                stack: false,
+                                                editable: true,
+                                                start: startDate.toDate(),
+                                                end: endDate.toDate(),
+                                                min: startDate.toDate(), // Cannot scroll before today
+                                                max: endDate.toDate(),
+                                                zoomMin: MIN_ZOOM_MS, // Min zoom: 1 hour
+                                                zoomMax: MAX_ZOOM_MS, // Max zoom: 24 hours
+                                                stackSubgroups: false,
+                                                orientation: "top",
+                                                template: function (it, element, data) {
+                                                    let ctn = "";
+                                                    switch (it.tipe) {
+                                                        case "box" :
+                                                            let style = "";
+                                                            if (it.status == 'draft')
+                                                                style = " background : #B29E1E;";
+                                                            ctn = `<div class="gantt-bar" style='${style}'>
                                                     <div class="d-flex justify-content-between align-items-center">
                                                        <a href="<?= base_url('manufacturing/mO/edit') ?>/${it.enc_kode}" target="_blank">
                                                             <span style="color:#ffffff; text-decoration:underline; text-decoration-color: #000000;">${it.kode}</span>
@@ -763,34 +902,39 @@
                                                                                 <div class="progress-text">${it.progress}%</div>
                                                                             </div>
                                                                                 `;
-                                                    break;
-                                                case "break-bng":
-                                                    ctn = `<div class="yarn-depleted-marker">
+                                                            break;
+                                                        case "break-bng":
+                                                            ctn = `<!-- <div class="yarn-depleted-marker">
     
                                                             </div>
                                                             <div class="yarn-depleted-badge">
                                                             <i class="fa-solid fa-triangle-exclamation me-1"></i>YARN DEPLETED
-                                                            </div>`;
-                                                    break;
-                                                default :
-                                                    let nm = it.nama_produk.toLowerCase();
-                                                    nm = nm.replaceAll(" ", "-");
-                                                    ctn = `<div class="gantt-bar ${nm}" title="${it.nama_produk}">
+                                                            </div> -->`;
+                                                            break;
+                                                        default :
+                                                            let nm = it.nama_produk.toLowerCase();
+                                                            nm = nm.replaceAll(" ", "-");
+                                                            ctn = `<div class="gantt-bar ${nm}" title="${it.nama_produk}">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                             <span class="fw-bold">${it.nama_produk}</span>
                                                                 </div>
                                                  `;
-                                            }
-                                            return ctn;
-                                        },
-                                        groupTemplate: function (gr) {
-                                            return `<div class="mesin-bar mesin-bar-${gr.devid_esp}" >
+                                                    }
+                                                    return ctn;
+                                                },
+                                                groupTemplate: function (gr) {
+                                                    return `<div class="mesin-bar mesin-bar-${gr.devid_esp}" >
                                                           <div class="d-flex justify-content-between align-items-center">
                                                           <span class="fw-bold">${gr.content}</span>
+                                                                  <div class="d-flex gap-1">
+                                                                  <!--<button class="btn btn-xs text-warning p-0" onclick="openGroupConesModal('${gr.id}')" title="Group Cones Tracker">
+                                                                    <i class="fa-solid fa-layer-group"></i>
+                                                                    </button>-->
                                                                 <button class="btn btn-xs text-teal-400 p-0 ms-1" onclick="showEditMesin(event)" title="Edit Master Benang"
                                                                          data-mc="${gr.id}"  data-benang="${gr.benang}"  data-qty="${gr.qty}"  data-time="${gr.time}"  data-est="${gr.est}">
                                                             <i class="fa-solid fa-pen-to-square"></i>
                                                                 </button>
+                                                                                        </div>
                                                                   </div>
                                                                   
                                                                 <div class="text-truncate fw-semibold" style="font-size:0.65rem;" title="${gr.benang}">${gr.benang}</div>
@@ -805,474 +949,481 @@
                                                     </div>
                                                             </div>
                                                                     `;
-                                        },
-                                        onAdd: async function (item, callback) {
-                                            item.end = moment(item.start).add(item.total_minute, "minutes");
-                                            item.start = moment(item.start);
-                                            var overlaps = await overlapCheck(item);
-                                            if (overlaps.length > 0) {
-                                                alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
-                                                callback(null); // Cancel the drag/move action
-                                            } else {
-                                                switch (item.tipe) {
-                                                    case "box":
-                                                        const resp = await save({
-                                                            mcid: [item.group],
-                                                            kode: [item.kode],
-                                                            start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                            finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                            start_old: [item.start_time],
-                                                            finish_old: [item.finish_time],
-                                                            mcid_old: [item.mc_id],
-                                                            total_minute: [item.total_minute],
-                                                            tipe: item.tipe,
-                                                            nama: [item.nama_produk]
-                                                        });
-                                                        items.remove(item.kode);
-                                                        items.add({
-                                                            id: item.kode,
-                                                            enc_kode: resp.enc,
-                                                            progress: 0,
-                                                            group: item.group,
-                                                            start: item.start.toDate(),
-                                                            end: item.end.toDate(),
-                                                            nama_produk: item.nama_produk,
-                                                            uom: item.uom,
-                                                            qty: item.qty,
-                                                            duration: item.total_minute,
-                                                            kode: item.kode,
-                                                            start_time: item.start.toString(),
-                                                            finish_time: item.end.toString(),
-                                                            tipe: item.tipe,
-                                                            qty_target: item.qty_target,
-                                                            status: item.status
-
-                                                        });
-                                                        await moList();
-                                                        break;
-                                                    case undefined:
-                                                        break;
-                                                    default:
-                                                        await save({
-                                                            mcid: [item.group],
-                                                            kode: [item.id],
-                                                            start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                            finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
-                                                            total_minute: [item.total_minute],
-                                                            tipe: item.tipe,
-                                                            nama: [item.nama_produk]
-                                                        });
-                                                        items.add({
-                                                            group: item.group,
-                                                            start: item.start.toDate(),
-                                                            end: item.end.toDate(),
-                                                            nama_produk: item.nama_produk,
-                                                            duration: item.total_minute,
-                                                            tipe: item.tipe,
-                                                            id: item.id,
-
-                                                        });
-                                                }
-//                                                        callback(item);
-                                                timeline.redraw();
-                                                $(`#card-${item.kode}`).removeClass('dragging');
-                                                loadBebanMesin();
-                                            }
-
-                                        },
-                                        onRemove: async function (item, callback) {
-                                            item.kode = item.id;
-                                            if (item.tipe === 'break-bng')
-                                                return false;
-                                            remove({kode: [item.kode]}).then(async rst => {
-                                                //                                                    await moList();
-                                                callback(item);
-//                                                        refreshVis();
-                                                loadBebanMesin();
-                                            }).catch((e) => {
-                                                callback(null);
-                                            });
-                                        },
-                                        onMove: async function (item, callback) {
-                                            if (item.tipe === 'break-bng') {
-                                                callback(null);
-                                                return false;
-                                            }
-                                            var start = moment(item.start);
-                                            var end = moment(item.end);
-                                            let diffMinute = end.diff(start, "minutes");
-                                            var startTime = moment(item.start).format("YYYY-MM-DD HH:mm:ss").toString();
-                                            var finishTime = moment(item.end).format("YYYY-MM-DD HH:mm:ss").toString();
-                                            if ((item.finish_time !== finishTime) && (item.start_time === startTime)) {
-//                                                console.log(item);
-                                                var itemsInView = items.get({
-                                                    filter: function (it) {
-                                                        return it.group === item.group;
-                                                    }
-                                                });
-
-                                            }
-                                            var tempStartTime = item.start_time;
-                                            item.start_time = startTime;
-                                            item.finish_time = finishTime;
-                                            item.total_minute = diffMinute;
-                                            var overlaps = await overlapCheck(item);
-                                            if (overlaps.length > 0) {
-                                                var dffm = moment(item.end).diff(overlaps[0].start, "minutes");
-                                                if (dffm > 0) {
-                                                    if (moment(item.start) < moment(tempStartTime)) {
+                                                },
+                                                onAdd: async function (item, callback) {
+                                                    item.end = moment(item.start).add(item.total_minute, "minutes");
+                                                    item.start = moment(item.start);
+                                                    var overlaps = await overlapCheck(item);
+                                                    if (overlaps.length > 0) {
                                                         alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
                                                         callback(null); // Cancel the drag/move action
                                                     } else {
-                                                        var itemSelected = items.get({
-                                                            filter: function (it) {
-                                                                return moment(it.start) > moment(item.start);
-                                                            }
-                                                        });
-                                                        itemSelected.forEach((itt, idx) => {
-                                                            var str = moment(itt.start).add(dffm, "minutes");
-                                                            var en = moment(itt.end).add(dffm, "minutes");
-                                                            itt.start = str.toDate();
-                                                            itt.end = en.toDate();
+                                                        switch (item.tipe) {
+                                                            case "box":
+                                                                const resp = await save({
+                                                                    mcid: [item.group],
+                                                                    kode: [item.kode],
+                                                                    start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                                    finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                                    start_old: [item.start_time],
+                                                                    finish_old: [item.finish_time],
+                                                                    mcid_old: [item.mc_id],
+                                                                    total_minute: [item.total_minute],
+                                                                    tipe: item.tipe,
+                                                                    nama: [item.nama_produk]
+                                                                });
+                                                                items.remove(item.kode);
+                                                                items.add({
+                                                                    id: item.kode,
+                                                                    enc_kode: resp.enc,
+                                                                    progress: 0,
+                                                                    group: item.group,
+                                                                    start: item.start.toDate(),
+                                                                    end: item.end.toDate(),
+                                                                    nama_produk: item.nama_produk,
+                                                                    uom: item.uom,
+                                                                    qty: item.qty,
+                                                                    duration: item.total_minute,
+                                                                    kode: item.kode,
+                                                                    start_time: item.start.toString(),
+                                                                    finish_time: item.end.toString(),
+                                                                    tipe: item.tipe,
+                                                                    qty_target: item.qty_target,
+                                                                    status: item.status
+
+                                                                });
+                                                                await moList();
+                                                                break;
+                                                            case undefined:
+                                                                break;
+                                                            default:
+                                                                await save({
+                                                                    mcid: [item.group],
+                                                                    kode: [item.id],
+                                                                    start: [item.start.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                                    finish: [item.end.format("YYYY-MM-DD HH:mm:ss").toString()],
+                                                                    total_minute: [item.total_minute],
+                                                                    tipe: item.tipe,
+                                                                    nama: [item.nama_produk]
+                                                                });
+                                                                items.add({
+                                                                    group: item.group,
+                                                                    start: item.start.toDate(),
+                                                                    end: item.end.toDate(),
+                                                                    nama_produk: item.nama_produk,
+                                                                    duration: item.total_minute,
+                                                                    tipe: item.tipe,
+                                                                    id: item.id,
+
+                                                                });
+                                                        }
+//                                                        callback(item);
+                                                        timeline.redraw();
+                                                        $(`#card-${item.kode}`).removeClass('dragging');
+                                                        loadBebanMesin();
+                                                    }
+
+                                                },
+                                                onRemove: async function (item, callback) {
+                                                    item.kode = item.id;
+                                                    if (item.tipe === 'break-bng')
+                                                        return false;
+                                                    remove({kode: [item.kode]}).then(async rst => {
+                                                        //                                                    await moList();
+                                                        callback(item);
+//                                                        refreshVis();
+                                                        loadBebanMesin();
+                                                    }).catch((e) => {
+                                                        callback(null);
+                                                    });
+                                                },
+                                                onMove: async function (item, callback) {
+                                                    if (item.tipe === 'break-bng') {
+                                                        callback(null);
+                                                        return false;
+                                                    }
+                                                    var start = moment(item.start);
+                                                    var end = moment(item.end);
+                                                    let diffMinute = end.diff(start, "minutes");
+                                                    var startTime = moment(item.start).format("YYYY-MM-DD HH:mm:ss").toString();
+                                                    var finishTime = moment(item.end).format("YYYY-MM-DD HH:mm:ss").toString();
+                                                    if ((item.finish_time !== finishTime) && (item.start_time === startTime)) {
+//                                               
+
+                                                    }
+                                                    var tempStartTime = item.start_time;
+                                                    item.start_time = startTime;
+                                                    item.finish_time = finishTime;
+                                                    item.total_minute = diffMinute;
+                                                    var overlaps = await overlapCheck(item);
+                                                    if (overlaps.length > 0) {
+                                                        var dffm = moment(item.end).diff(overlaps[0].start, "minutes");
+                                                        if (dffm > 0) {
+                                                            if (moment(item.start) < moment(tempStartTime)) {
+                                                                alert_notify("fa fa-warning", "Time slot is already booked!", "danger", function () {}, 500);
+                                                                callback(null); // Cancel the drag/move action
+                                                            } else {
+                                                                var itemSelected = items.get({
+                                                                    filter: function (it) {
+                                                                        return moment(it.start) > moment(item.start) && it.group === item.group;
+                                                                    }
+                                                                });
+                                                                itemSelected.forEach((itt, idx) => {
+                                                                    var str = moment(itt.start).add(dffm, "minutes");
+                                                                    var en = moment(itt.end).add(dffm, "minutes");
+                                                                    itt.start = str.toDate();
+                                                                    itt.end = en.toDate();
 //                                                        itt.total_minute = parseInt(itt.total_minute) + dffm;
-                                                            itt.start_time = str.format("YYYY-MM-DD HH:mm").toString();
-                                                            itt.finish_time = en.format("YYYY-MM-DD HH:mm").toString();
-                                                            itemSelected[idx] = itt;
-                                                        });
-                                                        itemSelected.push(item);
-                                                        await update(itemSelected).then(async rst => {
+                                                                    itt.start_time = str.format("YYYY-MM-DD HH:mm").toString();
+                                                                    itt.finish_time = en.format("YYYY-MM-DD HH:mm").toString();
+                                                                    itemSelected[idx] = itt;
+                                                                });
+                                                                itemSelected.push(item);
+                                                                await update(itemSelected).then(async rst => {
+                                                                    callback(item);
+                                                                    items.update(itemSelected);
+                                                                    timeline.redraw();
+                                                                    await moList();
+                                                                }).catch(e => {
+                                                                    callback(null);
+                                                                });
+                                                            }
+                                                        }
+                                                    } else {
+                                                        item.kode = item.id;
+                                                        await update([item]).then(async rst => {
                                                             callback(item);
-                                                            items.update(itemSelected);
-                                                            timeline.redraw();
                                                             await moList();
                                                         }).catch(e => {
                                                             callback(null);
                                                         });
                                                     }
                                                 }
-                                            } else {
-                                                item.kode = item.id;
-                                                await update([item]).then(async rst => {
-                                                    callback(item);
-                                                    await moList();
-                                                }).catch(e => {
-                                                    callback(null);
-                                                });
-                                            }
-                                        }
 
-                                    };
-                                    // Create a Timeline
-                                    timeline = new vis.Timeline(containerVis, items, options);
-                                    timeline.setGroups(mesinDataVis);
-                                    timeline.moveTo(new Date(), {animation: false});
-                                    setTimelineItems();
-                                    timeline.redraw();
-                                    timeline.on('rangechanged', () => {
-                                        const currentWindow = timeline.getWindow();
-                                        const currentDuration = currentWindow.end.valueOf() - currentWindow.start.valueOf();
-                                        let calculatedFactor = (MAX_ZOOM_MS - currentDuration) / (MAX_ZOOM_MS - MIN_ZOOM_MS);
+                                            };
+                                            // Create a Timeline
+                                            timeline = new vis.Timeline(containerVis, items, options);
+                                            timeline.setGroups(mesinDataVis);
+                                            timeline.moveTo(new Date(), {animation: false});
+                                            setTimelineItems();
+                                            timeline.redraw();
+                                            timeline.on('rangechanged', () => {
+                                                const currentWindow = timeline.getWindow();
+                                                const currentDuration = currentWindow.end.valueOf() - currentWindow.start.valueOf();
+                                                let calculatedFactor = (MAX_ZOOM_MS - currentDuration) / (MAX_ZOOM_MS - MIN_ZOOM_MS);
 
-                                        // Constrain boundaries between 0 and 100
-                                        let percentage = Math.max(0, Math.min(100, calculatedFactor * 100));
-                                        percentage = percentage.toFixed(),
-                                                document.getElementById('zoom-level-text').value = `${percentage}`;
-                                    });
-                                });
-                                const getBreaks = ((it) => {
-                                    const gets = breaks.filter((brk, idx) => {
-                                        if (brk.group !== it.mc_id) {
-                                            return false;
-                                        }
-
-                                        var str = moment(it.start_time);
-                                        var end = moment(it.finish_time);
-                                        var p = JSON.parse(breaksDef);
-                                        if (moment(p[idx].start) < end) {
-                                            var mntEnd = hitungHabisBng(str, end, it.qty_target, brk.qty_max);
-                                            if (brk.qty_max > 0) {
-                                                brk.qty_max -= it.qty_target;
-                                                if (brk.qty_max < 0) {
-                                                    brk.start = str.add(mntEnd, "minute");
-                                                    return true;
-                                                }
-                                            }
-                                        }
-                                        return false;
-                                    });
-                                    return gets;
-                                });
-                                const overlapCheck = ((item) => {
-                                    if (item.tipe === 'break-bng')
-                                        return false;
-                                    var overlaps = items.get({
-                                        filter: function (exs) {
-                                            if (exs.tipe === 'break-bng')
-                                                return false;
-                                            if (exs.id === item.id)
-                                                return false;
-                                            if (exs.group !== item.group)
-                                                return false;
-                                            exs.end = moment(exs.end);
-                                            exs.start = moment(exs.start);
-                                            if (item.end > exs.start && item.end <= exs.end) {
-                                                return true;
-                                            }
-                                            if (item.start > exs.start && item.start < exs.end) {
-                                                return true;
-                                            }
-                                            if (exs.start > item.start && exs.start < item.start) {
-                                                return true;
-                                            }
-                                            if (exs.end > item.start && exs.end < item.end) {
-                                                return true;
-                                            }
-
-                                        }
-                                    });
-                                    return overlaps;
-                                });
-                                const setTimelineItems = (async () => {
-                                    items.clear();
-                                    await getItems().then(resp => {
-                                        resp.data.forEach(it => {
-                                            var persenProgress = 0;
-                                            if (it.tipe === 'box') {
-                                                let hsl = (it.qty_hasil / it.qty) * 100;
-                                                persenProgress = hsl.toFixed();
-                                            }
-                                            let drt = converMinute(it.total_minute);
-                                            items.add({
-                                                id: it.kode,
-                                                enc_kode: it.enc_kode,
-                                                progress: persenProgress,
-                                                group: it.mc_id,
-                                                start: it.start_time,
-                                                end: it.finish_time,
-                                                nama_produk: it.nama_produk,
-                                                uom: it.uom,
-                                                qty: it.qty,
-                                                duration: drt,
-                                                kode: it.kode,
-                                                start_time: it.start_time,
-                                                finish_time: it.finish_time,
-                                                total_minute: it.total_minute,
-                                                tipe: it.tipe,
-                                                qty_target: it.qty_target,
-                                                status: it.status
+                                                // Constrain boundaries between 0 and 100
+                                                let percentage = Math.max(0, Math.min(100, calculatedFactor * 100));
+                                                percentage = percentage.toFixed(),
+                                                        document.getElementById('zoom-level-text').value = `${percentage}`;
                                             });
-
-                                            if (it.tipe === 'box') {
-                                                getBreaks(it).forEach(brk => {
-                                                    items.add({
-                                                        id: brk.id,
-                                                        group: brk.group,
-                                                        start: brk.start,
-                                                        tipe: brk.tipe
-                                                    });
-                                                    breaksStatus[brk.group] = brk.start.format("YYYY-MM-DD HH:mm").toString();
-                                                });
-                                            }
                                         });
-                                    });
-                                    //                                                breaks.forEach(brk => {
-                                    //
-                                    //                                                });
-                                    loadBebanMesin();
-                                });
-                                const hitungHabisBng = ((start, end, kg_target, qty_max) => {
-                                    var minutesPassed = end.diff(start, 'minutes');
-                                    var kgPerMenit = kg_target / minutesPassed;
-                                    kgPerMenit = kgPerMenit.toFixed(2);
-                                    var mnt = qty_max / kgPerMenit;
-                                    //                                        console.log(`minute : ${minutesPassed} , kg/menit : ${kgPerMenit}, hasil : ${mnt}`);
-                                    return Math.round(mnt);
-                                });
+                                        const getBreaks = ((it) => {
+                                            const gets = breaks.filter((brk, idx) => {
+                                                if (brk.group !== it.mc_id) {
+                                                    return false;
+                                                }
+                                                var str = moment(it.start_time);
+                                                var end = moment(it.finish_time);
+                                                var p = JSON.parse(breaksDef);
+//                                                console.log(`${it.qty_target} -- ${brk.qty_kg}`);
+                                                if (moment(p[idx].start) < end) {
+                                                    var mntEnd = hitungHabisBng(str, end, it.qty_target, brk.qty_kg);
+                                                    if (brk.qty_kg > 0)
+                                                        brk.start = str.add(mntEnd, "minute");
+                                                    else
+                                                        brk.start = str;
+                                                    brk.qty_kg -= it.qty_target;
+                                                    return true;
+//                                                    if (brk.qty_max > 0) {
+//                                                        brk.qty_max -= it.qty_target;
+//                                                        if (brk.qty_max < 0) {
+//                                                            brk.start = str.add(mntEnd, "minute");
+//                                                            return true;
+//                                                        }
+//                                                    }
+                                                }
+                                                return false;
+                                            });
+                                            return gets;
+                                        });
+                                        const overlapCheck = ((item) => {
+                                            if (item.tipe === 'break-bng')
+                                                return false;
+                                            var overlaps = items.get({
+                                                filter: function (exs) {
+                                                    if (exs.tipe === 'break-bng')
+                                                        return false;
+                                                    if (exs.id === item.id)
+                                                        return false;
+                                                    if (exs.group !== item.group)
+                                                        return false;
+                                                    exs.end = moment(exs.end);
+                                                    exs.start = moment(exs.start);
+                                                    if (item.end > exs.start && item.end <= exs.end) {
+                                                        return true;
+                                                    }
+                                                    if (item.start > exs.start && item.start < exs.end) {
+                                                        return true;
+                                                    }
+                                                    if (exs.start > item.start && exs.start < item.start) {
+                                                        return true;
+                                                    }
+                                                    if (exs.end > item.start && exs.end < item.end) {
+                                                        return true;
+                                                    }
+
+                                                }
+                                            });
+                                            return overlaps;
+                                        });
+                                        const setTimelineItems = (async () => {
+                                            items.clear();
+                                            await getItems().then(resp => {
+                                                resp.data.forEach(it => {
+                                                    var persenProgress = 0;
+                                                    if (it.tipe === 'box') {
+                                                        let hsl = (it.qty_hasil / it.qty) * 100;
+                                                        persenProgress = hsl.toFixed();
+                                                    }
+                                                    let drt = converMinute(it.total_minute);
+                                                    items.add({
+                                                        id: it.kode,
+                                                        enc_kode: it.enc_kode,
+                                                        progress: persenProgress,
+                                                        group: it.mc_id,
+                                                        start: it.start_time,
+                                                        end: it.finish_time,
+                                                        nama_produk: it.nama_produk,
+                                                        uom: it.uom,
+                                                        qty: it.qty,
+                                                        duration: drt,
+                                                        kode: it.kode,
+                                                        start_time: it.start_time,
+                                                        finish_time: it.finish_time,
+                                                        total_minute: it.total_minute,
+                                                        tipe: it.tipe,
+                                                        qty_target: it.qty_target,
+                                                        status: it.status
+                                                    });
+
+                                                    if (it.tipe === 'box') {
+
+                                                        getBreaks(it).forEach(brk => {
+//                                                            console.log(it);
+                                                            items.add({
+                                                                id: `${brk.id}-${it.kode}`,
+                                                                group: brk.group,
+                                                                start: brk.start,
+                                                                end: it.finish_time,
+                                                                tipe: brk.tipe,
+                                                                type: "background",
+                                                                className: "negative"
+                                                            });
+                                                            breaksStatus[brk.group] = moment(brk.start).format("YYYY-MM-DD HH:mm").toString();
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                            //                                                breaks.forEach(brk => {
+                                            //
+                                            //                                                });
+                                            loadBebanMesin();
+                                        });
+                                        const hitungHabisBng = ((start, end, kg_target, qty_kg) => {
+                                            var minutesPassed = end.diff(start, 'minutes');
+                                            var kgPerMenit = kg_target / minutesPassed;
+                                            kgPerMenit = kgPerMenit.toFixed(2);
+                                            var mnt = qty_kg / kgPerMenit;
+                                            //                                        console.log(`minute : ${minutesPassed} , kg/menit : ${kgPerMenit}, hasil : ${mnt}`);
+                                            return Math.round(mnt);
+                                        });
 
 //                                        const setMes
-                                function populateMachineFilter() {
-                                    const filterEl = document.getElementById('filterMachine');
-                                    if (!filterEl)
-                                        return;
-                                    filterEl.innerHTML = '<option value="">Semua MC Target</option>';
-                                    mesinDataVis.forEach(mc => {
-                                        filterEl.innerHTML += `<option value="${mc.id}">${mc.content}</option>`;
-                                    });
-                                    filterEl.innerHTML += `<option value="UNASSIGNED">UNASSIGNED</option>`;
-                                }
+                                        function populateMachineFilter() {
+                                            const filterEl = document.getElementById('filterMachine');
+                                            if (!filterEl)
+                                                return;
+                                            filterEl.innerHTML = '<option value="">Semua MC Target</option>';
+                                            mesinDataVis.forEach(mc => {
+                                                filterEl.innerHTML += `<option value="${mc.id}">${mc.content}</option>`;
+                                            });
+                                            filterEl.innerHTML += `<option value="UNASSIGNED">UNASSIGNED</option>`;
+                                        }
 
-                                const getMesin = (() => {
-                                    $.ajax({
-                                        url: "<?php echo base_url(); ?>ppic/productionplanning/get_mesin",
-                                        type: "GET",
-                                        data: {
-                                            dept: "<?= $dep ?>",
-                                        },
-                                        success: function (data) {
-                                            mesinData = JSON.parse(JSON.stringify(data.data));
-                                            mesinDataVis = [];
-                                            breaks = [];
-                                            mesinData.forEach(mc => {
-                                                mesinDataVis.push({
-                                                    id: mc.mc_id,
-                                                    content: mc.nama_mesin,
-                                                    time: mc.time,
-                                                    benang: mc.benang,
-                                                    est: mc.estimasi,
-                                                    qty: mc.qty,
-                                                    devid_esp: mc.devid_esp
-                                                });
-                                                if (mc.benang != "") {
-                                                    breaks.push({
-                                                        group: mc.mc_id,
-                                                        start: moment(mc.time),
-                                                        tipe: "break-bng",
-                                                        content: "YARN DEPLETED",
-                                                        nm: "YARN DEPLETED",
-                                                        id: mc.ids,
-                                                        qty_max: parseFloat(mc.qty)
+                                        const getMesin = (() => {
+                                            $.ajax({
+                                                url: "<?php echo base_url(); ?>ppic/productionplanning/get_mesin",
+                                                type: "GET",
+                                                data: {
+                                                    dept: "<?= $dep ?>"
+                                                },
+                                                success: function (data) {
+                                                    mesinData = JSON.parse(JSON.stringify(data.data));
+                                                    mesinDataVis = [];
+                                                    breaks = [];
+                                                    mesinData.forEach(mc => {
+                                                        mesinDataVis.push({
+                                                            id: mc.mc_id,
+                                                            content: mc.nama_mesin,
+                                                            time: mc.time,
+                                                            benang: mc.benang,
+                                                            est: mc.estimasi,
+                                                            qty: mc.qty,
+                                                            devid_esp: mc.devid_esp
+                                                        });
+                                                        if (mc.benang != "") {
+                                                            breaks.push({
+                                                                group: mc.mc_id,
+                                                                start: moment(mc.time),
+                                                                tipe: "break-bng",
+                                                                content: "YARN DEPLETED",
+                                                                nm: "YARN DEPLETED",
+                                                                id: mc.ids,
+                                                                qty_max: parseFloat(mc.qty),
+                                                                qty_kg : parseFloat(mc.qty)
+                                                            });
+                                                        }
                                                     });
+                                                    breaksDef = JSON.stringify([...breaks]);
+                                                    refreshVis();
+                                                    populateMachineFilter();
+                                                    //                        renderGanttLanes();
+                                                }
+
+                                            });
+                                        });
+                                        const save = ((data) => {
+                                            return new Promise((resolve, reject) => {
+                                                $.ajax({
+                                                    url: "<?php echo base_url(); ?>ppic/productionplanning/save_plan",
+                                                    type: "post",
+                                                    data: data,
+                                                    success: (response) => resolve(response),
+                                                    error: (error) => reject(0)
+
+                                                });
+                                            });
+                                        });
+                                        const update = ((data) => {
+                                            return new Promise((resolve, reject) => {
+                                                $.ajax({
+                                                    url: "<?php echo base_url(); ?>ppic/productionplanning/update_plan",
+                                                    type: "post",
+                                                    data: {
+                                                        dt: data
+                                                    },
+                                                    success: (response) => resolve(1),
+                                                    error: (error) => reject(0)
+
+                                                });
+                                            });
+                                        });
+                                        const remove = ((data) => {
+                                            return new Promise((resolve, reject) => {
+                                                $.ajax({
+                                                    url: "<?php echo base_url(); ?>ppic/productionplanning/rmv_plan",
+                                                    type: "post",
+                                                    data: data,
+                                                    success: (response) => resolve(1),
+                                                    error: (error) => reject(0)
+
+                                                });
+                                            });
+                                        });
+                                        const dbounce = ((func, delay) => {
+                                            let timeout;
+                                            return function (...args) {
+                                                clearTimeout(timeout);
+                                                timeout = setTimeout(() => {
+                                                    func.apply(this, args);
+                                                }, delay);
+                                            };
+                                        });
+                                        function dragEnd(e) {
+                                            e.target.classList.remove('dragging');
+                                        }
+
+                                        function zoomTimeline(deltaPercent) {
+                                            var crt = $("#zoom-level-text").val();
+                                            crt = parseInt(crt);
+                                            currentZoomLevel = Math.max(0, Math.min(100, crt + deltaPercent));
+//                                            document.getElementById('zoom-level-text').innerText = `${currentZoomLevel}%`;
+                                            zoomTimelineToPercentage(currentZoomLevel);
+                                        }
+
+                                        function resetZoom() {
+                                            //                                        timeline.fit({animation: true});
+                                            timeline.moveTo(new Date(), {
+                                                scale: 0.5,
+                                                animation: {
+                                                    duration: 1000, // 1 second animation
+                                                    easingFunction: 'easeInOutQuad'
                                                 }
                                             });
-                                            breaksDef = JSON.stringify([...breaks]);
-                                            refreshVis();
-                                            populateMachineFilter();
-                                            //                        renderGanttLanes();
+                                            document.getElementById('zoom-level-text').innerText = '100%';
+                                            //                                        renderGanttHeader();
+                                            //                renderGanttLanes();
+                                        }
+                                        function dragStartTimeBreak(e) {
+                                            var data = e.target.dataset;
+                                            data.content = "New Task";
+                                            e.dataTransfer.setData('text', JSON.stringify(data));
+                                            e.target.classList.add('dragging');
                                         }
 
-                                    });
-                                });
-                                const save = ((data) => {
-                                    return new Promise((resolve, reject) => {
-                                        $.ajax({
-                                            url: "<?php echo base_url(); ?>ppic/productionplanning/save_plan",
-                                            type: "post",
-                                            data: data,
-                                            success: (response) => resolve(response),
-                                            error: (error) => reject(0)
-
-                                        });
-                                    });
-                                });
-                                const update = ((data) => {
-                                    return new Promise((resolve, reject) => {
-                                        $.ajax({
-                                            url: "<?php echo base_url(); ?>ppic/productionplanning/update_plan",
-                                            type: "post",
-                                            data: {
-                                                dt: data
-                                            },
-                                            success: (response) => resolve(1),
-                                            error: (error) => reject(0)
-
-                                        });
-                                    });
-                                });
-                                const remove = ((data) => {
-                                    return new Promise((resolve, reject) => {
-                                        $.ajax({
-                                            url: "<?php echo base_url(); ?>ppic/productionplanning/rmv_plan",
-                                            type: "post",
-                                            data: data,
-                                            success: (response) => resolve(1),
-                                            error: (error) => reject(0)
-
-                                        });
-                                    });
-                                });
-                                const dbounce = ((func, delay) => {
-                                    let timeout;
-                                    return function (...args) {
-                                        clearTimeout(timeout);
-                                        timeout = setTimeout(() => {
-                                            func.apply(this, args);
-                                        }, delay);
-                                    };
-                                });
-                                function dragEnd(e) {
-                                    e.target.classList.remove('dragging');
-                                }
-
-                                function zoomTimeline(deltaPercent) {
-                                    var crt = $("#zoom-level-text").val();
-                                    crt = parseInt(crt);
-                                    currentZoomLevel = Math.max(0, Math.min(100, crt + deltaPercent));
-//                                            document.getElementById('zoom-level-text').innerText = `${currentZoomLevel}%`;
-                                    zoomTimelineToPercentage(currentZoomLevel);
-                                }
-
-                                function resetZoom() {
-                                    //                                        timeline.fit({animation: true});
-                                    timeline.moveTo(new Date(), {
-                                        scale: 0.5,
-                                        animation: {
-                                            duration: 1000, // 1 second animation
-                                            easingFunction: 'easeInOutQuad'
+                                        function dragStart(e, moId) {
+                                            const mo = moData.find(m => m.kode === moId);
+                                            var data = e.target.dataset;
+                                            data.content = "New Task";
+                                            data.kode = moId;
+                                            e.dataTransfer.setData('text', JSON.stringify(data));
+                                            e.target.classList.add('dragging');
                                         }
-                                    });
-                                    document.getElementById('zoom-level-text').innerText = '100%';
-                                    //                                        renderGanttHeader();
-                                    //                renderGanttLanes();
-                                }
-                                function dragStartTimeBreak(e) {
-                                    var data = e.target.dataset;
-                                    data.content = "New Task";
-                                    e.dataTransfer.setData('text', JSON.stringify(data));
-                                    e.target.classList.add('dragging');
-                                }
 
-                                function dragStart(e, moId) {
-                                    const mo = moData.find(m => m.kode === moId);
-                                    var data = e.target.dataset;
-                                    data.content = "New Task";
-                                    data.kode = moId;
-                                    e.dataTransfer.setData('text', JSON.stringify(data));
-                                    e.target.classList.add('dragging');
-                                }
-
-                                const moList = (async (event) => {
-                                    const moListEl = document.getElementById('mo-list');
-                                    moListEl.innerHTML = '';
-                                    const dt = await getMo(event);
-                                    moData = dt.data;
-                                    moDataCount = dt.count;
-                                    moData.forEach(mo => {
-                                        var nm = mo.reff_note;
-                                        var hslnm = nm.split(" | ");
-                                        const card = document.createElement('div');
-                                        card.className = 'mo-card';
-                                        card.draggable = true;
-                                        card.id = `card-${mo.kode}`;
-                                        card.ondragstart = (e) => dragStart(e, mo.kode);
-                                        card.ondragend = dragEnd;
-                                        if (mo.mc) {
-                                            card.style.borderLeftColor = '#059669'; // Emerald if scheduled
-                                        }
-                                        card.dataset.nama_produk = mo.nama_produk;
-                                        card.dataset.start_time = mo.start_time;
-                                        card.dataset.qty = mo.qty;
-                                        card.dataset.uom = mo.uom;
-                                        card.dataset.status = mo.status;
-                                        card.dataset.mc_id = mo.mc_id;
-                                        card.dataset.qty_target = mo.qty_target;
-                                        card.dataset.tipe = "box";
-                                        if (mo.speed_unit !== "") {
-                                            if (mo.speed_unit === "m/menit") {
-                                                var hslMnt = parseFloat(mo.qty) / parseFloat(mo.speed);
-                                            } else {
-                                                var hsl = parseFloat(mo.qty) / parseFloat(mo.speed);
-                                                var hslMnt = hsl * 60;
-                                            }
-                                            hslMnt = hslMnt.toFixed();
+                                        const moList = (async (event) => {
+                                            const moListEl = document.getElementById('mo-list');
+                                            moListEl.innerHTML = '';
+                                            const dt = await getMo(event);
+                                            moData = dt.data;
+                                            moDataCount = dt.count;
+                                            moData.forEach(mo => {
+                                                var nm = mo.reff_note;
+                                                var hslnm = nm.split(" | ");
+                                                const card = document.createElement('div');
+                                                card.className = 'mo-card';
+                                                card.draggable = true;
+                                                card.id = `card-${mo.kode}`;
+                                                card.ondragstart = (e) => dragStart(e, mo.kode);
+                                                card.ondragend = dragEnd;
+                                                if (mo.mc) {
+                                                    card.style.borderLeftColor = '#059669'; // Emerald if scheduled
+                                                }
+                                                card.dataset.nama_produk = mo.nama_produk;
+                                                card.dataset.start_time = mo.start_time;
+                                                card.dataset.qty = mo.qty;
+                                                card.dataset.uom = mo.uom;
+                                                card.dataset.status = mo.status;
+                                                card.dataset.mc_id = mo.mc_id;
+                                                card.dataset.qty_target = mo.qty_target;
+                                                card.dataset.tipe = "box";
+                                                if (mo.speed_unit !== "") {
+                                                    if (mo.speed_unit === "m/menit") {
+                                                        var hslMnt = parseFloat(mo.qty) / parseFloat(mo.speed);
+                                                    } else {
+                                                        var hsl = parseFloat(mo.qty) / parseFloat(mo.speed);
+                                                        var hslMnt = hsl * 60;
+                                                    }
+                                                    hslMnt = hslMnt.toFixed();
 //                                            console.log(`${mo.start_time} - ${mo.finish_time}`);
-                                            mo.finish_time = moment(mo.start_time).add(hslMnt,"minutes");
-                                            
-                                        }
-                                        const diffInMinutes = moment(mo.finish_time).diff(moment(mo.start_time), 'minutes');
-                                        const durHoursFormatted = (diffInMinutes / 60).toFixed(1);
-                                        card.dataset.finish_time = mo.finish_time;
-                                        card.dataset.total_minute = diffInMinutes;
-                                        card.innerHTML = `
+                                                    mo.finish_time = moment(mo.start_time).add(hslMnt, "minutes");
+
+                                                }
+                                                const diffInMinutes = moment(mo.finish_time).diff(moment(mo.start_time), 'minutes');
+                                                const durHoursFormatted = (diffInMinutes / 60).toFixed(1);
+                                                card.dataset.finish_time = mo.finish_time;
+                                                card.dataset.total_minute = diffInMinutes;
+                                                card.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-1">
             <div>
             <span class="mo-code">${mo.kode} </span><span class="badge ${(mo.status === 'draft') ? 'bg-warning text-dark' : 'bg-success'} text-capitalize" style="font-size:0.6rem;">${mo.status}</span>
@@ -1302,280 +1453,469 @@
                 <span><i class="fa-solid fa-layer-group me-1 text-success"></i><b>${hslnm[4] ?? 'GB'}</b></span>
             </div>
         `;
-                                        moListEl.appendChild(card);
-                                    });
-                                    updateKPIs();
-                                    return new Promise((resolve, ) => {
-                                        resolve(1);
-                                    });
-                                });
-                                const searchMo = dbounce(moList, 700);
-                                async function resetAllData() {
-                                    const dts = timeline.itemsData.get();
-                                    const mo = dts.map(dt => dt.kode);
-                                    if (mo.length > 0) {
-                                        if (confirm('Apakah Anda yakin ingin mengosongkan semua jadwal dan mengembalikan ke data awal?')) {
-                                            let rmv = await remove({kode: mo});
-                                            if (rmv == 1) {
-                                                await moList();
-                                                items.clear();
-                                                timeline.redraw();
-                                            }
-
-                                            //                                                renderGanttBars();
-                                        }
-
-                                    }
-
-                                }
-
-                                function updateKPIs() {
-                                    const unassignedCount = moDataCount;
-                                    document.getElementById('mo-count').innerText = `${unassignedCount} MO`;
-//                                        document.getElementById('kpi-backlog').innerText = `${unassignedCount} MO`;
-//                                        let totalScheduledMinutes = 0;
-//                                        let totalOutputMtr = 0;
-//                                        moData.filter(m => m.mc != "").forEach(m => {
-//                                            totalScheduledMinutes += parseInt(m.total_minute);
-//                                            totalOutputMtr += Number(m.qty);
-//                                        });
-//                                        const avgUtilization = Math.round((totalScheduledMinutes / (TOTAL_HOURS * 60 * mesinData.length)) * 100);
-//                                        document.getElementById('kpi-utilization').innerText = `${avgUtilization}%`;
-//                                        document.getElementById('kpi-output').innerText = `${totalOutputMtr.toLocaleString()} Mtr`;
-                                }
-
-                                const loadBebanMesin = (() => {
-                                    var startDate = $('#tanggal').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm');
-                                    var endDate = $('#tanggal').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm');
-                                    var pjg = moment(endDate).diff(moment(startDate), "minute");
-                                    var totalMesin = mesinDataVis.length;
-                                    var ratamesin = 0;
-                                    mesinData.forEach(mc => {
-                                        var itm = items.get({
-                                            filter: function (item) {
-                                                return item.group === mc.mc_id && item.tipe === 'box';
-                                            }
-                                        });
-                                        var totalMinute = 0;
-                                        itm.forEach(it => {
-                                            var mnt = moment(it.end).diff(moment(it.start), "minute");
-                                            totalMinute += mnt;
-                                        });
-                                        var hsl = (totalMinute / pjg) * 100;
-                                        ratamesin += hsl;
-                                        $(`#load-${mc.mc_id}`).html(hsl.toFixed(2) + "%");
-                                    });
-                                    var totalMeter = 0;
-                                    var totalMo = items.get({
-                                        filter: function (item) {
-                                            if (item.tipe === 'box') {
-                                                totalMeter += parseInt(item.qty);
-                                                return true;
-                                            }
-                                        }
-                                    });
-                                    document.getElementById('kpi-backlog').innerText = `${totalMo.length} MO`;
-                                    var rata2mesin = ratamesin / totalMesin;
-                                    document.getElementById('kpi-utilization').innerText = `${rata2mesin.toFixed(2)}%`;
-                                    document.getElementById('kpi-output').innerText = `${totalMeter.toLocaleString()} Mtr`;
-                                });
-                                const exportToExcel = (() => {
-                                    $.ajax({
-                                        url: "<?php echo base_url(); ?>ppic/productionplanning/export_excel",
-                                        type: "post",
-                                        data: {
-                                            dept: "<?= $dep ?>",
-                                            start: startDate.format("YYYY-MM-DD").toString(),
-                                            end: endDate.format("YYYY-MM-DD").toString()
-                                        },
-                                        success: function (resp) {
-                                            const link = document.createElement('a');
-                                            link.download = resp?.text_name;
-                                            link.href = resp?.data;
-                                            link.click();
-                                        }
-
-                                    });
-                                });
-                                const exportPdf = (() => {
-                                    $.ajax({
-                                        url: "<?= base_url('ppic/productionplanning/export_pdf') ?>",
-                                        type: "POST",
-                                        beforeSend: function (xhr) {
-                                            please_wait(function () {});
-                                        },
-                                        data: {
-                                            dept: "<?= $dep ?>",
-                                            start: startDate.format("YYYY-MM-DD").toString(),
-                                            end: endDate.format("YYYY-MM-DD").toString()
-                                        },
-                                        success: function (data) {
-                                            unblockUI(function () {});
-                                            window.open(data.url, "_blank").focus();
-                                        },
-                                        error: function (req, error) {
-                                            unblockUI(function () {
-                                                setTimeout(function () {
-                                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                                                }, 500);
+                                                moListEl.appendChild(card);
                                             });
-                                        }
-                                    });
-                                });
-                                const showEditMesin = ((event) => {
-                                    const modal = new bootstrap.Modal(document.getElementById('yarnMasterModal'));
-                                    const button = event.currentTarget; // Selalu mendapatkan tag <button>
-                                    const dataMc = button.getAttribute('data-mc');
-                                    const dataBng = button.getAttribute('data-benang');
-                                    const dataTime = button.getAttribute('data-time');
-                                    const dataQty = button.getAttribute('data-qty');
-                                    const dataEst = button.getAttribute('data-est');
-                                    $("#frm-mc").val(dataMc);
-                                    $("#frm-bng").val(dataBng);
-                                    $("#frm-qty").val(dataQty);
-                                    $("#frm-estimasi").val(dataEst);
-                                    $("#frm-time").val(dataTime);
-                                    if (dataQty !== "") {
-                                        $(".info-est").html(statusBenang(dataMc));
-                                    }
-                                    modal.show();
-                                });
-                                const statusBenang = ((dataMc) => {
-                                    if (breaksStatus[dataMc] == undefined)
-                                        return '<span class="badge bg-success">Stok Mencukupi</span>';
-                                    else
-                                        return '<span class="badge bg-danger">Stok Tidak Mencukupi</span>';
-                                });
-                                const formUpdateBenang = ((name, idModal) => {
-                                    const formdo = document.forms.namedItem(name);
-                                    formdo.addEventListener(
-                                            "submit",
-                                            (event) => {
-                                        please_wait(function () {});
-                                        request(name).then(
-                                                response => {
-                                                    unblockUI(function () {
-                                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                                    }, 100);
-                                                    if (response.status === 200) {
-                                                        getMesin();
-                                                        refreshVis();
+                                            updateKPIs();
+                                            return new Promise((resolve, ) => {
+                                                resolve(1);
+                                            });
+                                        });
+                                        const searchMo = dbounce(moList, 700);
+                                        async function resetAllData() {
+                                            const dts = timeline.itemsData.get();
+                                            const mo = dts.map(dt => dt.kode);
+                                            if (mo.length > 0) {
+                                                if (confirm('Apakah Anda yakin ingin mengosongkan semua jadwal dan mengembalikan ke data awal?')) {
+                                                    let rmv = await remove({kode: mo});
+                                                    if (rmv == 1) {
+                                                        await moList();
+                                                        items.clear();
+                                                        timeline.redraw();
                                                     }
+
+                                                    //                                                renderGanttBars();
                                                 }
 
-                                        ).finally(() => {
-                                            $(`${idModal} [data-bs-dismiss="modal"]`).click();
-                                            unblockUI(function () {});
-                                        });
-                                        event.preventDefault();
-                                    }, false
-                                            );
-                                });
-                                const refreshVis = (() => {
-                                    $("#visualization").html("");
-                                    breaks = JSON.parse(breaksDef);
-                                    setTimeline();
-                                    moList()
-                                    //                                        timeline.redraw();
-                                });
-                                const setDateForm = ((cls) => {
-                                    $(cls).daterangepicker({
-                                        singleDatePicker: true,
-                                        showDropdowns: true,
-                                        minYear: 1901,
-                                        maxYear: parseInt(moment().format('YYYY'), 10),
-                                        locale: {
-                                            format: 'YYYY-MM-DD HH:mm'
-                                        },
-                                        timePicker: true,
-                                        timePicker24Hour: true
-                                    });
-                                });
-
-                                const zoomTimelineToPercentage = ((percentage) => {
-// Normalize percentage to a 0-1 scale
-                                    const factor = percentage / 100;
-
-                                    // Calculate the target window duration (Interval decreases as percentage increases)
-                                    const targetDuration = MAX_ZOOM_MS - (factor * (MAX_ZOOM_MS - MIN_ZOOM_MS));
-
-                                    // Get current window states to maintain focus center
-                                    const currentWindow = timeline.getWindow();
-                                    const centerTime = (currentWindow.start.valueOf() + currentWindow.end.valueOf()) / 2;
-
-                                    // Compute the new start and end timestamps centered on the current view
-                                    const newStart = centerTime - (targetDuration / 2);
-                                    const newEnd = centerTime + (targetDuration / 2);
-
-                                    // Apply the calculated window programmatically
-                                    timeline.setWindow(newStart, newEnd, {animation: false});
-                                });
-
-
-                                var ipSocket = "<?= $ip_socket ?>";
-                                const socket = new WebSocket(`${ipSocket}`);
-                                socket.onopen = function () {
-                                    console.log("Connected to server");
-                                };
-                                var stateMesin = JSON.parse('<?= json_encode($state) ?>');
-                                socket.onmessage = async function (event) {
-                                    var data = JSON.parse(event.data);
-                                    if (data["version"] != undefined && data["version"] == 2) {
-                                        data["data"].forEach(dtt => {
-//                                            console.log(dtt);
-                                            $(`.mesin-bar-${dtt.devid}`).css("border-color", stateMesin[dtt.state]["warna"]);
-//                                            console.log(stateMesin[dtt.state]);
-                                        })
-                                    }
-                                };
-
-
-                                $(function () {
-                                    setDateForm(".tanggal-bng");
-                                    formUpdateBenang("form-edit-mesin", "#yarnMasterModal");
-                                    $('#tanggal').daterangepicker({
-                                        //                    autoUpdateInput: false,
-                                        startDate: startDate,
-                                        endDate: endDate,
-                                        locale: {
-                                            format: 'YYYY-MM-DD'
-                                        }
-                                    });
-                                    $('#tanggal').on('apply.daterangepicker', function (ev, picker) {
-                                        startDate = picker.startDate;
-                                        //                                            startDate = moment()picker.startDate;
-                                        endDate = picker.endDate;
-                                        refreshVis();
-                                        loadBebanMesin();
-                                        //                                            console.log(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-                                    });
-                                    getMesin();
-//                                            moList();
-                                    const srcMO = document.getElementById("searchInputMO");
-                                    srcMO.addEventListener("input", searchMo);
-                                    $(".zoomin").on("click", function () {
-//                                                timeline.zoomIn(0.5);
-                                        zoomTimeline(10);
-                                    });
-                                    $(".zoomout").on("click", function () {
-//                                                timeline.zoomOut(0.5);
-                                        zoomTimeline(-10);
-                                    });
-                                    formUpdateBenang("form-edit-mesin-all", "#yarnMasterModalAll");
-                                    $(".btn-update-benang").unbind("click").off("click").on("click", function (e) {
-                                        e.preventDefault();
-                                        const tbody = document.getElementById('yarn-master-tbody');
-                                        if (!tbody)
-                                            return;
-                                        tbody.innerHTML = '';
-                                        const modal = new bootstrap.Modal(document.getElementById('yarnMasterModalAll'));
-                                        mesinDataVis.forEach(mc => {
-                                            const tr = document.createElement('tr');
-                                            var stt = "";
-                                            if (mc.qty !== "") {
-                                                stt = statusBenang(mc.id);
                                             }
-                                            tr.innerHTML = `
+
+                                        }
+
+                                        function updateKPIs() {
+                                            const unassignedCount = moDataCount;
+                                            document.getElementById('mo-count').innerText = `${unassignedCount} MO`;
+                                        }
+
+                                        const loadBebanMesin = (() => {
+                                            var startDate = $('#tanggal').data('daterangepicker').startDate.format('YYYY-MM-DD HH:mm');
+                                            var endDate = $('#tanggal').data('daterangepicker').endDate.format('YYYY-MM-DD HH:mm');
+                                            var pjg = moment(endDate).diff(moment(startDate), "minute");
+                                            var totalMesin = mesinDataVis.length;
+                                            var ratamesin = 0;
+                                            mesinData.forEach(mc => {
+                                                var itm = items.get({
+                                                    filter: function (item) {
+                                                        return item.group === mc.mc_id && item.tipe === 'box';
+                                                    }
+                                                });
+                                                var totalMinute = 0;
+                                                itm.forEach(it => {
+                                                    var mnt = moment(it.end).diff(moment(it.start), "minute");
+                                                    totalMinute += mnt;
+                                                });
+                                                var hsl = (totalMinute / pjg) * 100;
+                                                ratamesin += hsl;
+                                                $(`#load-${mc.mc_id}`).html(hsl.toFixed(2) + "%");
+                                            });
+                                            var totalMeter = 0;
+                                            var totalMo = items.get({
+                                                filter: function (item) {
+                                                    if (item.tipe === 'box') {
+                                                        totalMeter += parseInt(item.qty);
+                                                        return true;
+                                                    }
+                                                }
+                                            });
+                                            document.getElementById('kpi-backlog').innerText = `${totalMo.length} MO`;
+                                            var rata2mesin = ratamesin / totalMesin;
+                                            document.getElementById('kpi-utilization').innerText = `${rata2mesin.toFixed(2)}%`;
+                                            document.getElementById('kpi-output').innerText = `${totalMeter.toLocaleString()} Mtr`;
+                                        });
+                                        const exportToExcel = (() => {
+                                            $.ajax({
+                                                url: "<?php echo base_url(); ?>ppic/productionplanning/export_excel",
+                                                type: "post",
+                                                data: {
+                                                    dept: "<?= $dep ?>",
+                                                    start: startDate.format("YYYY-MM-DD").toString(),
+                                                    end: endDate.format("YYYY-MM-DD").toString()
+                                                },
+                                                success: function (resp) {
+                                                    const link = document.createElement('a');
+                                                    link.download = resp?.text_name;
+                                                    link.href = resp?.data;
+                                                    link.click();
+                                                }
+
+                                            });
+                                        });
+                                        const exportPdf = (() => {
+                                            $.ajax({
+                                                url: "<?= base_url('ppic/productionplanning/export_pdf') ?>",
+                                                type: "POST",
+                                                beforeSend: function (xhr) {
+                                                    please_wait(function () {});
+                                                },
+                                                data: {
+                                                    dept: "<?= $dep ?>",
+                                                    start: startDate.format("YYYY-MM-DD").toString(),
+                                                    end: endDate.format("YYYY-MM-DD").toString()
+                                                },
+                                                success: function (data) {
+                                                    unblockUI(function () {});
+                                                    window.open(data.url, "_blank").focus();
+                                                },
+                                                error: function (req, error) {
+                                                    unblockUI(function () {
+                                                        setTimeout(function () {
+                                                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                                        }, 500);
+                                                    });
+                                                }
+                                            });
+                                        });
+                                        const showEditMesin = ((event) => {
+                                            const modal = new bootstrap.Modal(document.getElementById('yarnMasterModal'));
+                                            const button = event.currentTarget; // Selalu mendapatkan tag <button>
+                                            const dataMc = button.getAttribute('data-mc');
+                                            const dataBng = button.getAttribute('data-benang');
+                                            const dataTime = button.getAttribute('data-time');
+                                            const dataQty = button.getAttribute('data-qty');
+                                            const dataEst = button.getAttribute('data-est');
+                                            $("#frm-mc").val(dataMc);
+                                            $("#frm-bng").val(dataBng);
+                                            $("#frm-qty").val(dataQty);
+                                            $("#frm-estimasi").val(dataEst);
+                                            $("#frm-time").val(dataTime);
+                                            if (dataQty !== "") {
+                                                $(".info-est").html(statusBenang(dataMc));
+                                            }
+                                            modal.show();
+                                        });
+                                        const statusBenang = ((dataMc) => {
+                                            if (breaksStatus[dataMc] == undefined)
+                                                return '<span class="badge bg-success">Stok Mencukupi</span>';
+                                            else
+                                                return '<span class="badge bg-danger">Stok Tidak Mencukupi</span>';
+                                        });
+                                        const formUpdateBenang = ((name, idModal) => {
+                                            const formdo = document.forms.namedItem(name);
+                                            formdo.addEventListener(
+                                                    "submit",
+                                                    (event) => {
+                                                please_wait(function () {});
+                                                request(name).then(
+                                                        response => {
+                                                            unblockUI(function () {
+                                                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+                                                            }, 100);
+                                                            if (response.status === 200) {
+                                                                getMesin();
+                                                                refreshVis();
+                                                            }
+                                                        }
+
+                                                ).finally(() => {
+                                                    $(`${idModal} [data-bs-dismiss="modal"]`).click();
+                                                    unblockUI(function () {});
+                                                });
+                                                event.preventDefault();
+                                            }, false
+                                                    );
+                                        });
+                                        const refreshVis = (() => {
+                                            $("#visualization").html("");
+                                            breaks = JSON.parse(breaksDef);
+                                            setTimeline();
+                                            moList()
+                                            //                                        timeline.redraw();
+                                        });
+                                        const setDateForm = ((cls) => {
+                                            $(cls).daterangepicker({
+                                                singleDatePicker: true,
+                                                showDropdowns: true,
+                                                minYear: 1901,
+                                                maxYear: parseInt(moment().format('YYYY'), 10),
+                                                locale: {
+                                                    format: 'YYYY-MM-DD HH:mm'
+                                                },
+                                                timePicker: true,
+                                                timePicker24Hour: true
+                                            });
+                                        });
+
+                                        const zoomTimelineToPercentage = ((percentage) => {
+// Normalize percentage to a 0-1 scale
+                                            const factor = percentage / 100;
+
+                                            // Calculate the target window duration (Interval decreases as percentage increases)
+                                            const targetDuration = MAX_ZOOM_MS - (factor * (MAX_ZOOM_MS - MIN_ZOOM_MS));
+
+                                            // Get current window states to maintain focus center
+                                            const currentWindow = timeline.getWindow();
+                                            const centerTime = (currentWindow.start.valueOf() + currentWindow.end.valueOf()) / 2;
+
+                                            // Compute the new start and end timestamps centered on the current view
+                                            const newStart = centerTime - (targetDuration / 2);
+                                            const newEnd = centerTime + (targetDuration / 2);
+
+                                            // Apply the calculated window programmatically
+                                            timeline.setWindow(newStart, newEnd, {animation: false});
+                                        });
+
+
+                                        var ipSocket = "<?= $ip_socket ?>";
+                                        const socket = new WebSocket(`${ipSocket}`);
+                                        socket.onopen = function () {
+                                            console.log("Connected to server");
+                                        };
+                                        var stateMesin = JSON.parse('<?= json_encode($state) ?>');
+                                        socket.onmessage = async function (event) {
+                                            var data = JSON.parse(event.data);
+                                            if (data["version"] != undefined && data["version"] == 2) {
+                                                data["data"].forEach(dtt => {
+//                                            console.log(dtt);
+                                                    $(`.mesin-bar-${dtt.devid}`).css("border-color", stateMesin[dtt.state]["warna"]);
+//                                            console.log(stateMesin[dtt.state]);
+                                                });
+                                            }
+                                        };
+
+                                        const openGroupConesModal = ((mc) => {
+                                            document.getElementById('modal-target-machine').innerText = mc;
+                                            const trackerModal = new bootstrap.Modal(document.getElementById('groupConesModal'));
+                                            trackerModal.show();
+                                            loadMoFromScheduleToTracker(mc);
+                                        });
+
+                                        const loadMoFromScheduleToTracker = ((mc) => {
+                                            document.getElementById('setup-total-stock-input').value = 0;
+                                            var assignedMOs = items.get({
+                                                filter: function (it) {
+                                                    return it.group === mc && it.tipe === "box";
+                                                }
+                                            }).sort((a, b) => a.start - b.start);
+                                            const tbody = document.getElementById('mo-input-tbody');
+                                            tbody.innerHTML = '';
+                                            ;
+                                            if (assignedMOs.length === 0) {
+                                                tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted p-3">Belum ada MO yang dijadwalkan pada ${mc}</td></tr>`;
+                                                document.getElementById('setup-total-cones').value = 0;
+                                                document.getElementById('setup-weight-per-cone').value = 0;
+                                                calculateGroupDepletion();
+                                                return;
+                                            }
+                                            let maxCones = 0;
+                                            assignedMOs.forEach(mo => {
+                                                let lembar = 0;
+                                                if (mo.nama_produk && mo.nama_produk.includes('/')) {
+                                                    const parts = mo.nama_produk.split('/');
+                                                    const parsed = parseInt(parts[parts.length - 1].trim());
+                                                    if (!isNaN(parsed))
+                                                        lembar = parsed;
+                                                }
+                                                if (lembar > maxCones)
+                                                    maxCones = lembar;
+                                                const targetConsume = mo.qty * YARN_KG_PER_METER;
+                                                const tr = document.createElement('tr');
+                                                tr.innerHTML = `
+                                                <td class="fw-bold text-teal mono">${mo.id}</td>
+                                                <td><input type="number" class="form-control form-control-sm mono text-center mo-lembar" value="${lembar}" oninput="calculateGroupDepletion()"></td>
+                                                <td><input type="number" class="form-control form-control-sm mono text-end mo-target" value="${targetConsume.toFixed(2)}" step="0.01" oninput="calculateGroupDepletion()"></td>
+                                                    `;
+                                                tbody.appendChild(tr);
+
+                                            });
+                                            document.getElementById('setup-total-cones').value = maxCones;
+                                            const masterYarn = mesinDataVis.filter(m => m.id === mc);
+                                            if (masterYarn.length > 0 && parseInt(masterYarn[0].qty) > 0) {
+                                                document.getElementById('setup-total-stock-input').value = masterYarn[0].qty;
+                                            }
+                                            calculateGroupDepletion();
+                                        });
+                                        const calculateGroupDepletion = (() => {
+                                            const totalCones = parseInt(document.getElementById('setup-total-cones').value) || 0;
+                                            // 1. Ambil Total Berat Stock Awal dari input yang bisa diubah
+                                            const totalStock = parseFloat(document.getElementById('setup-total-stock-input').value) || 0;
+                                            // Hitung Berat Awal per Cone
+                                            const weightPerCone = totalCones > 0 ? (totalStock / totalCones) : 0;
+                                            document.getElementById('setup-weight-per-cone').value = weightPerCone.toFixed(4);
+                                            // Ambil Data MO dari Tabel Input
+                                            const lembarInputs = document.querySelectorAll('.mo-lembar');
+                                            const targetInputs = document.querySelectorAll('.mo-target');
+                                            const moRows = document.querySelectorAll('#mo-input-tbody tr');
+
+                                            let mos = [];
+                                            let totalTargetConsume = 0;
+
+                                            for (let i = 0; i < moRows.length; i++) {
+                                                const moName = moRows[i].querySelector('td:first-child')?.innerText.split('\n')[0] || `MO${i + 1}`;
+                                                const lembar = parseInt(lembarInputs[i]?.value) || 0;
+                                                const target = parseFloat(targetInputs[i]?.value) || 0;
+
+                                                mos.push({
+                                                    name: moName,
+                                                    lembar: lembar,
+                                                    target: target
+                                                });
+                                                totalTargetConsume += target;
+                                            }
+                                            document.getElementById('label-total-target').innerText = totalTargetConsume.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' Kg';
+                                            // 2. Tracking Deplesi Cones & Deteksi MO tempat benang habis (Warning)
+                                            let currentConesWeight = new Array(totalCones).fill(weightPerCone);
+                                            let runningStockKg = totalStock;
+                                            let firstDepletedMoFound = false;
+
+                                            const moSummaryTbody = document.getElementById('mo-summary-tbody');
+                                            moSummaryTbody.innerHTML = '';
+
+                                            mos.forEach((mo, index) => {
+                                                const consumePerCone = mo.lembar > 0 ? (mo.target / mo.lembar) : 0;
+                                                // Cek apakah stok tersisa tidak mencukupi untuk MO ini
+                                                const isDeficit = runningStockKg < mo.target;
+                                                const currentMoRow = moRows[index];
+                                                if (isDeficit && !firstDepletedMoFound) {
+                                                    firstDepletedMoFound = true; // Kunci pada MO pertama yang mengalami kehabisan benang
+                                                    if (currentMoRow) {
+                                                        currentMoRow.classList.add('table-danger');
+                                                        const tdName = currentMoRow.querySelector('td:first-child');
+                                                        if (tdName) {
+                                                            tdName.innerHTML = `${mo.name} <br><span class="badge bg-danger mo-warning-badge" style="font-size:0.6rem;"><i class="fa-solid fa-triangle-exclamation me-1"></i>BENANG HABIS DI MO INI!</span>`;
+                                                        }
+                                                    }
+                                                } else if (currentMoRow) {
+                                                    currentMoRow.classList.remove('table-danger');
+                                                    const tdName = currentMoRow.querySelector('td:first-child');
+                                                    if (tdName)
+                                                        tdName.innerHTML = mo.name;
+                                                }
+                                                // Potong stok per cone aktif
+                                                for (let i = 0; i < mo.lembar && i < totalCones; i++) {
+                                                    currentConesWeight[i] -= consumePerCone;
+                                                }
+                                                runningStockKg -= mo.target;
+                                                const activeConeRemaining = mo.lembar > 0 && mo.lembar <= totalCones ? currentConesWeight[mo.lembar - 1] : 0;
+
+                                                // Render baris Detail Sisa per MO
+                                                const tr = document.createElement('tr');
+                                                if (isDeficit)
+                                                    tr.className = 'table-danger';
+
+                                                tr.innerHTML = `
+                <td class="fw-bold text-teal mono text-center">
+                    ${mo.name}
+                    ${isDeficit ? `<br><span class="badge bg-danger" style="font-size:0.58rem;"><i class="fa-solid fa-triangle-exclamation me-1"></i>Defisit ${Math.abs(runningStockKg).toFixed(2)} Kg</span>` : ''}
+                </td>
+                <td class="text-center mono">${mo.lembar}</td>
+                <td class="text-end mono ${isDeficit ? 'text-danger fw-bold' : ''}">${mo.target.toFixed(2)}</td>
+                <td class="text-end mono text-muted">${consumePerCone.toFixed(5)}</td>
+                <td class="text-end mono fw-bold ${activeConeRemaining < 0 ? 'text-danger' : 'text-primary'}">${Math.max(0, activeConeRemaining).toFixed(5)}</td>
+            `;
+                                                moSummaryTbody.appendChild(tr);
+
+                                            });
+
+                                            // 3. Rekapitulasi Group Cones Akhir
+                                            let groups = [];
+                                            let currentGroup = null;
+                                            for (let i = 0; i < totalCones; i++) {
+                                                const w = parseFloat(Math.max(0, currentConesWeight[i]).toFixed(5));
+                                                const position = i + 1;
+
+                                                if (!currentGroup) {
+                                                    currentGroup = {weight: w, startPos: position, endPos: position, count: 1};
+                                                } else if (Math.abs(currentGroup.weight - w) < 0.00001) {
+                                                    currentGroup.endPos = position;
+                                                    currentGroup.count++;
+                                                } else {
+                                                    groups.push(currentGroup);
+                                                    currentGroup = {weight: w, startPos: position, endPos: position, count: 1};
+                                                }
+                                            }
+                                            if (currentGroup)
+                                                groups.push(currentGroup);
+
+                                            const groupSummaryTbody = document.getElementById('group-summary-tbody');
+                                            groupSummaryTbody.innerHTML = '';
+
+                                            let totalFinalWeight = 0;
+                                            const groupLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+
+                                            groups.forEach((g, idx) => {
+                                                const totalGroupWeight = g.count * g.weight;
+                                                totalFinalWeight += totalGroupWeight;
+
+                                                const label = groupLabels[idx] || `G${idx + 1}`;
+                                                const posText = g.startPos === g.endPos ? `Posisi ${g.startPos}` : `Posisi ${g.startPos} - ${g.endPos}`;
+
+                                                const tr = document.createElement('tr');
+                                                tr.innerHTML = `
+                <td class="fw-bold text-center mono">Group ${label}</td>
+                <td class="text-center">${posText}</td>
+                <td class="text-center mono fw-bold">${g.count} cones</td>
+                <td class="text-end mono fw-bold text-teal">${g.weight.toFixed(5)}</td>
+                <td class="text-end mono fw-bold text-dark">${totalGroupWeight.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            `;
+                                                groupSummaryTbody.appendChild(tr);
+                                            });
+                                            document.getElementById('label-total-final-cones').innerText = totalCones;
+                                            document.getElementById('label-total-final-weight').innerText = totalFinalWeight.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' Kg';
+                                            // 4. Update Indikator Balance & Warning Alert Card
+                                            const balanceVal = totalStock - totalTargetConsume;
+                                            const balanceEl = document.getElementById('label-balance-check');
+                                            const verifCard = document.getElementById('verif-card');
+                                            document.getElementById('verif-initial').innerText = totalStock.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                            document.getElementById('verif-target').innerText = totalTargetConsume.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                            if (balanceVal < 0) {
+                                                balanceEl.innerText = `${balanceVal.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})} Kg (DEFISIT)`;
+                                                balanceEl.className = "fw-bold mono fs-6 text-danger";
+                                                if (verifCard) {
+                                                    verifCard.className = "alert alert-danger p-2 mb-0 xsmall d-flex justify-content-between align-items-center";
+                                                }
+                                            } else {
+                                                balanceEl.innerText = `${balanceVal.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})} Kg`;
+                                                balanceEl.className = "fw-bold mono fs-6 text-success";
+                                                if (verifCard) {
+                                                    verifCard.className = "alert alert-success p-2 mb-0 xsmall d-flex justify-content-between align-items-center";
+                                                }
+                                            }
+
+                                        });
+                                        $(function () {
+                                            setDateForm(".tanggal-bng");
+                                            formUpdateBenang("form-edit-mesin", "#yarnMasterModal");
+                                            $('#tanggal').daterangepicker({
+                                                //                    autoUpdateInput: false,
+                                                startDate: startDate,
+                                                endDate: endDate,
+                                                locale: {
+                                                    format: 'YYYY-MM-DD'
+                                                }
+                                            });
+                                            $('#tanggal').on('apply.daterangepicker', function (ev, picker) {
+                                                startDate = picker.startDate;
+                                                //                                            startDate = moment()picker.startDate;
+                                                endDate = picker.endDate;
+                                                refreshVis();
+                                                loadBebanMesin();
+                                                //                                            console.log(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                                            });
+                                            getMesin();
+//                                            moList();
+                                            const srcMO = document.getElementById("searchInputMO");
+                                            srcMO.addEventListener("input", searchMo);
+                                            $(".zoomin").on("click", function () {
+//                                                timeline.zoomIn(0.5);
+                                                zoomTimeline(10);
+                                            });
+                                            $(".zoomout").on("click", function () {
+//                                                timeline.zoomOut(0.5);
+                                                zoomTimeline(-10);
+                                            });
+                                            formUpdateBenang("form-edit-mesin-all", "#yarnMasterModalAll");
+                                            $(".btn-update-benang").unbind("click").off("click").on("click", function (e) {
+                                                e.preventDefault();
+                                                const tbody = document.getElementById('yarn-master-tbody');
+                                                if (!tbody)
+                                                    return;
+                                                tbody.innerHTML = '';
+                                                const modal = new bootstrap.Modal(document.getElementById('yarnMasterModalAll'));
+                                                mesinDataVis.forEach(mc => {
+                                                    const tr = document.createElement('tr');
+                                                    var stt = "";
+                                                    if (mc.qty !== "") {
+                                                        stt = statusBenang(mc.id);
+                                                    }
+                                                    tr.innerHTML = `
                                                        <td class="fw-bold text-center">${mc.id}
                                                                         <input type="hidden" name="mc[]" value="${mc.id}">
                                     </td>
@@ -1592,13 +1932,13 @@
                                 ${stt}
                     </td>
                                                       `;
-                                            tbody.appendChild(tr);
-                                        });
-                                        setDateForm(".tanggal-bng");
+                                                    tbody.appendChild(tr);
+                                                });
+                                                setDateForm(".tanggal-bng");
 
-                                        modal.show();
-                                    });
-                                });
+                                                modal.show();
+                                            });
+                                        });
     </script>
 </body>
 </html>
