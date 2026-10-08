@@ -43,12 +43,12 @@ class Memorialpengbank {
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setSelects(["bkd.no_bk,bkd.tanggal,kurs"]);
+                    $model->setSelects(["bkd.no_bk,date(bkd.tanggal) as tanggal,kurs"]);
                     $model->setGroups(["bkd.id"], true)->setOrder(["bk.kode_coa", "bkd.no_bk"], true);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setSelects(["bkd.no_bk,bkd.tanggal,kurs"]);
+                    $model->setSelects(["bkd.no_bk,date(bkd.tanggal) as tanggal,kurs"]);
                     $model->setGroups(["bkd.id"], true)->setOrder(["bkd.kode_coa", "bkd.no_bk"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
@@ -72,13 +72,13 @@ class Memorialpengbank {
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setSelects(["transinfo as uraian,gkd.no_gk,gkd.tanggal,kurs"]);
+                    $model->setSelects(["transinfo as uraian,gkd.no_gk,date(gkd.tanggal) as tanggal,kurs"]);
                     $model->setGroups(["gkd.id", "gkd.no_gk"], true)->setOrder(["gk.kode_coa", "gkd.no_gk"], true);
 
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setSelects(["transinfo as uraian,gkd.no_gk,gkd.tanggal,kurs"]);
+                    $model->setSelects(["transinfo as uraian,gkd.no_gk,date(gkd.tanggal) as tanggal,kurs"]);
                     $model->setGroups(["gkd.id"], true)->setOrder(["gkd.kode_coa", "gkd.no_gk"], true);
                     $data["giro_debit"] = $model->getData();
                     break;

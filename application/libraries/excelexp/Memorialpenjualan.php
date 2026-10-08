@@ -30,16 +30,20 @@ class Memorialpenjualan {
                     ->setJoins("acc_coa ac", "ac.kode_coa = jei.kode_coa", "left")
                     ->setWheres(["je.tanggal_dibuat >=" => $tanggalAwal, "je.tanggal_dibuat <=" => $tanggalAkhir, "je.status" => "posted", "posisi" => "D", "tipe" => "PJ"])
                     ->setGroups(["jei.kode_coa"])->setOrder(["jei.kode_coa"])
-                    ->setSelects(["jei.kode_coa,ac.nama as nama_coa,je.reff_note as partner,kurs,if(kurs > 1,sum(jei.nominal_curr),0) as valas,sum(nominal) as nominals,je.tanggal_dibuat as tanggal,jei.nama as uraian,je.kode"]);
+                    ->setSelects(["jei.kode_coa,ac.nama as nama_coa,je.reff_note as partner,kurs,if(kurs > 1,sum(jei.nominal_curr),0) as valas,sum(nominal) as nominals,date(je.tanggal_dibuat) as tanggal,jei.nama as uraian,je.kode"]);
             $data["debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setWheres(["date(je.tanggal_dibuat) >=" => $datas['tanggals'][0], "date(je.tanggal_dibuat) <=" => $datas['tanggals'][1], "je.status" => "posted", "posisi" => "C", "tipe" => "PJ"], true);
-                    $model->setGroups(["jei.kode_coa", "jei.kode"], true)->setOrder(["jei.kode_coa"], true);
+//                    $model->setGroups(["jei.kode_coa", "jei.kode"], true)
+                    $model->setGroups(["jei.id"], true)
+                            ->setOrder(["jei.kode_coa"], true);
                     $data["kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setGroups(["jei.kode", "jei.kode_coa"], true)->setOrder(["jei.kode_coa"], true);
+//                    $model->setGroups(["jei.kode", "jei.kode_coa"], true)
+                    $model->setGroups(["jei.id"], true)
+                        ->setOrder(["jei.kode_coa"], true);
                     $data["debit"] = $model->getData();
                     break;
                 default:
