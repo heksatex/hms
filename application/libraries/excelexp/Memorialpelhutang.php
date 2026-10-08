@@ -44,13 +44,13 @@ class Memorialpelhutang {
                 case "detail":
 //                    $model->setGroups(["bk.kode_coa", "bkd.no_bk"], true)
                     $model->setGroups(["bkd.id"], true)->setOrder(["bk.kode_coa", "bkd.no_bk"], true)
-                            ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bk.jenis_transaksi) else bk.jenis_transaksi end as uraian']);
+                            ->setSelects(['transinfo as uraian']);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
 //                    $model->setGroups(["bkd.no_bk"], true)
                     $model->setGroups(["bkd.id"], true)
-                            ->setOrder(["bkd.kode_coa"], true);
+                            ->setOrder(["bkd.kode_coa", "bkd.no_bk"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
                 default:
