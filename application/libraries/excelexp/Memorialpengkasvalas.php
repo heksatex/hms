@@ -38,7 +38,9 @@ class Memorialpengkasvalas {
                     $data["kas_kredit"] = $model->getData();
                     break;
                 default:
-                    $model->setGroups(["kk.kode_coa"], true)->setOrder(["kk.kode_coa"], true);
+//                    $model->setGroups(["kk.kode_coa"], true)
+                    $model->setGroups(["kkd.id"], true)
+                        ->setOrder(["kk.kode_coa"], true);
                     $data["kas_kredit"] = $model->getData();
                     break;
             }
