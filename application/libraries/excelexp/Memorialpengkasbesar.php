@@ -32,12 +32,15 @@ class Memorialpengkasbesar {
             if ($datas['filter'] === "detail") {
                 $model->setSelects(["date(km.tanggal) as tanggal", "km.no_kk as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
                 $data["kredit"] = $model->getData();
-                $model->setGroups(["kmd.id","kmd.no_kk"])->setOrder(["kmd.kode_coa","kmd.no_kk","kmd.id"]);
+//                $model->setGroups(["kmd.id","kmd.no_kk"])
+                $model->setGroups(["kmd.id"])
+                        ->setOrder(["kmd.kode_coa","kmd.no_kk","kmd.id"]);
                 $data["debit"] = $model->getData();
             } else {
-                $model->setGroups(["kmd.kode_coa"]);
+//                $model->setGroups(["kmd.kode_coa"]);
+                $model->setGroups(["kmd.id"]);
                 $data["debit"] = $model->getData();
-                $model->setGroups(["km.kode_coa"], true);
+//                $model->setGroups(["km.kode_coa"], true);
                 $data["kredit"] = $model->getData();
             }
             return $data;

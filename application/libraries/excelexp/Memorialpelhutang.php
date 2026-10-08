@@ -42,12 +42,15 @@ class Memorialpelhutang {
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["bk.kode_coa", "bkd.no_bk"], true)->setOrder(["bk.kode_coa", "bkd.no_bk"], true)
+//                    $model->setGroups(["bk.kode_coa", "bkd.no_bk"], true)
+                    $model->setGroups(["bkd.id"], true)->setOrder(["bk.kode_coa", "bkd.no_bk"], true)
                             ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",bk.jenis_transaksi) else bk.jenis_transaksi end as uraian']);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setGroups(["bkd.no_bk"], true)->setOrder(["bkd.kode_coa"], true);
+//                    $model->setGroups(["bkd.no_bk"], true)
+                    $model->setGroups(["bkd.id"], true)
+                            ->setOrder(["bkd.kode_coa"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
                 default:
@@ -68,11 +71,15 @@ class Memorialpelhutang {
             $data["giro_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["gk.kode_coa", "gkd.no_gk"], true)->setOrder(["gk.kode_coa", "gkd.no_gk"], true);
+//                    $model->setGroups(["gk.kode_coa", "gkd.no_gk"], true)
+                    $model->setGroups(["gkd.id"], true)
+                            ->setOrder(["gk.kode_coa", "gkd.no_gk"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setGroups(["gkd.no_gk"], true)->setOrder(["gkd.kode_coa"], true);
+//                    $model->setGroups(["gkd.no_gk"], true)
+                    $model->setGroups(["gkd.id"], true)
+                            ->setOrder(["gkd.kode_coa"], true);
                     $data["giro_debit"] = $model->getData();
                     break;
                 default:

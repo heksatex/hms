@@ -32,18 +32,19 @@ class Memorialpenkasbesar {
                     ->setWheres(["km.kode_coa" => "1111.01", "kmd.kurs" => 1, "km.status" => "confirm"])
                     ->setSelects(["sum(nominal) as nominals,km.kode_coa as km_kode_coa", "acc_coa.kode_coa,acc_coa.nama"])
                     ->setSelects(['case when transinfo <> "" then CONCAT(transinfo," - ",GROUP_CONCAT(uraian)) else GROUP_CONCAT(uraian) end as uraian'])
-                        ->setOrder(["kmd.kode_coa" => "asc"]);
+                    ->setOrder(["kmd.kode_coa" => "asc"]);
             if ($datas['filter'] === "detail") {
                 $model->setSelects(["date(km.tanggal) as tanggal", "km.no_km as no_bukti", "if(partner_nama ='',lain2,partner_nama) as partner"]);
-                $model->setGroups(["kmd.kode_coa", "kmd.id"], true)->setOrder(["kmd.kode_coa", "kmd.no_km","kmd.id"]);
+//                $model->setGroups(["kmd.kode_coa", "kmd.id"], true)
+                $model->setOrder(["kmd.kode_coa", "kmd.no_km", "kmd.id"]);
                 $data["kredit"] = $model->getData();
-                $model->setGroups(["km.kode_coa"]);
+//                $model->setGroups(["km.kode_coa"]);
                 $data["debit"] = $model->getData();
             } else {
-                $model->setGroups(["km.kode_coa"]);
-                 $data["debit"] = $model->getData();
-                 $model->setGroups(["kmd.kode_coa"]);
-                 $data["kredit"] = $model->getData();
+//                $model->setGroups(["km.kode_coa"]);
+                $data["debit"] = $model->getData();
+//                 $model->setGroups(["kmd.kode_coa"]);
+                $data["kredit"] = $model->getData();
             }
             return $data;
         } catch (Exception $ex) {
@@ -85,11 +86,11 @@ class Memorialpenkasbesar {
                 $sheet->setCellValue("D{$row}", ($this->data["debit"][0]->nominals ?? 0));
                 $sheet->setCellValue("E{$row}", "{$totalKredit}");
             }
-            
+
             $sheet->getStyle("D2:D{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 //            $sheet->getStyle("F2:F{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $this->data["periode"]);
             $filename = "jurnal {$this->data['jurnal']} {$nm} global";
             $url = "dist/storages/report/jurnal_memorial";
@@ -149,10 +150,10 @@ class Memorialpenkasbesar {
                     $sheet->setCellValue("H{$row}", $total);
                 }
             }
-            
+
             $sheet->getStyle("H2:H{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("E2:E{$row}")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            
+
             $nm = str_replace("/", "_", $data["periode"]);
             $filename = "jurnal {$data['jurnal']} {$nm} detail";
             $url = "dist/storages/report/jurnal_memorial";

@@ -33,11 +33,15 @@ class Memorialpenkasvalas {
             $data["kas_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setGroups(["kmd.id"], true)->setOrder(["kmd.kode_coa","kmd.no_km","kmd.id"], true);
+//                    $model->setGroups(["kmd.id"], true)
+                    $model->setGroups(["kmd.id"], true)
+                        ->setOrder(["kmd.kode_coa","kmd.no_km","kmd.id"], true);
                     $data["kas_kredit"] = $model->getData();
                     break;
                 default:
-                    $model->setGroups(["kmd.kode_coa"], true)->setOrder(["kmd.kode_coa"], true);
+//                    $model->setGroups(["kmd.kode_coa"], true)
+                    $model->setGroups(["kmd.id"], true)
+                        ->setOrder(["kmd.kode_coa"], true);
                     $data["kas_kredit"] = $model->getData();
                     break;
             }

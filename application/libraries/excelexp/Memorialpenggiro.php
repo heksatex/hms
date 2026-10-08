@@ -37,7 +37,9 @@ class Memorialpenggiro {
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setSelects(["transinfo as uraian"]);
-                    $model->setGroups(["gk.id","gkd.no_gk"], true)->setOrder(["gk.kode_coa","gkd.no_gk"], true);
+//                    $model->setGroups(["gk.id","gkd.no_gk"], true)
+                    $model->setGroups(["gkd.id"], true)
+                            ->setOrder(["gk.kode_coa","gkd.no_gk"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
