@@ -50,7 +50,8 @@ class Memorialpelpiutang {
                 case "detail_2":
 //                    $model->setGroups(["bm.no_bm"], true)
                     $model->setGroups(["bmd.id"], true)
-                        ->setOrder(["bm.kode_coa"], true);
+                         ->setSelects(['transinfo as uraian'])
+                        ->setOrder(["bm.kode_coa", "bm.no_bm"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
                 default:
