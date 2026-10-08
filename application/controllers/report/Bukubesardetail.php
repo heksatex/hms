@@ -276,9 +276,9 @@ class Bukubesardetail extends MY_Controller
                 $num=1;
 
                 // summary
-				$activeSheet->SetCellValue('A'.$rowCount, 'Saldo Awal : ');
-                $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
-				$activeSheet->SetCellValue('C'.$rowCount, $datas['saldo_awal']); // Saldo Awal
+				// $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Awal : ');
+                // $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
+				// $activeSheet->SetCellValue('C'.$rowCount, $datas['saldo_awal']); // Saldo Awal
                 $activeSheet->SetCellValue('E'.$rowCount, 'Total : ');
                 $activeSheet->SetCellValue('F'.$rowCount, $total_debit_valas);
                 $activeSheet->SetCellValue('g'.$rowCount, $total_credit_valas);
@@ -292,16 +292,16 @@ class Bukubesardetail extends MY_Controller
                 $object->getActiveSheet()->getStyle("A".$rowCount.":J".$rowCount)->applyFromArray($styleArrayColor);
                 $rowCount++;
 
-                $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Akhir :');
-                $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
-                $activeSheet->SetCellValue('C'.$rowCount, $saldo_akhir);
-				$activeSheet->getStyle('C'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $activeSheet->SetCellValue('E'.$rowCount, 'Mutasi : ');
-                $mutasi_saldo  = $saldo_akhir - $datas['saldo_awal'];
-                $activeSheet->SetCellValue('F'.$rowCount, $mutasi_saldo);
-				$activeSheet->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                // $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Akhir :');
+                // $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
+                // $activeSheet->SetCellValue('C'.$rowCount, $saldo_akhir);
+				// $activeSheet->getStyle('C'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                // $activeSheet->SetCellValue('E'.$rowCount, 'Mutasi : ');
+                // $mutasi_saldo  = $saldo_akhir - $datas['saldo_awal'];
+                // $activeSheet->SetCellValue('F'.$rowCount, $mutasi_saldo);
+				// $activeSheet->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
-                $object->getActiveSheet()->getStyle("A".$rowCount.":J".$rowCount)->applyFromArray($styleArrayColor);
+                // $object->getActiveSheet()->getStyle("A".$rowCount.":J".$rowCount)->applyFromArray($styleArrayColor);
                 
 
                 $total_credit  = 0;

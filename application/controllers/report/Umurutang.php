@@ -12,9 +12,9 @@ class Umurutang extends MY_Controller
         $this->load->model('m_outstandinginvoice');
     }
 
-    public function index()
+    public function index($id_dept = 'RUU')
     {
-        $id_dept        = 'RUU';
+        // $id_dept        = 'RUU';
         $data['id_dept'] = $id_dept;
         $this->load->view('report/v_umur_utang', $data);
     }

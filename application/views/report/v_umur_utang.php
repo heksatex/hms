@@ -269,11 +269,14 @@
                         let total_hutang_bulan_2 = 0;
                         let total_hutang_bulan_3 = 0;
                         let total_hutang_lebih_dari_3_bulan = 0;
+                        <?php
+                            $url_detail_par = $this->uri->segment(1) == 'accounting' ? base_url('accounting/outstandinginvoice?id_partner=') : base_url('report/outstandinginvoice?id_partner=');
+                        ?>
                         $.each(data.record, function(key, value) {
 
                             var tr = $("<tr>").append(
                                 $("<td>").text(key + 1),
-                                $("<td align=''>").html(`<a href="<?php echo site_url('report/outstandinginvoice?id_partner=') ?>${value.id_partner}" target="_blank">${value.nama_partner}</a>`),
+                                $("<td align=''>").html(`<a href="<?php echo $url_detail_par ?>${value.id_partner}" target="_blank">${value.nama_partner}</a>`),
                                 $("<td align='right'>").text(formatNumber(value.total_hutang.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.hutang_bulan_ini.toFixed(2))),
                                 $("<td align='right'>").text(formatNumber(value.hutang_bulan_1.toFixed(2))),
@@ -356,6 +359,9 @@
         });
 
         var arr_filter = [];
+        <?php
+            $url_detail = $this->uri->segment(1) == 'accounting' ? base_url('accounting/umurutang/export_pdf') : base_url('report/umurutang/export_pdf');
+        ?>
         // klik btn print  pdf
         $(document).on('click', "#btn-pdf", function(e) {
 
@@ -365,7 +371,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/umurutang/export_pdf';
+                var url = '<?php echo $url_detail; ?>';
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 

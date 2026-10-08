@@ -119,6 +119,12 @@ class Bukubesar extends MY_Controller
             $where  = ["je.status"=>"posted",'je.tanggal_dibuat >= '=>$tgldari,'je.tanggal_dibuat <= '=>$tglsampai];
             if($view == 'N'){
                 $data = $this->proses_data2($tgldari,$tglsampai,$coa,$where);
+            } else if($view === 'NL') { // Normal Lawan
+                $prefix = substr($coa, 0, 1);
+                if (!in_array($prefix, ['1', '2'], true)) {
+                    throw new \Exception('Normal Lawan hanya dapat digunakan untuk COA dengan kode awal 1 atau 2. ', 200);
+                }
+                $data = $this->proses_data4($tgldari,$tglsampai,$coa,$where);
             } else {
                 $data = $this->proses_data3($where,$coa,$view);
             }
@@ -130,7 +136,7 @@ class Bukubesar extends MY_Controller
         } catch (Exception $ex) {
                 $this->output->set_status_header(($ex->getCode()) ?? 500)
                 ->set_content_type('application/json', 'utf-8')
-                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                ->set_output(json_encode(array('status'=>"failed",'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
 
     }
@@ -347,6 +353,135 @@ class Bukubesar extends MY_Controller
         return $tmp_data_akun_isi;
     }
 
+
+    function proses_data4($tgl_dari, $tgl_sampai, $coa, $where = [])
+    {
+        $where_coa = ["coa.kode_coa" => $coa];
+
+        $data = $this->m_bukubesar->get_list_bukubesar_detail_coa($tgl_dari,$tgl_sampai,$where_coa);
+
+        $tmp_data_akun = [];
+
+        foreach ($data as $datas) {
+            $saldo_awal = floatval($datas->saldo_awal_final);
+            $saldo_awal_debit = floatval($datas->total_debit_sbl);
+            $saldo_awal_credit = floatval($datas->total_credit_sbl);
+
+            // ============================
+            // GET DETAIL
+            // ============================
+            $where2 = ["coa.kode_coa" => $datas->kode_coa];
+            $where_detail = array_merge($where, $where2);
+
+            $data2 = $this->m_bukubesar->get_list_bukubesar_detail_lawan_normal_by_coa($where_detail);
+
+            // ============================
+            // GROUP BERDASARKAN ENTRY
+            // ============================
+            $group_entries = [];
+
+            foreach ($data2 as $datas2) {
+                $kode_entries = $datas2->kode_entries;
+
+                if (!isset($group_entries[$kode_entries])) {
+                    $group_entries[$kode_entries] = [
+                        "total_debit" => 0,
+                        "total_credit" => 0,
+                        "items" => [],
+                    ];
+                }
+
+                $debit = floatval($datas2->total_debit);
+                $credit = floatval($datas2->total_credit);
+
+                // Total untuk perhitungan saldo
+                $group_entries[$kode_entries]["total_debit"] += $debit;
+                $group_entries[$kode_entries]["total_credit"] += $credit;
+
+                // Simpan baris lawan
+                $group_entries[$kode_entries]["items"][] = [
+                    "data" => $datas2,
+                    "debit" => $debit,
+                    "credit" => $credit,
+                ];
+            }
+
+            // ============================
+            // HASIL DETAIL
+            // ============================
+            $tmp_data_akun_isi = [];
+
+            foreach ($group_entries as $kode_entries => $entry) {
+                $total_debit = $entry["total_debit"];
+                $total_credit = $entry["total_credit"];
+
+                // ============================
+                // HITUNG SALDO SATU KALI
+                // ============================
+                if ($datas->saldo_normal == "D") {
+                    $saldo_akhir = $saldo_awal + $total_debit - $total_credit;
+                } else {
+                    $saldo_akhir = $saldo_awal + $total_credit - $total_debit;
+                }
+
+                // ============================
+                // JUMLAH LAWAN
+                // ============================
+                $jumlah_lawan = count($entry["items"]);
+
+                foreach ($entry["items"] as $index => $item) {
+                    $datas2 = $item["data"];
+
+                    // Saldo hanya ditampilkan
+                    // pada baris lawan terakhir
+                    $saldo_tampil = null;
+
+                    if ($index == $jumlah_lawan - 1) {
+                        $saldo_tampil = $saldo_akhir;
+                    }
+
+                    $tmp_data_akun_isi[] = [
+                        "tanggal"           => date("Y-m-d", strtotime($datas2->tanggal)),
+                        "kode_entries_encr" => encrypt_url($datas2->kode_entries),
+                        "kode_entries"      => $datas2->kode_entries,
+                        "origin"            => $datas2->origin,
+                        "keterangan"        => $datas2->keterangan,
+
+                        "kode_coa_lawan"    => $datas2->kode_coa_lawan,
+                        "nama_coa_lawan"    => $datas2->nama_coa_lawan,
+
+                        "debit"             => $item["debit"],
+                        "credit"            => $item["credit"],
+                        "debit_valas"       => floatval($datas2->total_debit_valas),
+                        "credit_valas"      => floatval($datas2->total_credit_valas),
+                        "saldo_akhir"       => $saldo_tampil,
+                    ];
+                }
+
+                // ============================
+                // SALDO BERIKUTNYA
+                // ============================
+                $saldo_awal = $saldo_akhir;
+            }
+
+            // ============================
+            // DATA AKUN
+            // ============================
+            $tmp_data_akun[] = [
+                "kode_acc"      => $datas->kode_coa,
+                "nama_acc"      => $datas->nama_coa,
+                "saldo_awal"    => floatval($datas->saldo_awal_final),
+                "saldo_normal"  => $datas->saldo_normal,
+                "saldo_awal_debit"  => floatval($saldo_awal_debit),
+                "saldo_awal_credit" => floatval($saldo_awal_credit),
+                "tmp_data_isi"      => $tmp_data_akun_isi,
+            ];
+        }
+
+        return $tmp_data_akun;
+    }
+
+
     function export_excel()
     {
         try {
@@ -534,6 +669,8 @@ class Bukubesar extends MY_Controller
             $view       = $arr_filter[0]['view'] ?? '';
             if($view == 'N'){
                $this->export_excel_detail_normal($arr_filter);
+            } else if ($view === 'NL') {
+               $this->export_excel_detail_normal_lawan($arr_filter);
             } else {
                 // $views = 'Lawan Credit';
                 $this->export_excel_detail_lawan($arr_filter);
@@ -711,9 +848,9 @@ class Bukubesar extends MY_Controller
                 $num=1;
 
                 // summary
-				$activeSheet->SetCellValue('A'.$rowCount, 'Saldo Awal : ');
-                $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
-				$activeSheet->SetCellValue('C'.$rowCount, $datas['saldo_awal']); // Saldo Awal
+				// $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Awal : ');
+                // $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
+				// $activeSheet->SetCellValue('C'.$rowCount, $datas['saldo_awal']); // Saldo Awal
                 $activeSheet->SetCellValue('E'.$rowCount, 'Total : ');
                 $activeSheet->SetCellValue('F'.$rowCount, $total_debit_valas);
                 $activeSheet->SetCellValue('G'.$rowCount, $total_credit_valas);
@@ -727,16 +864,16 @@ class Bukubesar extends MY_Controller
                 $object->getActiveSheet()->getStyle("A".$rowCount.":j".$rowCount)->applyFromArray($styleArrayColor);
                 $rowCount++;
 
-                $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Akhir :');
-                $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
-                $activeSheet->SetCellValue('C'.$rowCount, $saldo_akhir);
-				$activeSheet->getStyle('C'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
-                $activeSheet->SetCellValue('E'.$rowCount, 'Mutasi : ');
-                $mutasi_saldo  = $saldo_akhir - $datas['saldo_awal'];
-                $activeSheet->SetCellValue('F'.$rowCount, $mutasi_saldo);
-				$activeSheet->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                // $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Akhir :');
+                // $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
+                // $activeSheet->SetCellValue('C'.$rowCount, $saldo_akhir);
+				// $activeSheet->getStyle('C'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                // $activeSheet->SetCellValue('E'.$rowCount, 'Mutasi : ');
+                // $mutasi_saldo  = $saldo_akhir - $datas['saldo_awal'];
+                // $activeSheet->SetCellValue('F'.$rowCount, $mutasi_saldo);
+				// $activeSheet->getStyle('F'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
 
-                $object->getActiveSheet()->getStyle("A".$rowCount.":J".$rowCount)->applyFromArray($styleArrayColor);
+                // $object->getActiveSheet()->getStyle("A".$rowCount.":J".$rowCount)->applyFromArray($styleArrayColor);
                 
 
                 $total_credit  = 0;
@@ -931,6 +1068,304 @@ class Bukubesar extends MY_Controller
      
     }
 
+
+    function export_excel_detail_normal_lawan($arr_filter)
+    {
+        try {
+            //code...
+            $this->load->library('excel');
+
+
+            $tgl_dari   = $arr_filter[0]['tgldari'] ?? '';
+            $tgl_sampai = $arr_filter[0]['tglsampai'] ?? '';
+            $checkhidden= $arr_filter[0]['checkhidden'] ?? '';
+            $coa        = $arr_filter[0]['coa'] ?? '';
+            $view       = $arr_filter[0]['view'] ?? '';
+            $tgl_dari   = date('Y-m-d H:i:s', strtotime($tgl_dari));
+            $tgl_sampai = date('Y-m-d 23:59:59', strtotime($tgl_sampai));
+
+            $gc  = $this->m_bukubesar->get_coa_by_kode($coa);
+
+            if($view == 'N'){
+                $views = 'Normal';
+            } else if($view == 'NL'){
+                $views = 'Normal Lawan';
+            } else if($view == 'D'){
+                $views = 'Lawan Debit';
+            } else {
+                $views = 'Lawan Credit';
+            }
+
+            $where  = ["je.status"=>"posted",'je.tanggal_dibuat >= '=>$tgl_dari,'je.tanggal_dibuat <= '=>$tgl_sampai];
+            // if(!empty($coa)){
+            //     $where = array_merge($where,array("coa.kode_coa"=>$coa));
+            // }
+
+            ob_start();
+            $object = new PHPExcel();
+            $object->setActiveSheetIndex(0);
+
+
+            // $object->createSheet();
+            $sheet = $object->setActiveSheetIndex(0);
+            $sheet->setTitle('DETAIL');
+            $activeSheet = $object->getActiveSheet();
+            // $getSheet  = $object->getSheet(0);
+            $activeSheet->setShowGridlines(false);
+
+            $rowCount = 1;
+            $loop     = 1;
+
+            $periode = tgl_indo(date('d-m-Y',strtotime($tgl_dari))) .' - '.tgl_indo(date('d-m-Y',strtotime($tgl_sampai)));
+            // set Judul
+            $sheet->SetCellValue('A'.$rowCount, 'PT. HEKSATEX INDAH');
+            $sheet->mergeCells('A'.$rowCount.':K'.$rowCount);
+            $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $rowCount++;
+
+            // set Judul
+            $sheet->SetCellValue('A'.$rowCount, 'BUKU BESAR DETAIL');
+            $sheet->mergeCells('A'.$rowCount.':K'.$rowCount);
+            $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $rowCount++;
+
+
+            // set periode
+            $sheet->SetCellValue('A'.$rowCount, $periode );
+            $sheet->mergeCells('A'.$rowCount.':K'.$rowCount);
+            $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+            $rowCount = 4;
+            $sheet->SetCellValue('A'.$rowCount, $gc->kode_coa.' - '.$gc->nama.' - '.$views);
+            $sheet->mergeCells('A'.$rowCount.':K'.$rowCount);
+            $sheet->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+            //bold huruf
+            $activeSheet->getStyle("A1:K5")->getFont()->setBold(true);
+
+            // Border 
+            $styleArray = array(
+                'borders' => array(
+                    'allborders' => array(
+                    'style' => PHPExcel_Style_Border::BORDER_THIN
+                    )
+                )
+            );	
+
+            $styleArrayColor = array(
+                'font'  => array(
+                    'bold'  => true,
+                    // 'color' => array('rgb' => 'FFFFFF'),
+                ),
+                'fill' => array(
+                        'type' => PHPExcel_Style_Fill::FILL_SOLID,
+                        'color' => array('rgb' => 'D3D3D3' )
+                ),
+                'alignment' => array(
+                    // 'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                    'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+                )
+            );	
+            
+
+            $data = $this->proses_data4($tgl_dari,$tgl_sampai,$coa,$where);
+            $rowCount = 6;
+            $num      = 1;
+            $total_credit  = 0;
+            $total_debit   = 0;
+            $total_credit_valas  = 0;
+            $total_debit_valas   = 0;
+            foreach($data as $datas){
+
+                // nama acc
+                $activeSheet->SetCellValue('A'.$rowCount, $datas['kode_acc'] . ' - ' . $datas['nama_acc']);
+                $activeSheet->mergeCells('A'.$rowCount.':K'.$rowCount);
+                $activeSheet->getStyle("A".$rowCount.":K".$rowCount)->getFont()->setBold(true);
+                $activeSheet->getRowDimension($rowCount)->setRowHeight(24); // height acc
+				$object->getActiveSheet()->getStyle("A".$rowCount.":K".$rowCount)->applyFromArray($styleArrayColor);
+
+
+                $rowCount++;
+                // thead
+                $this->create_thead2($rowCount, $activeSheet,$activeSheet,$view);
+                $activeSheet->getStyle("A".$rowCount.":K".$rowCount)->getFont()->setBold(true);
+
+                // saldo Awal
+                $rowCount++;
+                $activeSheet->SetCellValue('A'.$rowCount, ($num++));
+				$activeSheet->SetCellValue('B'.$rowCount, 'Saldo Awal');
+                $activeSheet->mergeCells('B'.$rowCount.':F'.$rowCount);
+				$activeSheet->SetCellValue('G'.$rowCount, 0.00);
+				$activeSheet->SetCellValue('H'.$rowCount, 0.00);
+				$activeSheet->SetCellValue('I'.$rowCount, 0.00);
+				$activeSheet->SetCellValue('J'.$rowCount, 0.00);
+				$activeSheet->SetCellValue('K'.$rowCount, $datas['saldo_awal']);
+				$activeSheet->getStyle('K'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+
+                $rowCount++;
+                $saldo_akhir = $datas['saldo_awal'];
+
+                // ==================================================
+                // GROUP DATA BERDASARKAN KODE ENTRIES
+                // ==================================================
+                $groupedEntries = [];
+
+                foreach ($datas['tmp_data_isi'] as $datas2) {
+
+                    $kodeEntries = $datas2['kode_entries'];
+                    if (!isset($groupedEntries[$kodeEntries])) {
+                        $groupedEntries[$kodeEntries] = [];
+                    }
+                    $groupedEntries[$kodeEntries][] = $datas2;
+                }
+
+
+                // ==================================================
+                // LOOP SETIAP JOURNAL ENTRY
+                // ==================================================
+                foreach ($groupedEntries as $kodeEntries => $items) {
+
+                    $jumlahLawan = count($items);
+
+                    // ------------------------------------------
+                    // LOOP DATA LAWAN
+                    // ------------------------------------------
+                    foreach ($items as $index => $datas2) {
+
+                        // ==========================================
+                        // KOLOM UTAMA
+                        // HANYA DIISI PADA BARIS PERTAMA
+                        // ==========================================
+                        if ($index === 0) {
+                            $activeSheet->SetCellValue('A'.$rowCount,$num);
+                            $activeSheet->SetCellValue('B'.$rowCount,$datas2['tanggal']);
+                            $activeSheet->SetCellValue('C'.$rowCount,$datas2['kode_entries']);
+                            $activeSheet->SetCellValue('D'.$rowCount,$datas2['origin']);
+                            $activeSheet->SetCellValue('E'.$rowCount,$datas2['keterangan']);
+                        } else {
+
+                            // ------------------------------------------
+                            // BARIS KEDUA DAN SETERUSNYA
+                            // A - E DIKOSONGKAN
+                            // ------------------------------------------
+                            $activeSheet->SetCellValue('A'.$rowCount, '');
+                            $activeSheet->SetCellValue('B'.$rowCount, '');
+                            $activeSheet->SetCellValue('C'.$rowCount, '');
+                            $activeSheet->SetCellValue('D'.$rowCount, '');
+                            $activeSheet->SetCellValue('E'.$rowCount, '');
+                        }
+
+
+                        // ==========================================
+                        // COA LAWAN
+                        // TETAP DIISI SETIAP BARIS
+                        // ==========================================
+                        $activeSheet->SetCellValue('F'.$rowCount,$datas2['kode_coa_lawan'] . " - " . $datas2['nama_coa_lawan']);
+
+                        // ==========================================
+                        // DEBIT / CREDIT VALAS
+                        // TETAP DIISI SETIAP BARIS
+                        // ==========================================
+                        $activeSheet->SetCellValue('G'.$rowCount,$datas2['debit_valas']);
+                        $activeSheet->SetCellValue('H'.$rowCount,$datas2['credit_valas']);
+
+                        // ==========================================
+                        // DEBIT / CREDIT
+                        // TETAP DIISI SETIAP BARIS
+                        // ==========================================
+                        $activeSheet->SetCellValue('I'.$rowCount,$datas2['debit']);
+                        $activeSheet->SetCellValue('J'.$rowCount,$datas2['credit']);
+
+
+                        // ==========================================
+                        // SALDO
+                        // HANYA BARIS TERAKHIR
+                        // ==========================================
+                        if ($index === $jumlahLawan - 1) {
+                            $activeSheet->SetCellValue('K'.$rowCount,$datas2['saldo_akhir']);
+                            $saldo_akhir = $datas2['saldo_akhir'];
+                        } else {
+                            $activeSheet->SetCellValue('K'.$rowCount,'');
+                        }
+
+
+                        // ==========================================
+                        // FORMAT ANGKA
+                        // ==========================================
+                        $activeSheet->getStyle('G'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                        $activeSheet->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                        $activeSheet->getStyle('I'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                        $activeSheet->getStyle('J'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                        $activeSheet->getStyle('K'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+
+                        // ==========================================
+                        // TOTAL
+                        // ==========================================
+                        $total_debit += (float) $datas2['debit'];
+                        $total_credit += (float) $datas2['credit'];
+                        $total_debit_valas += (float) $datas2['debit_valas'];
+                        $total_credit_valas += (float) $datas2['credit_valas'];
+
+                        $rowCount++;
+                    }
+
+
+                    // ==========================================
+                    // NOMOR ENTRY BERIKUTNYA
+                    // ==========================================
+                    $num++;
+                }
+
+                $num = 1;
+
+                // summary
+				// $activeSheet->SetCellValue('A'.$rowCount, 'Saldo Awal : ');
+                // $activeSheet->mergeCells('A'.$rowCount.':B'.$rowCount);
+				// $activeSheet->SetCellValue('C'.$rowCount, $datas['saldo_awal']); // Saldo Awal
+                $activeSheet->SetCellValue('F'.$rowCount, 'Total : ');
+                $activeSheet->SetCellValue('G'.$rowCount, $total_debit_valas);
+                $activeSheet->SetCellValue('H'.$rowCount, $total_credit_valas);
+                $activeSheet->SetCellValue('I'.$rowCount, $total_debit);
+                $activeSheet->SetCellValue('J'.$rowCount, $total_credit);
+
+				$activeSheet->getStyle('G'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+				$activeSheet->getStyle('H'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+				$activeSheet->getStyle('I'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+				$activeSheet->getStyle('J'.$rowCount)->getNumberFormat()->setFormatCode('#,##0.00');
+                $object->getActiveSheet()->getStyle("A".$rowCount.":k".$rowCount)->applyFromArray($styleArrayColor);
+                $rowCount++;
+
+                $total_credit  = 0;
+                $total_debit   = 0;
+                $saldo_akhir   = 0;
+                $rowCount=$rowCount+2;;
+                
+            }
+
+            $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+            $object->save('php://output');
+    
+            $xlsData = ob_get_contents();
+            ob_end_clean();
+
+            $name_file ='Buku Besar Detail '.$views.' Periode '.$periode.'.xlsx';
+    
+            $response =  array(
+                'op'        => 'ok',
+                'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+                'filename'  => $name_file
+            );
+        
+            die(json_encode($response));
+
+        } catch (Exception $ex) {
+            $this->output->set_status_header(($ex->getCode()) ?? 500)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+     
+    }
+
     function create_thead($rowCount, $activeSheet, $getSheet,$view)
     {
         if($view == 'N'){
@@ -963,6 +1398,44 @@ class Bukubesar extends MY_Controller
                 $getSheet->getColumnDimension($val)->setWidth(35); // index D/E
             } else if ($loop > 4) {
                 $getSheet->getColumnDimension($val)->setWidth(20); // index F -> G
+                $getSheet->getStyle($val.''.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT );
+                
+            }
+
+            $loop++;
+        }
+
+        return;
+    }
+
+
+    function create_thead2($rowCount, $activeSheet, $getSheet,$view)
+    {
+        $table_head_columns  = array('No', 'Tanggal', 'Kode Entries', 'Origin', 'Keterangan', 'CoA Lawan', 'Debit Valas', 'Credit Valas', 'Debit', 'Credit', 'Saldo');
+       
+        $column = 0;
+        foreach ($table_head_columns as $field) {
+            $activeSheet->setCellValueByColumnAndRow($column, $rowCount, $field);
+            $column++;
+        }
+
+        // set width and border
+        $index_header = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'i', 'J','K');
+        $loop = 0;
+        foreach ($index_header as $val) {
+
+            // $activeSheet->getStyle($val . '3')->applyFromArray($styleArrayColor);
+
+            if ($loop == 0) {
+                $getSheet->getColumnDimension($val)->setAutoSize(true); // index A
+            } else if ($loop ==  1) {
+                $getSheet->getColumnDimension($val)->setWidth(10); // index B
+            } else if ($loop == 2) {
+                $getSheet->getColumnDimension($val)->setWidth(20); // index C
+            } else if ($loop == 3 or $loop == 4 or $loop == 5) {
+                $getSheet->getColumnDimension($val)->setWidth(35); // index D/E/F
+            } else if ($loop > 5) {
+                $getSheet->getColumnDimension($val)->setWidth(20); // index  G
                 $getSheet->getStyle($val.''.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT );
                 
             }

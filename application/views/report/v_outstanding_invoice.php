@@ -429,6 +429,9 @@
         });
 
         var arr_filter = [];
+        <?php
+            $url_detail = $this->uri->segment(1) == 'accounting' ? base_url('accounting/outstandinginvoice/export_pdf') : base_url('report/outstandinginvoice/export_pdf');
+        ?>
         // klik btn print  pdf
         $(document).on('click', "#btn-pdf", function(e) {
 
@@ -441,7 +444,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/outstandinginvoice/export_pdf';
+                var url = '<?php echo $url_detail; ?>';
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 
