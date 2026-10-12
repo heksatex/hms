@@ -77,6 +77,26 @@
             background-color: rgba(0, 0, 0, 0.1);
         }
 
+        #example1 .ledger-group {
+            vertical-align: top;
+        }
+
+        #example1 .coa-lawan-cell {
+            min-width: 280px;
+            vertical-align: top;
+        }
+
+        #example1 .coa-lawan-child {
+            padding-left: 25px;
+        }
+
+        #example1 .saldo-entry {
+            font-weight: 600;
+        }
+
+        /* #example1 tbody tr {
+            height: 25px;
+        } */
         /*
     .btn-setTgl {
       height: 22px;
@@ -139,6 +159,7 @@
                                     <div class="col-md-12">&nbsp</div>
                                     <div class="col-md-12">
                                         <button type="button" class="btn btn-default pilih-btn active disabled" name="btn-normal" id="btn-normal" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." tabindex="-1" aria-disabled="true"> Normal</button>
+                                        <button type="button" class="btn btn-default pilih-btn " name="btn-normal-lawan" id="btn-normal-lawan" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." aria-disabled="true"> Normal Lawan</button>
                                         <button type="button" class="btn btn-default pilih-btn" name="btn-debit" id="btn-debit" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Lawan Debit</button>
                                         <button type="button" class="btn btn-default pilih-btn" name="btn-credit" id="btn-credit" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Lawan Credit</button>
                                         <button type="button" class="btn btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
@@ -162,6 +183,7 @@
                                                         <th class='style bb resizable' style="min-width: 105px; width:105px;">Kode Entries</th>
                                                         <th class='style bb resizable' style="min-width: 100px; max-width: 220px; width:100px;">Origin</th>
                                                         <th class='style bb resizable' style="min-width: 200px">Keterangan</th>
+                                                        <th class='style bb resizable' style="min-width: 100px; display:none;" id="coa_lawan">CoA Lawan</th>
                                                         <th class='style bb resizable text-right' style="min-width: 150px; width:100px;" id="posisi_valas">Debit Valas</th>
                                                         <th class='style bb resizable text-right' style="min-width: 150px; width:100px;" id="lawan_valas">Credit Valas</th>
                                                         <th class='style bb resizable text-right' style="min-width: 150px; width:100px;" id="posisi">Debit</th>
@@ -274,6 +296,7 @@
             const kolomLawanValas = document.getElementById('lawan_valas');
             kolomPosisiValas.textContent = 'Debit Valas';
             kolomLawanValas.textContent = 'Credit Valas (Lawan)';
+            $("#coa_lawan").css('display','none');
 
             process_bukubesar_detail('D', this_btn);
         });
@@ -290,11 +313,11 @@
             const kolomLawanValas = document.getElementById('lawan_valas');
             kolomPosisiValas.textContent = 'Credit Valas';
             kolomLawanValas.textContent = 'Debit Valas (Lawan)';
-
+            $("#coa_lawan").css('display','none');
             process_bukubesar_detail('C', this_btn);
         });
 
-        // btn lawan credit
+        // btn normal
         $("#btn-normal").on('click', function() {
             var this_btn = $(this);
             const kolomPosisi = document.getElementById('posisi');
@@ -305,7 +328,36 @@
             const kolomLawanValas = document.getElementById('lawan_valas');
             kolomPosisiValas.textContent = 'Debit Valas';
             kolomLawanValas.textContent = 'Credit Valas';
+            $("#coa_lawan").css('display','none');
             process_bukubesar_detail('N', this_btn);
+        });
+
+
+        let coa = `<?php echo  $coa->kode_coa; ?>`;
+
+        if (['1', '2'].includes(coa.charAt(0))) {
+            $('#btn-normal-lawan')
+                .prop('disabled', false)
+                .removeClass('disabled');
+        } else {
+            $('#btn-normal-lawan')
+                .prop('disabled', true)
+                .addClass('disabled');
+        }
+
+         // btn normal lawan
+        $("#btn-normal-lawan").on('click', function() {
+            var this_btn = $(this);
+            const kolomPosisi = document.getElementById('posisi');
+            const kolomLawan = document.getElementById('lawan');
+            kolomPosisi.textContent = 'Debit';
+            kolomLawan.textContent = 'Credit';
+            const kolomPosisiValas = document.getElementById('posisi_valas');
+            const kolomLawanValas = document.getElementById('lawan_valas');
+            kolomPosisiValas.textContent = 'Debit Valas';
+            kolomLawanValas.textContent = 'Credit Valas';
+            $("#coa_lawan").css('display','table-cell');
+            process_bukubesar_detail('NL', this_btn);
         });
 
 
@@ -337,14 +389,26 @@
                     checkhidden: checkhidden,
                     view: view
                 },
+                beforeSend: function() {
+                    let tbody = $("<tbody />");
+                    $("#example1 tbody").remove();
+                    var tr = $("<tr>").append($("<td colspan='11'>").text('Tidak ada Data'));
+                    tbody.append(tr);
+                    $("#example1").append(tbody); // append parents
+                },
                 success: function(data) {
 
                     if (data.status == 'failed') {
+                        let tbody = $("<tbody />");
+                        $("#example1 tbody").remove();
                         unblockUI(function() {
                             setTimeout(function() {
                                 alert_notify(data.icon, data.message, data.type, function() {});
                             }, 1000);
                         });
+                        var tr = $("<tr>").append($("<td colspan='11'>").text('Tidak ada Data'));
+                        tbody.append(tr);
+                        $("#example1").append(tbody); // append parents
                     } else {
 
                         arr_filter.push({
@@ -443,6 +507,8 @@
                             }
 
                             $("#example1").append(tbody); // append parents
+                        } else if( view ==='NL') {
+                            create_tbody_normal_lawan(view, data.record);
                         } else {
                             create_tbody_lawan(view, data.record);
                         }
@@ -547,6 +613,194 @@
             $("#example1").append(tbody); // append parents
 
 
+        }
+
+        function create_tbody_normal_lawan(view, dataRecord) {
+
+            $("#example1 tbody").remove();
+            let no = 1;
+            let empty = true;
+            let tbody = $("<tbody />");
+
+            $.each(dataRecord, function(key, value) {
+
+                empty = false;
+
+                // ==========================================
+                // SALDO AWAL
+                // ==========================================
+                var tr2 = $("<tr>").append(
+                    $("<td colspan='4'>").text(no),
+                    $("<td colspan='2'>").html('SALDO AWAL'),
+                    $("<td align='right'>").text('0.00'),
+                    $("<td align='right'>").text('0.00'),
+                    $("<td align='right'>").text('0.00'),
+                    $("<td align='right'>").text('0.00'),
+                    $("<td align='right'>").text(formatNumber(value.saldo_awal.toFixed(2)))
+                );
+
+                tbody.append(tr2);
+
+                no = 1;
+
+                let debit = 0;
+                let credit = 0;
+                let debit_valas = 0;
+                let credit_valas = 0;
+
+                let s_akhir = value.saldo_awal;
+
+                // ==================================================
+                // GROUP DATA BERDASARKAN KODE ENTRIES
+                // ==================================================
+
+                let groupedEntries = {};
+                $.each(value.tmp_data_isi, function(key, value2) {
+
+                    if (!groupedEntries[value2.kode_entries]) {
+                        groupedEntries[value2.kode_entries] = [];
+                    }
+                    groupedEntries[value2.kode_entries].push(value2);
+                });
+
+
+                // ==================================================
+                // LOOP SETIAP JOURNAL ENTRY
+                // ==================================================
+
+                $.each(groupedEntries, function(kodeEntries, items) {
+
+                    let jumlahLawan = items.length;
+                    // ------------------------------------------
+                    // TOTAL NOMINAL
+                    // ------------------------------------------
+
+                    $.each(items, function(i, item) {
+                        debit += parseFloat(item.debit || 0);
+                        credit += parseFloat(item.credit || 0);
+                        debit_valas += parseFloat(item.debit_valas || 0);
+                        credit_valas += parseFloat(item.credit_valas || 0);
+                    });
+
+                    // ------------------------------------------
+                    // DATA UTAMA ENTRY
+                    // ------------------------------------------
+
+                    let first = items[0];
+
+                    let linkUrl ="<?php echo site_url('accounting/jurnalentries/edit/') ?>" +first.kode_entries_encr;
+                    let noBuktiHtml =`<a href="${linkUrl}" target="_blank">${first.kode_entries}</a>`;
+
+
+                    // ==================================================
+                    // BARIS LAWAN
+                    // ==================================================
+
+                    $.each(items, function(index, value2) {
+
+                        let tr = $("<tr>");
+                        // ------------------------------------------
+                        // KOLOM UTAMA HANYA DI BARIS PERTAMA
+                        // ------------------------------------------
+
+                        if (index === 0) {
+
+                            tr.append(
+                                $("<td>").attr("rowspan", jumlahLawan).addClass("ledger-group").text(no),
+                                $("<td>").attr("rowspan", jumlahLawan).addClass("ledger-group").text(value2.tanggal),
+                                $("<td>").attr("rowspan", jumlahLawan).addClass("ledger-group").html(noBuktiHtml),
+                                $("<td>").attr("rowspan", jumlahLawan).addClass("ledger-group").text(value2.origin),
+                                $("<td>").attr("rowspan", jumlahLawan).addClass("ledger-group ket-acc").text(value2.keterangan)
+                            );
+                        }
+
+
+                        // ------------------------------------------
+                        // COA LAWAN
+                        // ------------------------------------------
+
+                        let coaLawan =(value2.kode_coa_lawan || '') +" - " +(value2.nama_coa_lawan || '');
+                        let coaCell = $("<td>").addClass("coa-lawan-cell");
+                        if (index > 0) {
+                            coaCell.addClass("coa-lawan-child");
+                        }
+
+                        coaCell.text(coaLawan);
+                        tr.append(coaCell);
+
+                        // ------------------------------------------
+                        // VALAS
+                        // ------------------------------------------
+
+                        tr.append(
+                            $("<td align='right'>").text(formatNumber(parseFloat(value2.debit_valas || 0).toFixed(2))),
+                            $("<td align='right'>").text(formatNumber(parseFloat(value2.credit_valas || 0).toFixed(2)))
+                        );
+                        // ------------------------------------------
+                        // DEBIT / CREDIT
+                        // ------------------------------------------
+
+                        tr.append($("<td align='right'>").text(formatNumber(parseFloat(value2.debit || 0).toFixed(2))),
+                            $("<td align='right'>").text(formatNumber(parseFloat(value2.credit || 0).toFixed(2)))
+                        );
+
+
+                        // ------------------------------------------
+                        // SALDO
+                        // HANYA BARIS TERAKHIR
+                        // ------------------------------------------
+
+                        let saldo = value2.saldo_akhir;
+                        let saldoCell = $("<td align='right'>");
+                        if (index === jumlahLawan - 1) {
+                            saldoCell.addClass("saldo-entry").text(formatNumber(parseFloat(saldo || 0).toFixed(2)));
+                        } else {
+                            saldoCell.text('');
+                        }
+                        tr.append(saldoCell);
+                        tbody.append(tr);
+                    });
+
+
+                    no++;
+
+                    // saldo terakhir entry
+                    let lastItem = items[items.length - 1];
+
+                    if (lastItem.saldo_akhir !== null && lastItem.saldo_akhir !== '') {
+                        s_akhir = parseFloat(lastItem.saldo_akhir);
+                    }
+
+                });
+
+
+                // ==================================================
+                // TOTAL
+                // ==================================================
+                var tr4 = $("<tr>").append(
+
+                    $("<td colspan='5' class='style_space'>").text(''),
+                    $("<td class='style_space text-right'>").html('<b>Total : ' + value.kode_acc + '</b>'),
+                    $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit_valas.toFixed(2)) + '</b>' ),
+                    $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit_valas.toFixed(2)) + '</b>' ),
+                    $("<td class='style_space text-right'>").html('<b>' + formatNumber(debit.toFixed(2)) + '</b>' ),
+                    $("<td class='style_space text-right'>").html('<b>' + formatNumber(credit.toFixed(2)) + '</b>' ),
+                    $("<td class='style_space text-right'>").html('<b>' + formatNumber(s_akhir.toFixed(2)) + '</b>' )
+                );
+                tbody.append(tr4);
+            });
+
+
+            // ==================================================
+            // EMPTY
+            // ==================================================
+
+            if (empty == true) {
+                var tr = $("<tr>").append($("<td colspan='11'>").text('Tidak ada Data'));
+                tbody.append(tr);
+            }
+
+            $("#example1").append(tbody);
         }
 
         // klik btn excel

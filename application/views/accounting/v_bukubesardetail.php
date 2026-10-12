@@ -16,7 +16,7 @@
             overflow-x: auto;
         }
 
-        table tbody tr td {
+        #example1 tbody tr td {
             padding: 0px 5px 0px 5px !important;
         }
 
@@ -54,8 +54,8 @@
             height: 100%;
         }
 
-        table th,
-        table td {
+        #example1 th,
+        #example1 td {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

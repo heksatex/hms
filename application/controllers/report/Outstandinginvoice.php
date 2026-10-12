@@ -12,9 +12,9 @@ class Outstandinginvoice extends MY_Controller
         $this->load->model('m_outstandinginvoice');
     }
 
-    public function index()
+    public function index($id_dept = 'ROUTSINV')
     {
-        $id_dept        = 'ROUTSINV';
+        // $id_dept        = 'ROUTSINV';
         $data['id_dept'] = $id_dept;
         $this->load->view('report/v_outstanding_invoice', $data);
     }
