@@ -11,6 +11,7 @@ class Salescontract extends MY_Controller
       $this->load->model('m_sales');
   		$this->load->model('_module');
   		$this->load->library('Pdf');//load library pdf
+      $this->config->load('additional');
   	}
 
   	public function index()
@@ -482,13 +483,15 @@ class Salescontract extends MY_Controller
             // session habis
             $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{	
+          $this->load->library('wa_message');
     		  $sub_menu  = $this->uri->segment(2);
           $username  = addslashes($this->session->userdata('username'));
+
 
         	$sales_order = $this->input->post('sales_order');
         
           ///lock table
-          $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
+          $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group mst WRITE, sales_contract_items sci WRITE, tax write, mesin mc write, mst_sales_group WRITE, wa_template WRITE, wa_group WRITE, wa_send_message WRITE, wa_group as a WRITE, wa_group_departemen as b WRITE');
 
           //cek status sales contract
           $status     = "status IN ('done')";
@@ -517,10 +520,47 @@ class Salescontract extends MY_Controller
           		$status = 'waiting_date';
           		$this->m_sales->update_status_sales_contract($sales_order,$status);
           		$callback = array('status' => 'success','message' => 'Confirm Contract Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+
+              $data_head = $this->m_sales->get_data_by_kode($sales_order);
+
+              if($data_head->order_production === 'true') {
+                // SEND WA MESSAGE  -->>
+              
+                $data_head_items = $this->m_sales->get_data_detail_by_kode($sales_order);
+                $list_produk_str = "";
+                $num             = 1;
+                foreach ($data_head_items as $row) {
+                    // Sesuaikan format pemisah antar produk (misal pakai <br> atau koma)
+                    $list_produk_str .= $num." ".$row->nama_produk . " - " . number_format($row->qty) . " " . $row->uom . "\n";
+                    $num++;
+                }
+                $kode_mkt  = $data_head->sales_group ?? '';  
+                $nama_mkt  = $this->_module->get_nama_sales_Group_by_kode($kode_mkt);
+                $template_name = 'sc_create';
+                $list_value = array(
+                                '{judul}'     => "SALES CONTRACT BARU",
+                                '{sc}'     => $sales_order,
+                                '{tgl}'     => $data_head->create_date,
+                                '{mkt}'       => $nama_mkt,
+                                '{list_produk}' => $list_produk_str,
+                                );
+
+                  $groups = $this->config->item('additional_wa_bc_sc') ?? [];
+                  $data_pesan = [];
+                  $data_pesan = array_merge($data_pesan, $list_value);
+                  $wa = new $this->wa_message;
+                  $wa->sendMessageToGroup($template_name, $data_pesan, $groups)->setMentions([])->setFooter('footer_hms')->send();
+
+                  // SEND WA MESSAGE  <<--  
+              }
+
           		
   	        	$jenis_log   = "edit";
   	          $note_log    = $sales_order.' -> Confirm Contract';
   	          $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+
+              
   	            
           	}else{
           		$callback = array('status' => 'failed','message' => 'Contract Line Items Masing Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
@@ -579,6 +619,8 @@ class Salescontract extends MY_Controller
   	        	$jenis_log   = "edit";
   	          $note_log    = $sales_order.' -> Approve Contract';
   	          $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+
+             
   	            
           	}else{
           		$callback = array('status' => 'failed','message' => 'Contract Lines Items Masih Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
