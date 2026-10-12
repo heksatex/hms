@@ -15,9 +15,9 @@ class Bukubesarpembantupiutangdetail extends MY_Controller
         $this->load->model('m_bukubesarpembantupiutang');
     }
 
-    public function index()
+    public function index($id_dept = 'RBBPPD')
     {
-        $data['id_dept'] = 'RBBPPD';
+        $data['id_dept'] = $id_dept;
         $this->load->view('report/v_bukubesar_pembantu_piutang_detail', $data);
     }
 

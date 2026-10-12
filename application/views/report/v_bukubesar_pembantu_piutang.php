@@ -496,6 +496,9 @@
 
         }
 
+        <?php
+            $url_detail = $this->uri->segment(1) == 'accounting' ? base_url('accounting/bukubesarpembantupiutangdetail') : base_url('report/bukubesarpembantupiutangdetail');
+        ?>
 
         function view_detail2(partner) {
             var arrStr = encodeURIComponent(JSON.stringify(arr_filter));
@@ -503,7 +506,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/bukubesarpembantupiutangdetail';
+                var url = '<?php echo $url_detail; ?>';
                 window.open(url + '?partner=' + partner + '&&params=' + arrStr, '_blank');
             }
         }
@@ -546,6 +549,10 @@
             }
         });
 
+        <?php
+            $url_detail_pdf = $this->uri->segment(1) == 'accounting' ? base_url('accounting/bukubesarpembantupiutang/export_pdf') : base_url('report/bukubesarpembantupiutang/export_pdf');
+        ?>
+
         // klik btn print  pdf
         $(document).on('click', "#btn-pdf", function(e) {
 
@@ -553,7 +560,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/bukubesarpembantupiutang/export_pdf';
+                var url = '<?php echo $url_detail_pdf; ?>';
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 
