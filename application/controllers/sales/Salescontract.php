@@ -532,7 +532,7 @@ class Salescontract extends MY_Controller
                 $num             = 1;
                 foreach ($data_head_items as $row) {
                     // Sesuaikan format pemisah antar produk (misal pakai <br> atau koma)
-                    $list_produk_str .= $num." ".$row->nama_produk . " - " . number_format($row->qty) . " " . $row->uom . "\n";
+                    $list_produk_str .= $num." ".$row->nama_produk . " - " . number_format($row->qty,2) . " " . $row->uom . "\n";
                     $num++;
                 }
                 $kode_mkt  = $data_head->sales_group ?? '';  
