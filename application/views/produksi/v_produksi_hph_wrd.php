@@ -119,7 +119,7 @@
                                 <i class="fa fa-exclamation"></i>
                             </div>
 
-                            <div class="hph-result-content">
+                            <div class="hph-result-content blink">
                                 <span class="hph-result-label">Reff Note</span>
                                 <strong class="hph-result-value">
                                     <?= htmlspecialchars(trim($note_add)); ?>
