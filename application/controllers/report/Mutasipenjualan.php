@@ -14,9 +14,9 @@ class Mutasipenjualan extends MY_Controller
         $this->load->model('m_mutasipenjualan');
     }
 
-    public function index()
+    public function index($id_dept = 'RMP')
     {
-        $data['id_dept'] = 'RMP';
+        $data['id_dept'] = $id_dept;
         $this->load->view('report/v_mutasi_penjualan', $data);
     }
 

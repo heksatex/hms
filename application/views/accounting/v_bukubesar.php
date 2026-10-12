@@ -336,6 +336,9 @@
 
         }
 
+        <?php
+        $url_detail = $this->uri->segment(1) == 'accounting' ? base_url('accounting/bukubesar/detail') : base_url('report/bukubesar/detail');
+        ?>
 
         function view_detail2(kode_coa) {
             var arrStr = encodeURIComponent(JSON.stringify(arr_filter));
@@ -343,7 +346,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>report/bukubesar/detail';
+                var url = '<?php echo $url_detail; ?>'
                 window.open(url + '?coa=' + kode_coa + '&&params=' + arrStr, '_blank');
             }
         }

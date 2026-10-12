@@ -13,9 +13,9 @@ class Bukupembelian extends MY_Controller
         $this->load->model('m_bukupembelian');
     }
 
-    public function index()
+    public function index($id_dept = 'RBP')
     {
-        $data['id_dept'] = 'RBP';
+        $data['id_dept'] = $id_dept;
         $data['date'] = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d")))) . ' - ' . date('Y-m-d');
         $this->load->view('report/v_buku_pembelian', $data);
     }

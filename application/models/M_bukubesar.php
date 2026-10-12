@@ -347,6 +347,39 @@ class M_bukubesar extends CI_Model
     }
 
 
+    public function get_list_bukubesar_detail_lawan_normal_by_coa(array $where = [])
+    {
+
+        
+        if (count($where) > 0) {
+            $this->db->where($where);
+        }
+       
+        $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, CONCAT( IF(prt.nama is null or  prt.nama = '',  IF(je.reff_note ='',jei.nama,CONCAT('[',je.reff_note,']', IF(jei.nama!= '', CONCAT(' - ', jei.nama), ' ' ))), CONCAT('[',prt.nama,']',' ', jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))), IF(jei.kode_mua <> 'IDR', CONCAT(' - ', jei.kode_mua, ' ',FORMAT(jei.kurs, 2) COLLATE  utf8mb4_unicode_ci),'') ) as keterangan,
+                            jei.kode_coa, coa.nama as nama_coa, jei.posisi,  
+                            if(jei.posisi = 'D',  jei_lawan.nominal, 0) as total_debit, 
+                            if(jei.posisi = 'C', jei_lawan.nominal, 0) as total_credit,
+                            if(jei.posisi = 'C' AND jei_lawan.kode_mua <> 'IDR', jei_lawan.nominal_curr, 0) as total_credit_valas,
+                            if(jei.posisi = 'D' AND jei_lawan.kode_mua <> 'IDR', jei_lawan.nominal_curr, 0) as total_debit_valas,
+
+                            jei_lawan.kode_coa AS kode_coa_lawan,
+                            coa_lawan.nama AS nama_coa_lawan,
+                        ");
+        $this->db->from("acc_jurnal_entries je");
+        $this->db->join("acc_jurnal_entries_items jei","jei.kode = je.kode","inner");
+        $this->db->join("acc_coa coa","coa.kode_coa = jei.kode_coa","inner");
+        $this->db->join("partner prt","prt.id = jei.partner","left");
+        $this->db->join("acc_jurnal_entries_items jei_lawan", "jei_lawan.kode = jei.kode AND jei_lawan.posisi <> jei.posisi AND jei_lawan.kode_coa <> jei.kode_coa", "INNER");
+        $this->db->join("acc_coa coa_lawan", "coa_lawan.kode_coa = jei_lawan.kode_coa");
+        $this->db->order_by('je.tanggal_dibuat asc');
+        $query = $this->db->get();
+        return $query->result();
+
+    }
+
+
+
+
 
     
 
