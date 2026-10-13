@@ -185,6 +185,20 @@ class M_menu2 extends CI_Model
             ->count_all_results('main_menu_sub') > 0;
     }
 
+    public function has_button($kode)
+    {
+        return $this->db
+            ->where('main_menu_sub_kode', $kode)
+            ->count_all_results('main_menu_sub_button') > 0;
+    }
+
+    public function has_status($kode)
+    {
+        return $this->db
+            ->where('main_menu_sub_kode', $kode)
+            ->count_all_results('main_menu_sub_status') > 0;
+    }
+
     public function has_sub_menu($main_kode)
     {
         $this->db->select('main_menu_sub.kode');
@@ -444,5 +458,13 @@ class M_menu2 extends CI_Model
             ->update('main_menu_sub', [
                 'row_order' => (int)$row_order
             ]);
+    }
+
+    public function has_user_priv($kode)
+    {
+        return $this->db
+            ->where('main_menu_sub_kode', $kode)
+            // ->where('action', 1)
+            ->count_all_results('user_priv') > 0;
     }
 }
