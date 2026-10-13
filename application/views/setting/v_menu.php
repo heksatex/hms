@@ -87,9 +87,13 @@
                                 <button class="btn btn-xs btn-danger btn-delete-main" data-kode="<?= html_escape($main['kode']) ?>">
                                     <i class="fa fa-trash"></i>
                                 </button>
+
+                                <button type="button" class="btn btn-xs btn-default btn-toggle-main" title="Buka/Tutup Menu">
+                                    <i class="fa fa-chevron-up"></i>
+                                </button>
                             </div>
                         </div>
-
+                        <div class="menu-main-body">
                         <?php if (!empty($main['sub_menu'])): ?>
 
                             <div    class="menu-sub-list menu-sub-sortable"    data-main="<?= html_escape($main['kode']) ?>">
@@ -158,6 +162,10 @@
 
                                         <?php if (!empty($sub['child_menu'])): ?>
 
+                                            <button type="button" class="btn btn-xs btn-default btn-toggle-child" title="Buka/Tutup Child">
+                                                <i class="fa fa-chevron-up"></i>
+                                            </button>
+
                                             <div class="menu-child-list menu-child-sortable" data-parent="<?= html_escape($sub['kode']) ?>">
 
                                                 <?php foreach ($sub['child_menu'] as $child): ?>
@@ -220,6 +228,7 @@
 
                         <?php endif; ?>
 
+                        </div>
                     </div>
 
                 <?php endforeach; ?>
@@ -1512,6 +1521,50 @@
         }
     });
 
+    $(document).on('click', '.btn-toggle-main', function (e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $button = $(this);
+        var $main = $button.closest('.menu-main');
+        var $body = $main.children('.menu-main-body');
+        var $icon = $button.find('i');
+
+        $body.stop(true, true).slideToggle(200);
+
+        if ($icon.hasClass('fa-chevron-up')) {
+            $icon.removeClass('fa-chevron-up')
+                .addClass('fa-chevron-down');
+        } else {
+            $icon.removeClass('fa-chevron-down')
+                .addClass('fa-chevron-up');
+        }
+
+    });
+
+
+    $(document).on('click', '.btn-toggle-child', function (e) {
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $button = $(this);
+        var $sub = $button.closest('.menu-sub-item');
+        var $list = $sub.children('.menu-child-list');
+        var $icon = $button.find('i');
+
+        $list.stop(true, true).slideToggle(200);
+
+        if ($icon.hasClass('fa-chevron-up')) {
+            $icon.removeClass('fa-chevron-up')
+                .addClass('fa-chevron-down');
+        } else {
+            $icon.removeClass('fa-chevron-down')
+                .addClass('fa-chevron-up');
+        }
+
+    });
 
     $(function () {
 
