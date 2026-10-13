@@ -33,7 +33,7 @@
                 </div>
                 <div class="summary-box">
                     <label class="info-summary-label">MC Knitting</label>
-                    <div class="info-summary-val"> <?= isset($mc_knitting) ? $mc_knitting: '-'; ?> </div>
+                    <div class="info-summary-val"> <?= isset($mc_knitting) ? $mc_knitting: '-';  ?>  <?= isset($corak_knitting) ? " - ".$corak_knitting: ''; ?></div>
                 </div>
                 <div class="summary-box">
                     <label class="info-summary-label">Jml Beam</label>

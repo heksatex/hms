@@ -134,12 +134,14 @@ class Produksi extends MY_Controller
         $ex = explode('|', $list_mo['reff_note']);
         $mo_knitting = trim($ex[1] ?? '');
         $mc_knitting = trim($ex[2] ?? '');
+        $corak_knitting = trim($ex[3] ?? '');
         $gb          = trim($ex[4] ?? '');
         $jml_beam     = trim($ex[5] ?? '');
         $note_add   = trim($ex[9] ?? '');
 
         $data['mo_knitting']    = $mo_knitting;
         $data['mc_knitting']    = $mc_knitting;
+        $data['corak_knitting'] = $corak_knitting;
         $data['jml_beam']       = $jml_beam .' - '.$gb;
         $data['note_add']       = $note_add;
         $data['total_target']   = $list_mo['qty'];
