@@ -646,7 +646,7 @@
                             return params.marker + params.name;
                         }
                     },
-                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: '40%', containLabel: true},
+                    grid: {top: 5, bottom: 5, left: 30, right: 10, height: "<?= $heighContainer ?>", containLabel: true},
                     xAxis: {
                         type: 'time',
                         position: 'top',

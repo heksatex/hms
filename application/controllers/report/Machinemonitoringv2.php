@@ -5,6 +5,11 @@ defined('BASEPATH') OR exit('No Direct Script Acces Allowed');
 class Machinemonitoringv2 extends MY_Controller {
 
     //put your code here
+    
+    protected $heigtContainerTL = [
+        "WRD"=>"40%",
+        "TRI"=>"60%"
+    ];
 
     protected $waktuShip1 = "07:00:00";
     protected $waktuShip2 = "15:00:00";
@@ -251,7 +256,8 @@ GROUP BY devid;
         $data["state"] = json_encode($this->state);
         $data["departmen"] = $model->setTables("departemen")->setWheres(["kode" => $dept])->getDetail();
 //        $this->load->view('report/v_machine_monitoring_v2_1', $data);
-        //cobav2_2
+        //cobav2_2+
+        $data["heighContainer"] = $this->heigtContainerTL[$dept];
         $this->load->view('report/v_machine_monitoring_v2_2', $data);
     }
 
