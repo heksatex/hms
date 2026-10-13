@@ -317,3 +317,11 @@
     border: 1px dashed #aaa;
     border-radius: 4px;
 }
+
+.menu-main-body {
+    display: block;
+}
+
+.menu-main-header .btn-toggle-main {
+    cursor: pointer;
+}

@@ -363,9 +363,7 @@ class Menu extends MY_Controller
         $data = $this->menu->get_sub_menu_by_kode($kode);
 
         if (empty($data)) {
-            $this->json_error(
-                'Data submenu tidak ditemukan.'
-            );
+            $this->json_error('Data submenu tidak ditemukan.');
             return;
         }
 
@@ -374,13 +372,27 @@ class Menu extends MY_Controller
 
         // Tidak boleh hapus jika masih punya child
         if ($this->menu->has_child($kode)) {
-
-            $this->json_error(
-                'Menu masih memiliki child menu. Hapus child terlebih dahulu.'
-            );
-
+            $this->json_error('Menu masih memiliki child menu. Hapus child terlebih dahulu.');
             return;
         }
+
+        if ($this->menu->has_button($kode)) {
+            $this->json_error('Submenu tidak bisa dihapus karena masih memiliki button.');
+            return;
+        }
+
+        // 3. Tidak boleh dihapus jika memiliki status
+        if ($this->menu->has_status($kode)) {
+            $this->json_error('Submenu tidak bisa dihapus karena masih memiliki status.');
+            return;
+        }
+        
+        // 4. Tidak boleh dihapus jika masih digunakan user
+        if ($this->menu->has_user_priv($kode)) {
+            $this->json_error('Submenu tidak bisa dihapus karena masih digunakan atau diberikan akses kepada user.');
+            return;
+        }
+
 
         $this->db->trans_start();
 
