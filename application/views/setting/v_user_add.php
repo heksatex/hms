@@ -208,11 +208,7 @@
                                                             
                                                                 <div class="col-xs-8" <?php echo $margin_; ?> ><?php echo $nama; ?></div>
                                                                 <div class="<?php echo $col_xs_; ?>" <?php echo $padding_; ?>>
-                                                                    <!-- <?php if (strpos($priv, $kode) == true) { ?>
-                                                                        <input type="checkbox" name="chk[]" value="<?php echo $val->kode; ?>" checked="checked">
-                                                                    <?php } else { ?>
-                                                                        <input type="checkbox" name="chk[]" value="<?php echo $val->kode; ?>">
-                                                                    <?php } ?> -->
+                                                                 
 
                                                                     <?php
                                                                         if ($val->parent == true) {
