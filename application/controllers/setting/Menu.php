@@ -172,6 +172,7 @@ class Menu extends MY_Controller
         $nama = trim($this->input->post('nama'));
         $main_kode = trim($this->input->post('main_menu_kode'));
         $parent_kode = trim($this->input->post('is_menu_sub'));
+        $parent = $this->input->post('parent') === 'true' ? 'true' : '';
 
         if ($kode == '' || $nama == '' || $main_kode == '') {
             $this->json_error(
@@ -190,6 +191,12 @@ class Menu extends MY_Controller
             return;
         }
 
+        // Child tidak boleh menjadi Parent
+        if ($parent_kode != '' && $parent === 'true') {
+            $this->json_error('Child tidak boleh dijadikan Parent.');
+            return;
+        }
+
         $data = [
             'kode'          => $kode,
             'nama'          => $nama,
@@ -199,8 +206,9 @@ class Menu extends MY_Controller
             'row_order'     => (int)$this->input->post('row_order'),
             'status_bar'    => (int)$this->input->post('status_bar'),
             'dept_id'       => trim($this->input->post('dept_id')),
-            'parent'        => '',
-            'is_menu_sub'   => $parent_kode
+            'parent'        => $parent,
+            'is_menu_sub'   => $parent_kode,
+            
         ];
 
         // Jika mempunyai parent berarti child
@@ -272,6 +280,15 @@ class Menu extends MY_Controller
             return;
         }
 
+        $parent = $this->input->post('parent') === 'true'   ? 'true'  : '';
+
+        if ($parent !== 'true' && $this->menu->has_child($kode)) {
+            $this->json_error(
+                'Tidak bisa menonaktifkan Parent karena masih memiliki Child.'
+            );
+            return;
+        }
+
         $old_parent = trim($old_data['is_menu_sub']);
 
         $data = [
@@ -282,7 +299,8 @@ class Menu extends MY_Controller
             'row_order'     => (int)$this->input->post('row_order'),
             'status_bar'    => (int)$this->input->post('status_bar'),
             'dept_id'       => trim($this->input->post('dept_id')),
-            'is_menu_sub'   => $new_parent
+            'is_menu_sub'   => $new_parent,
+            'parent'        => $parent
         ];
 
         $this->db->trans_start();
@@ -982,6 +1000,69 @@ class Menu extends MY_Controller
             'message' => $status
                 ? 'Urutan child berhasil disimpan.'
                 : 'Gagal menyimpan urutan child.'
+        ]);
+    }
+
+
+    public function get_sub_user_access()
+    {
+        $kode = trim($this->input->post('kode'));
+
+        if ($kode == '') {
+            $this->json_error('Kode submenu wajib diisi.');
+            return;
+        }
+
+        if (!$this->menu->sub_exists($kode)) {
+            $this->json_error('Submenu tidak ditemukan.');
+            return;
+        }
+
+        $users = $this->menu->get_users_by_sub_access($kode);
+
+        echo json_encode([
+            'status' => true,
+            'data'   => $users
+        ]);
+    }
+
+
+    public function delete_sub_user_access()
+    {
+        $kode      = trim($this->input->post('kode'));
+        $username  = trim($this->input->post('username'));
+        $main_kode = trim($this->input->post('main_menu_kode'));
+
+        if ($kode == '' || $username == '' || $main_kode == '') {
+            $this->json_error('Data akses user belum lengkap.');
+            return;
+        }
+
+        if (!$this->menu->sub_exists($kode)) {
+            $this->json_error('Submenu tidak ditemukan.');
+            return;
+        }
+
+        if (!$this->menu->user_sub_access_exists(
+            $username,
+            $main_kode,
+            $kode
+        )) {
+            $this->json_error('Akses user tidak ditemukan.');
+            return;
+        }
+
+        $success = $this->menu->delete_user_sub_access(
+            $username,
+            $main_kode,
+            $kode
+        );
+
+        echo json_encode([
+            'status'  => $success,
+            'message' => $success
+                ? 'Akses user berhasil dicabut.'
+                : 'Gagal mencabut akses user.'
         ]);
     }
 }
