@@ -1692,6 +1692,9 @@ class Penerimaanbarang extends MY_Controller
                 $sql_update_status_stock_move = "UPDATE stock_move SET status = '" . $status_update . "' WHERE move_id = '" . $move_id . "' ";
                 $this->_module->update_perbatch($sql_update_status_stock_move);
 
+                $sql_update_status_stock_move_items = "UPDATE stock_move_items SET status = '" . $status_update . "' WHERE move_id = '" . $move_id . "' ";
+                $this->_module->update_perbatch($sql_update_status_stock_move_items);
+
                 $sql_update_status_stock_move_produk = "UPDATE stock_move_produk SET status = '" . $status_update . "' WHERE move_id = '" . $move_id . "' ";
                 $this->_module->update_perbatch($sql_update_status_stock_move_produk);
                 

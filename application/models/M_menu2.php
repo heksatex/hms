@@ -235,30 +235,16 @@ class M_menu2 extends CI_Model
 
             foreach ($main['sub_menu'] as &$sub) {
 
-                $sub['child_menu'] =
-                    $this->get_child_menu($sub['kode']);
-
-                $sub['button_count'] =
-                    count($this->get_buttons_by_sub($sub['kode']));
-
-                $sub['status_count'] =
-                    count($this->get_status_by_sub($sub['kode']));
+                $sub['child_menu'] =$this->get_child_menu($sub['kode']);
+                $sub['button_count'] =count($this->get_buttons_by_sub($sub['kode']));
+                $sub['status_count'] =count($this->get_status_by_sub($sub['kode']));
+                $sub['user_access_count'] =$this->get_user_access_count($sub['kode']);
 
                 foreach ($sub['child_menu'] as &$child) {
 
-                    $child['button_count'] =
-                        count(
-                            $this->get_buttons_by_sub(
-                                $child['kode']
-                            )
-                        );
-
-                    $child['status_count'] =
-                        count(
-                            $this->get_status_by_sub(
-                                $child['kode']
-                            )
-                        );
+                    $child['button_count'] =count($this->get_buttons_by_sub($child['kode']));
+                    $child['status_count'] =count($this->get_status_by_sub($child['kode']));
+                    $child['user_access_count'] =  $this->get_user_access_count($child['kode']);
                 }
             }
         }
@@ -466,5 +452,68 @@ class M_menu2 extends CI_Model
             ->where('main_menu_sub_kode', $kode)
             // ->where('action', 1)
             ->count_all_results('user_priv') > 0;
+    }
+
+
+    // Ambil daftar user yang memiliki akses ke submenu
+public function get_users_by_sub_access($sub_kode)
+{
+    $this->db->select('
+        up.username,
+        up.main_menu_kode,
+        up.main_menu_sub_kode,
+        up.action,
+        u.nama,
+        u.dept
+    ');
+
+    $this->db->from('user_priv up');
+
+    $this->db->join(
+        'user u',
+        'u.username = up.username',
+        'inner'
+    );
+
+    $this->db->where(
+        'up.main_menu_sub_kode',
+        $sub_kode
+    );
+
+    $this->db->where('up.action', 1);
+
+    $this->db->order_by('u.nama', 'ASC');
+
+    return $this->db->get()->result_array();
+}
+
+
+    // Cek apakah akses user tersedia
+    public function user_sub_access_exists($username,$main_kode,$sub_kode) {
+        return $this->db
+            ->where('username', $username)
+            ->where('main_menu_kode', $main_kode)
+            ->where('main_menu_sub_kode', $sub_kode)
+            ->where('action', 1)
+            ->count_all_results('user_priv') > 0;
+    }
+
+
+    // Cabut akses user dari submenu
+    public function delete_user_sub_access($username,$main_kode,$sub_kode) {
+        return $this->db
+            ->where('username', $username)
+            ->where('main_menu_kode', $main_kode)
+            ->where('main_menu_sub_kode', $sub_kode)
+            ->where('action', 1)
+            ->delete('user_priv');
+    }
+
+    public function get_user_access_count($sub_kode)
+    {
+        return $this->db
+            ->where('main_menu_sub_kode', $sub_kode)
+            ->where('action', 1)
+            ->count_all_results('user_priv');
     }
 }

@@ -126,7 +126,7 @@
 
                                             <div class="menu-actions">
 
-                                                    <span class="label label-info">
+                                                    <!-- <span class="label label-info">
                                                         <i class="fa fa-cog"></i>
                                                         <?= (int)$sub['button_count'] ?>
                                                     </span>
@@ -134,7 +134,7 @@
                                                     <span class="label label-warning">
                                                         <i class="fa fa-tags"></i>
                                                         <?= (int)$sub['status_count'] ?>
-                                                    </span>
+                                                    </span> -->
 
                                                     <button class="btn btn-xs btn-success btn-add-child" data-parent="<?= html_escape($sub['kode']) ?>" data-main="<?= html_escape($main['kode']) ?>" title="Tambah Child">
                                                         <i class="fa fa-plus"></i>
@@ -142,9 +142,24 @@
                                                     </button>
                                                     <button type="button" class="btn btn-xs btn-info btn-manage-button" data-kode="<?= html_escape($sub['kode']) ?>" data-nama="<?= html_escape($sub['nama']) ?> "title="Kelola Button">
                                                         <i class="fa fa-cog"></i> Button
+                                                         <span class="badge">
+                                                            <?= (int)$sub['button_count'] ?>
+                                                        </span>
                                                     </button>
                                                     <button type="button" class="btn btn-xs btn-warning btn-manage-status" data-kode="<?= html_escape($sub['kode']) ?>" data-nama="<?= html_escape($sub['nama']) ?>">
                                                         <i class="fa fa-tags"></i> Status
+                                                        <span class="badge">
+                                                            <?= (int)$sub['status_count'] ?>
+                                                        </span>
+                                                    </button>
+
+                                                    <button type="button" class="btn btn-xs btn-primary btn-manage-user-access" data-kode="<?= html_escape($sub['kode']) ?>" data-nama="<?= html_escape($sub['nama']) ?>">
+                                                        <i class="fa fa-users"></i>
+                                                            User Akses
+                                                        <span class="badge">
+                                                            <?= (int) $sub['user_access_count'] ?>
+                                                        </span>
+
                                                     </button>
 
                                                     <button class="btn btn-xs btn-default btn-edit-sub" data-kode="<?= html_escape($sub['kode']) ?>">
@@ -185,7 +200,7 @@
 
                                                         <div class="menu-actions">
 
-                                                            <span class="label label-info">
+                                                            <!-- <span class="label label-info">
                                                                 <i class="fa fa-cog"></i>
                                                                 <?= (int)$child['button_count'] ?>
                                                             </span>
@@ -193,14 +208,29 @@
                                                             <span class="label label-warning">
                                                                 <i class="fa fa-tags"></i>
                                                                 <?= (int)$child['status_count'] ?>
-                                                            </span>
+                                                            </span> -->
 
                                                             <button type="button" class="btn btn-xs btn-info btn-manage-button" data-kode="<?= html_escape($child['kode']) ?>" data-nama="<?= html_escape($child['nama']) ?>">
                                                                 <i class="fa fa-cog"></i> Button
+                                                                <span class="badge">
+                                                                    <?= (int)$child['button_count'] ?>
+                                                                </span>
                                                             </button>
 
                                                             <button type="button" class="btn btn-xs btn-warning btn-manage-status" data-kode="<?= html_escape($child['kode']) ?>"data-nama="<?= html_escape($child['nama']) ?>"title="Kelola Status">
                                                                 <i class="fa fa-tags"></i> Status
+                                                                <span class="badge">
+                                                                    <?= (int)$child['status_count'] ?>
+                                                                </span>
+                                                            </button>
+
+                                                            <button type="button" class="btn btn-xs btn-primary btn-manage-user-access" data-kode="<?= html_escape($sub['kode']) ?>" data-nama="<?= html_escape($sub['nama']) ?>">
+                                                                <i class="fa fa-users"></i>
+                                                                User Akses
+
+                                                                <span class="badge">
+                                                                    <?= (int) $sub['user_access_count'] ?>
+                                                                </span>
                                                             </button>
 
                                                             <button class="btn btn-xs btn-default btn-edit-sub" data-kode="<?= html_escape($child['kode']) ?>">
@@ -308,7 +338,7 @@
 				<div class="modal-body">
 					<div class="row">
 						<!-- MAIN MENU -->
-						<div class="col-md-6">
+						<div class="col-md-4">
 							<div class="form-group">
 								<label> Menu Utama <span class="text-danger">*</span>
 								</label>
@@ -318,7 +348,7 @@
 							</div>
 						</div>
 						<!-- PARENT -->
-						<div class="col-md-6">
+						<div class="col-md-4">
 							<div class="form-group">
 								<label> Parent </label>
 								<select name="is_menu_sub" id="subParent" class="form-control">
@@ -327,6 +357,20 @@
 								<small class="text-muted"> Kosong = submenu level 1. </small>
 							</div>
 						</div>
+                        <div class="col-md-4">
+                            <div class="form-group" id="parentField">
+                                <label for="parent">Jadikan Parent?</label>
+
+                                <select name="parent" id="parent" class="form-control">
+                                    <option value="">Tidak</option>
+                                    <option value="true">Ya, bisa memiliki Child</option>
+                                </select>
+
+                                <small class="text-muted">
+                                    Pilih Ya jika submenu ini akan memiliki submenu turunan (Child).
+                                </small>
+                            </div>
+                        </div>
 					</div>
 					<div class="row">
 						<!-- KODE -->
@@ -595,6 +639,45 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="modalUserAccess" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"> &times; </button>
+        <h4 class="modal-title">
+          <i class="fa fa-users"></i> Akses User
+        </h4>
+        <p class="text-muted" id="userAccessSubName"></p>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="userAccessSubKode">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover ">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Username</th>
+                <th>Nama User</th>
+                <th>Departemen</th>
+                <th width="130">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="userAccessTableBody">
+              <tr>
+                <td colspan="4" class="text-center"> Memuat data... </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal"> Tutup </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     $(document).ready(function() {
     /*
@@ -842,10 +925,22 @@
                 $('#subOrder').val(data.row_order);
                 $('#subStatusBar').val(data.status_bar);
                 $('#subDept').val(data.dept_id);
+                $('#subMainMenu').val(data.main_menu_kode);
+                // $('#parent').val(data.parent);
 
-                $('#subMainMenu').val(
-                    data.main_menu_kode
-                );
+                var isChild = String(data.is_menu_sub || '') !== '';
+
+                setParentOption(isChild);
+
+                if (isChild) {
+                    // Child tidak boleh menjadi Parent
+                    $('#parent').val('');
+                } else {
+                    // Submenu level pertama: ambil nilai dari database
+                    $('#parent').val(
+                        String(data.parent || '') === 'true' ? 'true' : ''
+                    );
+                }
 
                 loadParentMenu(
                     data.main_menu_kode,
@@ -976,6 +1071,7 @@
         var mainKode = $(this).data('main');
         var parentKode = $(this).data('parent');
         resetSubForm();
+        setParentOption(true);
         $('#subMode').val('insert');
         $('#subMainMenu').val(mainKode);
         $('#modalSubTitle').text('Tambah Child Menu');
@@ -989,6 +1085,7 @@
     $(document).on('click', '.btn-add-sub', function() {
         var mainKode = $(this).data('main');
         resetSubForm();
+        setParentOption(false);
         $('#subMode').val('insert');
         $('#subMainMenu').val(mainKode);
         $('#modalSubTitle').text('Tambah Submenu');
@@ -1566,30 +1663,128 @@
 
     });
 
-    $(function () {
-
-    console.log(
-        'MAIN LIST:',
-        $('.menu-main-list').length
-    );
-
-    console.log(
-        'MAIN ITEM:',
-        $('.menu-sortable-item').length
-    );
-
-    console.log(
-        'DRAG HANDLE:',
-        $('.menu-drag-handle').length
-    );
-
-    $('.menu-main-list').sortable({
-        items: '.menu-sortable-item',
-        axis: 'y',
-        tolerance: 'pointer'
+    function loadSubUserAccess(kode) {
+        $('#userAccessTableBody').html('<tr><td colspan="4" class="text-center">' + 'Memuat data...</td></tr>');
+        $.ajax({
+            url: menuUrl + '/get_sub_user_access',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                kode: kode
+            },
+            success: function(res) {
+                if (!res.status) {
+                    $('#userAccessTableBody').html('<tr><td colspan="4" class="text-center">' + escapeHtml(res.message) + '</td></tr>');
+                    return;
+                }
+                var html = '';
+                if (!res.data || res.data.length === 0) {
+                    html = '<tr><td colspan="5" class="text-center text-muted">' + 'Belum ada user yang memiliki akses.' + '</td></tr>';
+                } else {
+                    var num = 1;
+                    $.each(res.data, function(i, user) {
+                        html += '<tr>';
+                        html += '<td>' + num++ +'</td>';
+                        html += '<td>' + escapeHtml(user.username) + '</td>';
+                        html += '<td>' + escapeHtml(user.nama) + '</td>';
+                        html += '<td>' + escapeHtml(user.dept || '-') + '</td>';
+                        html += '<td>';
+                        html += '<button type="button" ' + 'class="btn btn-xs btn-danger btn-revoke-user-access" ' + 'data-username="' + escapeHtml(user.username) + '" ' + 'data-main="' + escapeHtml(user.main_menu_kode) + '">';
+                        html += '<i class="fa fa-unlock"></i> Cabut Akses';
+                        html += '</button>';
+                        html += '</td>';
+                        html += '</tr>';
+                    });
+                }
+                $('#userAccessTableBody').html(html);
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+                $('#userAccessTableBody').html('<tr><td colspan="5" class="text-center text-danger text-muted">' + 'Gagal memuat daftar user.' + '</td></tr>');
+            }
+        });
+    }
+    // Buka modal akses user
+    $(document).on('click', '.btn-manage-user-access', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var kode = $(this).data('kode');
+        var nama = $(this).data('nama');
+        $('#userAccessSubKode').val(kode);
+        $('#userAccessSubName').text(nama + ' (' + kode + ')');
+        $('#modalUserAccess').modal('show');
+        loadSubUserAccess(kode);
+    });
+    // Cabut akses user
+    $(document).on('click', '.btn-revoke-user-access', function() {
+        var username = $(this).data('username');
+        var mainKode = $(this).data('main');
+        var subKode = $('#userAccessSubKode').val();
+        if (!confirm('Cabut akses submenu ini dari user ' + username + '?')) {
+            return;
+        }
+        var $button = $(this);
+        $button.prop('disabled', true);
+        $.ajax({
+            url: menuUrl + '/delete_sub_user_access',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                username: username,
+                main_menu_kode: mainKode,
+                kode: subKode
+            },
+            success: function(res) {
+                if (res.status) {
+                    loadSubUserAccess(subKode);
+                } else {
+                    alert(res.message);
+                    $button.prop('disabled', false);
+                }
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+                alert('Gagal mencabut akses user.');
+                $button.prop('disabled', false);
+            }
+        });
     });
 
-});
+    function setParentOption(isChild) {
+
+        if (isChild) {
+            $('#parentField').hide();
+            $('#parent').val('');
+        } else {
+            $('#parentField').show();
+        }
+
+    }
+
+    $(function () {
+
+        console.log(
+            'MAIN LIST:',
+            $('.menu-main-list').length
+        );
+
+        console.log(
+            'MAIN ITEM:',
+            $('.menu-sortable-item').length
+        );
+
+        console.log(
+            'DRAG HANDLE:',
+            $('.menu-drag-handle').length
+        );
+
+        $('.menu-main-list').sortable({
+            items: '.menu-sortable-item',
+            axis: 'y',
+            tolerance: 'pointer'
+        });
+
+    });
     
 
 });
