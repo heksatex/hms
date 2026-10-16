@@ -55,12 +55,50 @@
                 </button>
             </div>
 
+            <div class="menu-filter-panel">
+                <div class="row">
+                    <div class="col-sm-7">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-search"></i>
+                            </span>
+
+                            <input type="text"
+                                id="searchMenu"
+                                class="form-control"
+                                placeholder="Cari nama atau kode menu...">
+
+                            <span class="input-group-btn">
+                                <button type="button"
+                                        id="btnResetMenuFilter"
+                                        class="btn btn-default"
+                                        title="Reset filter">
+                                    <i class="fa fa-refresh"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-5">
+                        <select id="filterJenisMenu" class="form-control">
+                            <option value="">Semua Jenis Menu</option>
+                            <option value="main">Menu Utama</option>
+                            <option value="sub">Submenu</option>
+                            <option value="child">Child</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="menuFilterInfo" class="text-muted">
+                    Menampilkan semua menu
+                </div>
+            </div>
 
             <div class="menu-tree menu-main-list">
 
                 <?php foreach ($menu_tree as $main): ?>
 
-                    <div class="menu-main menu-sortable-item" data-kode="<?= html_escape($main['kode']) ?>">
+                    <div class="menu-main menu-sortable-item" data-kode="<?= html_escape($main['kode']) ?>" data-jenis="main">
 
                         <div class="menu-main-header menu-drag-handle" >
 
@@ -100,7 +138,7 @@
 
                                 <?php foreach ($main['sub_menu'] as $sub): ?>
 
-                                    <div class="menu-sub menu-sub-item" data-kode="<?= html_escape($sub['kode']) ?>"> 
+                                    <div class="menu-sub menu-sub-item" data-kode="<?= html_escape($sub['kode']) ?>" data-jenis="sub"> 
                                         
                                         <div class="menu-sub-header menu-sub-drag-handle">
 
@@ -184,7 +222,7 @@
                                             <div class="menu-child-list menu-child-sortable" data-parent="<?= html_escape($sub['kode']) ?>">
 
                                                 <?php foreach ($sub['child_menu'] as $child): ?>
-                                                    <div class="menu-child menu-child-item" data-kode="<?= html_escape($child['kode']) ?>">
+                                                    <div class="menu-child menu-child-item" data-kode="<?= html_escape($child['kode']) ?>" data-jenis="child">
 
                                                         <div class="menu-child-drag-handle">
                                                             <!-- <i class="fa fa-arrows"></i> -->
@@ -1761,6 +1799,124 @@
 
     }
 
+    // ========================================
+    // SEARCH & FILTER MENU
+    // ========================================
+    function applyMenuFilter() {
+        var keyword = $.trim($('#searchMenu').val()).toLowerCase();
+        var jenis = $('#filterJenisMenu').val();
+        var filtering = keyword !== '' || jenis !== '';
+        var totalMain = 0;
+        var totalSub = 0;
+        var totalChild = 0;
+
+        function matches(text) {
+            return String(text || '').toLowerCase().indexOf(keyword) !== -1;
+        }
+
+        function hideElement($element) {
+            $element.addClass('menu-filter-hidden');
+        }
+
+        function showElement($element) {
+            $element.removeClass('menu-filter-hidden');
+        }
+        $('.menu-main-list > .menu-main').each(function() {
+            var $main = $(this);
+            var $mainBody = $main.children('.menu-main-body');
+            var mainText = [
+                $main.data('kode'),
+                $main.find('.menu-title').first().text()
+            ].join(' ');
+            var mainMatch = (jenis === '' || jenis === 'main') && matches(mainText);
+            var mainVisible = mainMatch;
+            var visibleSubCount = 0;
+            $main.find('.menu-sub-list > .menu-sub').each(function() {
+                var $sub = $(this);
+                var subText = [
+                    $sub.data('kode'),
+                    $sub.children('.menu-sub-header').text()
+                ].join(' ');
+                var subMatch = (jenis === '' || jenis === 'sub') && matches(subText);
+                var visibleChildCount = 0;
+                $sub.children('.menu-child-list').children('.menu-child').each(function() {
+                    var $child = $(this);
+                    var childText = [
+                        $child.data('kode'),
+                        $child.children('.menu-child-drag-handle').text()
+                    ].join(' ');
+                    var childMatch = (jenis === '' || jenis === 'child') && matches(childText);
+                    var childVisible = !filtering || childMatch || (jenis === '' && (mainMatch || subMatch));
+                    if (childVisible) {
+                        showElement($child);
+                        visibleChildCount++;
+                        totalChild++;
+                    } else {
+                        hideElement($child);
+                    }
+                });
+                var subVisible = !filtering || subMatch || visibleChildCount > 0 || (jenis === '' && mainMatch);
+                if (subVisible) {
+                    showElement($sub);
+                    visibleSubCount++;
+                    totalSub++;
+                } else {
+                    hideElement($sub);
+                }
+                // Saat filter aktif, buka child list yang relevan.
+                if (filtering && visibleChildCount > 0) {
+                    $sub.children('.menu-child-list').show();
+                    $sub.children('.btn-toggle-child').find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                }
+            });
+            if (jenis === 'main' && filtering) {
+                visibleSubCount = 0;
+            }
+            if (jenis === 'main' && filtering) {
+                $main.find('.menu-sub').addClass('menu-filter-hidden');
+            }
+            mainVisible = !filtering || mainMatch || visibleSubCount > 0;
+            if (mainVisible) {
+                showElement($main);
+                totalMain++;
+                // Buka induk agar hasil pencarian terlihat.
+                if (filtering) {
+                    $mainBody.show();
+                    $main.children('.menu-main-header').find('.btn-toggle-main i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                }
+            } else {
+                hideElement($main);
+            }
+        });
+        var info = 'Menu utama: ' + totalMain + ' | Submenu: ' + totalSub + ' | Child: ' + totalChild;
+        if (filtering && totalMain === 0) {
+            info = 'Data tidak ditemukan.';
+        } else if (!filtering) {
+            info = 'Menampilkan semua menu';
+        }
+        $('#menuFilterInfo').text(info);
+    }
+    // Ketik untuk mencari
+    $('#searchMenu').on('input', function() {
+        applyMenuFilter();
+    });
+    // Filter jenis menu
+    $('#filterJenisMenu').on('change', function() {
+        applyMenuFilter();
+    });
+    // Reset pencarian dan filter
+    $('#btnResetMenuFilter').on('click', function() {
+        $('#searchMenu').val('');
+        $('#filterJenisMenu').val('');
+        $('.menu-filter-hidden').removeClass('menu-filter-hidden');
+        // Pulihkan semua daftar agar seluruh menu terlihat.
+        $('.menu-main-body, .menu-child-list').show();
+        $('.btn-toggle-main i, .btn-toggle-child i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        applyMenuFilter();
+    });
+
+    
+
     $(function () {
 
         console.log(
@@ -1785,6 +1941,8 @@
         });
 
     });
+
+
     
 
 });
