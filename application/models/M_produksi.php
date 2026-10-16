@@ -220,6 +220,14 @@ class M_produksi extends CI_Model
 	
 	}
 
+    public function cek_lot_by_mo($lot, $mo)
+    {
+        $this->db->where('lot', $lot);
+        $this->db->where('kode', $mo);
+        $query =  $this->db->get('mrp_production_fg_hasil');
+        return $query;
+    }
+
 }
 
 
