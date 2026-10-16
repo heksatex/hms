@@ -79,7 +79,7 @@ class M_printlabel extends CI_Model
 			$this->db->where($where);
 		}
 		$this->db->order_by('id', 'asc');
-		$result  = $this->db->get('mst_beam_dasar_2');
+		$result  = $this->db->get('mst_beam_dasar');
 		return $result;
 	}
 
