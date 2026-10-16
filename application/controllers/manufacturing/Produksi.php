@@ -344,57 +344,33 @@ class Produksi extends MY_Controller
 
                     foreach ($required_fg as $field => $label) {
 
-                        if (
-                            !isset($fg[$field]) ||
-                            trim((string)$fg[$field]) === ''
-                        ) {
-                            throw new \Exception(
-                                $label . ' pada data ke-' . $no . ' tidak boleh kosong !',
-                                400
-                            );
+                        if (!isset($fg[$field]) ||trim((string)$fg[$field]) === '') {
+                            throw new \Exception($label . ' pada data ke-' . $no . ' tidak boleh kosong !',400);
                         }
                     }
 
                     if ($fg['nama_produk'] !== $nama_produk) {
-                        throw new \Exception(
-                            'Nama produk data produksi tidak sesuai dengan MO !',
-                            400
-                        );
+                        throw new \Exception('Nama produk data produksi tidak sesuai dengan MO !',400);
                     }
 
                     if ($fg['kode_produk'] !== $kode_produk) {
-                        throw new \Exception(
-                            'Kode produk data produksi tidak sesuai dengan MO !',
-                            400
-                        );
+                        throw new \Exception('Kode produk data produksi tidak sesuai dengan MO !',400);
                     }
 
                     if (!is_numeric($fg['qty'])) {
-                        throw new \Exception(
-                            'Qty pada data ke-' . $no . ' harus berupa angka !',
-                            400
-                        );
+                        throw new \Exception('Qty pada data ke-' . $no . ' harus berupa angka !',400);
                     }
 
                     if ((float)$fg['qty'] <= 0) {
-                        throw new \Exception(
-                            'Qty pada data ke-' . $no . ' harus lebih besar dari 0 !',
-                            400
-                        );
+                        throw new \Exception('Qty pada data ke-' . $no . ' harus lebih besar dari 0 !',400);
                     }
 
                     if (!is_numeric($fg['qty2'])) {
-                        throw new \Exception(
-                            'Qty 2 pada data ke-' . $no . ' harus berupa angka !',
-                            400
-                        );
+                        throw new \Exception('Qty 2 pada data ke-' . $no . ' harus berupa angka !',400);
                     }
 
                     if ((float)$fg['qty2'] < 0) {
-                        throw new \Exception(
-                            'Qty 2 pada data ke-' . $no . ' tidak boleh negatif !',
-                            400
-                        );
+                        throw new \Exception('Qty 2 pada data ke-' . $no . ' tidak boleh negatif !',400);
                     }
                 }
 
@@ -510,9 +486,7 @@ class Produksi extends MY_Controller
                             $defect_key = $kode . '|' . $lot;
 
                              if (!isset($defect_row_map[$defect_key])) {
-
                                 $ro = $this->m_mo->get_row_order_rekam_cacat($kode, $lot)->row_array();
-
                                 $defect_row_map[$defect_key] =!empty($ro['row']) ? ((int)$ro['row'] + 1) : 1;
                             }
 
@@ -690,14 +664,14 @@ class Produksi extends MY_Controller
                                 }
                             }
                             
-                            /*
-                            //cek lot apa pernah diinput ?
-                            $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($lot)),$lokasi_fg['lokasi_tujuan'])->row_array();
-                            if($cek_lot['lot'] == trim($lot)){
-                                //ambil lot double untuk alert
-                                $lot_double .= $lot.',';
+                            
+                            //cek lot apa pernah diinput di MO yang sama  ?
+                            // $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($lot)),$lokasi_fg['lokasi_tujuan'])->row_array();
+                            $cek_lot    = $this->m_produksi->cek_lot_by_mo(addslashes(trim($lot)), $kode)->num_rows();
+                            if($cek_lot > 0){
+                                throw new \Exception('Lot '. $lot.' sudah pernah diinput di MO ini !', 400);
                             }
-                            */
+                           
                             $row_order_smi++;
                             $row_order++;
                             $start++;                        

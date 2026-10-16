@@ -325,3 +325,35 @@
 .menu-main-header .btn-toggle-main {
     cursor: pointer;
 }
+
+
+/* Panel pencarian menu */
+.menu-filter-panel {
+    background: #fff;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #e5e9ef;
+    border-radius: 8px;
+}
+
+.menu-filter-panel .form-control,
+.menu-filter-panel .input-group-addon,
+.menu-filter-panel .btn {
+    height: 36px;
+}
+
+#menuFilterInfo {
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+/* Elemen yang tidak sesuai pencarian */
+.menu-filter-hidden {
+    display: none !important;
+}
+
+@media (max-width: 767px) {
+    .menu-filter-panel .col-sm-5 {
+        margin-top: 8px;
+    }
+}
