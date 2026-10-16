@@ -285,6 +285,7 @@ class MO extends MY_Controller
             $menit             = $list->estimasi_menit_habis % 60;             
             $data['estimasi_habis_jam']   = $jam;
             $data['estimasi_habis_menit'] = $menit;
+            $data['estimasi_total_menit']  = $list->estimasi_menit_habis;
             $lw                = $this->m_mo->get_location_waste_by_deptid($list->dept_id)->row_array();
             $data["rm"]        = $this->m_mo->get_list_bahan_baku($kode_decrypt);
             $data["hasil_rm"]  = $this->m_mo->get_list_bahan_baku_hasil_group($kode_decrypt,'f');
@@ -5081,8 +5082,12 @@ class MO extends MY_Controller
             $show_lebar = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
             $estimasi_jam       = (int) $this->input->post('estimasi_jam');
             $estimasi_menit     = (int) $this->input->post('estimasi_menit');
+            $estimasi_tanggal_habis = $this->input->post('estimasi_tanggal_habis');
             $speed              = $this->input->post('speed');
             $speed_unit         = $this->input->post('speed_unit');
+            if ($estimasi_tanggal_habis === '' || $estimasi_tanggal_habis === '0000-00-00 00:00:00') {
+                $estimasi_tanggal_habis = null;
+            }
 
             //cek status mrp_production = done
             $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
@@ -5162,7 +5167,7 @@ class MO extends MY_Controller
                     // Konversi ke total menit
                     $estimasi_habis_menit = ($estimasi_jam * 60) + $estimasi_menit;
 
-                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alasan, $estimasi_habis_menit, $speed, $speed_unit);
+                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alasan, $estimasi_habis_menit, $speed, $speed_unit, $estimasi_tanggal_habis);
                     
                     if($show_lebar['show_lebar'] == 'true'){
                         $lebar = $lebar_greige."  ".$uom_lebar_greige." | ".$lebar_jadi."  ".$uom_lebar_jadi." | ";
@@ -5180,9 +5185,9 @@ class MO extends MY_Controller
                     
                     $jenis_log   = "edit";
                     if($type_mo == 'colouring'){                    
-                        $note_log    = "-> ".$lebar." | ".$berat." | ".$air." | ".$handling." | ".$gramasi." | ".$program." | ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed" ; 
+                        $note_log    = "-> ".$lebar." | ".$berat." | ".$air." | ".$handling." | ".$gramasi." | ".$program." | ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed " .$speed_unit ." | Tgl Habis ".$estimasi_tanggal_habis; 
                     }else{
-                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed " .$speed_unit; 
+                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste." | ".$alasan ." | ". $estimasi_jam ." Jam | ".$estimasi_menit." Menit | ".$speed." Speed " .$speed_unit ." | Tgl Habis ".$estimasi_tanggal_habis; 
                     }
 
 

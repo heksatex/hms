@@ -427,7 +427,9 @@
 
               <div class="col-md-12 col-xs-12">
                         <div class="col-xs-4">
-                            <label>Estimasi Sisa Waktu Bahan Baku</label>
+                            <label id="label_estimasi_waktu">
+                                Estimasi Waktu Menuju MO Berjalan
+                            </label>
                         </div>
                         <div class="col-xs-4">
                             <div class="input-group">
@@ -448,7 +450,7 @@
                         <div class="col-xs-4">
                             <div class="input-group">
                                 <input type="text"
-                                      class="form-control input-sm  formatAngka text-right" 
+                                      class="form-control input-sm   text-right" 
                                       data-decimal="0" 
                                       name="estimasi_habis_menit"
                                       id="estimasi_habis_menit"
@@ -456,11 +458,37 @@
                                       min="0"
                                       max="59"
                                       readonly="readonly" 
-                                      value="<?php echo $estimasi_habis_menit;?>">
+                                      value="<?php echo $estimasi_habis_menit;?>" oninput="validasiMenit()">
                                 <span class="input-group-addon">Menit</span>
                             </div>
                         </div>
+                        
               </div>
+
+              <div class="col-md-12 col-xs-12" >
+                <div class="col-xs-4">
+                    <label id="label_tanggal_habis">
+                        Jadwal Mulai MO
+                    </label>
+                </div>
+
+                <div class="col-xs-8">
+                    <div class="input-group  date" id='datetimepicker5' >
+                        <input type="text"
+                              class="form-control input-sm"
+                              name="estimasi_tanggal_habis"
+                              id="estimasi_tanggal_habis"
+                              placeholder="Tanggal dan waktu bahan baku habis"
+                              readonly="readonly"
+                              value="<?php echo isset($list->estimasi_tgl_habis) ? $list->estimasi_tgl_habis : ''; ?>"  disabled="true">
+                          <span class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </span>
+                    </div>
+                    <input type="hidden" name="estimasi_menit" id="estimasi_menit" value="<?= (int) $estimasi_total_menit; ?>">
+                    <input type="hidden" id="status_mo" value="<?= html_escape(strtolower($list->status ?? 'draft')); ?>">
+                </div>
+            </div>
 
             </div>
             </div>
@@ -1190,7 +1218,7 @@
   
   $(document).on('click','#datetimepicker5',function (e) {
       $('#datetimepicker5').datetimepicker({
-          format : 'HH:mm:ss',
+          format : 'YYYY-MM-DD HH:mm:ss',
           ignoreReadonly: true
       }); 
   });
@@ -1283,6 +1311,7 @@
     $('#handling').attr('disabled', true);
     $('#start').attr('disabled', true);
     $('#finish').attr('disabled', true);
+    $('#estimasi_tanggal_habis').attr("disabled", true);
 
   }
 
@@ -1458,7 +1487,7 @@
     $('#handling').attr('disabled', false).attr('id','handling');
     $('#start').attr('disabled', false).attr('id','start');;
     $('#finish').attr('disabled', false).attr('id','finish');;
-
+    $('#estimasi_tanggal_habis').attr("disabled", false).attr('id','estimasi_tanggal_habis');
   });
 
 
@@ -2280,6 +2309,7 @@
                 estimasi_menit : unformatNumber($('#estimasi_habis_menit').val()),
                 speed      : $('#speed').val(),
                 speed_unit      : $('#speed_unit').val(),
+                estimasi_tanggal_habis : $("#estimasi_tanggal_habis").val()
 
           },success: function(data){
             if(data.sesi == "habis"){
@@ -2300,9 +2330,14 @@
                   setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $('#btn-simpan').button('reset');
-              readonly_textfield();
+              
               refresh_mo();
-              $("#mo").load(location.href + " #mo>*");
+              $("#mo").load(location.href + " #mo>*", function(response, status) {
+                  if (status === 'success') {
+                      readonly_textfield();
+                      initEstimasi();
+                  }
+              });
             }
 
           },error: function (xhr, ajaxOptions, thrownError) { 
@@ -2312,7 +2347,7 @@
             $('#btn-simpan').button('reset');
           }
       });
-    });
+  });
 
 
    //modal request resep
@@ -2935,6 +2970,117 @@
     });  
 
   //## << Finish Additional 
+
+
+  function initEstimasi() {
+      var sedangMenghitung = false;
+
+      function formatTanggalLocal(date) {
+          var pad = function(n) {
+              return String(n).padStart(2, '0');
+          };
+          return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+      }
+      // Jam + menit -> tanggal dan waktu habis
+      function hitungTanggalHabis() {
+          if (sedangMenghitung) return;
+          sedangMenghitung = true;
+          try {
+              var jam = parseInt($('#estimasi_habis_jam').val(), 10) || 0;
+              var menit = parseInt($('#estimasi_habis_menit').val(), 10) || 0;
+              if (jam < 0) jam = 0;
+              if (menit < 0) menit = 0;
+              if (menit > 59) menit = 59;
+              var totalMenit = (jam * 60) + menit;
+              if (totalMenit === 0) {
+                  $('#estimasi_menit').val(0);
+                  $('#estimasi_tanggal_habis').val('');
+                  return;
+              }
+              var sekarang = new Date();
+              var waktuHabis = new Date(sekarang.getTime() + totalMenit * 60000);
+              $('#estimasi_menit').val(totalMenit);
+              $('#estimasi_tanggal_habis').val(formatTanggalLocal(waktuHabis));
+          } finally {
+              sedangMenghitung = false;
+          }
+      }
+      // Tanggal dan waktu -> jam + menit tersisa
+      function hitungSisaWaktu() {
+          var nilaiTanggal = $.trim($('#estimasi_tanggal_habis').val() || '');
+          if (!nilaiTanggal) {
+              $('#estimasi_habis_jam').val(0);
+              $('#estimasi_habis_menit').val(0);
+              $('#estimasi_menit').val(0);
+              return;
+          }
+          // Memperbaiki regex tanggal yang sebelumnya salah
+          var cocok = nilaiTanggal.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
+          if (!cocok) {
+              console.log('Format tanggal tidak valid:', nilaiTanggal);
+              return;
+          }
+          var waktuHabis = new Date(Number(cocok[1]), Number(cocok[2]) - 1, Number(cocok[3]), Number(cocok[4]), Number(cocok[5]), Number(cocok[6]));
+          var sekarang = new Date();
+          var selisihMs = waktuHabis.getTime() - sekarang.getTime();
+          var totalMenit = Math.max(0, Math.ceil(selisihMs / 60000));
+          var jam = Math.floor(totalMenit / 60);
+          var menit = totalMenit % 60;
+          $('#estimasi_habis_jam').val(jam);
+          $('#estimasi_habis_menit').val(menit);
+          $('#estimasi_menit').val(totalMenit);
+          if (totalMenit === 0) {
+              $('#estimasi_tanggal_habis').val('');
+          }
+      }
+      // Baca status terbaru dari elemen MO yang sudah dimuat ulang
+      var status = $('#status_mo').val();
+      if (!status) {
+          status = <?= json_encode(strtolower($list->status ?? 'draft')); ?> ;
+      }
+      updateLabelEstimasi(status);
+      // Lepas event dari input lama, lalu pasang pada input terbaru
+      $('#estimasi_tanggal_habis').off('.estimasi').on('change.estimasi input.estimasi blur.estimasi', function() {
+          hitungSisaWaktu();
+      });
+      $('#estimasi_habis_jam, #estimasi_habis_menit').off('.estimasi').on('input.estimasi change.estimasi', function() {
+          hitungTanggalHabis();
+      });
+  }
+  // Inisialisasi saat halaman pertama kali dibuka
+  $(document).ready(function() {
+      initEstimasi();
+  });
+
+  function updateLabelEstimasi(status) {
+      status = String(status || 'draft').toLowerCase();
+      if (status === 'draft') {
+          $('#label_estimasi_waktu').text('Estimasi Waktu Menuju MO Berjalan');
+          $('#info_estimasi_waktu').text('Hitung mundur menuju jadwal mulai MO.');
+          $('#label_tanggal_habis').text('Jadwal Mulai MO');
+          $('#estimasi_tanggal_habis').attr('placeholder', 'Jadwal mulai MO');
+      } else {
+          $('#label_estimasi_waktu').text('Estimasi Sisa Waktu Bahan Baku Habis');
+          $('#info_estimasi_waktu').text('Hitung mundur berdasarkan sisa bahan baku.');
+          $('#label_tanggal_habis').text('Perkiraan Bahan Baku Habis');
+          $('#estimasi_tanggal_habis').attr('placeholder', 'Perkiraan bahan baku habis');
+      }
+  }
+
+  function validasiMenit() {
+      var input = document.getElementById('estimasi_habis_menit');
+      if (!input) return;
+      var menit = parseInt(input.value, 10);
+      if (isNaN(menit) || menit < 0) {
+          menit = 0;
+      }
+      if (menit > 59) {
+          menit = 59;
+      }
+      input.value = menit;
+  }
+
+  
 </script>
 
 
