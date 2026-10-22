@@ -262,7 +262,7 @@
                                                                 </span>
                                                             </button>
 
-                                                            <button type="button" class="btn btn-xs btn-primary btn-manage-user-access" data-kode="<?= html_escape($sub['kode']) ?>" data-nama="<?= html_escape($sub['nama']) ?>">
+                                                            <button type="button" class="btn btn-xs btn-primary btn-manage-user-access" data-kode="<?= html_escape($child['kode']) ?>" data-nama="<?= html_escape($child['nama']) ?>">
                                                                 <i class="fa fa-users"></i>
                                                                 User Akses
 
