@@ -267,7 +267,7 @@
                                                                 User Akses
 
                                                                 <span class="badge">
-                                                                    <?= (int) $sub['user_access_count'] ?>
+                                                                    <?= (int) $child['user_access_count'] ?>
                                                                 </span>
                                                             </button>
 
