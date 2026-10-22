@@ -68,7 +68,7 @@ class Scadacountdown extends MY_Controller {
         try {
             $dept = $this->input->get("dept");
             $model = new $this->m_global;
-            $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "dept_id" => $dept, "devid_esp >" => 0, "start_time <=" => date("Y-m-d H:i"), "estimasi_menit_habis > " => 0])
+            $model->setTables("mesin mst")->setWheres(["status_aktif" => "t", "dept_id" => $dept, "estimasi_menit_habis > " => 0])
                     ->setJoins("(select mrp.kode,mrp.mc_id, start_time, estimasi_menit_habis,GROUP_CONCAT(mrprt.nama_produk) as nama_produk,
 GROUP_CONCAT(mrprt.reff_note) as reff_note,estimasi_tgl_habis
 from mrp_production_rm_target mrprt
@@ -77,7 +77,7 @@ where dept_id = '{$dept}'
 GROUP BY mrprt.kode order by start_time desc) mrp", "(mst.mc_id = mrp.mc_id and mst.dept_id = '{$dept}')", "LEFT")
                     ->setOrder(["start_time" => "asc"])
 //        ->setGroups(["mrp.mc_id"])
-                    ->setSelects(["mst.mc_id", "mst.no_mesin", "kode", "nama_produk", "reff_note", "start_time", "estimasi_menit_habis", "mst.devid_esp","estimasi_tgl_habis"]);
+                    ->setSelects(["mst.mc_id", "mst.no_mesin", "kode", "nama_produk", "reff_note", "start_time", "estimasi_menit_habis", "mst.devid_esp","estimasi_tgl_habis","nama_mesin"]);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('data' => $model->getData())));
