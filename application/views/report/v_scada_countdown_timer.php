@@ -8,7 +8,7 @@
         <link href="<?= base_url('dist/css/fontaws6.5.css'); ?>" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
-
+        <link rel="shortcut icon"  href="<?php echo base_url('dist/img/favicon_heksa.ico') ?>">
         <style>
             :root {
                 --bg-app: #f8fafc;
@@ -98,7 +98,7 @@
 
             .table-master th {
                 height: var(--table-header-height);
-                color: #0f172a;
+                color: #ffff !important;
                 font-size: 0.85rem;
                 font-weight: 800;
                 text-transform: uppercase;
@@ -161,9 +161,11 @@
                 border-bottom: 1px solid var(--border-color);
                 font-size: 1.05rem;
                 text-align: center;
-                padding: 8px 12px;
-                font-weight: 700;
+                padding-top: 12px;
+                /*font-weight: 700;*/
                 color: #1e293b;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
 
             /* LEBAR KOLOM */
@@ -200,7 +202,7 @@
                 padding: 8px 14px;
                 border-radius: 8px;
                 background-color: #0f172a;
-                color: #38bdf8;
+                color: #ffff;
                 display: inline-block;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.06);
                 letter-spacing: -0.5px;
@@ -208,6 +210,10 @@
 
             .timer-expired {
                 background-color: #e11d48 !important;
+                color: #ffffff !important;
+            }
+            .timer-siaga {
+                background-color: #b45309 !important;
                 color: #ffffff !important;
             }
 
@@ -256,7 +262,7 @@
             .spec-item {
                 font-size: 0.9rem;
                 color: #0f172a;
-                font-weight: 700;
+                /*font-weight: 700;*/
                 line-height: 1.3;
             }
             .reff-item {
@@ -341,8 +347,11 @@
                 <div class="timestamp" id="realtime-clock">LOADING...</div>
             </div>
             <div class="row align-items-center">
-                <div class="col-md-4 border-end border-light">
+                <div class="col-md-6 border-end border-light">
                     <div class="main-header d-flex align-items-center justify-content-between">
+                        <div class="counter-pill" style="color: #e11d48 ;border-color: #e11d48 ">
+                            <div class="c-num stt-habis">0</div><div class="c-lab">Beam Habis</div>
+                        </div>
                         <div class="counter-pill" style="color: #e11d48 ;border-color: #e11d48 ">
                             <div class="c-num stt-warning">0</div><div class="c-lab">Warning</div>
                         </div>
@@ -354,14 +363,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-8 border-end border-light">
+                <div class="col-md-6 border-end border-light">
                     <div class="main-header status-list-mesin d-flex align-items-center justify-content-between" id="scrollListMesin">
                         <?php
                         foreach ($msn as $key => $value) {
                             ?>
-                                                <!--                            <div class="counter-pill stt-msn-<?= $value->devid_esp ?>"  style="border-color: rgb(0, 0, 128) ">
-                                                                                <div class="c-num">MC<?= $value->no_mesin ?></div>
-                                                                            </div>-->
+                                                                                                    <!--                            <div class="counter-pill stt-msn-<?= $value->devid_esp ?>"  style="border-color: rgb(0, 0, 128) ">
+                                                                                                                                    <div class="c-num">MC<?= $value->no_mesin ?></div>
+                                                                                                                                </div>-->
 
                             <?php
                         }
@@ -391,7 +400,11 @@
         <!-- DATA DISPLAY CONTAINER -->
         <div class="scrollable-data-container" id="scrollContainer">
             <div class="table-card-body">
-                <ul class="data-list" id="data-list-mo" data-autoscroll></ul>
+                <table class="table-master">
+                    <tbody id="timer-table-body">
+                        <!-- Data dimasukkan via JS -->
+                    </tbody>
+                </table>
             </div>
         </div>
         <?php $this->load->view("admin/_partials/js.php") ?>
@@ -436,7 +449,7 @@
 
 
             async function initTableDOM() {
-                const tbody = document.getElementById('data-list-mo');
+                const tbody = document.getElementById('timer-table-body');
                 await getDatas().then((res) => {
                     machineData = [];
                     var dt = res.data;
@@ -453,7 +466,8 @@
                             reff: e.reff_note.split(","),
                             targetTime: targetTime.toDate(),
                             devid_esp: e.devid_esp,
-                            sisa: targetTime.diff(moment(), "seconds")
+                            sisa: targetTime.diff(moment(), "seconds"),
+                            nama_mesin: e.nama_mesin
                         };
 
                         machineData.push(dt);
@@ -464,28 +478,28 @@
                 tbody.innerHTML = '';
                 machineData.forEach((item, index) => {
                     const trHtml = `
-                        <li id="row-${item.id}" class="row-aman table-row">
-                            <div class="mono fs-5 fw-bold text-muted">#${index + 1}</div>
-                            <div class="">
+                        <tr id="row-${item.id}" class="row-aman table-row">
+                            <td class="mono fs-5 fw-bold text-muted">#${index + 1}</td>
+                            <td class="">
                                 <div id="timer-${item.id}" class="timer-box mono">00:00:00</div>
-                            </div>
-                            <div class="fs-3 fw-extrabold stt-msn-${item.devid_esp}">${item.mesin}</div>
-                            <div class="">
+                            </td>
+                            <td style="font-size : 20px !important; overflow-wrap: break-word !important; " class="fs-3 fw-extrabold stt-msn-${item.devid_esp}">${item.nama_mesin}</td>
+                            <td class="">
                                 <div class="mo-block">
                                     <span class="mo-label">MO TRICOT</span>
                                     <span class="mono text-dark fw-bold fs-6">${item.mo}</span>
                                 </div>
-                            </div>
-                            <div class="text-start">
+                            </td>
+                            <td class="text-start">
                                 ${item.bd.map(bdName => `<div class="spec-item">${bdName}</div>`).join('')}
-                            </div>
-                            <div class="">
+                            </td>
+                            <td class="">
                                 ${item.reff.map(reffName => `<div class="reff-item mono">${reffName}</div>`).join('')}
-                            </div>
-                            <div class="">
+                            </td>
+                            <td class="">
                                 <span id="badge-${item.id}" class="urgency-badge badge-aman">AMAN</span>
-                            </div>
-                        </li>
+                            </td>
+                        </tr>
                     `;
 //                                    console.log(trHtml);
                     tbody.innerHTML += trHtml;
@@ -494,6 +508,7 @@
 
             function updateTimerValues() {
                 const currentTime = Date.now();
+                let beamHabis = 0;
                 let criticalCount = 0;
                 let warningCount = 0;
                 let saveCount = 0;
@@ -517,11 +532,17 @@
 
                     const sign = isNegative ? "-" : "";
                     const formattedTime = `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
                     if (isNegative) {
                         rowElem.className = 'row-darurat table-row';
                         badgeElem.className = 'urgency-badge badge-darurat';
                         badgeElem.innerText = 'BEAM HABIS';
+                        timerElem.className = 'timer-box mono timer-expired';
+                        timerElem.innerText = `${formattedTime}`;
+                        beamHabis++;
+                    } else if (hours < 3) {
+                        rowElem.className = 'row-darurat table-row';
+                        badgeElem.className = 'urgency-badge badge-darurat';
+                        badgeElem.innerText = 'Warning';
                         timerElem.className = 'timer-box mono timer-expired';
                         timerElem.innerText = `${formattedTime}`;
                         criticalCount++;
@@ -529,7 +550,7 @@
                         rowElem.className = 'row-awas table-row';
                         badgeElem.className = 'urgency-badge badge-awas';
                         badgeElem.innerText = 'SEGERA SIAPKAN';
-                        timerElem.className = 'timer-box mono';
+                        timerElem.className = 'timer-box mono timer-siaga';
                         timerElem.innerText = formattedTime;
                         warningCount++;
                     } else {
@@ -545,6 +566,7 @@
                 $(".stt-warning").html(criticalCount);
                 $(".stt-siaga").html(warningCount);
                 $(".stt-aman").html(saveCount);
+                $(".stt-habis").html(beamHabis);
                 if (tempRefresh !== "" && tempRefresh !== tempr)
                     refresh = true;
                 tempRefresh = tempr;
@@ -555,20 +577,57 @@
 
 
 
-            var ipSocket = "<?= $ip_socket ?>";
-            const socket = new WebSocket(`${ipSocket}`);
-            socket.onopen = function () {
-                console.log("Connected to server");
-            };
-            var stateMesin = JSON.parse('<?= json_encode($state) ?>');
-            socket.onmessage = async function (event) {
-                var data = JSON.parse(event.data);
-                if (data["version"] != undefined && data["version"] == 2) {
-                    data["data"].forEach(dtt => {
-                        $(`.stt-msn-${dtt.devid}`).css("color", stateMesin[dtt.state]["warna"]);
-                    });
+//            var ipSocket = "<?= $ip_socket ?>";
+//            const socket = new WebSocket(`${ipSocket}`);
+//            socket.onopen = function () {
+//                console.log("Connected to server");
+//            };
+//            var stateMesin = JSON.parse('<?= json_encode($state) ?>');
+//            socket.onmessage = async function (event) {
+//                var data = JSON.parse(event.data);
+//                if (data["version"] != undefined && data["version"] == 2) {
+//                    data["data"].forEach(dtt => {
+//                        $(`.stt-msn-${dtt.devid}`).css("color", stateMesin[dtt.state]["warna"]);
+//                    });
+//                }
+//            };
+
+
+            function startAutoScroll() {
+                const container = document.getElementById('scrollContainer');
+                let currentScroll = 0; // Variabel penampung nilai desimal
+                let scrollSpeed = 0.3; // Kecepatan scroll (0.3 sekarang berjalan sempurna)
+                let isPaused = true;
+
+                // Jeda 5 detik di awal sebelum mulai scroll
+                setTimeout(() => {
+                    isPaused = false;
+                }, 5000);
+
+                function scrollAnimation() {
+                    if (!isPaused) {
+                        // Cek jika posisi scroll sudah mencapai batas bawah
+                        if ((container.scrollTop + container.clientHeight) >= container.scrollHeight - 2) {
+                            isPaused = true;
+                            setTimeout(() => {
+                                currentScroll = 0;
+                                container.scrollTop = 0; // Reset ke posisi paling atas
+
+                                // Mulai scroll lagi setelah jeda 5 detik di atas
+                                setTimeout(() => {
+                                    isPaused = false;
+                                }, 5000);
+                            }, 5000);
+                        } else {
+                            currentScroll += scrollSpeed;
+                            container.scrollTop = currentScroll; // Terapkan nilai akumulasi desimal
+                        }
+                    }
+                    requestAnimationFrame(scrollAnimation);
                 }
-            };
+
+                requestAnimationFrame(scrollAnimation);
+            }
 
             $(function () {
 //                getData();
@@ -585,7 +644,10 @@
                     updateTimerValues();
 
                 }, 1000);
-                $("#data-list-mo").autoscroll({interval: 30});
+                setTimeout(() => {
+                    startAutoScroll();
+                }, 5000);
+
             };
         </script>
     </body>
