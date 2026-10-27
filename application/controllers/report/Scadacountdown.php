@@ -11,9 +11,14 @@ defined('BASEPATH') OR exit('No Direct Script Acces Allowed');
  *
  * @author RONI
  */
+require_once APPPATH . '/third_party/vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class Scadacountdown extends MY_Controller {
 
-    //put your code here
+//put your code here
     public function __construct() {
         parent::__construct();
         $this->is_loggedin();
@@ -64,7 +69,7 @@ class Scadacountdown extends MY_Controller {
         $this->load->view("report/v_scada_countdown_timer", $data);
     }
 
-    public function list_data() {
+    protected function _listData() {
         try {
             $dept = $this->input->get("dept");
             $model = new $this->m_global;
@@ -76,13 +81,144 @@ join mrp_production mrp on (mrp.kode = mrprt.kode and mrp.status in ('ready','dr
 where dept_id = '{$dept}' 
 GROUP BY mrprt.kode order by start_time desc) mrp", "(mst.mc_id = mrp.mc_id and mst.dept_id = '{$dept}')", "LEFT")
                     ->setOrder(["start_time" => "asc"])
+                    ->setSelects(["mst.mc_id", "mst.no_mesin", "kode", "nama_produk", "reff_note", "start_time", "estimasi_menit_habis", "mst.devid_esp", "estimasi_tgl_habis", "nama_mesin"]);
+            return $model;
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function list_data() {
+        try {
+            $model = $this->_listData();
 //        ->setGroups(["mrp.mc_id"])
-                    ->setSelects(["mst.mc_id", "mst.no_mesin", "kode", "nama_produk", "reff_note", "start_time", "estimasi_menit_habis", "mst.devid_esp","estimasi_tgl_habis","nama_mesin"]);
+
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('data' => $model->getData())));
         } catch (Exception $ex) {
             
         }
+    }
+
+    public function download() {
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $row = 1;
+            $model = $this->_listData();
+
+            $sheet->setCellValue("A{$row}", 'No');
+            $sheet->setCellValue("B{$row}", 'Sisa Waktu');
+            $sheet->setCellValue("C{$row}", 'Mesin Hilir');
+            $sheet->setCellValue("D{$row}", 'MO Hilir');
+            $sheet->setCellValue("E{$row}", 'Spesifikasi BD');
+            $sheet->setCellValue("F{$row}", 'Reff');
+            $sheet->setCellValue("G{$row}", 'Urgensi');
+
+            $data = [];
+            $now = new DateTime(date("Y-m-d H:i:s"));
+
+            foreach ($model->getData() as $key => $value) {
+                if (empty($value->nama_produk))
+                    continue;
+                $targetTime = date("Y-m-d H:i:s", strtotime($value->estimasi_tgl_habis));
+                $ttm = new DateTime($targetTime);
+                $data[] = [
+                    "id" => $value->kode,
+                    "mo" => $value->kode,
+                    "bd" => explode(",", $value->nama_produk),
+                    "reff" => explode(",", $value->reff_note),
+                    "nama_mesin" => $value->nama_mesin,
+                    "sisa" => $now->getTimestamp() - $ttm->getTimestamp()
+                ];
+            }
+
+            usort($data, function ($a, $b) {
+                return $a["sisa"] <=> $b["sisa"];
+            });
+
+            foreach ($data as $k => $val) {
+                $row++;
+                $sheet->setCellValue("A{$row}", ($k + 1));
+                $sheet->setCellValue("B{$row}", $this->_convertMinute($val["sisa"]));
+                $sheet->setCellValue("C{$row}", $val["nama_mesin"]);
+                $sheet->setCellValue("D{$row}", $val["mo"]);
+                $sheet->setCellValue("E{$row}", implode("\n", $val["bd"]));
+                $sheet->setCellValue("F{$row}", implode("\n", $val["reff"]));
+                $sheet->setCellValue("G{$row}", $this->_statusBeam($val["sisa"]));
+            }
+
+            $filename = "Scada Count Down ". $now->format("Y-m-d H i");
+            $url = "dist/storages/export/scada";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
+    }
+
+    protected function _statusBeam($second) {
+        $status = "AMAN";
+        switch ($second) {
+            case $second < 0:
+                $status = "BEAM HABIS";
+                break;
+            case $second < 10800:
+                $status = "WARNING";
+                break;
+            case $second <= 21600:
+                $status = "SEGERA SIAPKAN";
+                break;
+        }
+        return $status;
+    }
+
+    protected function _convertMinute($second) {
+        // 1. Cek apakah nilai negatif
+        $isNegative = $second < 0;
+
+        // 2. Ambil nilai absolut (positif) untuk perhitungan
+        $value = abs($second);
+
+        $units = [
+            "hour" => 60 * 60, // 3600 detik
+            "min" => 60, // 60 detik
+            "sec" => 1             // 1 detik
+        ];
+        $result = [];
+
+        foreach ($units as $name => $div) {
+            $p = floor($value / $div);
+
+            if ($p == 1) {
+                $result[] = $p . " " . $name;
+            } elseif ($p >= 2) {
+                $result[] = $p . " " . $name . "s";
+            }
+
+            $value %= $div;
+        }
+
+        // Jika nilai 0 detik
+        if (empty($result)) {
+            $result[] = "0 secs";
+        }
+
+        // 3. Jika aslinya negatif, tambahkan tanda minus di elemen pertama array
+        if ($isNegative && !empty($result)) {
+            $result[0] = "-" . $result[0];
+        }
+
+        return implode(" ", $result);
     }
 }
