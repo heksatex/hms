@@ -605,7 +605,7 @@
                         <div class="fixed-top-wrapper">
 
                             <div class="row align-items-center">
-                                <div class="col-md-4 border-end border-light">
+                                <div class="col-md-6 border-end border-light">
 
                                     <h4 class="dashboard-title m-0">
                                         <a href="#"onclick="history.back(); return false;">
@@ -613,7 +613,7 @@
                                         </a>
                                         COUNTDOWN TIMER - WARPING DASAR</h4>
                                 </div>
-                                <div class="col-md-5 border-end border-light">
+                                <div class="col-md-6 border-end border-light">
                                     <div class="main-header d-flex align-items-center justify-content-between">
                                         <div class="counter-pill" style="color: #e11d48 ;border-color: #e11d48 ">
                                             <div class="c-num stt-habis">0</div><div class="c-lab">Beam Habis</div>
