@@ -120,7 +120,7 @@ GROUP BY mrprt.kode order by start_time desc) mrp", "(mst.mc_id = mrp.mc_id and 
             $now = new DateTime(date("Y-m-d H:i:s"));
 
             foreach ($model->getData() as $key => $value) {
-                if (empty($value->nama_produk))
+                if ($value->nama_produk === null)
                     continue;
                 $targetTime = date("Y-m-d H:i:s", strtotime($value->estimasi_tgl_habis));
                 $ttm = new DateTime($targetTime);
@@ -130,7 +130,7 @@ GROUP BY mrprt.kode order by start_time desc) mrp", "(mst.mc_id = mrp.mc_id and 
                     "bd" => explode(",", $value->nama_produk),
                     "reff" => explode(",", $value->reff_note),
                     "nama_mesin" => $value->nama_mesin,
-                    "sisa" => $now->getTimestamp() - $ttm->getTimestamp()
+                    "sisa" =>  $ttm->getTimestamp() - $now->getTimestamp()
                 ];
             }
 
