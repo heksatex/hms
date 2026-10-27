@@ -8,7 +8,7 @@ class Machinemonitoringv2 extends MY_Controller {
     
     protected $heigtContainerTL = [
         "WRD"=>"40%",
-        "TRI"=>"60%"
+        "TRI"=>"80%"
     ];
 
     protected $waktuShip1 = "07:00:00";
