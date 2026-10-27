@@ -57,7 +57,7 @@
 
             .dashboard-title {
                 font-weight: 600;
-                font-size: 1.6rem;
+                font-size: 1.2rem;
                 letter-spacing: -0.5px;
                 color: #0f172a;
             }
@@ -111,7 +111,7 @@
 
             /* 3. CONTAINER DATA DISPLAY */
             .scrollable-data-container {
-                margin-top: calc(var(--header-height) + var(--table-header-height) + 80px);
+                margin-top: calc(var(--header-height) + var(--table-header-height) + 30px);
                 height: calc(100vh - var(--header-height) - var(--table-header-height) - 32px);
                 overflow-y: auto;
                 padding: 0 24px 24px 24px;
@@ -314,17 +314,7 @@
             .status-list-mesin::-webkit-scrollbar {
                 display: none;
             }
-            .data-list {
-                height: 100vh;
-                padding: 1rem;
-                overflow-y: hidden;
-                border: 2px solid #222;
-                border-radius: 5px;
-                padding-left: 0;
-                margin-left: 0;
-                list-style-position: inside;
-                list-style-type: inherit; /* Removes the bullet points */
-            }
+
             .table-row {
                 display: grid;
                 grid-template-columns: 6% 17% 10% 15% 28% 11% 13%; /* 3 equal columns */
@@ -338,22 +328,17 @@
 
         <!-- FIXED HEADER -->
         <div class="fixed-top-wrapper">
-            <div class="main-header d-flex justify-content-between align-items-center">
 
-                <div class="d-flex justify-content align-items-center mb-2">
-                    <a href="#"onclick="history.back(); return false;">
-                        <div class="fw-bold fs-6 text-white "style="background-color: black;border-radius: 50%; "><i class="fa-solid fa-arrow-left me-2"></i> </div>
-                    </a>
-                    <div>
-                        <h3 class="dashboard-title m-0">COUNTDOWN TIMER - WARPING DASAR</h3>
-                    <div class="brand small">MONITORING SISA WAKTU BEAM MESIN TRICOT HILIR</div>
-                    </div>
-                </div>
-
-                <div class="timestamp" id="realtime-clock">LOADING...</div>
-            </div>
             <div class="row align-items-center">
-                <div class="col-md-6 border-end border-light">
+                <div class="col-md-4 border-end border-light">
+
+                    <h4 class="dashboard-title m-0">
+                        <a href="#"onclick="history.back(); return false;">
+                            <i class="fa-solid fa-arrow-left me-2"></i>
+                        </a>
+                        COUNTDOWN TIMER - WARPING DASAR</h4>
+                </div>
+                <div class="col-md-4 border-end border-light">
                     <div class="main-header d-flex align-items-center justify-content-between">
                         <div class="counter-pill" style="color: #e11d48 ;border-color: #e11d48 ">
                             <div class="c-num stt-habis">0</div><div class="c-lab">Beam Habis</div>
@@ -367,21 +352,29 @@
                         <div class="counter-pill" style="color: #047857;border-color: #047857">
                             <div class="c-num stt-aman">0</div><div class="c-lab">Aman</div>
                         </div>
+                        <div class="counter-pill" style="color: #000000;border-color: #000000">
+                            <div class="c-num stt-total">0</div><div class="c-lab">Total</div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6 border-end border-light">
-                    <div class="main-header status-list-mesin d-flex align-items-center justify-content-between" id="scrollListMesin">
-                        <?php
-                        foreach ($msn as $key => $value) {
-                            ?>
-                                                                                                        <!--                            <div class="counter-pill stt-msn-<?= $value->devid_esp ?>"  style="border-color: rgb(0, 0, 128) ">
-                                                                                                                                        <div class="c-num">MC<?= $value->no_mesin ?></div>
-                                                                                                                                    </div>-->
+                <div class="col-md-4 border-end border-light text-right">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="timestamp text-right" id="realtime-clock">LOADING...</div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary btn-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-download-fill" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 0a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 4.095 0 5.555 0 7.318 0 9.366 1.708 11 3.781 11H7.5V5.5a.5.5 0 0 1 1 0V11h4.188C14.502 11 16 9.57 16 7.773c0-1.636-1.242-2.969-2.834-3.194C12.923 1.999 10.69 0 8 0m-.354 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V11h-1v3.293l-2.146-2.147a.5.5 0 0 0-.708.708z"/>
+                                </svg>
+                                Download
+                            </button>
 
-                            <?php
-                        }
-                        ?>
+                        </div>
                     </div>
+
+
+
                 </div>
             </div>
 
@@ -415,75 +408,74 @@
         </div>
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script src="<?= base_url('dist/js/bs5/bs5.bundle.min.js') ?>"></script>
-        <script src="<?= base_url('dist/js/jquery.autoscroll.js') ?>"></script>
         <script>
-                        const nowMs = Date.now();
-                        let refSec = 0;
-                        let machineData = [];
-                        let tempRefresh = "";
-                        let refresh = false;
+                            const nowMs = Date.now();
+                            let refSec = 0;
+                            let machineData = [];
+                            let tempRefresh = "";
+                            let refresh = false;
 
-                        function updateClock() {
-                            const now = new Date();
-                            const options = {weekday: 'short', day: 'numeric', month: 'short'};
-                            document.getElementById('realtime-clock').textContent =
-                                    `${now.toLocaleDateString('id-ID', options).toUpperCase()} | ${now.toLocaleTimeString('id-ID', {hour12: false})}`;
-                            refSec++;
-                            if (refresh) {
-                                refSec = 0;
-                                refresh = false;
+                            function updateClock() {
+                                const now = new Date();
+                                const options = {weekday: 'short', day: 'numeric', month: 'short'};
+                                document.getElementById('realtime-clock').textContent =
+                                        `${now.toLocaleDateString('id-ID', options).toUpperCase()} | ${now.toLocaleTimeString('id-ID', {hour12: false})}`;
+                                refSec++;
+                                if (refresh) {
+                                    refSec = 0;
+                                    refresh = false;
 //                    getData();
-                                initTableDOM();
-                            }
-                            if (refSec > 300)
-                                refresh = true;
-                        }
-
-                        const getDatas = (() => {
-                            return $.ajax({
-                                url: "<?php echo base_url(); ?>report/scadacountdown/list_data",
-                                type: "GET",
-                                data: {
-                                    dept: "<?= $dept ?>"
-                                },
-                                complete: function (jqXHR, textStatus) {
-                                    unblockUI(function () {}, 200);
+                                    initTableDOM();
                                 }
-                            });
-                        });
+                                if (refSec > 300)
+                                    refresh = true;
+                            }
 
-
-
-                        async function initTableDOM() {
-                            const tbody = document.getElementById('timer-table-body');
-                            await getDatas().then((res) => {
-                                machineData = [];
-                                var dt = res.data;
-                                dt.forEach(e => {
-                                    if (e.nama_produk === null) {
-                                        return;
+                            const getDatas = (() => {
+                                return $.ajax({
+                                    url: "<?php echo base_url(); ?>report/scadacountdown/list_data",
+                                    type: "GET",
+                                    data: {
+                                        dept: "<?= $dept ?>"
+                                    },
+                                    complete: function (jqXHR, textStatus) {
+                                        unblockUI(function () {}, 200);
                                     }
-                                    let targetTime = moment(e.estimasi_tgl_habis);
-                                    var dt = {
-                                        id: e.kode,
-                                        mesin: `MC${e.no_mesin}`,
-                                        mo: e.kode,
-                                        bd: e.nama_produk.split(","),
-                                        reff: e.reff_note.split(","),
-                                        targetTime: targetTime.toDate(),
-                                        devid_esp: e.devid_esp,
-                                        sisa: targetTime.diff(moment(), "seconds"),
-                                        nama_mesin: e.nama_mesin
-                                    };
-
-                                    machineData.push(dt);
                                 });
                             });
-                            machineData.sort((a, b) => a.sisa - b.sisa);
+
+
+
+                            async function initTableDOM() {
+                                const tbody = document.getElementById('timer-table-body');
+                                await getDatas().then((res) => {
+                                    machineData = [];
+                                    var dt = res.data;
+                                    dt.forEach(e => {
+                                        if (e.nama_produk === null) {
+                                            return;
+                                        }
+                                        let targetTime = moment(e.estimasi_tgl_habis);
+                                        var dt = {
+                                            id: e.kode,
+                                            mesin: `MC${e.no_mesin}`,
+                                            mo: e.kode,
+                                            bd: e.nama_produk.split(","),
+                                            reff: e.reff_note.split(","),
+                                            targetTime: targetTime.toDate(),
+                                            devid_esp: e.devid_esp,
+                                            sisa: targetTime.diff(moment(), "seconds"),
+                                            nama_mesin: e.nama_mesin
+                                        };
+
+                                        machineData.push(dt);
+                                    });
+                                });
+                                machineData.sort((a, b) => a.sisa - b.sisa);
 //                console.log(machineData);
-                            tbody.innerHTML = '';
-                            machineData.forEach((item, index) => {
-                                const trHtml = `
+                                tbody.innerHTML = '';
+                                machineData.forEach((item, index) => {
+                                    const trHtml = `
                         <tr id="row-${item.id}" class="row-aman table-row">
                             <td class="mono fs-5 fw-bold text-muted">#${index + 1}</td>
                             <td class="">
@@ -508,153 +500,135 @@
                         </tr>
                     `;
 //                                    console.log(trHtml);
-                                tbody.innerHTML += trHtml;
-                            });
-                        }
+                                    tbody.innerHTML += trHtml;
+                                });
+                            }
 
-                        function updateTimerValues() {
-                            const currentTime = Date.now();
-                            let beamHabis = 0;
-                            let criticalCount = 0;
-                            let warningCount = 0;
-                            let saveCount = 0;
-                            let tempr = "";
-                            machineData.forEach((item) => {
-                                const rowElem = document.getElementById(`row-${item.id}`);
-                                const timerElem = document.getElementById(`timer-${item.id}`);
-                                const badgeElem = document.getElementById(`badge-${item.id}`);
+                            function updateTimerValues() {
+                                const currentTime = Date.now();
+                                let beamHabis = 0;
+                                let criticalCount = 0;
+                                let warningCount = 0;
+                                let saveCount = 0;
+                                let tempr = "";
+                                machineData.forEach((item) => {
+                                    const rowElem = document.getElementById(`row-${item.id}`);
+                                    const timerElem = document.getElementById(`timer-${item.id}`);
+                                    const badgeElem = document.getElementById(`badge-${item.id}`);
 
-                                if (!timerElem)
-                                    return;
+                                    if (!timerElem)
+                                        return;
 
-                                const totalSeconds = moment(item.targetTime).diff(moment(), "seconds");
+                                    const totalSeconds = moment(item.targetTime).diff(moment(), "seconds");
 
-                                const isNegative = totalSeconds < 0;
-                                const absoluteSeconds = Math.abs(totalSeconds);
+                                    const isNegative = totalSeconds < 0;
+                                    const absoluteSeconds = Math.abs(totalSeconds);
 
-                                const hours = Math.floor(absoluteSeconds / 3600);
-                                const minutes = Math.floor((absoluteSeconds % 3600) / 60);
-                                const seconds = absoluteSeconds % 60;
+                                    const hours = Math.floor(absoluteSeconds / 3600);
+                                    const minutes = Math.floor((absoluteSeconds % 3600) / 60);
+                                    const seconds = absoluteSeconds % 60;
 
-                                const sign = isNegative ? "-" : "";
-                                const formattedTime = `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                                if (isNegative) {
-                                    rowElem.className = 'row-darurat table-row';
-                                    badgeElem.className = 'urgency-badge badge-darurat';
-                                    badgeElem.innerText = 'BEAM HABIS';
-                                    timerElem.className = 'timer-box mono timer-expired';
-                                    timerElem.innerText = `${formattedTime}`;
-                                    beamHabis++;
-                                } else if (hours < 3) {
-                                    rowElem.className = 'row-darurat table-row';
-                                    badgeElem.className = 'urgency-badge badge-darurat';
-                                    badgeElem.innerText = 'Warning';
-                                    timerElem.className = 'timer-box mono timer-expired';
-                                    timerElem.innerText = `${formattedTime}`;
-                                    criticalCount++;
-                                } else if (hours <= 6) {
-                                    rowElem.className = 'row-awas table-row';
-                                    badgeElem.className = 'urgency-badge badge-awas';
-                                    badgeElem.innerText = 'SEGERA SIAPKAN';
-                                    timerElem.className = 'timer-box mono timer-siaga';
-                                    timerElem.innerText = formattedTime;
-                                    warningCount++;
-                                } else {
-                                    rowElem.className = 'row-aman table-row';
-                                    badgeElem.className = 'urgency-badge badge-aman';
-                                    badgeElem.innerText = 'AMAN';
-                                    timerElem.className = 'timer-box mono';
-                                    timerElem.innerText = formattedTime;
-                                    saveCount++;
-                                }
-                                tempr = `${criticalCount}-${warningCount}-${saveCount}`;
-                            });
-                            $(".stt-warning").html(criticalCount);
-                            $(".stt-siaga").html(warningCount);
-                            $(".stt-aman").html(saveCount);
-                            $(".stt-habis").html(beamHabis);
-                            if (tempRefresh !== "" && tempRefresh !== tempr)
-                                refresh = true;
-                            tempRefresh = tempr;
-
-//                document.getElementById('total-critical-badge').innerText = `âš ï¸ ${criticalCount} MESIN STOP`;
-                        }
-
-
-
-
-//            var ipSocket = "<?= $ip_socket ?>";
-//            const socket = new WebSocket(`${ipSocket}`);
-//            socket.onopen = function () {
-//                console.log("Connected to server");
-//            };
-//            var stateMesin = JSON.parse('<?= json_encode($state) ?>');
-//            socket.onmessage = async function (event) {
-//                var data = JSON.parse(event.data);
-//                if (data["version"] != undefined && data["version"] == 2) {
-//                    data["data"].forEach(dtt => {
-//                        $(`.stt-msn-${dtt.devid}`).css("color", stateMesin[dtt.state]["warna"]);
-//                    });
-//                }
-//            };
-
-
-                        function startAutoScroll() {
-                            const container = document.getElementById('scrollContainer');
-                            let currentScroll = 0; // Variabel penampung nilai desimal
-                            let scrollSpeed = 0.3; // Kecepatan scroll (0.3 sekarang berjalan sempurna)
-                            let isPaused = true;
-
-                            // Jeda 5 detik di awal sebelum mulai scroll
-                            setTimeout(() => {
-                                isPaused = false;
-                            }, 5000);
-
-                            function scrollAnimation() {
-                                if (!isPaused) {
-                                    // Cek jika posisi scroll sudah mencapai batas bawah
-                                    if ((container.scrollTop + container.clientHeight) >= container.scrollHeight - 2) {
-                                        isPaused = true;
-                                        setTimeout(() => {
-                                            currentScroll = 0;
-                                            container.scrollTop = 0; // Reset ke posisi paling atas
-
-                                            // Mulai scroll lagi setelah jeda 5 detik di atas
-                                            setTimeout(() => {
-                                                isPaused = false;
-                                            }, 5000);
-                                        }, 5000);
+                                    const sign = isNegative ? "-" : "";
+                                    const formattedTime = `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                                    if (isNegative) {
+                                        rowElem.className = 'row-darurat table-row';
+                                        badgeElem.className = 'urgency-badge badge-darurat';
+                                        badgeElem.innerText = 'BEAM HABIS';
+                                        timerElem.className = 'timer-box mono timer-expired';
+                                        timerElem.innerText = `${formattedTime}`;
+                                        beamHabis++;
+                                    } else if (hours < 3) {
+                                        rowElem.className = 'row-darurat table-row';
+                                        badgeElem.className = 'urgency-badge badge-darurat';
+                                        badgeElem.innerText = 'Warning';
+                                        timerElem.className = 'timer-box mono timer-expired';
+                                        timerElem.innerText = `${formattedTime}`;
+                                        criticalCount++;
+                                    } else if (hours <= 6) {
+                                        rowElem.className = 'row-awas table-row';
+                                        badgeElem.className = 'urgency-badge badge-awas';
+                                        badgeElem.innerText = 'SEGERA SIAPKAN';
+                                        timerElem.className = 'timer-box mono timer-siaga';
+                                        timerElem.innerText = formattedTime;
+                                        warningCount++;
                                     } else {
-                                        currentScroll += scrollSpeed;
-                                        container.scrollTop = currentScroll; // Terapkan nilai akumulasi desimal
+                                        rowElem.className = 'row-aman table-row';
+                                        badgeElem.className = 'urgency-badge badge-aman';
+                                        badgeElem.innerText = 'AMAN';
+                                        timerElem.className = 'timer-box mono';
+                                        timerElem.innerText = formattedTime;
+                                        saveCount++;
                                     }
+                                    tempr = `${criticalCount}-${warningCount}-${saveCount}`;
+                                });
+                                $(".stt-warning").html(criticalCount);
+                                $(".stt-siaga").html(warningCount);
+                                $(".stt-aman").html(saveCount);
+                                $(".stt-habis").html(beamHabis);
+                                $(".stt-total").html(machineData.length);
+                                if (tempRefresh !== "" && tempRefresh !== tempr)
+                                    refresh = true;
+                                tempRefresh = tempr;
+                            }
+
+
+
+                            function startAutoScroll() {
+                                const container = document.getElementById('scrollContainer');
+                                let currentScroll = 0; // Variabel penampung nilai desimal
+                                let scrollSpeed = 0.3; // Kecepatan scroll (0.3 sekarang berjalan sempurna)
+                                let isPaused = true;
+
+                                // Jeda 5 detik di awal sebelum mulai scroll
+                                setTimeout(() => {
+                                    isPaused = false;
+                                }, 5000);
+
+                                function scrollAnimation() {
+                                    if (!isPaused) {
+                                        // Cek jika posisi scroll sudah mencapai batas bawah
+                                        if ((container.scrollTop + container.clientHeight) >= container.scrollHeight - 2) {
+                                            isPaused = true;
+                                            setTimeout(() => {
+                                                currentScroll = 0;
+                                                container.scrollTop = 0; // Reset ke posisi paling atas
+
+                                                // Mulai scroll lagi setelah jeda 5 detik di atas
+                                                setTimeout(() => {
+                                                    isPaused = false;
+                                                }, 5000);
+                                            }, 5000);
+                                        } else {
+                                            currentScroll += scrollSpeed;
+                                            container.scrollTop = currentScroll; // Terapkan nilai akumulasi desimal
+                                        }
+                                    }
+                                    requestAnimationFrame(scrollAnimation);
                                 }
+
                                 requestAnimationFrame(scrollAnimation);
                             }
 
-                            requestAnimationFrame(scrollAnimation);
-                        }
-
-                        $(function () {
+                            $(function () {
 //                getData();
 //                initTableDOM();
-                        });
+                            });
 
-                        window.onload = function () {
+                            window.onload = function () {
 //                setInterval(, 1000);
 //                getData();
-                            initTableDOM();
-                            updateTimerValues();
-                            setInterval(() => {
-                                updateClock();
+                                initTableDOM();
                                 updateTimerValues();
+                                setInterval(() => {
+                                    updateClock();
+                                    updateTimerValues();
 
-                            }, 1000);
-                            setTimeout(() => {
-                                startAutoScroll();
-                            }, 5000);
+                                }, 1000);
+                                setTimeout(() => {
+                                    startAutoScroll();
+                                }, 5000);
 
-                        };
+                            };
         </script>
     </body>
 </html>
