@@ -347,7 +347,7 @@
                         return;
                     }
 
-                   $("#total_nominal").val(total);                formatCurrency($("#total_nominal"),"blur");
+                   $("#total_nominal").val(total.toFixed(2));                formatCurrency($("#total_nominal"),"blur");
                 });
 
             $(document).on('focus', '.select2', function (e) {
