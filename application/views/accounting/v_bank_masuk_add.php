@@ -349,7 +349,7 @@
                     return;
                 }
 
-                $("#total_nominal").val(total);
+                $("#total_nominal").val(total.toFixed(2));
                 formatCurrency($("#total_nominal"), "blur");
             });
             const setCurr = (() => {
