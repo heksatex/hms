@@ -1123,7 +1123,7 @@ class Produksi extends MY_Controller
 
                             
                             if ($case_movedate_smi !== '') {
-                                $set_stock[] = " tanggal_transaksi = CASE {$case_movedate_smi} ELSE tanggal_transaksi END ";
+                                $set_smi[] = " tanggal_transaksi = CASE {$case_movedate_smi} ELSE tanggal_transaksi END ";
                             }
 
                             if (!empty($where_smi) && !empty($set_smi)) {
