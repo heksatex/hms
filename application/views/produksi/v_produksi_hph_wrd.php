@@ -237,7 +237,7 @@
                         <div class="defect-field">
                             <label> KODE CACAT </label>
                             <select id="kodeCacat" class="defect-input">
-                                <?php foreach($list_cacat as $row){ echo '<option value='.$row['kode_cacat'].' data-nama='.$row['kode_cacat'].'>'.$row['kode_nama'].'</option>';}?>
+                                <?php foreach($list_cacat as $row){ echo '<option value='.$row['kode_cacat'].' data-nama='.$row['nama_cacat'].'>'.$row['kode_nama'].'</option>';}?>
                             </select>
                         </div>
                         <button type="button" id="btnTambahCacat" class="btn-add-defect">
@@ -327,10 +327,71 @@
         /* =====================================================
         TAMBAH CACAT
         ====================================================== */
-        $('#btnTambahCacat').on('click', function () {
+        // $('#btnTambahCacat').on('click', function () {
 
-            var mtr  = $('#mtrCacat').val();
+        //     var mtr  = $('#mtrCacat').val();
+        //     var kode = $('#kodeCacat').val();
+
+        //     if (!mtr || parseFloat(mtr) <= 0) {
+        //         alert('MTR cacat belum diisi');
+        //         $('#mtrCacat').focus();
+        //         return;
+        //     }
+
+        //     var $option = $('#kodeCacat option:selected');
+
+        //     // Untuk tampilan
+        //     var kodeText = $option.text();
+
+        //     // Untuk database
+        //     var namaCacat = $option.data('nama');
+
+        //     $('#defectTableBody .defect-empty').remove();
+
+        //     var row = `
+        //         <tr
+        //             data-mtr="${mtr}"
+        //             data-kode-cacat="${kode}"
+        //             data-nama-cacat="${namaCacat}"
+        //         >
+        //             <td>
+        //                 ${mtr}
+        //             </td>
+
+        //             <td>
+        //                 ${kodeText}
+        //             </td>
+
+        //             <td>
+        //                 <button type="button" class="btn-remove-defect">
+        //                     <i class="fa fa-close"></i>
+        //                 </button>
+        //             </td>
+        //         </tr>
+        //     `;
+
+        //     $('#defectTableBody').append(row);
+
+        //     updateDefectCount();
+
+        //     $('#mtrCacat').val('');
+        //     $('#mtrCacat').focus();
+        // });
+
+        // ===================================
+        // TAMBAH CACAT
+        // ===================================
+
+        $('#btnTambahCacat').on('click', function() {
+
+            var mtr = $('#mtrCacat').val();
             var kode = $('#kodeCacat').val();
+            var kodeMrp = "<?= ($data_mo['kode']) ?>";
+
+            if (!kodeMrp) {
+                alert('Kode MRP tidak ditemukan');
+                return;
+            }
 
             if (!mtr || parseFloat(mtr) <= 0) {
                 alert('MTR cacat belum diisi');
@@ -340,43 +401,142 @@
 
             var $option = $('#kodeCacat option:selected');
 
-            // Untuk tampilan
-            var kodeText = $option.text();
-
-            // Untuk database
             var namaCacat = $option.data('nama');
 
-            $('#defectTableBody .defect-empty').remove();
+            $.ajax({
+                url: '<?= base_url("manufacturing/produksi/simpan_cacat") ?>',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    kode_mrp: kodeMrp,
+                    mtr: mtr,
+                    kode_cacat: kode,
+                    nama_cacat: namaCacat
+                },
 
-            var row = `
-                <tr
-                    data-mtr="${mtr}"
-                    data-kode-cacat="${kode}"
-                    data-nama-cacat="${namaCacat}"
-                >
-                    <td>
-                        ${mtr}
-                    </td>
+                success: function(res) {
 
-                    <td>
-                        ${kodeText}
-                    </td>
+                    if (res.status) {
 
-                    <td>
-                        <button type="button" class="btn-remove-defect">
-                            <i class="fa fa-close"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
+                        loadDataCacat();
 
-            $('#defectTableBody').append(row);
+                        $('#mtrCacat').val('').focus();
 
-            updateDefectCount();
+                    } else {
+                        alert(res.message || 'Gagal menyimpan data');
+                    }
+                },
 
-            $('#mtrCacat').val('');
-            $('#mtrCacat').focus();
+                error: function() {
+                    alert('Terjadi kesalahan saat menyimpan data');
+                }
+            });
+
         });
+
+
+        // ===================================
+        // LOAD DATA CACAT
+        // ===================================
+
+        function loadDataCacat() {
+
+            var kodeMrp = "<?= ($data_mo['kode']) ?>";
+
+            $.ajax({
+                url: '<?= base_url("manufacturing/produksi/get_cacat") ?>',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    kode_mrp: kodeMrp
+                },
+
+                success: function(data) {
+
+                    $('#defectTableBody').empty();
+
+                    if (data.length === 0) {
+
+                        $('#defectTableBody').html(`
+                            <tr class="defect-empty">
+                                <td colspan="3" class="text-center"
+                                    style="color:#9aa7ae;">
+                                    Belum ada data cacat
+                                </td>
+                            </tr>
+                        `);
+
+                    } else {
+
+                        $.each(data, function(i, item) {
+
+                            var row = `
+                                <tr data-id="${item.id}">
+                                    <td>${item.point}</td>
+
+                                    <td>
+                                        ${item.kode_cacat} - ${item.nama_cacat}
+                                    </td>
+
+                                    <td>
+                                        <button type="button"
+                                            class="btn-remove-defect"
+                                            data-id="${item.id}">
+                                            <i class="fa fa-close"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+
+                            $('#defectTableBody').append(row);
+
+                        });
+
+                    }
+
+                    updateDefectCount();
+
+                }
+            });
+
+        }
+
+
+        // ===================================
+        // HAPUS CACAT
+        // ===================================
+
+        $(document).on('click', '.btn-remove-defect', function() {
+
+            var id = $(this).data('id');
+            var kodeMrp = "<?= ($data_mo['kode']) ?>";
+
+            if (!confirm('Hapus data cacat ini?')) {
+                return;
+            }
+
+            $.ajax({
+                url: '<?= base_url("manufacturing/produksi/hapus_cacat") ?>',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: id,
+                    kode_mrp: kodeMrp
+                },
+
+                success: function(res) {
+
+                    if (res.status) {
+                        loadDataCacat();
+                    } else {
+                        alert(res.message || 'Gagal menghapus data');
+                    }
+
+                }
+            });
+
+        });
+
 
         var data_cacat = [];
 
@@ -410,14 +570,20 @@
         }
 
 
+        $(document).ready(function () {
+
+            loadDataCacat();
+
+        });
+
         /* =====================================================
         HAPUS CACAT
         ====================================================== */
 
-        $(document).on('click','.btn-remove-defect',function () {
-            $(this).closest('tr').remove();
-            updateDefectCount();
-        });
+        // $(document).on('click','.btn-remove-defect',function () {
+        //     $(this).closest('tr').remove();
+        //     updateDefectCount();
+        // });
 
 
         function updateDefectCount() {
@@ -538,9 +704,11 @@
                         alert_notify(res.icon,res.message2,"warning",function(){})
                     }
                     resetFormProduksi();
+                    loadDataCacat();
                     
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
+                    alert('Error Simpan Hph');
                     $("#btnSimpan").button("reset");
                     
                     var pesanError = "Error Simpan Produksi";

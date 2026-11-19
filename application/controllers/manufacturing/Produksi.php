@@ -385,7 +385,7 @@ class Produksi extends MY_Controller
                 $transaction_started = true;
 
                 // lock table
-                $this->_module->lock_tabel("mrp_production WRITE, stock_quant WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, stock_move WRITE,  stock_move_items WRITE, sales_contract WRITE, pengiriman_barang WRITE,  pengiriman_barang_items WRITE,  penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production_rm_target WRITE,  departemen WRITE, log_history WRITE, user READ,  main_menu_sub READ, stock_move_produk WRITE, mrp_production_fg_hasil as fg WRITE, mrp_production as mrp WRITE, mrp_production_cacat WRITE, mrp_production as mp WRITE, mst_status ms READ, mst_produk prod READ, stock_quant as sq WRITE, mrp_production as mph WRITE, stock_move_items as smi WRITE, stock_move as sm READ, pengiriman_barang as pb WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mprod  WRITE, stock_move_items as smi2 WRITE, mrp_production_rm_hasil WRITE, product_planning  as pp WRITE");
+                $this->_module->lock_tabel("mrp_production WRITE, stock_quant WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, stock_move WRITE,  stock_move_items WRITE, sales_contract WRITE, pengiriman_barang WRITE,  pengiriman_barang_items WRITE,  penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production_rm_target WRITE,  departemen WRITE, log_history WRITE, user READ,  main_menu_sub READ, stock_move_produk WRITE, mrp_production_fg_hasil as fg WRITE, mrp_production as mrp WRITE, mrp_production_cacat WRITE, mrp_production as mp WRITE, mst_status ms READ, mst_produk prod READ, stock_quant as sq WRITE, mrp_production as mph WRITE, stock_move_items as smi WRITE, stock_move as sm READ, pengiriman_barang as pb WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mprod  WRITE, stock_move_items as smi2 WRITE, mrp_production_rm_hasil WRITE, product_planning  as pp WRITE, mrp_production_cacat_tmp WRITE");
 
                 // cek status mrp_production
                 $cek = $this->m_produksi->cek_mrp_production(['kode'=>$kode])->row();
@@ -480,6 +480,11 @@ class Produksi extends MY_Controller
                         $tmp_print  = [];
                         $total_fg_qty1 = 0;
                         $total_fg_qty2 = 0;
+
+                        $data_cacat_save = $this->db->where('kode_mrp', $kode)
+                                        ->order_by('id', 'ASC')
+                                        ->get('mrp_production_cacat_tmp')
+                                        ->result_array();
                         foreach ($array_fg as $fg) {
 
                             $lot = trim($fg['lot']);
@@ -552,7 +557,9 @@ class Produksi extends MY_Controller
 
                             $tmp_print[] = array('quant_id'=>$start, 'lot'=>trim($fg['lot']));
 
-                            foreach($array_defect as $def) {
+                         
+
+                            foreach($data_cacat_save as $def) {
 
                                 $data_fg_cacat[] = array(
                                             'kode'          => $kode,
@@ -560,7 +567,7 @@ class Produksi extends MY_Controller
                                             'create_date'   => $tgl,
                                             'lot'           => $fg['lot'],
                                             'dept_id'       => $deptid,
-                                            'point_cacat'   => $def['mtr'],
+                                            'point_cacat'   => $def['point'],
                                             'kode_cacat'    => $def['kode_cacat'],
                                             'nama_user'     => $nama_user,
                                             'row_order'     => $defect_row_map[$defect_key],
@@ -1041,7 +1048,9 @@ class Produksi extends MY_Controller
                             if(!empty($data_fg_cacat)){
                                 if (!$this->m_produksi->save_batch('mrp_production_cacat', $data_fg_cacat)) {
                                     throw new \Exception('Gagal menyimpan data cacat !', 500);
-                                }
+                                } 
+                                // hapus cacat by kode mrp
+                                $this->db->where('kode_mrp', $kode)->delete('mrp_production_cacat_tmp');
                             }
 
                             if(!empty($where7) AND !empty($case7)){
@@ -1451,6 +1460,62 @@ class Produksi extends MY_Controller
             $resp = $wprint->print();
             return $resp;
         
+    }
+
+
+    public function simpan_cacat()
+    {
+        $kode_mrp = $this->input->post('kode_mrp');
+
+        if (empty($kode_mrp)) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Kode MRP tidak ditemukan'
+            ]);
+            return;
+        }
+
+        $data = [
+            'kode_mrp'   => $kode_mrp,
+            'point'        => $this->input->post('mtr'),
+            'kode_cacat' => $this->input->post('kode_cacat'),
+            'nama_cacat' => $this->input->post('nama_cacat')
+        ];
+
+        $this->db->insert('mrp_production_cacat_tmp', $data);
+
+        echo json_encode([
+            'status' => true,
+            'id' => $this->db->insert_id()
+        ]);
+    }
+
+    public function get_cacat()
+    {
+        $kode_mrp = $this->input->get('kode_mrp');
+
+        $data = $this->db
+            ->where('kode_mrp', $kode_mrp)
+            ->order_by('id', 'ASC')
+            ->get('mrp_production_cacat_tmp')
+            ->result_array();
+
+        echo json_encode($data);
+    }
+
+    public function hapus_cacat()
+    {
+        $id = $this->input->post('id');
+        $kode_mrp = $this->input->post('kode_mrp');
+
+        $this->db
+            ->where('id', $id)
+            ->where('kode_mrp', $kode_mrp)
+            ->delete('mrp_production_cacat_tmp');
+
+        echo json_encode([
+            'status' => ($this->db->affected_rows() > 0)
+        ]);
     }
     
 
