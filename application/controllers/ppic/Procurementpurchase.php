@@ -382,33 +382,91 @@ class Procurementpurchase extends MY_Controller
                     $tmp_produk = [];
                     $log_produk = "";
                     $row        = 1;
-                    foreach($array_items as $it){
-                            // cek mst produk 
-                            $cek_mst = $this->_module->cek_produk_by_kode_produk($it['kode_produk'])->row_array();
-                            if($cek_mst){
+                    // foreach($array_items as $it){
+                    //         // cek mst produk 
+                    //         $cek_mst = $this->_module->cek_produk_by_kode_produk($it['kode_produk'])->row_array();
+                    //         if($cek_mst){
 
-                                $tmp_produk[] = array(
-                                            "kode_pp"   => $kode_pp_new,
-                                            "kode_produk"=> $it['kode_produk'],
-                                            "nama_produk"=> $cek_mst['nama_produk'],
-                                            "schedule_date" => $it['schedule_date'],
-                                            "qty"       => $it['qty'],
-                                            "uom"       => $it['uom'],
-                                            "qty_beli"  => $it['qty_beli'],
-                                            "uom_beli"  => $it['uom_beli'],
-                                            "reff_notes"=> $it['reff_note'],
-                                            'status'    =>  'draft',
-                                            'row_order' => $row
-                                );
-                                $gt_ku = $this->m_procurementPurchase->get_nilai_konversi_uom_by_id($it['uom_beli']);
-                                $dari = $gt_ku->dari ?? '';
-                                $nilai = $gt_ku->nilai ?? '';
-                                $uom_beli = $dari."[Nilai=".$nilai."]";
-                                $log_produk .= "(".$row.") ".$it['kode_produk']." ".$cek_mst['nama_produk']." ".$it['schedule_date']." ".$it['qty_beli']." ".$uom_beli." ".$it['qty']." ".$it["uom"]." ".$it["reff_note"]." <br>";
-                                $row++;
-                            } else {
-                                throw new \Exception('Produk tidak ditemukan !', 200);
-                            }
+                    //             $tmp_produk[] = array(
+                    //                         "kode_pp"   => $kode_pp_new,
+                    //                         "kode_produk"=> $it['kode_produk'],
+                    //                         "nama_produk"=> $cek_mst['nama_produk'],
+                    //                         "schedule_date" => $it['schedule_date'],
+                    //                         "qty"       => $it['qty'],
+                    //                         "uom"       => $it['uom'],
+                    //                         "qty_beli"  => $it['qty_beli'],
+                    //                         "uom_beli"  => $it['uom_beli'],
+                    //                         "reff_notes"=> $it['reff_note'],
+                    //                         'status'    =>  'draft',
+                    //                         'row_order' => $row
+                    //             );
+                    //             $gt_ku = $this->m_procurementPurchase->get_nilai_konversi_uom_by_id($it['uom_beli']);
+                    //             $dari = $gt_ku->dari ?? '';
+                    //             $nilai = $gt_ku->nilai ?? '';
+                    //             $uom_beli = $dari."[Nilai=".$nilai."]";
+                    //             $log_produk .= "(".$row.") ".$it['kode_produk']." ".$cek_mst['nama_produk']." ".$it['schedule_date']." ".$it['qty_beli']." ".$uom_beli." ".$it['qty']." ".$it["uom"]." ".$it["reff_note"]." <br>";
+                    //             $row++;
+                    //         } else {
+                    //             throw new \Exception('Produk tidak ditemukan !', 200);
+                    //         }
+                    // }
+
+                    $kode_produk_terpakai = [];
+
+                    foreach ($array_items as $it) {
+
+                        // Validasi kode produk duplikat dalam array
+                        if (in_array($it['kode_produk'], $kode_produk_terpakai)) {
+                            throw new \Exception(
+                                'Kode produk '.$it['kode_produk'].' tidak boleh duplikat !',
+                                200
+                            );
+                        }
+
+                        // Simpan kode produk agar tidak digunakan kembali
+                        $kode_produk_terpakai[] = $it['kode_produk'];
+
+                        // Cek master produk
+                        $cek_mst = $this->_module->cek_produk_by_kode_produk($it['kode_produk'])->row_array();
+
+                        if ($cek_mst) {
+
+                            $tmp_produk[] = array(
+                                "kode_pp"       => $kode_pp_new,
+                                "kode_produk"   => $it['kode_produk'],
+                                "nama_produk"   => $cek_mst['nama_produk'],
+                                "schedule_date" => $it['schedule_date'],
+                                "qty"           => $it['qty'],
+                                "uom"           => $it['uom'],
+                                "qty_beli"      => $it['qty_beli'],
+                                "uom_beli"      => $it['uom_beli'],
+                                "reff_notes"    => $it['reff_note'],
+                                'status'        => 'draft',
+                                'row_order'     => $row
+                            );
+
+                            $gt_ku = $this->m_procurementPurchase
+                                ->get_nilai_konversi_uom_by_id($it['uom_beli']);
+
+                            $dari = $gt_ku->dari ?? '';
+                            $nilai = $gt_ku->nilai ?? '';
+
+                            $uom_beli = $dari."[Nilai=".$nilai."]";
+
+                            $log_produk .= "(".$row.") ".$it['kode_produk']." "
+                                .$cek_mst['nama_produk']." "
+                                .$it['schedule_date']." "
+                                .$it['qty_beli']." "
+                                .$uom_beli." "
+                                .$it['qty']." "
+                                .$it["uom"]." "
+                                .$it["reff_note"]." <br>";
+
+                            $row++;
+
+                        } else {
+                            throw new \Exception('Produk tidak ditemukan !', 200);
+                        }
                     }
 
                     if(!empty($array_items)) {
