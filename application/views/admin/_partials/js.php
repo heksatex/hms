@@ -347,15 +347,15 @@
         showBC(data);
     };
     const showBC = ((data) => {
-        if (data["type"] === "BC") {
-            $("#tickerText").html(data["text"]);
-            $(".ticker-wrap").css("display", "inline-block");
-            animateTicker();
-            setInterval(() => {
-                $("#tickerText").html("");
-                $(".ticker-wrap").css("display", "none");
-            }, data["timeDisplay"] * 1000);
-        }
+//        if (data["type"] === "BC") {
+//            $("#tickerText").html(data["text"]);
+//            $(".ticker-wrap").css("display", "inline-block");
+//            animateTicker();
+//            setInterval(() => {
+//                $("#tickerText").html("");
+//                $(".ticker-wrap").css("display", "none");
+//            }, data["timeDisplay"] * 1000);
+//        }
     });
 
 </script>
