@@ -288,7 +288,77 @@
     });
 
 </script>
+<style>
+    .ticker-wrap {
+        width: 100%;
+        overflow: hidden;
+        background: #222;
+        color: #fff;
+        padding: 10px 0;
+        font-family: sans-serif;
+        box-sizing: border-box;
+        letter-spacing: 3px;
+        /* Menempel di atas layar & selalu di depan */
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 9999;
+        display: none;
+        direction: rtl;
+        font-size: 2rem;
+    }
+</style>
+<div id="broadcast-info" class="ticker-wrap">
+    <div class="ticker-text" id="tickerText">
+    </div>
+</div>
 
+<script>
+
+    const ticker = document.getElementById("tickerText");
+    let currentX = 0;
+    const speed = 0.5;
+    function animateTicker() {
+        currentX -= speed;
+
+        // Get the actual width of the text block
+        const textWidth = ticker.offsetWidth;
+
+        // Reset position once the text has completely scrolled out of view to the left
+        if (currentX < -textWidth) {
+            currentX = ticker.parentElement.offsetWidth;
+        }
+
+        // Move the text using hardware-accelerated CSS transforms
+        ticker.style.transform = `translateX(${currentX}px)`;
+
+        // Call the function recursively on the next animation frame
+        requestAnimationFrame(animateTicker);
+    }
+
+    var broadcastSocketOpen = false;
+    const broadcastSocket = new WebSocket("ws://10.10.0.17:8789");
+    broadcastSocket.onopen = function () {
+        broadcastSocketOpen = true;
+        console.log("Connected to server Broadcast");
+    };
+    broadcastSocket.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        showBC(data);
+    };
+    const showBC = ((data) => {
+        if (data["type"] === "BC") {
+            $("#tickerText").html(data["text"]);
+            $(".ticker-wrap").css("display", "inline-block");
+            animateTicker();
+            setInterval(() => {
+                $("#tickerText").html("");
+                $(".ticker-wrap").css("display", "none");
+            }, data["timeDisplay"] * 1000);
+        }
+    });
+
+</script>
 
 
 <div class="modal fade" id="modal_printer" role="dialog">
