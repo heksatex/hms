@@ -14,7 +14,6 @@ class Tts extends MY_Controller {
         $this->load->model('_module');
         $this->load->model("m_global");
         $this->load->library("upload");
-        $this->load->library("ssmlaudio");
         $this->load->helper('file');
         $this->load->driver('cache', array('adapter' => 'file'));
     }
@@ -131,37 +130,6 @@ class Tts extends MY_Controller {
         }
     }
 
-    public function save_file() {
-        try {
-            if ($_FILES['fl']['size'] !== 0) {
-                $url = "dist/storages/test/sound";
-                if (!is_dir(FCPATH . $url)) {
-                    mkdir(FCPATH . $url, 0775, TRUE);
-                }
-
-                $config["upload_path"] = "./{$url}";
-                $config["allowed_types"] = "*";
-                $config["file_name"] = "test";
-                $this->upload->initialize($config);
-
-                if ($this->upload->do_upload("fl")) {
-                    $this->output->set_status_header(200)
-                            ->set_content_type('application/json', 'utf-8')
-                            ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
-                }
-                if (!$this->upload->do_upload("fl")) {
-                    $error = $this->upload->display_errors();
-                      throw new \Exception(json_encode($error), 500);
-                }
-            }
-            throw new \Exception("failed", 500);
-        } catch (Exception $ex) {
-            $this->_module->rollbackTransaction();
-            $this->output->set_status_header(500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-        }
-    }
 
 //    $teksHtml = '<say-as interpret-as="characters">adasd</say-as>';
 //$teksBersih = strip_tags($teksHtml);
