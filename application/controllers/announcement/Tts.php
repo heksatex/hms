@@ -22,7 +22,7 @@ class Tts extends MY_Controller {
     protected $tokenESP = "AA123";
 
     public function index() {
-        $data['id_dept'] = 'STTS';
+        $data['id_dept'] = 'ANNTTS';
         $data['user'] = (object) $this->session->userdata('nama');
         $this->load->view('announcement/v_tts', $data);
     }
@@ -41,7 +41,7 @@ class Tts extends MY_Controller {
 
 //        $data["ip_esp"] = $this->ipESP;
         $data["ip_esp"] = $wsIP->value;
-        $data['id_dept'] = 'ANTTS';
+        $data['id_dept'] = 'ANNTTS';
         $data["token_esp"] = $wsToken->value;
         $data['user'] = (object) $this->session->userdata('nama');
         $this->load->view('announcement/v_tts_add_1', $data);
