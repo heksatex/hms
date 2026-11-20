@@ -457,7 +457,7 @@
                         setProgress(
                                 masterBuffer
                                 ? Math.round(
-                                        currentOffset / masterBuffer.byteLength * 100
+                                        (currentOffset / 1000) / masterBuffer.byteLength * 100
                                         )
                                 : 0,
                                 message
@@ -719,7 +719,7 @@
                                     );
 
                             setProgress(100, 'Siaran berhasil diputar.');
-                            alert_notify('fa fa-check', "Siap Diputar", 'success', function () {});
+                            alert_notify('fa fa-check', "Berhasil Diputar", 'success', function () {});
                             setButtonsDisabled(false);
 
                             if (ws.readyState === WebSocket.OPEN) {
