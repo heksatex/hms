@@ -75,7 +75,7 @@
             }
         </style>
     </head>
-    <body class="hold-transition skin-black fixed sidebar-mini">
+    <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
             <header class="main-header">
                 <?php $this->load->view("admin/_partials/main-menu-new.php") ?>
@@ -103,16 +103,18 @@
                                         <button type="button" class="btn btn-default btn-sm  item-drag" data-text="" data-format='<say-as interpret-as="characters">{text}</say-as>' >
                                             Interpret Characters
                                         </button>
-<!--                                        <button type="button" class="btn btn-default btn-sm  item-drag" data-text="" data-format='<say-as interpret-as="cardinal">{text}</say-as>' >
-                                            Bilangan Suara
-                                        </button>-->
                                         <button type="button" class="btn btn-default btn-sm  item-drag" data-text="" data-format='<say-as interpret-as="digits">{text}</say-as>' >
                                             Interpret Digits
+                                        </button>
+                                        <button type="button" class="btn btn-default btn-sm  item-drag" data-text="" data-format='<prosody rate="70%" pitch="+5%">{text}</prosody>' >
+                                            Masukan Nama
                                         </button>
                                         <button type="button" class="btn btn-default btn-sm  item-drag" data-text='<break time="1s"/>' draggable="true" >Jeda Suara 1detik</button>
 
                                         <button type="button" class="btn btn-default btn-sm  item-drag" data-text='<break time="3s"/>' draggable="true" >Jeda Suara 3detik</button>
-
+                                        <button type="button" class="btn btn-default btn-sm  item-drag" data-text='Panggilan kepada Bapak / Ibu <prosody rate="70%" pitch="+5%">__nama__</prosody>. ditunggu kehadirannya Di __tempat__.'>
+                                            Template U/ Panggilan
+                                        </button>
                                     </div>
                                 </div>
 
@@ -302,9 +304,9 @@
 
 
             function fetchGoogleTTS(callback) {
-                const rawText = $('#myTextarea').val();
+                var rawText = $('#myTextarea').val();
                 const gender = $('#jenis_suara').val();
-                const speed = parseFloat($('#speed_suara').val());
+                const speed = $('#speed_suara').val();
 
                 if (!rawText.trim()) {
 //                    alert_notify('fa fa-close', "Teks tidak boleh kosong!", 'danger', function () {});
@@ -319,6 +321,11 @@
                 }
 
                 const endpoint = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_API_KEY}`;
+                
+                if(speed === "slow") {
+                    rawText = `<prosody rate="slow">${rawText}</prosody>`;
+                    
+                }
                 const ssmlContent = `<speak>${rawText}</speak>`;
 
                 const payload = {
@@ -328,8 +335,8 @@
                         name: (gender === 'male') ? 'id-ID-Standard-C' : 'id-ID-Standard-A'},
                     audioConfig: {
                         audioEncoding: 'LINEAR16',
-                        sampleRateHertz: 16000,
-                        speakingRate: speed
+                        sampleRateHertz: 16000
+//                        speakingRate: speed
                     }
                 };
                 $.ajax({
