@@ -38,16 +38,17 @@ foreach ($data as $key => $value) {
     $debetV = 0;
     $kreditV = 0;
     if ($value->posisi === "D") {
+        
         $debet = $value->nominal * $value->kurs;
         $debets += $debet;
 
-        $debetV = $value->nominal;
+        $debetV = ($value->kurs == 1 ? 0 : $value->nominal);
         $debetsV += $debetV;
     } else {
         $kredit = $value->nominal * $value->kurs;
         $kredits += $kredit;
 
-        $kreditV = $value->nominal;
+        $kreditV = ($value->kurs == 1 ? 0 : $value->nominal);
         $kreditsV += $kreditV;
     }
     $saldos += ($debet - $kredit);
