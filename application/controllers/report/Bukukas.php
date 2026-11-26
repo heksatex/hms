@@ -61,6 +61,17 @@ class Bukukas extends MY_Controller {
             $coa = $this->input->post("kode_coa");
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
+
+            //get tahun/bulan
+            $stdate = new \DateTime($tanggals[0]);
+            $enddate = new \DateTime($tanggals[1]);
+            $interval = new DateInterval('P1M');
+            $periodStart = (clone $stdate)->modify('first day of this month');
+            $period = new DatePeriod($periodStart, $interval, $enddate);
+            $bulanTahun = [];
+            foreach ($period as $dt) {
+                $bulanTahun[] = $dt->format('Y/m');
+            }
             $model = new $this->m_global;
             $model->setTables("acc_kas_masuk km")->setJoins("acc_kas_masuk_detail kmd", "kas_masuk_id = km.id")
                     ->setJoins("currency_kurs ck", "ck.id = currency_id", "left")
@@ -85,8 +96,20 @@ class Bukukas extends MY_Controller {
                 $model->setWheres(["kk.kode_coa" => $coa]);
             }
             $queryKasKeluar = $model->getQuery();
+            
+            //kursakhirbulan
+            $model->setTables("acc_jurnal_entries je")->setJoins("acc_jurnal_entries_items jei", "je.kode = jei.kode and je.status = 'posted' and tipe = 'SK'")
+                    ->setSelects(["jei.kode as no_bukti,date(je.tanggal_posting) as tanggal,jei.nama as uraian,posisi,nominal,jei.kode_coa,'-' as partner_nama,'' as lain2,kode_mua,jei.kurs,jei.id"]);
+            if (count($tanggals) > 1) {
+                $model->setWheres(["date(je.tanggal_posting) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(je.tanggal_posting) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+            }
+            if ($coa !== "") {
+                $model->setWheres(["jei.kode_coa" => $coa]);
+            }
+            
+            $entriesKAB = $model->getQuery();
 
-            $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
+            $table = "({$queryKasMasuk} union all {$queryKasKeluar} union all {$entriesKAB}) as kas";
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")
                     ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa", "partner_nama,lain2,nama_curr,kurs,acc_coa.kode_coa"])
                     ->setOrder(["tanggal" => "asc", "posisi" => "desc", "no_bukti" => "asc", "kas.id" => "asc"]);
@@ -137,14 +160,49 @@ class Bukukas extends MY_Controller {
 
             $saldoKredit = $model->getQuery();
 
+            //valas
+            if ($valas) {
+                //kurs akhir bulan
+                $model->setTables("acc_jurnal_entries_items jei")->setJoins("acc_jurnal_entries je", 'je.kode = jei.kode')
+                        ->setWheres(["date(je.tanggal_dibuat) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(je.tanggal_dibuat) <=" => date("Y-m-d", strtotime($tanggals[1])),
+                            'je.status' => 'posted'])
+                        ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa])
+                        ->setSelects(["jei.posisi, jei.kode_coa"]);
+                $model->setSelects(["IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal_curr ELSE 0 END),0) AS total_debit_valas,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal_curr ELSE 0 END),0) AS total_credit_valas"])
+                        ->setSelects(["IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit"]);
+                $entriesRp = $model->getQuery();
+
+                $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
+                        ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D"]);
+                $model->setSelects(["jei.kode_coa, SUM(jei.nominal_curr) as total_debit_valas"]);
+                $model->setSelects(["SUM(jei.nominal) as total_debit"]);
+                $saldoDebetRp = $model->getQuery();
+
+                $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
+                        ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C"]);
+                $model->setSelects(["SUM(jei.nominal_curr) as total_credit_valas"])->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit"]);
+
+                $saldoKreditRp = $model->getQuery();
+                $model->setTables("acc_coa coa")->setJoins("({$saldoDebetRp}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
+                        ->setJoins("({$saldoKreditRp}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
+                        ->setJoins("({$entriesRp}) as jr ", "jr.kode_coa = coa.kode_coa", "left")
+                        ->setOrder(["coa.kode_coa" => "asc"])->setWheres(["coa.kode_coa" => $coa])
+                        ->setSelects(["CASE 
+                                WHEN coa.saldo_normal = 'D' THEN 
+                                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                                WHEN coa.saldo_normal = 'C' THEN 
+                                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                                ELSE coa.saldo_awal
+                            END AS saldo_awal_final"]);
+                $rprp = $model->getDetail();
+            }
+
             $model->setTables("acc_coa coa")->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$entries}) as jr ", "jr.kode_coa = coa.kode_coa", "left")
                     ->setOrder(["coa.kode_coa" => "asc"])->setWheres(["coa.kode_coa" => $coa])
                     ->setSelects(["coa.kode_coa, coa.nama as nama_coa,coa.saldo_normal,coa.saldo_awal,COALESCE(debit_sbl.total_debit, 0) as total_debit_sbl",
                         "COALESCE(credit_sbl.total_credit, 0) as total_credit_sbl", "COALESCE(jr.total_debit, 0) as total_debit", "COALESCE(jr.total_credit, 0) as total_credit"]);
-
-            //valas
             $model->setSelects(["COALESCE(debit_sbl.total_debit_valas, 0) as total_debit_valas_sbl",
                 "COALESCE(credit_sbl.total_credit_valas, 0) as total_credit_valas_sbl",
                 "COALESCE(jr.total_debit_valas, 0) as total_debit_valas",
@@ -166,7 +224,11 @@ class Bukukas extends MY_Controller {
                                 ELSE coa.saldo_awal
                             END AS saldo_awal_final"]);
 
-            return $model->getDetail();
+            $hasil = $model->getDetail();
+            if ($valas) {
+                $hasil->saldo_awal_final = $rprp->saldo_awal_final;
+            }
+            return $hasil;
         } catch (Exception $ex) {
             throw $ex;
         }
@@ -235,20 +297,20 @@ class Bukukas extends MY_Controller {
             }
 
 //            if (count($data) > 0) {
-                $data_saldo = $this->_getSaldoAwal($valas);
-                $saldos = floatval($data_saldo->saldo_awal_final);
-                $row += 1;
-                if (!$valas) {
-                    $sheet->setCellValue("E{$row}", "Saldo Awal");
-                    $sheet->setCellValue("I{$row}", $saldos);
-                } else {
-                    $saldosValas = floatval($data_saldo->saldo_awal_valas_final);
-                    $sheet->setCellValue("E{$row}", "Saldo Awal");
-                    $sheet->setCellValue("I{$row}", $saldosValas);
-                    $sheet->setCellValue("J{$row}", '');
-                    $sheet->setCellValue("K{$row}", '');
-                    $sheet->setCellValue("L{$row}", $saldos);
-                }
+            $data_saldo = $this->_getSaldoAwal($valas);
+            $saldos = floatval($data_saldo->saldo_awal_final);
+            $row += 1;
+            if (!$valas) {
+                $sheet->setCellValue("E{$row}", "Saldo Awal");
+                $sheet->setCellValue("I{$row}", $saldos);
+            } else {
+                $saldosValas = floatval($data_saldo->saldo_awal_valas_final);
+                $sheet->setCellValue("E{$row}", "Saldo Awal");
+                $sheet->setCellValue("I{$row}", $saldosValas);
+                $sheet->setCellValue("J{$row}", '');
+                $sheet->setCellValue("K{$row}", '');
+                $sheet->setCellValue("L{$row}", $saldos);
+            }
 //            }
             $kredits = 0;
             $debets = 0;
@@ -311,13 +373,13 @@ class Bukukas extends MY_Controller {
                     $kreditRp = 0;
 
                     if ($value->posisi === "D") {
-                        $debet = $value->nominal;
+                        $debet = ($value->kurs == 1 ? 0 : $value->nominal);
                         $debets += $debet;
 
                         $debetRp = $value->nominal * $value->kurs;
                         $debetsRp += $debetRp;
                     } else {
-                        $kredit = $value->nominal;
+                        $kredit = ($value->kurs == 1 ? 0 : $value->nominal);
                         $kredits += $kredit;
 
                         $kreditRp = $value->nominal * $value->kurs;

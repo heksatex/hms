@@ -321,12 +321,14 @@
                 }
 
                 const endpoint = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_API_KEY}`;
-                
-                if(speed === "slow") {
-                    rawText = `<prosody rate="slow">${rawText}</prosody>`;
-                    
+
+                if (speed === "slow") {
+                    rawText = `<prosody rate="75%">${rawText}</prosody>`;
+
+                } else {
+                    rawText = `<prosody rate="85%">${rawText}</prosody>`;
                 }
-                const ssmlContent = `<speak>${rawText}</speak>`;
+                const ssmlContent = `<speak><break time="1s"/>${rawText}</speak>`;
 
                 const payload = {
                     input: {ssml: ssmlContent},
