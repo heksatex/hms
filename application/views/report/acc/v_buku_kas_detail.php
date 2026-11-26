@@ -39,13 +39,13 @@ if ($valas) {
         $debetRp = 0;
         $kreditRp = 0;
         if ($value->posisi === "D") {
-            $debet = $value->nominal;
+            $debet =  ($value->kurs == 1 ? 0 : $value->nominal);
             $debets += $debet;
 
             $debetRp = $value->nominal * $value->kurs;
             $debetsRp += $debetRp;
         } else {
-            $kredit = $value->nominal;
+            $kredit = ($value->kurs == 1 ? 0 : $value->nominal);
             $kredits += $kredit;
 
             $kreditRp = $value->nominal * $value->kurs;
