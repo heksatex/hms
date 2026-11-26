@@ -68,6 +68,38 @@ class Bukubank extends MY_Controller {
                     ->getQuery();
 
             //Kredit
+
+            if ($kodeMua !== "IDR") {
+                $entriesRupiah = $model->setTables("acc_jurnal_entries_items jei")->setJoins("acc_jurnal_entries je", 'je.kode = jei.kode')
+                                ->setWheres(["date(je.tanggal_dibuat) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(je.tanggal_dibuat) <=" => date("Y-m-d", strtotime($tanggals[1])),
+                                    'je.status' => 'posted'])
+                                ->setSelects(["jei.posisi, jei.kode_coa,  IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal ELSE 0 END),0) AS total_debit,   IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal ELSE 0 END),0) AS total_credit"])
+                                ->setSelects(["IFNULL(SUM(CASE WHEN jei.posisi = 'D' THEN jei.nominal_curr ELSE 0 END),0) AS total_debit_valas,IFNULL(SUM(CASE WHEN jei.posisi = 'C' THEN jei.nominal_curr ELSE 0 END),0) AS total_credit_valas"])
+                                ->setGroups(["jei.kode_coa"])->setWheres(["jei.kode_coa" => $coa])->getQuery();
+                $saldoDebetRupiah = $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
+                        ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_debit"])
+                        ->setSelects(["SUM(jei.nominal_curr) as total_debit_valas"])
+                        ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "D"])
+                        ->getQuery();
+                $saldoKreditRupiah = $model->setTables("acc_jurnal_entries je")->setJoins('acc_jurnal_entries_items jei', 'jei.kode = je.kode')->setGroups(["jei.kode_coa"])
+                        ->setSelects(["jei.kode_coa, SUM(jei.nominal) as total_credit"])
+                        ->setSelects(["SUM(jei.nominal_curr) as total_credit_valas"])
+                        ->setWheres(['je.tanggal_dibuat >= ' => $tgl_dari, 'je.tanggal_dibuat <= ' => $tgl_sampai, 'je.status' => 'posted', 'jei.posisi' => "C"])
+                        ->getQuery();
+                $model->setTables("acc_coa coa")->setJoins("({$saldoDebetRupiah}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
+                        ->setJoins("({$saldoKreditRupiah}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
+                        ->setJoins("({$entriesRupiah}) as jr ", "jr.kode_coa = coa.kode_coa", "left")
+                        ->setOrder(["coa.kode_coa" => "asc"])->setWheres(["coa.kode_coa" => $coa])
+                        ->setWheres(["coa.curr" => $curr])
+                        ->setSelects(["CASE 
+                                WHEN coa.saldo_normal = 'D' THEN 
+                                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0))
+                                WHEN coa.saldo_normal = 'C' THEN 
+                                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0))
+                                ELSE coa.saldo_awal
+                            END AS saldo_awal_final"]);
+                $rprp = $model->getDetail();
+            }
             $model->setTables("acc_coa coa")->setJoins("({$saldoDebet}) as debit_sbl", "debit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$saldoKredit}) as credit_sbl", "credit_sbl.kode_coa = coa.kode_coa", "left")
                     ->setJoins("({$entries}) as jr ", "jr.kode_coa = coa.kode_coa", "left")
@@ -91,7 +123,12 @@ class Bukubank extends MY_Controller {
                                     (coa.saldo_valas + COALESCE(credit_sbl.total_credit_valas, 0) - COALESCE(debit_sbl.total_debit_valas, 0))
                                 ELSE coa.saldo_valas
                             END AS saldo_valas_final", "coa.curr as coa_curr"]);
-            return $model->getDetail();
+
+            $hasil = $model->getDetail();
+            if ($kodeMua !== "IDR") {
+                $hasil->saldo_awal_final = $rprp->saldo_awal_final;
+            }
+            return $hasil;
         } catch (Exception $ex) {
             throw $ex;
         }
@@ -146,7 +183,19 @@ class Bukubank extends MY_Controller {
             }
             $queryKasKeluar = $model->getQuery();
 
-            $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
+            //kursakhirbulan
+            $model->setTables("acc_jurnal_entries je")->setJoins("acc_jurnal_entries_items jei", "je.kode = jei.kode and je.status = 'posted' and tipe = 'SK'")
+                    ->setSelects(["jei.kode as  no_bukti,date(je.tanggal_posting) as tanggal,posisi,nominal,jei.kode_coa,'-' as partner_nama,'' as lain2,jei.id,jei.kurs,jei.nama as uraian"]);
+            if (count($tanggals) > 1) {
+                $model->setWheres(["date(je.tanggal_posting) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(je.tanggal_posting) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+            }
+            if ($coa !== "") {
+                $model->setWheres(["jei.kode_coa" => $coa]);
+            }
+            
+            $entriesKAB = $model->getQuery();
+//            log_message("error",$entriesKAB);
+            $table = "({$queryKasMasuk} union all {$queryKasKeluar} union all $entriesKAB) as kas";
             $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")->setOrder(["tanggal" => "asc", "posisi" => "desc", "no_bukti" => "asc", "kas.id" => "asc"])
                     ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa,partner_nama,lain2,kas.kode_coa,kurs"]);
             return $model;
@@ -210,13 +259,13 @@ class Bukubank extends MY_Controller {
             $sheet->setCellValue("L{$row}", 'Saldo Rp');
 
 //            if (count($data) > 0) {
-                $data_saldo = $this->_getSaldoAwal();
-                $saldos = floatval($data_saldo->saldo_awal_final);
-                $saldosV = floatval($data_saldo->saldo_valas_final);
-                $row += 1;
-                $sheet->setCellValue("D{$row}", "Saldo Awal");
-                $sheet->setCellValue("I{$row}", $saldosV);
-                $sheet->setCellValue("L{$row}", $saldos);
+            $data_saldo = $this->_getSaldoAwal();
+            $saldos = floatval($data_saldo->saldo_awal_final);
+            $saldosV = floatval($data_saldo->saldo_valas_final);
+            $row += 1;
+            $sheet->setCellValue("D{$row}", "Saldo Awal");
+            $sheet->setCellValue("I{$row}", $saldosV);
+            $sheet->setCellValue("L{$row}", $saldos);
 //            }
 
             $kredits = 0;
@@ -245,13 +294,13 @@ class Bukubank extends MY_Controller {
                     $debet = $value->nominal * $value->kurs;
                     $debets += $debet;
 
-                    $debetV = $value->nominal;
+                    $debetV = ($value->kurs == 1 ? 0 : $value->nominal);
                     $debetsV += $debetV;
                 } else {
                     $kredit = $value->nominal * $value->kurs;
                     $kredits += $kredit;
 
-                    $kreditV = $value->nominal;
+                    $kreditV = ($value->kurs == 1 ? 0 : $value->nominal);
                     $kreditsV += $kreditV;
                 }
                 $saldos += ($debet - $kredit);
@@ -288,13 +337,13 @@ class Bukubank extends MY_Controller {
             $sheet->getStyle("K2:K{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
             $sheet->getStyle("L2:L{$row}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
 
-            if(!$valas){
+            if (!$valas) {
                 $sheet->removeColumn('I');
                 $sheet->removeColumn('H');
                 $sheet->removeColumn('G');
                 $sheet->removeColumn('F');
             }
-            
+
             $filename = "Buku Bank {$tanggals}";
             $url = "dist/storages/report/acc";
             if (!is_dir(FCPATH . $url)) {
